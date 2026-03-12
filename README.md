@@ -32,6 +32,3 @@ The main project documents include:
 - `README.md` – project overview and team information
 - `docs/` – documentation and milestone reports
 
-
-
-maintainers.
