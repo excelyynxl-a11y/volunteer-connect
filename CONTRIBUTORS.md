@@ -9,3 +9,4 @@ This file records individual commits from each team member.
 | Lim Excelyynx   | 34476245   |
 | Sheikh Fardin| 35566027   |
 | Chan Long Hei | 34474056 |
+| Xu Yiming    | 35576871   |
