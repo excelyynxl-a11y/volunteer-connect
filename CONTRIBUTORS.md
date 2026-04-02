@@ -8,6 +8,7 @@ This file records individual commits from each team member.
 | Jia Don Ti   | 12345678   |
 | Lim Excelyynx   | 34476245   |
 | Sheikh Fardin| 35566027   |
+| Ooi Hui Yi| 35555890   |
 | Chan Long Hei | 34474056 |
 | Xu Yiming    | 35576871   |
 | Muhammad Saud | 35355018 | 
