@@ -11,3 +11,4 @@ This file records individual commits from each team member.
 | Chan Long Hei | 34474056 |
 | Xu Yiming    | 35576871   |
 | Muhammad Saud | 35355018 | 
+| Dhakshini Subramanian   | 35097698   |
