@@ -1,4 +1,4 @@
-# FIT3170 Team 4 Project
+# FIT3170 Team 4 Project: Tech Stack Setup
 
 ## Steps to initialise the project in your branch
 1. Clone this repository.
@@ -24,7 +24,7 @@ npm install
 6. After installing dependencies in frontend, you should see a new node_module folder in your frontend folder.
 
 7. Your final directory should look like this:
-![alt text](idealDirectoryFolder.png)
+![alt text](./images/idealDirectoryFolder.png)
 
 
 ## A: How to test run the project (backend)
@@ -59,7 +59,7 @@ npm run dev
 2. Open the link generated (eg: http://localhost:5173/)
 3. Check if you can see the following display:
 
-![alt text](testSeeLandingPage.png)
+![alt text](./images/testSeeLandingPage.png)
 
 4. Similarly, go to the top of search bar and navigate to the following path:
 - localhost:5173/login
