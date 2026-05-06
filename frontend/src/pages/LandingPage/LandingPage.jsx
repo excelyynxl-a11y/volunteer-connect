@@ -91,7 +91,7 @@ const LandingPage = () => {
           <div className="nav-links">
             <Link to="/vision">Vision & Mission</Link>
             <Link to="/about">About Us</Link>
-            <Link to="/opportunities">Opportunities</Link>
+            <a href="#opportunities">Opportunities</a>
             <a href="#how-it-works">How It Works</a>
           </div>
 
@@ -119,7 +119,7 @@ const LandingPage = () => {
               <Link to="/sign-up" className="btn primary">
                 Get Started - It's Free
               </Link>
-              <Link to="/opportunities" className="btn secondary">
+              <Link to="/volunteer-dashboard" className="btn secondary">
                 Browse Opportunities
               </Link>
             </div>
