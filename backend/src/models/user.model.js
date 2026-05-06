@@ -1,51 +1,52 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
+const baseOptions = {
+  discriminatorKey: "role",
+  collection: "users",
+  timestamps: true,
+};
+
+// Base User Schema (Only fields that EVERYONE shares)
 const userSchema = new mongoose.Schema(
-    {
-        name: {
-            type: String,
-            required: true,
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-
-        },
-        password: {
-            type: String,
-            required: true,
-        },
-        role: {
-            type: String,
-            enum: ['volunteer', 'organisation', 'admin'],
-            required: true,
-        },
-        approvalStatus: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending'
-        },
-        ageGroup: {
-            type: String,
-            enum: ['21-30', '31-40', '41-50', '51-60', '60+']
-        },
-        resume: {
-            type: String,
-        },
-        biodata: {
-            type: String,
-        },
-        avatar: {
-            type: String,
-            default: '',
-        }
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
     },
-    {
-        timestamps: true 
-    }
+    avatar: { type: String, default: "" },
+  },
+  baseOptions,
 );
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
-export default User;
+// Volunteer Schema (Only fields specific to Volunteers)
+const Volunteer = User.discriminator(
+  "volunteer",
+  new mongoose.Schema({
+    ageGroup: {
+      type: String,
+      enum: ["21-30", "31-40", "41-50", "51-60", "60+"],
+      required: true,
+    },
+    resume: { type: String },
+    biodata: { type: String },
+  }),
+);
+
+// Organisation Schema (Only fields specific to Orgs)
+const Organisation = User.discriminator(
+  "organisation",
+  new mongoose.Schema({
+    biodata: { type: String },
+  }),
+);
+
+// Admin Schema (Only fields specific to Admins)
+const Admin = User.discriminator("admin", new mongoose.Schema({}));
+
+export { User, Volunteer, Organisation, Admin };
