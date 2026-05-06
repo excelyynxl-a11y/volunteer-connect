@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# upload folder containing test uplaods png, pdf
+backend/public/resumes/  
