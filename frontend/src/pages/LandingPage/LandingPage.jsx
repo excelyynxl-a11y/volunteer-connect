@@ -79,32 +79,6 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       <div className="page-shell">
-        <nav className="hero-nav">
-          <div className="brand-row">
-            <div className="brand-mark">V</div>
-            <div className="brand-details">
-              <p className="brand-name">VolunteerConnect</p>
-              <span className="brand-subtitle">COMMUNITY PLATFORM</span>
-            </div>
-          </div>
-
-          <div className="nav-links">
-            <Link to="/vision">Vision & Mission</Link>
-            <Link to="/about">About Us</Link>
-            <Link to="/opportunities">Opportunities</Link>
-            <a href="#how-it-works">How It Works</a>
-          </div>
-
-          <div className="nav-actions">
-            <Link to="/login" className="nav-button outlined">
-              Log In
-            </Link>
-            <Link to="/sign-up" className="nav-button primary">
-              Sign Up Free
-            </Link>
-          </div>
-        </nav>
-
         <section className="hero-section" id="opportunities">
           <div className="hero-copy">
             <span className="eyebrow">WELCOME TO VOLUNTEERCONNECT</span>

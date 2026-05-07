@@ -62,12 +62,6 @@ const forOrganizations = [
 const Mission = () => {
   return (
     <div className="mission-page">
-      <nav className="mission-nav">
-        <Link to="/" className="mission-back-link">
-          Home
-        </Link>
-      </nav>
-
       <section className="mission-hero">
         <div className="mission-hero-content">
           <h1>Our Mission</h1>

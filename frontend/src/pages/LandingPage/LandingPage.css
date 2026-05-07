@@ -10,106 +10,10 @@
   margin: 0 auto;
 }
 
-.hero-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 26px 40px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5ddd2;
-}
-
-.brand-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: #d4a456;
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 800;
-}
-
-.brand-details {
-  line-height: 1.15;
-}
-
-.brand-name {
-  margin: 0;
-  color: #2c5f4f;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.brand-subtitle {
-  color: #c6c4c2;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.nav-links a,
-.nav-button,
 .btn {
   text-decoration: none;
 }
 
-.nav-links a {
-  color: #000000;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.nav-links a:hover {
-  color: #d4a456;
-}
-
-.nav-actions {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.nav-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 54px;
-  padding: 0 24px;
-  border: 1px solid #d4a456;
-  border-radius: 6px;
-  color: #000000;
-  font-size: 20px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.nav-button.primary {
-  background: #d4a456;
-  color: #ffffff;
-}
-
-.nav-button.outlined {
-  background: transparent;
-}
-
-.nav-button:hover,
 .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(212, 164, 86, 0.2);
@@ -424,16 +328,6 @@
     grid-template-columns: 1fr;
   }
 
-  .hero-nav {
-    flex-wrap: wrap;
-  }
-
-  .nav-links {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
   .cta-section {
     align-items: flex-start;
     flex-direction: column;
@@ -441,22 +335,12 @@
 }
 
 @media (max-width: 720px) {
-  .hero-nav,
   .hero-section,
   .purpose-section,
   .workflow-section,
   .cta-section {
     padding-left: 18px;
     padding-right: 18px;
-  }
-
-  .nav-links {
-    justify-content: flex-start;
-    gap: 14px;
-  }
-
-  .nav-links a {
-    font-size: 16px;
   }
 
   .hero-copy h1 {

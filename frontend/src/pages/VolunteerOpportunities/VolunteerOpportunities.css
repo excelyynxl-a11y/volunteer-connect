@@ -12,61 +12,8 @@
   color: #ffffff;
 }
 
-.volunteer-opps-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.volunteer-opps-brand-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.volunteer-opps-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #d4a456;
-  color: #ffffff;
-  font-size: 19px;
-  font-weight: 800;
-}
-
-.volunteer-opps-brand-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.volunteer-opps-brand-name {
-  margin: 0;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.volunteer-opps-brand-subtitle {
-  color: #d4d4d4;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-}
-
-.volunteer-opps-close-btn {
-  padding: 8px 16px;
-  border: 1px solid #ffffff;
-  border-radius: 6px;
-  color: #ffffff;
-  font-weight: 700;
-  text-decoration: none;
-}
-
 .volunteer-opps-hero {
-  padding: 10px 32px 60px;
+  padding: 60px 32px;
   text-align: center;
 }
 
@@ -357,7 +304,6 @@
 }
 
 @media (max-width: 720px) {
-  .volunteer-opps-nav,
   .volunteer-opps-hero,
   .volunteer-opps-list {
     padding-left: 16px;

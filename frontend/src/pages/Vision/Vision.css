@@ -5,23 +5,6 @@
   font-family: 'Urbanist', Arial, sans-serif;
 }
 
-.vision-nav {
-  padding: 18px 28px 30px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5ddd2;
-}
-
-.vision-back-link {
-  color: #8a8a8a;
-  font-size: 20px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.vision-back-link:hover {
-  color: #d4a456;
-}
-
 .vision-hero {
   padding: 102px 32px;
   background: linear-gradient(135deg, #2c5f4f 0%, #3d7a66 100%);

@@ -60,12 +60,6 @@ const stats = [
 const AboutUs = () => {
   return (
     <div className="about-page">
-      <nav className="about-nav">
-        <Link to="/" className="about-back-link">
-          Home
-        </Link>
-      </nav>
-
       <section className="about-hero">
         <div className="about-hero-content">
           <h1>About VolunteerConnect</h1>

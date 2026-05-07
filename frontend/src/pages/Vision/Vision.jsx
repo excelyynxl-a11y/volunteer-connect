@@ -53,12 +53,6 @@ const timelineItems = [
 const Vision = () => {
   return (
     <div className="vision-page">
-      <nav className="vision-nav">
-        <Link to="/" className="vision-back-link">
-          Home
-        </Link>
-      </nav>
-
       <section className="vision-hero">
         <div className="vision-hero-content">
           <h1>Our Vision</h1>

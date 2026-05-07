@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import './VolunteerOpportunities.css'
 
 const opportunities = [
@@ -140,21 +139,6 @@ const VolunteerOpportunities = () => {
   return (
     <div className="volunteer-opps-page">
       <header className="volunteer-opps-header">
-        <nav className="volunteer-opps-nav">
-          <div className="volunteer-opps-brand-row">
-            <div className="volunteer-opps-brand-mark">V</div>
-            <div className="volunteer-opps-brand-details">
-              <p className="volunteer-opps-brand-name">VolunteerConnect</p>
-              <span className="volunteer-opps-brand-subtitle">
-                COMMUNITY PLATFORM
-              </span>
-            </div>
-          </div>
-          <Link to="/" className="volunteer-opps-close-btn">
-            Back Home
-          </Link>
-        </nav>
-
         <div className="volunteer-opps-hero">
           <span className="volunteer-opps-eyebrow">
             VOLUNTEER OPPORTUNITIES
