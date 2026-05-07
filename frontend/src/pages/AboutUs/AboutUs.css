@@ -6,60 +6,64 @@
 }
 
 .about-hero {
-  padding: 58px 32px 76px;
+  padding: 58px 32px 64px;
   background: linear-gradient(135deg, #2c5f4f 0%, #3d7a66 100%);
   color: #ffffff;
   text-align: center;
 }
 
 .about-hero-content {
-  max-width: 900px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
 .about-hero h1 {
-  margin: 0 0 26px;
+  margin: 0 0 22px;
   color: #ffffff;
   font-family: Georgia, serif;
-  font-size: 48px;
+  font-size: 40px;
+  font-weight: 700;
   line-height: 1.12;
 }
 
 .about-hero p {
-  max-width: 880px;
+  max-width: 760px;
   margin: 0 auto;
-  color: #f0f0f0;
-  font-size: 20px;
-  line-height: 1.6;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.75;
 }
 
 .about-section {
-  max-width: 1100px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 78px 32px;
+  padding: 64px 32px;
 }
 
 .about-section-content {
   display: grid;
-  gap: 28px;
+  gap: 22px;
 }
 
 .about-section h2 {
-  margin: 0 0 22px;
+  margin: 0 0 18px;
   color: #17584f;
-  font-size: 38px;
-  line-height: 1.15;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .about-section p {
   margin: 0;
-  color: #3f4a50;
+  color: #2f3a40;
   font-size: 16px;
-  line-height: 1.85;
+  font-weight: 400;
+  line-height: 1.8;
 }
 
 .about-section-header {
-  margin-bottom: 60px;
+  margin-bottom: 46px;
   text-align: center;
 }
 
@@ -68,13 +72,14 @@
 }
 
 .about-section-header p {
-  color: #4d5760;
-  font-size: 17px;
+  color: #3f4a50;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .about-values-section {
-  max-width: 936px;
-  padding: 76px 60px;
+  max-width: 920px;
+  padding: 58px 48px;
   border-radius: 10px;
   background: #ffffff;
 }
@@ -82,51 +87,53 @@
 .about-values-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 44px 54px;
+  gap: 34px 42px;
 }
 
 .about-value-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   text-align: center;
 }
 
 .about-value-icon {
-  font-size: 52px;
+  font-size: 40px;
   line-height: 1;
 }
 
 .about-value-card h3 {
   margin: 0;
   color: #17584f;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .about-value-card p {
-  color: #4d5760;
-  font-size: 16px;
-  line-height: 1.5;
+  color: #354047;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
 }
 
 .about-team-section {
-  padding-top: 68px;
+  padding-top: 56px;
 }
 
 .about-team-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 38px;
-  max-width: 880px;
+  gap: 26px;
+  max-width: 820px;
   margin: 0 auto;
 }
 
 .about-team-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
-  min-height: 360px;
-  padding: 38px 34px;
+  min-height: 300px;
+  padding: 30px 26px;
   border: 1px solid #e3d8c9;
   border-radius: 10px;
   background: #ffffff;
@@ -136,38 +143,40 @@
 .about-team-avatar {
   display: grid;
   place-items: center;
-  width: 76px;
-  height: 76px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, #d4a456 0%, #bf8c12 100%);
   color: #ffffff;
-  font-size: 26px;
-  font-weight: 900;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .about-team-card h3 {
   margin: 0;
   color: #111111;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .about-team-role {
   color: #2d3d4b !important;
-  font-size: 16px !important;
-  font-weight: 800;
+  font-size: 13px !important;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .about-team-bio {
-  color: #2d3d4b !important;
-  font-size: 16px !important;
-  line-height: 1.75 !important;
+  color: #25323f !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
 }
 
 .about-impact-section {
-  max-width: 938px;
-  padding: 78px 30px;
+  max-width: 920px;
+  padding: 62px 30px;
   background: #2c5f4f;
   color: #ffffff;
 }
@@ -180,14 +189,14 @@
 .about-impact-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 38px;
+  gap: 22px;
 }
 
 .about-impact-card {
   display: grid;
   place-items: center;
-  min-height: 174px;
-  padding: 24px;
+  min-height: 136px;
+  padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
@@ -196,21 +205,21 @@
 
 .about-impact-number {
   color: #e9b85a;
-  font-size: 42px;
-  font-weight: 900;
+  font-size: 32px;
+  font-weight: 700;
   line-height: 1;
 }
 
 .about-impact-label {
   margin-top: 12px;
-  color: #eeeeee;
-  font-size: 15px;
-  font-weight: 800;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
 .about-cta {
-  padding: 82px 32px;
+  padding: 62px 32px;
   background: #d4a456;
   color: #ffffff;
   text-align: center;
@@ -219,13 +228,15 @@
 .about-cta h2 {
   margin: 0 0 18px;
   color: #ffffff;
-  font-size: 36px;
+  font-size: 30px;
+  font-weight: 700;
 }
 
 .about-cta p {
-  margin: 0 0 38px;
+  margin: 0 0 30px;
   color: #ffffff;
   font-size: 16px;
+  font-weight: 400;
 }
 
 .about-cta-buttons {
@@ -239,11 +250,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 174px;
-  min-height: 48px;
-  padding: 0 28px;
+  min-width: 156px;
+  min-height: 44px;
+  padding: 0 24px;
   border-radius: 7px;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 14px;
   text-decoration: none;
 }
 
