@@ -1,4 +1,4 @@
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 
 export const deleteUser = async (req, res) => {
     try {
@@ -47,7 +47,7 @@ export const getUserById = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        res.status(500).json({ user });
+        res.status(200).json({ user });
 
     } catch (err) {
         console.log('Error in getUserById controller: ', err.message);                                                        
