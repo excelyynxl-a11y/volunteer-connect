@@ -1,4 +1,4 @@
-import { User } from "../models/user.model.js";
+import { Admin, Organisation, User, Volunteer } from "../models/user.model.js";
 
 export const getAllUsers = async (req, res) => {
     try {
@@ -51,6 +51,51 @@ export const deleteUser = async (req, res) => {
 
     } catch (err) {
         console.log('Error in deleteUser controller: ', err.message);
+        res.status(500).json({ message: err.message }); 
+    }
+}
+
+export const getAllVolunteers = async (req, res) => {
+    try {
+        const volunteers = await Volunteer.find().select('-password');
+
+        res.status(200).json({
+            count: volunteers.length,
+            volunteers
+        });
+
+    } catch (err) {
+        console.log('Error in getAllVolunteers controller: ', err.message);
+        res.status(500).json({ message: err.message }); 
+    }
+}
+
+export const getAllOrganisations = async (req, res) => {
+    try {
+        const organisations = await Organisation.find().select('-password');
+
+        res.status(200).json({
+            count: organisations.length,
+            organisations
+        });
+
+    } catch (err) {
+        console.log('Error in getAllOrganisations controller: ', err.message);
+        res.status(500).json({ message: err.message }); 
+    }
+}
+
+export const getAllAdmins = async (req, res) => {
+    try {
+        const admins = await Admin.find().select('-password');
+
+        res.status(200).json({
+            count: admins.length,
+            admins
+        });
+
+    } catch (err) {
+        console.log('Error in getAllAdmins controller: ', err.message);
         res.status(500).json({ message: err.message }); 
     }
 }
