@@ -10,9 +10,9 @@ export const approveUserAccount = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    if (user.approvalStatus !== "pending") {
+    if (user.approvalStatus === "approved") {
       return res.status(400).json({
-        message: "User account is not pending approval.",
+        message: "User account is already approved.",
       });
     }
 
@@ -39,9 +39,9 @@ export const rejectUserAccount = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    if (user.approvalStatus !== "pending") {
+    if (user.approvalStatus === "rejected") {
       return res.status(400).json({
-        message: "User account is not pending approval.",
+        message: "User account is already rejected.",
       });
     }
 
