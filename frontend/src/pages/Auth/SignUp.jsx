@@ -5,11 +5,11 @@ import { AlertCircle, ArrowBigLeft, Building2, Eye, EyeOff, Loader2, Lock, Mail,
 import Badge from '../../components/Badge';
 import { validateEmail, validatePassword } from '../../lib/utils';
 import WelcomeAbroad from './WelcomeAbroad';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const SignUp = () => {
 
-  // TODO: import signUp, isSigningUp from useAuthStore (hard-coded as false for now)
-  const isSigningUp = false;
+  const { signUp, isSigningUp } = useAuthStore();
 
   // basic formData [fullName, email, password, role]
   const [formData, setFormData] = useState({
@@ -139,23 +139,23 @@ const SignUp = () => {
     if (isValid) {
       setFormState((prev) => ({ ...prev, loading: true }));
 
-      // build role-specific payload as JSON object to be pass to signUp() from useAuthStore
-      const payload = {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-        ...(formData.role === 'volunteer' && {
-          ageGroup: volunteerFormData.ageGroup,
-          resume: volunteerFormData.resume,
-        }),
-        ...(formData.role === 'organisation' && {
-          biodata: organisationFormData.biodata,
-        }),
-      };
+      // build role-specific payload as FormData to support file upload via multipart/form-data
+      const payload = new FormData();
+      payload.append("name", formData.fullName);
+      payload.append("email", formData.email);
+      payload.append("password", formData.password);
+      payload.append("role", formData.role);
+      if (formData.role === 'volunteer') {
+        payload.append("ageGroup", volunteerFormData.ageGroup);
+        if (volunteerFormData.resume) {
+          payload.append("resume", volunteerFormData.resume);
+        }
+      }
+      if (formData.role === 'organisation') {
+        payload.append("biodata", organisationFormData.biodata);
+      }
 
-      // TODO: get const result = await signUp(payload); (hard coded as true for now)
-      const result = { success: true };
+      const result = await signUp(payload)
 
       console.log("Payload:", payload);
 
