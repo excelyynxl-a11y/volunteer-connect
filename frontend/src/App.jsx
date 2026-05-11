@@ -15,7 +15,7 @@ import AboutUs from './pages/AboutUs/AboutUs';
 const App = () => {
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <Routes>
         {/* landing page route */}
         <Route path='/' element={<LandingPage />}/>
