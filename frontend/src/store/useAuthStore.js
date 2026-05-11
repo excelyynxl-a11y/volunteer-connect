@@ -29,7 +29,11 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
       toast.success("Account created successfully.");
-      return { success: true };
+      return {
+        success: true,
+        role: res.data.role,
+        approvalStatus: res.data.approvalStatus,
+      };
     } catch (error) {
       const message =
         error.response?.data?.message ||
@@ -48,8 +52,17 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       toast.success("Logged in successfully.");
-      return { success: true, role: res.data.role };
+      return {
+        success: true,
+        role: res.data.role,
+        approvalStatus: res.data.approvalStatus,
+      };
     } catch (error) {
+      const approvalStatus = error.response?.data?.approvalStatus;
+      const role = error.response?.data?.role;
+      if (approvalStatus) {
+        return { success: false, approvalStatus, role };
+      }
       const message =
         error.response?.data?.message ||
         error.message ||
