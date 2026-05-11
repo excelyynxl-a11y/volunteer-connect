@@ -1,0 +1,36 @@
+.workflow-card {
+  border: 2px solid #d4a456;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  min-height: 256px;
+  padding: 26px;
+}
+
+.step-circle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: #d4a456;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.workflow-card h4 {
+  margin: 0 0 18px;
+  color: #16584d;
+  font-size: 16px;
+}
+
+.workflow-card p {
+  margin: 0;
+  color: #000000;
+  font-size: 15px;
+  line-height: 1.7;
+}

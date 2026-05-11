@@ -18,7 +18,7 @@ const App = () => {
 
   return (
     <div>
-      {!hideNavbar && <Navbar />}
+      {/* <Navbar /> */}
       <Routes>
         {/* landing page route */}
         <Route path='/' element={<LandingPage />}/>
