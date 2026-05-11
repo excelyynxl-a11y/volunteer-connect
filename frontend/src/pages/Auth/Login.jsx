@@ -5,95 +5,110 @@ import './Login.css'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('Volunteer')
+  const [rememberMe, setRememberMe] = useState(false)
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Login:', email, password)
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    console.log('Login:', role, email, password, rememberMe)
   }
 
   return (
-    <main className="auth-screen login-screen">
-      <aside className="auth-sidebar dark-sidebar">
-        <div className="brand-block">
-          <div className="brand-mark">V</div>
+    <main className="login-page">
+      <section className="login-panel">
+        <div className="login-brand-row">
+          <div className="login-brand-mark">V</div>
           <div>
-            <p className="brand-name">VolunteerConnect</p>
-            <span className="brand-subtitle">COMMUNITY PLATFORM</span>
+            <p className="login-brand-name">VolunteerConnect</p>
+            <span className="login-brand-subtitle">COMMUNITY PLATFORM</span>
           </div>
         </div>
 
-        <h1>Good to have you back.</h1>
-        <p>
-          Sign in to access your volunteer dashboard, manage applications, and
-          continue making a difference.
-        </p>
+        <div className="login-panel-copy">
+          <h1>Good to have you back.</h1>
+          <p>
+            Sign in to access your volunteer dashboard, manage applications,
+            and continue making a difference.
+          </p>
+        </div>
 
-        <div className="feature-list">
+        <div className="login-feature-list">
           <p>Browse 76+ verified opportunities</p>
           <p>Track your volunteer hours</p>
           <p>Message organizations directly</p>
           <p>Build your impact portfolio</p>
         </div>
-      </aside>
+      </section>
 
-      <section className="auth-content">
-        <Link to="/" className="back-link">
-          Back to home
-        </Link>
+      <section className="login-content">
+        <div className="login-form-shell">
+          <Link to="/" className="login-back-link">
+            ? Back to home
+          </Link>
 
-        <span className="auth-eyebrow">WELCOME BACK</span>
-        <h2>Log In</h2>
-        <p>
-          Don't have an account? <Link to="/sign-up">Sign up free</Link>
-        </p>
+          <span className="login-eyebrow">WELCOME BACK</span>
+          <h2>Log In</h2>
 
-        <div className="role-buttons centered" aria-label="Account type">
-          <button type="button" className="role active">
-            Volunteer
-          </button>
-          <button type="button" className="role">
-            Organization
-          </button>
-          <button type="button" className="role">
-            Admin
-          </button>
-        </div>
+          <p className="login-signup-prompt">
+            Don't have an account? <Link to="/sign-up">Sign up free ?</Link>
+          </p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Email address
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Password
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-
-          <div className="form-meta">
-            <label className="checkbox-label">
-              <input type="checkbox" />
-              REMEMBER ME
-            </label>
-            <Link to="/">Forgot password?</Link>
+          <div className="login-role-buttons">
+            {['Volunteer', 'Organization', 'Admin'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={role === item ? 'login-role active' : 'login-role'}
+                onClick={() => setRole(item)}
+              >
+                {item}
+              </button>
+            ))}
           </div>
 
-          <button type="submit" className="primary-btn">
-            Sign In
-          </button>
-        </form>
+          <form className="login-form" onSubmit={handleSubmit}>
+            <label>
+              Email address
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </label>
+
+            <label>
+              Password
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </label>
+
+            <div className="login-form-meta">
+              <label className="login-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                />
+                <span>REMEMBER ME</span>
+              </label>
+
+              <Link to="/" className="login-forgot-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button type="submit" className="login-submit">
+              Sign In ?
+            </button>
+          </form>
+        </div>
       </section>
     </main>
   )

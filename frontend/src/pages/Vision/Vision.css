@@ -1,0 +1,245 @@
+.vision-page {
+  min-height: 100vh;
+  background: #f5f1eb;
+  color: #333333;
+  font-family: 'Urbanist', Arial, sans-serif;
+}
+
+.vision-hero {
+  padding: 72px 32px;
+  background: linear-gradient(135deg, #2c5f4f 0%, #3d7a66 100%);
+  color: #ffffff;
+  text-align: center;
+}
+
+.vision-hero-content {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.vision-hero h1 {
+  margin: 0 0 24px;
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.vision-hero p {
+  max-width: 820px;
+  margin: 0 auto;
+  color: #f0f0f0;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.vision-section {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 68px 48px;
+}
+
+.vision-section-content {
+  display: grid;
+  gap: 24px;
+}
+
+.vision-section h2 {
+  margin: 0 0 22px;
+  color: #19584f;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.vision-section p {
+  margin: 0;
+  color: #3f4a50;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+.vision-section-header {
+  margin-bottom: 52px;
+  text-align: center;
+}
+
+.vision-section-header h2 {
+  margin-bottom: 14px;
+}
+
+.vision-section-header p {
+  color: #40494f;
+  font-size: 16px;
+}
+
+.vision-pillars-section {
+  max-width: 1080px;
+  padding: 58px 56px 64px;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.vision-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 42px 52px;
+}
+
+.vision-pillar-card {
+  display: grid;
+  gap: 16px;
+  text-align: center;
+}
+
+.vision-pillar-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.vision-pillar-card h3 {
+  margin: 0;
+  color: #17584f;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.vision-pillar-card p {
+  color: #424b51;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.vision-action {
+  max-width: 960px;
+}
+
+.vision-timeline {
+  display: grid;
+  gap: 34px;
+}
+
+.vision-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.vision-timeline-marker {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #d4a456;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.vision-timeline-content {
+  padding-top: 6px;
+}
+
+.vision-timeline-content h3 {
+  margin: 0 0 10px;
+  color: #17584f;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vision-timeline-content p {
+  color: #424b51;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.vision-cta {
+  padding: 62px 32px;
+  background: #d4a456;
+  color: #ffffff;
+  text-align: center;
+}
+
+.vision-cta h2 {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.vision-cta p {
+  margin: 0 0 30px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.vision-cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.vision-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 164px;
+  min-height: 44px;
+  padding: 0 24px;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.vision-btn-primary {
+  background: #2c5f4f;
+  color: #ffffff;
+}
+
+.vision-btn-outlined {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .vision-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vision-pillars-section,
+  .vision-section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .vision-hero h1,
+  .vision-section h2 {
+    font-size: 38px;
+  }
+
+  .vision-hero p,
+  .vision-section p {
+    font-size: 18px;
+  }
+
+  .vision-timeline-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .vision-timeline-marker {
+    align-self: center;
+  }
+}
