@@ -1,12 +1,28 @@
 import React from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import './Header.css'
+import { landingPageNavItems } from '../../lib/data'
 
 const Header = () => {
+
+  // smooth scroll down to navigated section
+  const handleNavClick = (e, href) => {
+    e.preventDefault()
+    const id = href.replace('#', '')
+    const target = document.getElementById(id)
+    const navbar = document.querySelector('.site-navbar')
+    if (target && navbar) {
+      const navbarHeight = navbar.offsetHeight
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - navbarHeight
+      window.scrollTo({ top: targetTop, behavior: 'smooth' })
+    }
+  }
+
   return (
     <header className="site-navbar">
+
+      {/* TODO: insert Badge component after merging to team/team-3 branch*/}
       <Link to="/" className="site-brand" aria-label="VolunteerConnect home">
-        {/* TODO: insert Badge component */}
         {/* <Badge
             icon="V"
             name="VolunteerConnect"
@@ -15,19 +31,20 @@ const Header = () => {
 
       </Link>
 
-      <nav className="site-nav-links" aria-label="Primary navigation">
-        <NavLink to="/vision">
-            Vision & Mission
-        </NavLink>
-        <NavLink to="/about">
-            About Us 
-        </NavLink>
-        <NavLink to="/opportunities">
-            Opportunities
-        </NavLink>
-        <a href="/#how-it-works">How It Works</a>
+      {/* navigation links */}
+      <nav className="site-nav-links" aria-label="Landing page navigation">
+          {landingPageNavItems.map((item, key) => (
+              <a 
+                  key={key} 
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+              >
+                  {item.name}
+              </a>
+          ))}
       </nav>
 
+      {/* login signup buttons */}
       <div className="site-nav-actions">
         <Link to="/login" className="site-nav-button outlined">
           Log In
@@ -36,6 +53,7 @@ const Header = () => {
           Sign Up Free
         </Link>
       </div>
+      
     </header>
   )
 }
