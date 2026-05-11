@@ -1,117 +1,219 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import './Login.css'
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "./Login.css";
+import {
+  AlertCircle,
+  ArrowBigLeft,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+} from "lucide-react";
+import Badge from "../../components/Badge";
+import WelcomeAbroad from "./WelcomeAbroad";
+import { validateEmail } from "../../lib/utils";
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState('Volunteer')
-  const [rememberMe, setRememberMe] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    console.log('Login:', role, email, password, rememberMe)
+  const [formState, setFormState] = useState({
+    loading: false,
+    errors: {},
+    showPassword: false,
+    success: false,
+  });
+
+  const [userRole, setUserRole] = useState("volunteer");
+
+  // TODO: import signIn, isSigningIn from useAuthStore
+  const isSigningIn = formState.loading;
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (formState.errors[name]) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, [name]: "" },
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      email: validateEmail(formData.email),
+      password: !formData.password ? "Password is required" : "",
+    };
+
+    Object.keys(errors).forEach((key) => {
+      if (!errors[key]) {
+        delete errors[key];
+      }
+    });
+
+    setFormState((prev) => ({ ...prev, errors }));
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const isValid = validateForm();
+
+    if (isValid) {
+      setFormState((prev) => ({ ...prev, loading: true }));
+
+      // TODO: const result = await signIn(formData)
+      const result = { success: true, role: "volunteer" };
+
+      if (result.success) {
+        setUserRole(result.role || "volunteer");
+        setFormState((prev) => ({ ...prev, loading: false, success: true }));
+      } else {
+        setFormState((prev) => ({
+          ...prev,
+          loading: false,
+          errors: {
+            ...prev.errors,
+            submit: result.error || "Login failed. Please try again.",
+          },
+        }));
+      }
+    }
+  };
+
+  if (formState.success) {
+    return <WelcomeAbroad role={userRole} />;
   }
 
   return (
     <main className="login-page">
       <section className="login-panel">
         <div className="login-brand-row">
-          <div className="login-brand-mark">V</div>
-          <div>
-            <p className="login-brand-name">VolunteerConnect</p>
-            <span className="login-brand-subtitle">COMMUNITY PLATFORM</span>
-          </div>
+          <Badge
+            icon="V"
+            name="VolunteerConnect"
+            subtitle="COMMUNITY PLATFORM"
+          />
         </div>
 
         <div className="login-panel-copy">
           <h1>Good to have you back.</h1>
           <p>
-            Sign in to access your volunteer dashboard, manage applications,
-            and continue making a difference.
+            Sign in to access your dashboard and continue making a difference!
           </p>
-        </div>
-
-        <div className="login-feature-list">
-          <p>Browse 76+ verified opportunities</p>
-          <p>Track your volunteer hours</p>
-          <p>Message organizations directly</p>
-          <p>Build your impact portfolio</p>
         </div>
       </section>
 
       <section className="login-content">
         <div className="login-form-shell">
           <Link to="/" className="login-back-link">
-            ? Back to home
+            <ArrowBigLeft /> Back Home
           </Link>
 
-          <span className="login-eyebrow">WELCOME BACK</span>
-          <h2>Log In</h2>
-
-          <p className="login-signup-prompt">
-            Don't have an account? <Link to="/sign-up">Sign up free ?</Link>
-          </p>
-
-          <div className="login-role-buttons">
-            {['Volunteer', 'Organization', 'Admin'].map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={role === item ? 'login-role active' : 'login-role'}
-                onClick={() => setRole(item)}
-              >
-                {item}
-              </button>
-            ))}
+          <div className="login-header">
+            <h2>Welcome Back</h2>
+            <p>Log in to keep your volunteer journey moving.</p>
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
-            <label>
-              Email address
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </label>
-
-            <label>
-              Password
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </label>
-
-            <div className="login-form-meta">
-              <label className="login-checkbox-label">
+            <div className="login-field">
+              <label className="login-field-label">Email Address</label>
+              <div className="login-input-wrapper">
+                <Mail className="login-input-icon" />
                 <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={
+                    formState.errors.email
+                      ? "login-input has-icon error"
+                      : "login-input has-icon"
+                  }
+                  placeholder="Enter your email"
                 />
-                <span>REMEMBER ME</span>
-              </label>
-
-              <Link to="/" className="login-forgot-link">
-                Forgot password?
-              </Link>
+              </div>
+              {formState.errors.email && (
+                <p className="login-field-error">
+                  <AlertCircle className="login-error-icon" />
+                  {formState.errors.email}
+                </p>
+              )}
             </div>
 
-            <button type="submit" className="login-submit">
-              Sign In ?
+            <div className="login-field">
+              <label className="login-field-label">Password</label>
+              <div className="login-input-wrapper">
+                <Lock className="login-input-icon" />
+                <input
+                  type={formState.showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={
+                    formState.errors.password
+                      ? "login-input has-icon has-toggle error"
+                      : "login-input has-icon has-toggle"
+                  }
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      showPassword: !prev.showPassword,
+                    }))
+                  }
+                  className="login-password-toggle"
+                >
+                  {formState.showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+              {formState.errors.password && (
+                <p className="login-field-error">
+                  <AlertCircle className="login-error-icon" />
+                  {formState.errors.password}
+                </p>
+              )}
+            </div>
+
+            {formState.errors.submit && (
+              <p className="login-field-error">
+                <AlertCircle className="login-error-icon" />
+                {formState.errors.submit}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={isSigningIn}
+            >
+              {isSigningIn ? (
+                <>
+                  <Loader2 className="login-submit-loader" />
+                  Loading...
+                </>
+              ) : (
+                "Log In"
+              )}
             </button>
+
+            <p className="login-signup-prompt">
+              Don't have an account? <Link to="/sign-up">Sign up.</Link>
+            </p>
           </form>
         </div>
       </section>
     </main>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
