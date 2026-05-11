@@ -31,7 +31,7 @@ export const activityItems = [
   },
 ]
 
-export const purposeCards = [
+export const aboutUsCards = [
   {
     icon: Eye,
     title: 'Our Vision',
@@ -49,7 +49,7 @@ export const purposeCards = [
   },
 ]
 
-export const workflowSteps = [
+export const howItWorkSteps = [
   {
     step: '1',
     title: 'Create Your Profile',
@@ -73,8 +73,7 @@ export const workflowSteps = [
 ]
 
 export const landingPageNavItems = [
-    {name: "Hero", href: "#hero"},
+    {name: "Home", href: "#hero"},
     {name: "About Us", href: "#about"},
-    {name: "Opportunities", href: "#opportunities"},
     {name: "How It Work", href: "#howitwork"}
 ]
