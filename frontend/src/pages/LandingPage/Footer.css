@@ -1,0 +1,17 @@
+.footer-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 44px 0 0;
+  padding: 48px 40px;
+  border-radius: 10px 10px 0 0;
+  background: #d4a456;
+  color: #ffffff;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
