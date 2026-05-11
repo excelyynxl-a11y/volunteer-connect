@@ -29,8 +29,8 @@ const Login = () => {
 
   const [userRole, setUserRole] = useState("volunteer");
 
-  // TODO: import signIn, isSigningIn from useAuthStore
-  const isSigningIn = formState.loading;
+  // TODO: import login, isLoggingIn from useAuthStore
+  const isLoggingIn = formState.loading;
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -68,7 +68,8 @@ const Login = () => {
     if (isValid) {
       setFormState((prev) => ({ ...prev, loading: true }));
 
-      // TODO: const result = await signIn(formData)
+      // TODO: const result = await login(formData)
+      // TODO: chankao SingUp.jsx de handleSubmit
       const result = { success: true, role: "volunteer" };
 
       if (result.success) {
