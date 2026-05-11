@@ -1,0 +1,21 @@
+.hero-section {
+  padding: 150px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-section .section-header p {
+  max-width: 690px;
+  margin: 12px auto 0;
+  color: #000000;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+@media (max-width: 720px) {
+  .hero-section {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
