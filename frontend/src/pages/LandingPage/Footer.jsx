@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <section className="footer-section">
+
+        {/* footer quote */}
         <div>
             <h2>
                 Ready to Make Your Mark?

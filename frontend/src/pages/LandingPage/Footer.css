@@ -10,8 +10,45 @@
   color: #ffffff;
 }
 
+.footer-section h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.footer-section p {
+  max-width: 600px;
+  margin: 18px 0 0;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
 .footer-actions {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.footer-section .btn.primary {
+  background: #2c5f4f;
+  border-color: #2c5f4f;
+}
+
+@media (max-width: 1180px) {
+  .footer-section {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 720px) {
+  .footer-section {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .footer-actions {
+    flex-direction: column;
+    width: 100%;
+  }
 }
