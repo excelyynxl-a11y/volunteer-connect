@@ -1,47 +1,43 @@
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { CheckCircle } from 'lucide-react'
-import './WelcomeAbroad.css'
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle } from "lucide-react";
+import "./WelcomeAbroad.css";
 
 const WelcomeAbroad = ({ role }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const dashboardPath = role === 'organisation' ? 
-    '/organisation-dashboard'
-    : 
-    '/volunteer-dashboard'
+  const dashboardPath =
+    role === "admin"
+      ? "/admin-dashboard"
+      : role === "organisation"
+        ? "/organisation-dashboard"
+        : "/volunteer-dashboard";
 
   // set WelcomeAbroad card to exist for 2.5 seconds only
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(dashboardPath, { replace: true })
-    }, 2500)
+      navigate(dashboardPath, { replace: true });
+    }, 2500);
 
-    return () => clearTimeout(timer)
-  }, [navigate, dashboardPath])
+    return () => clearTimeout(timer);
+  }, [navigate, dashboardPath]);
 
   return (
     <main className="welcome-page">
       <div className="welcome-card">
-        
         <CheckCircle className="welcome-icon" />
-        
-        <h1 className="welcome-heading">
-          Welcome Aboard!
-        </h1>
-        
-        <p className="welcome-subtitle">
-          Directing to your dashboard...
-        </p>
+
+        <h1 className="welcome-heading">Welcome Aboard!</h1>
+
+        <p className="welcome-subtitle">Directing to your dashboard...</p>
 
         {/* welcome bar track */}
         <div className="welcome-bar-track">
           <div className="welcome-bar-fill" />
         </div>
-
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default WelcomeAbroad
+export default WelcomeAbroad;
