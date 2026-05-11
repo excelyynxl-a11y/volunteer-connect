@@ -103,6 +103,7 @@ export const signup = async (req, res) => {
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        role: newUser.role,
         approvalStatus: newUser.approvalStatus,
         ageGroup: newUser.ageGroup || "",
         resume: newUser.resume || "",
@@ -141,6 +142,8 @@ export const login = async (req, res) => {
     if (user.approvalStatus !== "approved") {
       return res.status(403).json({
         message: "User account has not been approved by admin yet",
+        approvalStatus: user.approvalStatus,
+        role: user.role,
       });
     }
 
@@ -150,6 +153,7 @@ export const login = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       ageGroup: user.ageGroup || "",
       biodata: user.biodata || "",
       approvalStatus: user.approvalStatus,
@@ -176,10 +180,10 @@ export const logout = async (req, res) => {
 };
 
 export const checkAuth = (req, res) => {
-    try {
-        res.status(200).json(req.user);
-    } catch (error) {
-        console.log("Error in checkAuth controller", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-}
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
