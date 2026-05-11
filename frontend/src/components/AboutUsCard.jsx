@@ -1,24 +1,19 @@
 import React from 'react'
+import './AboutUsCard.css';
 
-const AboutUsCard = ({
-    title,
-    initial,
-    subtitle
-}) => {
+const AboutUsCard = ({ icon: Icon, title, text }) => {
   return (
-    <div>AboutUsCard</div>
-    <div className="activity-card" key={title}>
-        <div className="activity-chip">
-            {initial}
-        </div>
-        <div>
-            <p className="activity-title">{item.title}</p>
-            <p className="activity-subtitle">{item.subtitle}</p>
-        </div>
-        <span className={`status ${item.statusClass}`}>
-            {item.status}
-        </span>
-    </div>
+    <article className="about-card">
+      <div className="about-icon">
+        <Icon size={24} strokeWidth={2.2} />
+      </div>
+      <h3>
+        {title}
+      </h3>
+      <p>
+        {text}
+      </p>
+    </article>
   )
 }
 

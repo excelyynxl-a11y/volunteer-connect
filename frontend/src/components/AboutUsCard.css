@@ -1,0 +1,35 @@
+.about-card {
+    border: 2px solid #d4a456;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    min-height: 300px;
+    padding: 26px;
+}
+
+.about-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    background: #f5f1eb;
+    color: #2c5f4f;
+}
+
+.about-card h3 {
+  margin: 0 0 18px;
+  color: #16584d;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.about-card p {
+  margin: 0;
+  color: #000000;
+  font-size: 15px;
+  line-height: 1.7;
+}
