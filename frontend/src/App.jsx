@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage/LandingPage'
 import SignUp from './pages/Auth/SignUp'
 import VolunteerDashboard from './pages/Volunteer/VolunteerDashboard'
@@ -13,6 +13,9 @@ import Mission from './pages/Mission/Mission';
 import AboutUs from './pages/AboutUs/AboutUs';
 
 const App = () => {
+  const location = useLocation()
+  const hideNavbar = ['/login', '/sign-up'].includes(location.pathname)
+
   return (
     <div>
       {/* <Navbar /> */}

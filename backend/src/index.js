@@ -27,6 +27,7 @@ import opportunityRoutes from "./routes/opportunity.route.js";
 import organisationRoutes from "./routes/organisation.route.js";
 import userRoutes from "./routes/user.route.js";
 import volunteerRoutes from "./routes/volunteer.route.js";
+import reportRoutes from "./routes/report.route.js";
 
 dotenv.config();
 const app = express();
@@ -53,6 +54,7 @@ app.use("/api/opportunity", opportunityRoutes);
 app.use("/api/organisation", organisationRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/volunteer", volunteerRoutes);
+app.use("/api/report", reportRoutes);
 
 // check if backend is connected to localhost:5001
 app.get('/', (req, res) => {
