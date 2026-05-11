@@ -1,0 +1,115 @@
+.pending-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 32px 24px;
+  background: #2c614f;
+  color: #ffffff;
+  font-family: "Urbanist", Arial, sans-serif;
+}
+
+.pending-card {
+  width: min(100%, 560px);
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: center;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.25);
+}
+
+.pending-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.pending-card .badge {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pending-card .badge-name,
+.pending-card .badge-subtitle {
+  color: #ffffff;
+}
+
+.pending-icon {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  color: #d9aa55;
+}
+
+.pending-heading {
+  margin: 12px 0 6px;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.pending-message {
+  margin: 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.86);
+  line-height: 1.6;
+}
+
+.pending-hint {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+.pending-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.pending-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: #d9aa55;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.pending-button:hover {
+  background: #c89a48;
+  transform: translateY(-1px);
+}
+
+.pending-button.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.pending-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 640px) {
+  .pending-card {
+    padding: 28px 20px;
+  }
+
+  .pending-heading {
+    font-size: 26px;
+  }
+}
