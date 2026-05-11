@@ -1,28 +1,195 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './SignUp.css'
+import { AlertCircle, ArrowBigLeft, Building2, Eye, EyeOff, Loader2, Lock, Mail, Upload, UserCheck } from 'lucide-react';
+import Badge from '../../components/Badge';
+import { validateEmail, validatePassword } from '../../lib/utils';
+import WelcomeAbroad from './WelcomeAbroad';
 
 const SignUp = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState('Volunteer')
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    console.log('Signup:', role, email, password)
+  // TODO: import signUp, isSigningUp from useAuthStore (hard-coded as false for now)
+  const isSigningUp = false;
+
+  // basic formData [fullName, email, password, role]
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    role: ''
+  });
+
+  // current form state and errors
+  const [formState, setFormState] = useState({
+    loading: false,
+    errors: {},
+    showPassword: false,
+    success: false,
+  });
+
+  // additional formData for volunteer
+  const [volunteerFormData, setVolunteerFormData] = useState({
+    ageGroup: '',
+    resume: null
+  });
+
+  // additional formData for organisation
+  const [organisationFormData, setOrganisationFormData] = useState({
+    biodata: ""
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (formState.errors[name]) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, [name]: '' }
+      }));
+    }
+  };
+
+  const handleRoleChange = (role) => {
+    setFormData((prev) => ({ ...prev, role }));
+
+    if (formState.errors.role) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, role: '' }
+      }));
+    }
+  };
+
+  const handleVolunteerChange = (e) => {
+    const { name, value } = e.target;
+    setVolunteerFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (formState.errors[name]) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, [name]: '' }
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    setVolunteerFormData((prev) => ({ ...prev, resume: e.target.files[0] }));
+
+    if (formState.errors.resume) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, resume: '' }
+      }));
+    }
+  };
+
+  const handleOrgChange = (e) => {
+    setOrganisationFormData((prev) => ({ ...prev, biodata: e.target.value }));
+
+    if (formState.errors.biodata) {
+      setFormState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, biodata: '' }
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      fullName: !formData.fullName.trim() ? 'Enter your full name' : '',
+      email: validateEmail(formData.email),
+      password: validatePassword(formData.password),
+      role: !formData.role ? 'Please select a role' : '',
+    }
+
+    // volunteer-specific validation
+    if (formData.role === 'volunteer') {
+      if (!volunteerFormData.ageGroup) {
+        errors.ageGroup = 'Select your age group';
+      }
+      if (!volunteerFormData.resume) {
+        errors.resume = 'Upload your resume';
+      }
+    }
+
+    // organisation-specific validation
+    if (formData.role === 'organisation') {
+      if (!organisationFormData.biodata.trim()) {
+        errors.biodata = 'Enter your organisation bio';
+      }
+    }
+
+    // remove empty errors
+    Object.keys(errors).forEach((key) => {
+      if (!errors[key]) {
+        delete errors[key]
+      }
+    });
+
+    setFormState((prev) => ({ ...prev, errors }));
+    return Object.keys(errors).length === 0;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const isValid = validateForm();
+
+    if (isValid) {
+      setFormState((prev) => ({ ...prev, loading: true }));
+
+      // build role-specific payload as JSON object to be pass to signUp() from useAuthStore
+      const payload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        ...(formData.role === 'volunteer' && {
+          ageGroup: volunteerFormData.ageGroup,
+          resume: volunteerFormData.resume,
+        }),
+        ...(formData.role === 'organisation' && {
+          biodata: organisationFormData.biodata,
+        }),
+      };
+
+      // TODO: get const result = await signUp(payload); (hard coded as true for now)
+      const result = { success: true };
+
+      console.log("Payload:", payload);
+
+      if (result.success) {
+        setFormState((prev) => ({ ...prev, loading: false, success: true }));
+      } else {
+        setFormState((prev) => ({
+          ...prev,
+          loading: false,
+          errors: { ...prev.errors, submit: result.error || 'Signup failed. Please try again.' }
+        }));
+      }
+    }
+  }
+
+  // after hitting submit button and succesfully signup, 
+  // before directing to user's dashboard, render Welcome Abroad for 2.5 secs
+  if (formState.success) {
+    return <WelcomeAbroad role={formData.role} />
   }
 
   return (
     <main className="signup-page">
       <section className="signup-panel">
+        {/* upper left VolunteerConnect badge */}
         <div className="signup-brand-row">
-          <div className="signup-brand-mark">V</div>
-          <div>
-            <p className="signup-brand-name">VolunteerConnect</p>
-            <span className="signup-brand-subtitle">COMMUNITY PLATFORM</span>
-          </div>
+          <Badge
+            icon="V"
+            name="VolunteerConnect"
+            subtitle="COMMUNITY PLATFORM"
+          />
         </div>
 
+        {/* middle left text paragraph */}
         <div className="signup-panel-copy">
           <h1>Join thousands making a difference.</h1>
           <p>
@@ -30,82 +197,260 @@ const SignUp = () => {
             volunteer opportunities today.
           </p>
         </div>
-
-        <div className="signup-feature-list">
-          <p>Browse 76+ verified opportunities</p>
-          <p>Track your volunteer hours</p>
-          <p>Message organizations directly</p>
-          <p>Build your impact portfolio</p>
-        </div>
       </section>
 
       <section className="signup-content">
         <div className="signup-form-shell">
+          {/* back home button */}
           <Link to="/" className="signup-back-link">
-            ? Back to home
+            <ArrowBigLeft /> Back Home
           </Link>
 
-          <span className="signup-eyebrow">STEP 1 OF 3</span>
-          <h2>I want to?</h2>
-
-          <p className="signup-login-prompt">
-            Already have an account? <Link to="/login">Log in ?</Link>
-          </p>
-
-          <div className="signup-role-buttons">
-            <button
-              type="button"
-              className={role === 'Volunteer' ? 'signup-role active' : 'signup-role'}
-              onClick={() => setRole('Volunteer')}
-            >
-              Volunteer
-            </button>
-            <button
-              type="button"
-              className={
-                role === 'Organization' ? 'signup-role active' : 'signup-role'
-              }
-              onClick={() => setRole('Organization')}
-            >
-              Organization
-            </button>
+          {/* create account header */}
+          <div className="signup-header">
+            <h2>Create Account</h2>
+            <p>Join thousands in finding a purpose in doing good.</p>
           </div>
 
           <form className="signup-form" onSubmit={handleSubmit}>
-            <label>
-              Email address
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </label>
+            {/* role selection */}
+            <div className="signup-role-section">
+              <label className="signup-field-label">
+                I am a
+              </label>
+              <div className="signup-role-buttons">
+                {/* volunteer button */}
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange('volunteer')}
+                  className={formData.role === 'volunteer' ? 'signup-role active' : 'signup-role'}
+                >
+                  <UserCheck className="signup-role-icon" />
+                  <span className="signup-role-label">
+                    Volunteer
+                  </span>
+                </button>
 
-            <label>
-              Password
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-              />
-            </label>
+                {/* organisation button */}
+                <button
+                  type="button"
+                  onClick={() => handleRoleChange('organisation')}
+                  className={formData.role === 'organisation' ? 'signup-role active' : 'signup-role'}
+                >
+                  <Building2 className="signup-role-icon" />
+                  <span className="signup-role-label">
+                    Organisation
+                  </span>
+                </button>
+              </div>
 
-            <button type="submit" className="signup-submit">
-              Continue ?
-            </button>
-          </form>
-
-          <div className="signup-social">
-            <span>or sign up with</span>
-            <div className="signup-social-buttons">
-              <button type="button">Google</button>
-              <button type="button">Facebook</button>
+              {formState.errors.role && (
+                <p className="signup-field-error">
+                  <AlertCircle className="signup-error-icon" />
+                  {formState.errors.role}
+                </p>
+              )}
             </div>
-          </div>
+
+            {/* full name */}
+            <div className="signup-field">
+              <label className="signup-field-label">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className={formState.errors.fullName ? 'signup-input error' : 'signup-input'}
+                placeholder="Enter your full name"
+              />
+
+              {formState.errors.fullName && (
+                <p className="signup-field-error">
+                  <AlertCircle className="signup-error-icon" />
+                  {formState.errors.fullName}
+                </p>
+              )}
+            </div>
+
+            {/* email */}
+            <div className="signup-field">
+              <label className="signup-field-label">
+                Email Address
+              </label>
+              <div className="signup-input-wrapper">
+                <Mail className="signup-input-icon" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={formState.errors.email ? 'signup-input has-icon error' : 'signup-input has-icon'}
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              {formState.errors.email && (
+                <p className="signup-field-error">
+                  <AlertCircle className="signup-error-icon" />
+                  {formState.errors.email}
+                </p>
+              )}
+            </div>
+
+            {/* password */}
+            <div className="signup-field">
+              <label className="signup-field-label">
+                Password
+              </label>
+              <div className="signup-input-wrapper">
+                <Lock className="signup-input-icon" />
+                <input
+                  type={formState.showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={formState.errors.password ? 'signup-input has-icon has-toggle error' : 'signup-input has-icon has-toggle'}
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormState((prev) => ({ ...prev, showPassword: !prev.showPassword }))}
+                  className="signup-password-toggle"
+                >
+                  {formState.showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+
+              {formState.errors.password && (
+                <p className="signup-field-error">
+                  <AlertCircle className="signup-error-icon" />
+                  {formState.errors.password}
+                </p>
+              )}
+            </div>
+
+            {/* volunteer-specific fields */}
+            {formData.role === 'volunteer' && (
+              <div className="signup-role-fields">
+                {/* age group */}
+                <div className="signup-field">
+                  <label className="signup-field-label">
+                    Age Group
+                  </label>
+                  <select
+                    name="ageGroup"
+                    value={volunteerFormData.ageGroup}
+                    onChange={handleVolunteerChange}
+                    className={formState.errors.ageGroup ? 'signup-input signup-select error' : 'signup-input signup-select'}
+                  >
+                    <option value="" disabled>
+                      Select your age group
+                    </option>
+                    <option value="21-30">
+                      21 - 30
+                    </option>
+                    <option value="31-40">
+                      31 - 40
+                    </option>
+                    <option value="41-50">
+                      41 - 50
+                    </option>
+                    <option value="51-60">
+                      51 - 60
+                    </option>
+                    <option value="60+">
+                      60+
+                    </option>
+                  </select>
+
+                  {formState.errors.ageGroup && (
+                    <p className="signup-field-error">
+                      <AlertCircle className="signup-error-icon" />
+                      {formState.errors.ageGroup}
+                    </p>
+                  )}
+                </div>
+
+                {/* resume upload */}
+                <div className="signup-field">
+                  <label className="signup-field-label">
+                    Resume (PDF)
+                  </label>
+                  <label className={formState.errors.resume ? 'signup-file-upload error' : 'signup-file-upload'}>
+                    <Upload className="signup-file-icon" />
+                    <span>
+                      {volunteerFormData.resume
+                        ? volunteerFormData.resume.name
+                        : 'Upload your resume'}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileChange}
+                      className="signup-file-input"
+                    />
+                  </label>
+
+                  {formState.errors.resume && (
+                    <p className="signup-field-error">
+                      <AlertCircle className="signup-error-icon" />
+                      {formState.errors.resume}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* organisation-specific fields */}
+            {formData.role === 'organisation' && (
+              <div className="signup-role-fields">
+                <div className="signup-field">
+                  <label className="signup-field-label">
+                    Organisation Bio
+                  </label>
+                  <textarea
+                    name="biodata"
+                    value={organisationFormData.biodata}
+                    onChange={handleOrgChange}
+                    className={formState.errors.biodata ? 'signup-input signup-textarea error' : 'signup-input signup-textarea'}
+                    placeholder="Tell us about your organisation..."
+                    rows={4}
+                  />
+                  {formState.errors.biodata && (
+                    <p className="signup-field-error">
+                      <AlertCircle className="signup-error-icon" />
+                      {formState.errors.biodata}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* submit button */}
+            <button
+              type="submit"
+              className="signup-submit"
+              disabled={isSigningUp}
+            >
+              {isSigningUp ? (
+                <>
+                  <Loader2 className="signup-submit-loader" />
+                  Loading...
+                </>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+
+            {/* 'already have an account' login link */}
+            <p className="signup-login-prompt">
+              Already have an account?{' '}
+              <Link to="/login">Log in.</Link>
+            </p>
+
+          </form>
         </div>
       </section>
     </main>
