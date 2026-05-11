@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import {
   AlertCircle,
@@ -31,6 +31,7 @@ const Login = () => {
   const [userRole, setUserRole] = useState("volunteer");
 
   const { login, isLoggingIn } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -69,6 +70,15 @@ const Login = () => {
       setFormState((prev) => ({ ...prev, loading: true }));
 
       const result = await login(formData);
+
+      if (result.approvalStatus && result.approvalStatus !== "approved") {
+        setFormState((prev) => ({ ...prev, loading: false }));
+        navigate("/pending-approval", {
+          replace: true,
+          state: { status: result.approvalStatus },
+        });
+        return;
+      }
 
       if (result.success) {
         setUserRole(result.role || "volunteer");
@@ -193,9 +203,9 @@ const Login = () => {
             <button
               type="submit"
               className="login-submit"
-              disabled={isSigningIn}
+              disabled={isLoggingIn}
             >
-              {isSigningIn ? (
+              {isLoggingIn ? (
                 <>
                   <Loader2 className="login-submit-loader" />
                   Loading...
