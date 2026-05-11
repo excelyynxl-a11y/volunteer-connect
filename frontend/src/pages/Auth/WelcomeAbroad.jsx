@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import "./WelcomeAbroad.css";
 
-const WelcomeAbroad = ({ role }) => {
+const WelcomeAbroad = ({ role, redirectTo, redirectState }) => {
   const navigate = useNavigate();
 
   const dashboardPath =
@@ -13,14 +13,16 @@ const WelcomeAbroad = ({ role }) => {
         ? "/organisation-dashboard"
         : "/volunteer-dashboard";
 
+  const targetPath = redirectTo || dashboardPath;
+
   // set WelcomeAbroad card to exist for 2.5 seconds only
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(dashboardPath, { replace: true });
+      navigate(targetPath, { replace: true, state: redirectState });
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [navigate, dashboardPath]);
+  }, [navigate, targetPath, redirectState]);
 
   return (
     <main className="welcome-page">

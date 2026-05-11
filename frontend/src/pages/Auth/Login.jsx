@@ -29,6 +29,7 @@ const Login = () => {
   });
 
   const [userRole, setUserRole] = useState("volunteer");
+  const [redirectConfig, setRedirectConfig] = useState(null);
 
   const { login, isLoggingIn } = useAuthStore();
   const navigate = useNavigate();
@@ -72,15 +73,17 @@ const Login = () => {
       const result = await login(formData);
 
       if (result.approvalStatus && result.approvalStatus !== "approved") {
-        setFormState((prev) => ({ ...prev, loading: false }));
-        navigate("/pending-approval", {
-          replace: true,
+        setUserRole(result.role || "volunteer");
+        setRedirectConfig({
+          path: "/pending-approval",
           state: { status: result.approvalStatus },
         });
+        setFormState((prev) => ({ ...prev, loading: false, success: true }));
         return;
       }
 
       if (result.success) {
+        setRedirectConfig(null);
         setUserRole(result.role || "volunteer");
         setFormState((prev) => ({ ...prev, loading: false, success: true }));
       } else {
@@ -97,7 +100,13 @@ const Login = () => {
   };
 
   if (formState.success) {
-    return <WelcomeAbroad role={userRole} />;
+    return (
+      <WelcomeAbroad
+        role={userRole}
+        redirectTo={redirectConfig?.path}
+        redirectState={redirectConfig?.state}
+      />
+    );
   }
 
   return (

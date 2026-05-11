@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./SignUp.css";
 import {
   AlertCircle,
@@ -20,7 +20,6 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 const SignUp = () => {
   const { signUp, isSigningUp } = useAuthStore();
-  const navigate = useNavigate();
 
   // basic formData [fullName, email, password, role]
   const [formData, setFormData] = useState({
@@ -37,6 +36,8 @@ const SignUp = () => {
     showPassword: false,
     success: false,
   });
+
+  const [redirectConfig, setRedirectConfig] = useState(null);
 
   // additional formData for volunteer
   const [volunteerFormData, setVolunteerFormData] = useState({
@@ -172,14 +173,15 @@ const SignUp = () => {
 
       if (result.success) {
         if (result.approvalStatus && result.approvalStatus !== "approved") {
-          setFormState((prev) => ({ ...prev, loading: false }));
-          navigate("/pending-approval", {
-            replace: true,
+          setRedirectConfig({
+            path: "/pending-approval",
             state: { status: result.approvalStatus },
           });
+          setFormState((prev) => ({ ...prev, loading: false, success: true }));
           return;
         }
 
+        setRedirectConfig(null);
         setFormState((prev) => ({ ...prev, loading: false, success: true }));
       } else {
         setFormState((prev) => ({
@@ -197,7 +199,13 @@ const SignUp = () => {
   // after hitting submit button and succesfully signup,
   // before directing to user's dashboard, render Welcome Abroad for 2.5 secs
   if (formState.success) {
-    return <WelcomeAbroad role={formData.role} />;
+    return (
+      <WelcomeAbroad
+        role={formData.role}
+        redirectTo={redirectConfig?.path}
+        redirectState={redirectConfig?.state}
+      />
+    );
   }
 
   return (
