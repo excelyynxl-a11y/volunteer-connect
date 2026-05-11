@@ -13,6 +13,7 @@ import {
 import Badge from "../../components/Badge";
 import WelcomeAbroad from "./WelcomeAbroad";
 import { validateEmail } from "../../lib/utils";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -29,8 +30,7 @@ const Login = () => {
 
   const [userRole, setUserRole] = useState("volunteer");
 
-  // TODO: import login, isLoggingIn from useAuthStore
-  const isLoggingIn = formState.loading;
+  const { login, isLoggingIn } = useAuthStore();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -68,9 +68,7 @@ const Login = () => {
     if (isValid) {
       setFormState((prev) => ({ ...prev, loading: true }));
 
-      // TODO: const result = await login(formData)
-      // TODO: chankao SingUp.jsx de handleSubmit
-      const result = { success: true, role: "volunteer" };
+      const result = await login(formData);
 
       if (result.success) {
         setUserRole(result.role || "volunteer");
