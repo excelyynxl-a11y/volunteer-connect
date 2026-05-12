@@ -7,6 +7,38 @@ export function formatMessageTime(date) {
     });
 }
 
+export function formatApprovalStatus(status) {
+    if (!status) {
+        return 'Unknown';
+    }
+
+    return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+export function formatDate(dateValue) {
+    if (!dateValue) {
+        return 'Date unavailable';
+    }
+
+    return new Date(dateValue).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+}
+
+export function getInitials(name) {
+    if (!name) {
+        return 'VC';
+    }
+
+    return name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((word) => word[0].toUpperCase())
+        .join('');
+}
 
 export const validateEmail = (email) => {
     if (!email.trim()) {

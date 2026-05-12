@@ -7,37 +7,38 @@ import OrganisationDashboard from "./pages/Organisation/OrganisationDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import Pending from "./pages/Auth/Pending";
+import VolunteerProfile from './pages/Volunteer/VolunteerProfile'
+import EditProfile from './pages/Volunteer/EditProfile'
 
 const App = () => {
   const location = useLocation();
   const hideNavbar = ["/login", "/sign-up"].includes(location.pathname);
 
   return (
-    <div>
-      {/* <Navbar /> */}
+    <div className="app-shell">
       <Routes>
         {/* landing page route */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path='/' element={<LandingPage />} />
 
         {/* authentication and account creation route */}
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
+        <Route path='/sign-up' element={<SignUp />} />
+        <Route path='/login' element={<Login />} />
         <Route path="/pending-approval" element={<Pending />} />
 
         {/* volunteer route */}
-        <Route path="/volunteer-dashboard" element={<VolunteerDashboard />} />
+        <Route path='/volunteer-dashboard' element={<VolunteerDashboard />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/volunteer-profile" element={<VolunteerProfile />} />
 
         {/* organisation route */}
-        <Route
-          path="/organisation-dashboard"
-          element={<OrganisationDashboard />}
-        />
+        <Route path='/organisation-dashboard' element={<OrganisationDashboard />} />
 
         {/* admin route */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
         {/* catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
       </Routes>
     </div>
   );
