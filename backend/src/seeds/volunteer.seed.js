@@ -29,12 +29,7 @@ const volunteers = [
         preference: "available",
       },
     ],
-    resume: {
-      url: "https://res.cloudinary.com/demo/raw/upload/v1710000000/resumes/alicia-resume.pdf",
-      publicId: "resumes/alicia-resume",
-      originalName: "alicia-resume.pdf",
-      uploadedAt: new Date(),
-    },
+    resume: "",
     approvalStatus: "approved",
   },
   {
@@ -60,12 +55,7 @@ const volunteers = [
         preference: "preferred",
       },
     ],
-    resume: {
-      url: "https://res.cloudinary.com/demo/raw/upload/v1710000000/resumes/brandon-resume.pdf",
-      publicId: "resumes/brandon-resume",
-      originalName: "brandon-resume.pdf",
-      uploadedAt: new Date(),
-    },
+    resume: "",
     approvalStatus: "pending",
   },
   {
@@ -91,12 +81,7 @@ const volunteers = [
         preference: "preferred",
       },
     ],
-    resume: {
-      url: "",
-      publicId: "",
-      originalName: "",
-      uploadedAt: null,
-    },
+    resume: "",
     approvalStatus: "approved",
   },
 ];

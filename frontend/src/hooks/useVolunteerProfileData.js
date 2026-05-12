@@ -26,12 +26,7 @@ export function useVolunteerProfileData() {
     biodata: '',
     skills: [],
     availability: [],
-    resume: {
-      url: '',
-      publicId: '',
-      originalName: '',
-      uploadedAt: null,
-    },
+    resume: '',
     approvalStatus: '',
   })
   const [participationHistory, setParticipationHistory] = useState([])
@@ -56,12 +51,7 @@ export function useVolunteerProfileData() {
           biodata: '',
           skills: [],
           availability: [],
-          resume: {
-            url: '',
-            publicId: '',
-            originalName: '',
-            uploadedAt: null,
-          },
+          resume: typeof profile.resume === 'string' ? profile.resume : '',
           approvalStatus: '',
         })
 

@@ -59,31 +59,6 @@ const availabilitySlotSchema = new mongoose.Schema(
   { _id: false },
 );
 
-const resumeSchema = new mongoose.Schema(
-  {
-    url: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    publicId: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    originalName: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    uploadedAt: {
-      type: Date,
-      default: null,
-    },
-  },
-  { _id: false },
-);
-
 const Volunteer = User.discriminator(
   "volunteer",
   new mongoose.Schema({
@@ -121,8 +96,9 @@ const Volunteer = User.discriminator(
     },
 
     resume: {
-      type: resumeSchema,
-      default: () => ({}),
+      type: String,
+      default: "",
+      trim: true,
     },
 
     approvalStatus: {
