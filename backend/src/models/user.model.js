@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
     avatar: { type: String, default: "" },
   },
   baseOptions,
@@ -30,11 +35,6 @@ const Volunteer = User.discriminator(
     },
     resume: { type: String },
     biodata: { type: String },
-    approvalStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
   }),
 );
 
@@ -43,11 +43,6 @@ const Organisation = User.discriminator(
   "organisation",
   new mongoose.Schema({
     biodata: { type: String },
-    approvalStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
   }),
 );
 

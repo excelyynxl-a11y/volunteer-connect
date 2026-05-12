@@ -1,0 +1,124 @@
+.landing-page {
+  min-height: 100vh;
+  background: #f5f1eb;
+  color: #000000;
+  font-family: 'Urbanist', Arial, sans-serif;
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+.page-shell {
+  max-width: 1420px;
+  margin: 0 auto;
+}
+
+/* Shared section-header across Hero, AboutUs, HowItWork */
+.section-header {
+  max-width: 860px;
+  margin: 0 auto 68px;
+  text-align: center;
+}
+
+.section-header h2 {
+  margin: 20px 0 0;
+  color: #2c5f4f;
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.18;
+}
+
+/* Shared eyebrow style */
+.eyebrow {
+  color: #d4a456;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Shared btn styles used across sections */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  min-width: 224px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 164, 86, 0.2);
+}
+
+.btn.primary {
+  background: #2c5f4f;
+  color: #ffffff;
+  border: 2px solid #2c5f4f;
+}
+
+.btn.secondary {
+  background: transparent;
+  color: #2c5f4f;
+  border: 2px solid #2c5f4f;
+}
+
+.btn.outlined {
+  color: #ffffff;
+  background: transparent;
+  border: 2px solid #ffffff;
+}
+
+/* Shared slide-in animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Hero page-load animations */
+.hero-fade-in .eyebrow {
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.hero-fade-in h2 {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 0.4s;
+}
+
+.hero-fade-in p {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+  animation-delay: 0.6s;
+}
+
+/* Card scroll-triggered animations */
+.animate-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
