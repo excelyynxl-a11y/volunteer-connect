@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import './Header.css'
 import { landingPageNavItems } from '../../lib/data'
+import Badge from '../../components/Badge'
 
 const Header = () => {
 
@@ -23,11 +24,11 @@ const Header = () => {
 
       {/* TODO: insert Badge component after merging to team/team-3 branch*/}
       <Link to="/" className="site-brand" aria-label="VolunteerConnect home">
-        {/* <Badge
+        <Badge
             icon="V"
             name="VolunteerConnect"
             subtitle="COMMUNITY PLATFORM"
-        /> */}
+        />
 
       </Link>
 
