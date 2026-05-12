@@ -27,18 +27,7 @@ export function formatDate(dateValue) {
     });
 }
 
-export function getInitials(name) {
-    if (!name) {
-        return 'VC';
-    }
 
-    return name
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((word) => word[0].toUpperCase())
-        .join('');
-}
 
 export const validateEmail = (email) => {
     if (!email.trim()) {
@@ -75,11 +64,15 @@ export const validatePassword = (password) => {
     };
 }
 
-export const getInitials = (name) => {
+export function getInitials(name) {
+    if (!name) {
+        return 'VC';
+    }
+
     return name
-        .split(" ")
-        .map((word) => word.charAt(0))
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((word) => word[0].toUpperCase())
+        .join('');
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import SignUp from "./pages/Auth/SignUp";
@@ -9,11 +9,27 @@ import Login from "./pages/Auth/Login";
 import Pending from "./pages/Auth/Pending";
 import VolunteerProfile from './pages/Volunteer/VolunteerProfile'
 import EditProfile from './pages/Volunteer/EditProfile'
+import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
   const location = useLocation();
   const hideNavbar = ["/login", "/sign-up"].includes(location.pathname);
 
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="app-shell">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="app-shell">
       <Routes>
