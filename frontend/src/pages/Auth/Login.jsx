@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import {
   AlertCircle,
@@ -13,6 +13,7 @@ import {
 import Badge from "../../components/Badge";
 import WelcomeAbroad from "./WelcomeAbroad";
 import { validateEmail } from "../../lib/utils";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -28,9 +29,10 @@ const Login = () => {
   });
 
   const [userRole, setUserRole] = useState("volunteer");
+  const [redirectConfig, setRedirectConfig] = useState(null);
 
-  // TODO: import signIn, isSigningIn from useAuthStore
-  const isSigningIn = formState.loading;
+  const { login, isLoggingIn } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -68,10 +70,20 @@ const Login = () => {
     if (isValid) {
       setFormState((prev) => ({ ...prev, loading: true }));
 
-      // TODO: const result = await signIn(formData)
-      const result = { success: true, role: "volunteer" };
+      const result = await login(formData);
+
+      if (result.approvalStatus && result.approvalStatus !== "approved") {
+        setUserRole(result.role || "volunteer");
+        setRedirectConfig({
+          path: "/pending-approval",
+          state: { status: result.approvalStatus },
+        });
+        setFormState((prev) => ({ ...prev, loading: false, success: true }));
+        return;
+      }
 
       if (result.success) {
+        setRedirectConfig(null);
         setUserRole(result.role || "volunteer");
         setFormState((prev) => ({ ...prev, loading: false, success: true }));
       } else {
@@ -88,7 +100,13 @@ const Login = () => {
   };
 
   if (formState.success) {
-    return <WelcomeAbroad role={userRole} />;
+    return (
+      <WelcomeAbroad
+        role={userRole}
+        redirectTo={redirectConfig?.path}
+        redirectState={redirectConfig?.state}
+      />
+    );
   }
 
   return (
@@ -194,9 +212,9 @@ const Login = () => {
             <button
               type="submit"
               className="login-submit"
-              disabled={isSigningIn}
+              disabled={isLoggingIn}
             >
-              {isSigningIn ? (
+              {isLoggingIn ? (
                 <>
                   <Loader2 className="login-submit-loader" />
                   Loading...
