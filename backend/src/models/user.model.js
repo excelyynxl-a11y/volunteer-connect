@@ -25,6 +25,65 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model("User", userSchema);
 
 // Volunteer Schema (Only fields specific to Volunteers)
+const availabilitySlotSchema = new mongoose.Schema(
+  {
+    dayOfWeek: {
+      type: String,
+      enum: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      required: true,
+    },
+    startTime: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    endTime: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    preference: {
+      type: String,
+      enum: ["available", "preferred"],
+      default: "available",
+    },
+  },
+  { _id: false },
+);
+
+const resumeSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    publicId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    originalName: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    uploadedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  { _id: false },
+);
+
 const Volunteer = User.discriminator(
   "volunteer",
   new mongoose.Schema({
@@ -33,8 +92,44 @@ const Volunteer = User.discriminator(
       enum: ["21-30", "31-40", "41-50", "51-60", "60+"],
       required: true,
     },
-    resume: { type: String },
-    biodata: { type: String },
+
+    biodata: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 1000,
+    },
+
+    skills: {
+      type: [
+        {
+          type: String,
+          trim: true,
+          maxlength: 50,
+        },
+      ],
+      default: [],
+      validate: {
+        validator: (skills) => skills.length <= 20,
+        message: "A volunteer can have at most 20 skills",
+      },
+    },
+
+    availability: {
+      type: [availabilitySlotSchema],
+      default: [],
+    },
+
+    resume: {
+      type: resumeSchema,
+      default: () => ({}),
+    },
+
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
   }),
 );
 
