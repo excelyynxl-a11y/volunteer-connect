@@ -2,14 +2,20 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { axiosInstance } from '../lib/axios'
 import { formatDate } from '../lib/utils'
+import { useAuthStore } from '../store/useAuthStore'
 
-// Fallback volunteer id used when the profile route has no query parameter
-const DEFAULT_VOLUNTEER_ID = '6a02922bde9e47152201b5a2'
+
 
 export function useVolunteerProfileData() {
   // Route-derived identifiers
   const [searchParams] = useSearchParams()
-  const volunteerId = searchParams.get('id') || DEFAULT_VOLUNTEER_ID
+  const authUser = useAuthStore((state) => state.authUser)
+
+  const routeVolunteerId = searchParams.get('id')
+  const authenticatedVolunteerId =
+    authUser?.role === 'volunteer' ? authUser?._id || authUser?.id : ''
+
+  const volunteerId = routeVolunteerId || authenticatedVolunteerId || ''
 
   // Local hook state
   const [profileData, setProfileData] = useState({
@@ -40,6 +46,30 @@ export function useVolunteerProfileData() {
       // Reset loading state before each request cycle
       setIsLoading(true)
       setLoadError('')
+      
+      if (!volunteerId) {
+        setProfileData({
+          fullName: '',
+          email: '',
+          ageGroup: '',
+          avatar: '',
+          biodata: '',
+          skills: [],
+          availability: [],
+          resume: {
+            url: '',
+            publicId: '',
+            originalName: '',
+            uploadedAt: null,
+          },
+          approvalStatus: '',
+        })
+
+        setParticipationHistory([])
+        setLoadError('Unable to load volunteer profile because no volunteer ID is available.')
+        setIsLoading(false)
+        return
+      }
 
       // Fetch profile and past experience in parallel
       const [profileResult, historyResult] = await Promise.allSettled([
