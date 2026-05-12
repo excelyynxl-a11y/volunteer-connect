@@ -280,6 +280,14 @@
 }
 
 .login-signup-prompt a {
+  color: #d9aa55;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.login-signup-prompt a:hover {
   color: #2c614f;
 }
 
