@@ -10,6 +10,9 @@ import Pending from "./pages/Auth/Pending";
 import VolunteerProfile from './pages/Volunteer/VolunteerProfile'
 import EditProfile from './pages/Volunteer/EditProfile'
 import { useAuthStore } from "./store/useAuthStore";
+import { Smile } from 'lucide-react'
+import EditOrganisationProfile from './pages/Organisation/EditOrganisationProfile'
+import Navbar from './components/Navbar';
 
 const App = () => {
   const location = useLocation();
@@ -47,7 +50,8 @@ const App = () => {
         <Route path="/volunteer-profile" element={<VolunteerProfile />} />
 
         {/* organisation route */}
-        <Route path='/organisation-dashboard' element={<OrganisationDashboard />} />
+        <Route path='/organisation-dashboard' element={<OrganisationDashboard />}/>
+        <Route path='/edit-organisation-profile' element={<EditOrganisationProfile />} />
 
         {/* admin route */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
