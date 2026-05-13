@@ -30,7 +30,9 @@
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 100;
-  transition: width 0.3s ease, padding 0.3s ease;
+  transition:
+    width 0.3s ease,
+    padding 0.3s ease;
 }
 
 .admin-sidebar.collapsed {
@@ -66,7 +68,9 @@
 .admin-sidebar-brand .badge {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.15);
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .admin-sidebar-brand .badge-mark {
@@ -121,7 +125,10 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -219,7 +226,9 @@
   border-radius: 14px;
   background: #ffffff;
   border: 1px solid #e8ddd0;
-  transition: transform 0.15s, box-shadow 0.2s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.2s;
 }
 
 .admin-stat-card:hover {
@@ -282,7 +291,9 @@
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .admin-table-search::placeholder {
@@ -308,7 +319,9 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    transform 0.15s;
 }
 
 .admin-table-btn:hover {
@@ -366,7 +379,10 @@
   background: transparent;
   color: #6b7280;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
 }
 
 .admin-table-actions button:hover {
@@ -508,7 +524,10 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
 }
 
 .admin-profile-edit-btn:hover {
@@ -551,6 +570,20 @@
 .admin-volunteer-card-list {
   display: flex;
   flex-direction: column;
+}
+
+/* ── Organisation list (scrollable) ── */
+
+.admin-organisation-card-list {
+  --organisation-row-height: 72px;
+  max-height: calc(var(--organisation-row-height) * 7);
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+.admin-organisation-card-list .admin-volunteer-card {
+  height: var(--organisation-row-height);
+  box-sizing: border-box;
 }
 
 .admin-volunteer-card {
@@ -624,7 +657,10 @@
   color: #6b7280;
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
 }
 
 .admin-volunteer-card-manage:hover {
@@ -667,7 +703,9 @@
   font-size: 14px;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   appearance: auto;
 }
 
@@ -693,7 +731,10 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
 .admin-table-sort-btn:hover {
@@ -718,7 +759,10 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
 }
 
 .admin-table-clear-btn:hover {
@@ -778,7 +822,9 @@
   background: transparent;
   color: #9a8268;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .admin-modal-close:hover {
@@ -812,7 +858,9 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
+  transition:
+    opacity 0.2s,
+    transform 0.15s;
 }
 
 .admin-modal-approve-btn {
