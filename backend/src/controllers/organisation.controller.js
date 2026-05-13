@@ -1,26 +1,22 @@
-import { User } from "../models/user.model.js";
+import { User,Organisation } from "../models/user.model.js";
 
 export const updateOrgProfile = async (req, res) => {
   try {
+    // Use 'biodata' to match your model and frontend state
     const { name, biodata, categories, previousEvents } = req.body;
-
-    const userId = req.user._id;
-    const updatedOrg = await User.findByIdAndUpdate(
-      userId,
+    
+    const updatedOrg = await Organisation.findByIdAndUpdate(
+      req.user._id,
       {
         $set: {
           name,
-          aboutUs: biodata, // Map frontend 'biodata' to backend 'aboutUs'
+          biodata, // This must match the key in your User.discriminator
           categories,
           previousEvents
         }
       },
-      { new: true, runValidators: true }
+      { new: true }
     );
-
-    if (!updatedOrg) {
-      return res.status(404).json({ message: "Organisation not found" });
-    }
 
     res.status(200).json(updatedOrg);
   } catch (error) {

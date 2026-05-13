@@ -31,7 +31,7 @@ const EditOrganisationProfile = () => {
 
             if (response.status === 200) {
                 // Update global state so the dashboard reflects changes immediately
-                setAuthUser(response.data.user); 
+                setAuthUser(response.data); 
                 alert("Profile Updated Successfully");
                 navigate('/organisation-dashboard');
             }
