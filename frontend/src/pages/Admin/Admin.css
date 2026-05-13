@@ -572,20 +572,6 @@
   flex-direction: column;
 }
 
-/* ── Organisation list (scrollable) ── */
-
-.admin-organisation-card-list {
-  --organisation-row-height: 72px;
-  max-height: calc(var(--organisation-row-height) * 7);
-  overflow-y: auto;
-  padding-bottom: 0;
-}
-
-.admin-organisation-card-list .admin-volunteer-card {
-  height: var(--organisation-row-height);
-  box-sizing: border-box;
-}
-
 .admin-volunteer-card {
   display: flex;
   align-items: center;
