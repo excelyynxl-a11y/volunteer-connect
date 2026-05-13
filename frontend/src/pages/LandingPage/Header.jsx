@@ -21,6 +21,8 @@ const Header = () => {
 
   return (
     <header className="site-navbar">
+
+      {/* TODO: insert Badge component after merging to team/team-3 branch*/}
       <Link to="/" className="site-brand" aria-label="VolunteerConnect home">
         <Badge
             icon="V"

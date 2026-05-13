@@ -1,11 +1,11 @@
 import express from "express";
-import { updateOrgProfile, getOrgPublicProfile } from "../controllers/organisation.controller.js";
-import {protectRoute} from "../middlewares/auth.middleware.js"
+import { deleteOrganisation, getAllOrganisations, getOrganisationById } from "../controllers/organisation.controller.js";
+import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/:id", getOrgPublicProfile)
-
-router.put("/profile", protectRoute, updateOrgProfile)
+router.get("/", getAllOrganisations);
+router.get("/:id", getOrganisationById);
+router.delete("/:id", protectRoute, adminOnly, deleteOrganisation);
 
 export default router;
