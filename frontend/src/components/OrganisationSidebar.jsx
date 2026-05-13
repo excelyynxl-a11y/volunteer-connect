@@ -1,6 +1,7 @@
 import React from 'react';
 import Badge from './Badge';
 import { LayoutDashboard, Megaphone, FileText, LogOut } from 'lucide-react';
+import './OrganisationSidebar.css';
 
 const OrganisationSidebar = ({
     icon,
