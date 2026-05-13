@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import SignUp from "./pages/Auth/SignUp";
 import VolunteerDashboard from "./pages/Volunteer/VolunteerDashboard";
 import OrganisationDashboard from "./pages/Organisation/OrganisationDashboard";
+import EditOrganisationProfile from "./pages/Organisation/EditOrganisationProfile";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import Pending from "./pages/Auth/Pending";
@@ -48,6 +49,7 @@ const App = () => {
 
         {/* organisation route */}
         <Route path='/organisation-dashboard' element={<OrganisationDashboard />} />
+        <Route path='/edit-organisation-profile' element={<EditOrganisationProfile />} />
 
         {/* admin route */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
