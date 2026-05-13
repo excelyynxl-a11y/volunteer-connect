@@ -169,7 +169,7 @@ const SignUp = () => {
 
       const result = await signUp(payload);
 
-      console.log("Payload:", payload);
+      console.log("Payload:", Object.fromEntries(payload));
 
       if (result.success) {
         if (result.approvalStatus && result.approvalStatus !== "approved") {
