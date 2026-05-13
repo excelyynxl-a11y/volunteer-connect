@@ -1,21 +1,38 @@
-import React from 'react'
-import AdminSidebar from '../../components/AdminSidebar'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import AdminSidebar from "../../components/AdminSidebar";
+import { useAdminStore } from "../../store/useAdminStore";
+import AdminHomepage from "./AdminHomepage";
+import ManageVolunteer from "./ManageVolunteer";
+import ManageOrganisation from "./ManageOrganisation";
+import ManageOpportunity from "./ManageOpportunity";
+import ManageReport from "./ManageReport";
+import AdminAnalytics from "./AdminAnalytics";
+import AdminProfile from "./AdminProfile";
+import "./Admin.css";
 
 const AdminDashboard = () => {
+  const { sidebarCollapsed } = useAdminStore();
+
   return (
-    <div>
-
-      {/* admin sidebar */}
-      <AdminSidebar 
-        adminName="Admin 1"
-      />
-
-      <div>
-        {/* Whatever that is clicked on admin sidebar will be rendered here. By default it is the homepage */}
-        
-      </div>
+    <div className="admin-dashboard">
+      <AdminSidebar />
+      <main
+        className={`admin-content${sidebarCollapsed ? " sidebar-collapsed" : ""}`}
+      >
+        <Routes>
+          <Route path="/" element={<AdminHomepage />} />
+          <Route path="manage-volunteer" element={<ManageVolunteer />} />
+          <Route path="manage-organisation" element={<ManageOrganisation />} />
+          <Route path="manage-opportunity" element={<ManageOpportunity />} />
+          <Route path="manage-report" element={<ManageReport />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />
+        </Routes>
+      </main>
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;
