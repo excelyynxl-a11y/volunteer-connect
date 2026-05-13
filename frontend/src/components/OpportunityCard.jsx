@@ -1,4 +1,5 @@
 import React from 'react';
+import './OpportunityCard.css';
 
 const OpportunityCard = ({
     title,
