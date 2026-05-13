@@ -113,25 +113,7 @@ const Volunteer = User.discriminator(
 const Organisation = User.discriminator(
   "organisation",
   new mongoose.Schema({
-    aboutUs: { type: String, default: "" },
-
-    // Array of strings for: Community, Education, etc.
-    categories: [{ type: String }],
-
-    // Array of objects for the "Previous Events" section
-    previousEvents: [
-      {
-        year: { type: String },
-        title: { type: String },
-        description: { type: String },
-      },
-    ],
-    
-    approvalStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
+    biodata: { type: String },
   }),
 );
 
