@@ -9,3 +9,11 @@ export const getOpportunityById = (req, res) => {
 export const deleteOpportunity = (req, res) => {
     // TODO
 }
+
+export const updateOpportunity = (req, res) => {
+    // TODO
+}
+
+export const createOpportunity = (req, res) => {
+    // TODO
+}

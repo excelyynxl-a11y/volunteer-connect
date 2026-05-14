@@ -64,3 +64,19 @@ export const deleteApplication = async (req, res) => {
         res.status(500).json({ message: err.message }); 
     }
 }
+
+export const createApplication = (req, res) => {
+    // TODO
+}
+
+export const approveApplication = async (req, res) => {
+    // TODO
+}
+
+export const rejectApplication = async (req, res) => {
+    // TODO
+}
+
+export const completeApplication = async (req, res) => {
+    // TODO
+}
