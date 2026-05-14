@@ -3,6 +3,13 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 
 export const useOrganisationStore = create((set, get) => ({
+
+    currentTab: "homepage",
+    sidebarCollapsed: false,
+
+    setCurrentTab: (tab) => set({ currentTab: tab }),
+    toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+
     activeOpportunities: [],
     isActiveOpportunitiesLoading: false,
 

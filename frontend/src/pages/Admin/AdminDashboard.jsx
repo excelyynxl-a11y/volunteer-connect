@@ -1,9 +1,28 @@
-import React from 'react'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import AdminSidebar from "../../components/AdminSidebar";
+import { useAdminStore } from "../../store/useAdminStore";
+import AdminHomepage from "./AdminHomepage";
+import AdminProfile from "./AdminProfile";
+import "./Admin.css";
 
 const AdminDashboard = () => {
-  return (
-    <div>AdminDashboard</div>
-  )
-}
+  const { sidebarCollapsed } = useAdminStore();
 
-export default AdminDashboard
+  return (
+    <div className="admin-dashboard">
+      <AdminSidebar />
+      <main
+        className={`admin-content${sidebarCollapsed ? " sidebar-collapsed" : ""}`}
+      >
+        <Routes>
+          <Route path="/" element={<AdminHomepage />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard;

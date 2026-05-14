@@ -33,7 +33,7 @@ const EditOrganisationProfile = () => {
                 // Update global state so the dashboard reflects changes immediately
                 setAuthUser(response.data); 
                 alert("Profile Updated Successfully");
-                navigate('/organisation-dashboard');
+                navigate('/organisation-dashboard/profile');
             }
         } catch (error) {
             console.error("Update failed:", error.response?.data || error.message);
