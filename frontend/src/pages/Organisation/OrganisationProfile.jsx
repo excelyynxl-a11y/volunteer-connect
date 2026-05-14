@@ -5,7 +5,6 @@ import { getInitials } from '../../lib/utils.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useOrganisationStore } from '../../store/useOrganisationStore.js';
 import OpportunityCard from '../../components/OpportunityCard.jsx';
-import './OrganisationProfile.css'
 
 const OrganisationProfile = () => {
   const { authUser } = useAuthStore();
@@ -15,7 +14,6 @@ const OrganisationProfile = () => {
     getActiveOpportunities,
     getClosedOpportunities,
   } = useOrganisationStore();
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,26 +22,26 @@ const OrganisationProfile = () => {
   }, [authUser?._id, getActiveOpportunities, getClosedOpportunities]);
 
   return (
-    <div className="org-container">
+    <div className="org-profile-page">
 
-      <div className="org-main">
-        {/* search bar */}
-        <header className="org-header">
-          <div className="search-bar">
+      <div className="org-profile-main">
+
+        <header className="org-profile-header">
+          <div className="org-profile-search">
             <Search size={18} />
             <input type="text" placeholder="Search your postings..." />
           </div>
-          <div className="header-actions">
-            <div className="notification-bell">
+          <div className="org-profile-header-actions">
+            <div className="org-profile-notification">
               <Bell size={20} />
-              <span className="bell-dot"></span>
+              <span className="org-profile-bell-dot"></span>
             </div>
           </div>
         </header>
         
-        <section className="welcome-banner">
-          <div className="banner-text">
-            <span className="eyebrow-red">
+        <section className="org-profile-banner">
+          <div className="org-profile-banner-text">
+            <span className="org-profile-eyebrow">
               ORGANISATION CONTROL PANEL
             </span>
             <h1>
@@ -56,24 +54,24 @@ const OrganisationProfile = () => {
               </b>. Your community impact is growing.
             </p>
           </div>
-          <button className="btn-primary-org"><Plus size={18} />
+          <button className="org-profile-primary-btn"><Plus size={18} />
             Create New Posting
           </button>
         </section>
 
-        <section className="organisation-profile-section">
+        <section className="org-profile-section">
           {/* Header Card with Edit Button */}
-          <div className="profile-card profile-header-card">
-            <div className="profile-header-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <div className="profile-avatar">{getInitials(authUser.name)}</div>
+          <div className="org-profile-card org-profile-header-card">
+            <div className="org-profile-header-inner">
+              <div className="org-profile-title-row">
+                <div className="org-profile-avatar">{getInitials(authUser.name)}</div>
                 <div>
-                  <span className="profile-eyebrow"><b>Organisation Profile</b></span>
+                  <span className="org-profile-eyebrow"><b>Organisation Profile</b></span>
                   <h2>{authUser.name}</h2>
                 </div>
               </div>
               <button
-                className="btn-secondary-org"
+                className="org-profile-secondary-btn"
                 onClick={() => {
                   navigate("/organisation-dashboard/edit-organisation-profile");
                 }}
@@ -83,21 +81,21 @@ const OrganisationProfile = () => {
           </div>
 
           {/* About Us */}
-          <div className="profile-card">
-            <div className="card-accent" />
+          <div className="org-profile-card">
+            <div className="org-profile-card-accent" />
             <h4><b>About Us</b></h4>
             <p>{authUser.biodata || "No description provided yet."}</p>
           </div>
 
           {/* Previous Events */}
-          <div className="profile-card events-card">
-            <div className="card-accent" />
+          <div className="org-profile-card org-profile-events-card">
+            <div className="org-profile-card-accent" />
               <h4>
                 <b>
                   Previous Events
                 </b>
               </h4>
-            <div className="events-list">
+            <div className="org-profile-events-list">
               {closedOpportunities && closedOpportunities.length > 0 ? (
                 closedOpportunities.map((opp) => (
                   <OpportunityCard 
@@ -108,25 +106,24 @@ const OrganisationProfile = () => {
                     timeFrame={opp.timeFrame}
                     organisationId={opp.organisationId}
                     status={opp.status}
-                    showActionButtons={true}
+                    showActionButtons={false}
                   />
                 ))
               ) : (
-                <p className="no-data-text">No previous events listed.</p>
+                <p className="org-profile-empty-text">No previous events listed.</p>
               )}
             </div>
           </div>
         </section>
-
-        {/* Active Opportunity Section */}
-        <div className="main-table-card full-width">
-          <div className="card-header">
+        
+        <div className="org-profile-postings-card">
+          <div className="org-profile-card-header">
             <h3>Active Opportunity Postings</h3>
-            <span className="count-badge">{activeOpportunities.length} Published</span>
+            <span className="org-profile-count-badge">{activeOpportunities.length} Published</span>
           </div>
           
           {/* opportunities listing */}
-          <div className="opportunity-list">
+          <div className="org-profile-opportunity-list">
             {activeOpportunities.map((opp) => (
               <OpportunityCard 
                 key={opp._id || opp.title} 
@@ -139,10 +136,10 @@ const OrganisationProfile = () => {
                 showActionButtons={true}
               />
             ))}
-            {activeOpportunities.length === 0 && <p className="empty-msg">No active postings found.</p>}
+            {activeOpportunities.length === 0 && <p className="org-profile-empty-text">No active postings found.</p>}
           </div>
 
-          <button className="view-all-link">Manage all postings</button>
+          <button className="org-profile-view-all-link">Manage all postings</button>
         </div>
 
       </div>
