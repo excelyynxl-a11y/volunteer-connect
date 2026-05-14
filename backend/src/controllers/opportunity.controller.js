@@ -1,59 +1,8 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/opportunity.model.js";
 
-
-export const getAllOpportunities = async (req, res) => {
-  try {
-    const opportunities = await Opportunity.find();
-
-    res.status(200).json({
-      success: true,
-      count: opportunities.length,
-      data: opportunities,
-    });
-  } catch (err) {
-    console.log("Error in getAllOpportunities controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
-    });
-  }
-};
-
-export const getOpportunityById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid opportunity ID",
-      });
-    }
-
-    const opportunity = await Opportunity.findById(id);
-
-    if (!opportunity) {
-      return res.status(404).json({
-        success: false,
-        message: "Opportunity not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: opportunity,
-    });
-  } catch (err) {
-    console.log("Error in getOpportunityById controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
-    });
-  }
-};
-
+// TODO: update createOpportunity() after verifying with client what are required in createOpportunity
 export const createOpportunity = async (req, res) => {
-
-  // TODO: update createOpportunity() after verifying with client what are required in createOpportunity
 
   try {
     const { title, details, maxVolunteers, fixedDate, timeFrame } = req.body;
@@ -162,9 +111,57 @@ export const createOpportunity = async (req, res) => {
   }
 };
 
-export const updateOpportunity = async (req, res) => {
+export const getAllOpportunities = async (req, res) => {
+  try {
+    const opportunities = await Opportunity.find();
 
-  // TODO: update createOpportunity() after verifying with client what are required in createOpportunity
+    res.status(200).json({
+      success: true,
+      count: opportunities.length,
+      data: opportunities,
+    });
+  } catch (err) {
+    console.log("Error in getAllOpportunities controller: ", err.message);
+    res.status(500).json({ 
+      message: err.message 
+    });
+  }
+};
+
+export const getOpportunityById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid opportunity ID",
+      });
+    }
+
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: opportunity,
+    });
+  } catch (err) {
+    console.log("Error in getOpportunityById controller: ", err.message);
+    res.status(500).json({ 
+      message: err.message 
+    });
+  }
+};
+
+// TODO: update createOpportunity() after verifying with client what are required in createOpportunity
+export const updateOpportunity = async (req, res) => {
 
   try {
     const { id } = req.params;
