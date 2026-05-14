@@ -11,15 +11,18 @@ const OrganisationProfile = () => {
   const {
     closedOpportunities,
     activeOpportunities,
+    cancelledOpportunities,
     getActiveOpportunities,
     getClosedOpportunities,
+    getCancelledOpportunities,
   } = useOrganisationStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     getActiveOpportunities(authUser?._id);
     getClosedOpportunities(authUser?._id);
-  }, [authUser?._id, getActiveOpportunities, getClosedOpportunities]);
+    getCancelledOpportunities(authUser?._id);
+  }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
 
   return (
     <div className="org-profile-page">
@@ -112,6 +115,22 @@ const OrganisationProfile = () => {
               ) : (
                 <p className="org-profile-empty-text">No previous events listed.</p>
               )}
+              {cancelledOpportunities && cancelledOpportunities.length > 0 ? (
+                cancelledOpportunities.map((opp) => (
+                  <OpportunityCard 
+                    key={opp._id || opp.title} // Always use keys in maps
+                    title={opp.title}
+                    detail={opp.detail}
+                    fixedDate={opp.fixedDate}
+                    timeFrame={opp.timeFrame}
+                    organisationId={opp.organisationId}
+                    status={opp.status}
+                    showActionButtons={false}
+                  />
+                ))
+              ) : (
+                <p className="org-profile-empty-text">No previous events listed.</p>
+              )}
             </div>
           </div>
         </section>
@@ -121,8 +140,7 @@ const OrganisationProfile = () => {
             <h3>Active Opportunity Postings</h3>
             <span className="org-profile-count-badge">{activeOpportunities.length} Published</span>
           </div>
-          
-          {/* opportunities listing */}
+
           <div className="org-profile-opportunity-list">
             {activeOpportunities.map((opp) => (
               <OpportunityCard 

@@ -52,42 +52,6 @@ const mockClosedOpportunities = [
     organisationId: "mock-organisation",
     status: "Closed",
   },
-  {
-    _id: "closed-001",
-    title: "Senior Care Companion",
-    details: "Spent the afternoon supporting seniors through conversation and activities.",
-    fixedDate: "2026-04-15",
-    timeFrame: "01:00 PM - 04:00 PM",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
-  {
-    _id: "closed-002",
-    title: "Community Garden Setup",
-    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
-    fixedDate: "2026-04-22",
-    timeFrame: "08:30 AM - 11:30 AM",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
-  {
-    _id: "closed-001",
-    title: "Senior Care Companion",
-    details: "Spent the afternoon supporting seniors through conversation and activities.",
-    fixedDate: "2026-04-15",
-    timeFrame: "01:00 PM - 04:00 PM",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
-  {
-    _id: "closed-002",
-    title: "Community Garden Setup",
-    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
-    fixedDate: "2026-04-22",
-    timeFrame: "08:30 AM - 11:30 AM",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
 ];
 
 const mockCancelledOpportunities = [
@@ -177,8 +141,6 @@ export const useOrganisationStore = create((set, get) => ({
       "activeOpportunities",
       mockActiveOpportunities,
     ),
-
-    getActiveOppotunities: async (...args) => get().getActiveOpportunities(...args),
 
     getClosedOpportunities: async () => loadMockOpportunities(
       set,

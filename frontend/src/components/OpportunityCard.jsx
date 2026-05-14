@@ -9,10 +9,12 @@ const OpportunityCard = ({
     status,
     showActionButtons
 }) => {
+  const displayStatus = status || "Active";
+  const statusClass = displayStatus.toLowerCase();
 
   return (
     <div className="event-card">
-      <div className="event-tag">{status || "Active"}</div>
+      <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
       <h5>{title}</h5>
       <p>{detail}</p>
       <div className="item-sub">
