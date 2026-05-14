@@ -5,25 +5,12 @@ import ManageVolunteerCard from "../../components/ManageVolunteerCard";
 import PreviewVolunteer from "../../components/PreviewVolunteer";
 
 // ageGroup filter
-const AGE_GROUPS = [
-  "All", 
-  "21-30", 
-  "31-40", 
-  "41-50", 
-  "51-60", 
-  "60+"
-];
+const AGE_GROUPS = ["All", "21-30", "31-40", "41-50", "51-60", "60+"];
 
 // approvalStatus filter
-const APPROVAL_STATUSES = [
-  "All", 
-  "approved", 
-  "pending", 
-  "rejected"
-];
+const APPROVAL_STATUSES = ["All", "approved", "pending", "rejected"];
 
 const ManageVolunteer = () => {
-
   // search by volunteer name or email
   const [searchTerm, setSearchTerm] = useState("");
   // filter by approvalStatus, ageGroup, createdAt
@@ -36,7 +23,7 @@ const ManageVolunteer = () => {
 
   const { getAllVolunteers } = useAdminStore();
 
-  const volunteers =  getAllVolunteers();
+  const volunteers = getAllVolunteers();
 
   // filtering functions
   const filteredVolunteers = useMemo(() => {
@@ -48,7 +35,7 @@ const ManageVolunteer = () => {
       result = result.filter(
         (v) =>
           v.name.toLowerCase().includes(term) ||
-          v.email.toLowerCase().includes(term)
+          v.email.toLowerCase().includes(term),
       );
     }
 
@@ -70,20 +57,20 @@ const ManageVolunteer = () => {
     });
 
     return result;
-  }, [searchTerm, approvalStatusFilter, ageGroupFilter, sortDirection, volunteers]);
-
+  }, [
+    searchTerm,
+    approvalStatusFilter,
+    ageGroupFilter,
+    sortDirection,
+    volunteers,
+  ]);
 
   return (
     <div className="admin-page">
-
       {/* Manage Volunteer header */}
       <div className="admin-page-header">
-        <h1>
-          Manage Volunteers
-        </h1>
-        <p>
-          View, edit, and manage all registered volunteers.
-        </p>
+        <h1>Manage Volunteers</h1>
+        <p>View, edit, and manage all registered volunteers.</p>
       </div>
 
       <div className="admin-table-wrapper">
@@ -108,7 +95,9 @@ const ManageVolunteer = () => {
           >
             {APPROVAL_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s === "All" ? "All Statuses" : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === "All"
+                  ? "All Statuses"
+                  : s.charAt(0).toUpperCase() + s.slice(1)}
               </option>
             ))}
           </select>
@@ -131,7 +120,7 @@ const ManageVolunteer = () => {
             className="admin-table-sort-btn"
             onClick={() =>
               setSortDirection((d) =>
-                d === "descending" ? "ascending" : "descending"
+                d === "descending" ? "ascending" : "descending",
               )
             }
             title={`Sort by date created (${sortDirection})`}
@@ -158,7 +147,7 @@ const ManageVolunteer = () => {
 
         {/* volunteer cards */}
         {filteredVolunteers.length > 0 ? (
-          <div className="admin-volunteer-card-list">
+          <div className="admin-volunteer-card-list admin-volunteer-scroll">
             {filteredVolunteers.map((volunteer) => (
               <ManageVolunteerCard
                 key={volunteer._id}
@@ -170,12 +159,8 @@ const ManageVolunteer = () => {
         ) : (
           <div className="admin-empty">
             <AlertCircle className="admin-empty-icon" />
-            <h3>
-              No volunteers found
-            </h3>
-            <p>
-              Try adjusting your search or filters.
-            </p>
+            <h3>No volunteers found</h3>
+            <p>Try adjusting your search or filters.</p>
           </div>
         )}
       </div>

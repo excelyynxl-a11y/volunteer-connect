@@ -120,7 +120,7 @@ const ManageOrganisation = () => {
 
         {/* organisation cards */}
         {filteredOrganisations.length > 0 ? (
-          <div className="admin-volunteer-card-list">
+          <div className="admin-volunteer-card-list admin-organisation-card-list">
             {filteredOrganisations.map((organisation) => (
               <ManageOrganisationCard
                 key={organisation._id}
