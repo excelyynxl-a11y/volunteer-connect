@@ -45,11 +45,6 @@ import React from "react";
 import Badge from "./Badge";
 import {
   Home,
-  Users,
-  Building2,
-  Lightbulb,
-  AlertCircle,
-  BarChart3,
   User,
   LogOut,
 } from "lucide-react";
@@ -81,7 +76,10 @@ const OrganisationSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+  const activeKey = location.pathname.startsWith("/organisation-dashboard/profile") ||
+    location.pathname.startsWith("/organisation-dashboard/edit-organisation-profile")
+      ? "profile"
+      : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
 
   return (
     <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
@@ -112,7 +110,7 @@ const OrganisationSidebar = () => {
             }}
             title={sidebarCollapsed ? label : undefined}
           >
-            <Icon size={20} />
+            {React.createElement(Icon, { size: 20 })}
             {!sidebarCollapsed && <span>{label}</span>}
           </button>
         ))}

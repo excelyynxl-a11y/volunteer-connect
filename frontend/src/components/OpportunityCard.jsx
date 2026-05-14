@@ -6,7 +6,6 @@ const OpportunityCard = ({
     detail,
     fixedDate,
     timeFrame,
-    organisationId,
     status,
     showActionButtons
 }) => {

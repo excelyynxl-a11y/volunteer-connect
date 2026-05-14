@@ -2,6 +2,85 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 
+const mockActiveOpportunities = [
+  {
+    _id: "active-001",
+    title: "Community Food Drive Helper",
+    details: "Support food packing, registration, and distribution for local families.",
+    fixedDate: "2026-05-20",
+    timeFrame: "09:00 AM - 02:00 PM",
+    organisationId: "mock-organisation",
+    status: "Active",
+  },
+  {
+    _id: "active-002",
+    title: "Beach Cleanup Volunteer",
+    details: "Help collect litter, sort recyclables, and document cleanup progress.",
+    fixedDate: "2026-05-24",
+    timeFrame: "08:00 AM - 12:00 PM",
+    organisationId: "mock-organisation",
+    status: "Active",
+  },
+  {
+    _id: "active-003",
+    title: "Literacy Tutor",
+    details: "Assist children with reading practice and basic writing exercises.",
+    fixedDate: "2026-05-28",
+    timeFrame: "03:00 PM - 06:00 PM",
+    organisationId: "mock-organisation",
+    status: "Active",
+  },
+];
+
+const mockClosedOpportunities = [
+  {
+    _id: "closed-001",
+    title: "Senior Care Companion",
+    details: "Spent the afternoon supporting seniors through conversation and activities.",
+    fixedDate: "2026-04-15",
+    timeFrame: "01:00 PM - 04:00 PM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
+  {
+    _id: "closed-002",
+    title: "Community Garden Setup",
+    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
+    fixedDate: "2026-04-22",
+    timeFrame: "08:30 AM - 11:30 AM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
+];
+
+const mockCancelledOpportunities = [
+  {
+    _id: "cancelled-001",
+    title: "Outdoor Health Booth",
+    details: "Cancelled due to severe weather conditions.",
+    fixedDate: "2026-05-02",
+    timeFrame: "10:00 AM - 03:00 PM",
+    organisationId: "mock-organisation",
+    status: "Cancelled",
+  },
+];
+
+const normaliseOpportunity = (opportunity) => ({
+  ...opportunity,
+  detail: opportunity.detail ?? opportunity.details ?? "",
+});
+
+const loadMockOpportunities = async (set, loadingKey, dataKey, mockData) => {
+  set({ [loadingKey]: true });
+  try {
+    const opportunities = mockData.map(normaliseOpportunity);
+    set({ [dataKey]: opportunities });
+    return opportunities;
+  } finally {
+    set({ [loadingKey]: false });
+  }
+};
+
 export const useOrganisationStore = create((set, get) => ({
 
     currentTab: "homepage",
@@ -10,26 +89,13 @@ export const useOrganisationStore = create((set, get) => ({
     setCurrentTab: (tab) => set({ currentTab: tab }),
     toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
-    // TODO: "Replace with real API calls and data structure, this mockdata is not even align with model, just for ui development purpose only"
-    activeOpportunities: [
-      { id: 1, title: "Community Food Drive Helper", location: "Kuala Lumpur", time: "Active now", initial: "CF" },
-      { id: 2, title: "Beach Cleanup Volunteer", location: "Port Dickson", time: "2 days left", initial: "BC" },
-      { id: 3, title: "Literacy Tutor", location: "Subang Jaya", time: "Ongoing", initial: "LT" },
-      { id: 4, title: "Animal Shelter Assistant", location: "Petaling Jaya", time: "Starts tomorrow", initial: "AS" },
-      { id: 5, title: "Elderly Care Companion", location: "Bangsar", time: "Urgent", initial: "EC" },
-    ],
+    activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
     isActiveOpportunitiesLoading: false,
 
-    closedOpportunities: [
-      { id: 1, title: "Community Food Drive Helper", location: "Kuala Lumpur", time: "Active now", initial: "CF" },
-      { id: 2, title: "Beach Cleanup Volunteer", location: "Port Dickson", time: "2 days left", initial: "BC" },
-      { id: 3, title: "Literacy Tutor", location: "Subang Jaya", time: "Ongoing", initial: "LT" },
-      { id: 4, title: "Animal Shelter Assistant", location: "Petaling Jaya", time: "Starts tomorrow", initial: "AS" },
-      { id: 5, title: "Elderly Care Companion", location: "Bangsar", time: "Urgent", initial: "EC" },
-    ],
+    closedOpportunities: mockClosedOpportunities.map(normaliseOpportunity),
     isClosedOpportunitiesLoading: false,
 
-    cancelledOpportunities: [],
+    cancelledOpportunities: mockCancelledOpportunities.map(normaliseOpportunity),
     isCancelledOpportunitiesLoading: false,
 
     pendingApplications: [],
@@ -44,46 +110,33 @@ export const useOrganisationStore = create((set, get) => ({
     completedApplications: [],
     isCompletedApplications: false,
 
-    getActiveOppotunities: async (userId) => {
-        set({ isActiveOpportunitiesLoading: true });
-        try {
-            const res = await axiosInstance.get(`/opportunities/active/${userId}`);
-            set({ activeOpportunities: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load active opportunities");
-        } finally {
-            set({ isActiveOpportunitiesLoading: false });
-        }
-    },
+    getActiveOpportunities: async () => loadMockOpportunities(
+      set,
+      "isActiveOpportunitiesLoading",
+      "activeOpportunities",
+      mockActiveOpportunities,
+    ),
 
-    getClosedOpportunities: async (userId) => {
-        set({ isClosedOpportunitiesLoading: true });
-        try {
-            const res = await axiosInstance.get(`/opportunities/closed/${userId}`);
-            set({ closedOpportunities: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load closed opportunities");
-        } finally {
-            set({ isClosedOpportunitiesLoading: false });
-        }
-    },
+    getActiveOppotunities: async (...args) => get().getActiveOpportunities(...args),
 
-    getCancelledOpportunities: async (userId) => {
-        set({ isCancelledOpportunitiesLoading: true });
-        try {
-            const res = await axiosInstance.get(`/opportunities/cancelled/${userId}`);
-            set({ cancelledOpportunities: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load cancelled opportunities");
-        } finally {
-            set({ isCancelledOpportunitiesLoading: false });
-        }
-    },
+    getClosedOpportunities: async () => loadMockOpportunities(
+      set,
+      "isClosedOpportunitiesLoading",
+      "closedOpportunities",
+      mockClosedOpportunities,
+    ),
+
+    getCancelledOpportunities: async () => loadMockOpportunities(
+      set,
+      "isCancelledOpportunitiesLoading",
+      "cancelledOpportunities",
+      mockCancelledOpportunities,
+    ),
 
     getPendingApplications: async (userId) => {
         set({ isPendingApplicationsLoading: true });
         try {
-            const res = await axiosInstance.get(`/applications/pending/${userId}`);
+            const res = await axiosInstance.get(`/application/pending/${userId}`);
             set({ pendingApplications: res.data });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load pending applications");
@@ -95,7 +148,7 @@ export const useOrganisationStore = create((set, get) => ({
     getApprovedApplications: async (userId) => {
         set({ isApproveApplicationsLoading: true });
         try {
-            const res = await axiosInstance.get(`/applications/approved/${userId}`);
+            const res = await axiosInstance.get(`/application/approved/${userId}`);
             set({ approvedApplications: res.data });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load approved applications");
@@ -107,7 +160,7 @@ export const useOrganisationStore = create((set, get) => ({
     getRejectedApplications: async (userId) => {
         set({ isRejectedApplications: true });
         try {
-            const res = await axiosInstance.get(`/applications/rejected/${userId}`);
+            const res = await axiosInstance.get(`/application/rejected/${userId}`);
             set({ rejectedApplications: res.data });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load rejected applications");
@@ -119,7 +172,7 @@ export const useOrganisationStore = create((set, get) => ({
     getCompletedApplications: async (userId) => {
         set({ isCompletedApplications: true });
         try {
-            const res = await axiosInstance.get(`/applications/completed/${userId}`);
+            const res = await axiosInstance.get(`/application/completed/${userId}`);
             set({ completedApplications: res.data });
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load completed applications");

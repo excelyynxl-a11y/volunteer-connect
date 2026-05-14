@@ -1,18 +1,27 @@
-import React from 'react'
-import { Link, Route, useNavigate } from 'react-router-dom';
-import { Search, Bell, Plus, Settings } from 'lucide-react'
+import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
+import { Search, Bell, Plus } from 'lucide-react'
 import { getInitials } from '../../lib/utils.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useOrganisationStore } from '../../store/useOrganisationStore.js';
 import OpportunityCard from '../../components/OpportunityCard.jsx';
-import OrganisationSidebar from '../../components/OrganisationSidebar.jsx';
 import './OrganisationProfile.css'
 
 const OrganisationProfile = () => {
   const { authUser } = useAuthStore();
-  const { closedOpportunities, activeOpportunities } = useOrganisationStore();
+  const {
+    closedOpportunities,
+    activeOpportunities,
+    getActiveOpportunities,
+    getClosedOpportunities,
+  } = useOrganisationStore();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getActiveOpportunities(authUser?._id);
+    getClosedOpportunities(authUser?._id);
+  }, [authUser?._id, getActiveOpportunities, getClosedOpportunities]);
 
   return (
     <div className="org-container">
