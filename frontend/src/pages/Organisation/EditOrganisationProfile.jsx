@@ -1,27 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Info, Save } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore.js";
-import { axiosInstance } from "../../lib/axios";
+import { useOrganisationStore } from "../../store/useOrganisationStore.js";
 import { getInitials } from "../../lib/utils.js";
 
 const EditOrganisationProfile = () => {
   const navigate = useNavigate();
-  const { authUser, setAuthUser } = useAuthStore();
+  const { authUser } = useAuthStore();
+  const { updateOrganisationProfile, isUpdatingOrganisationProfile } =
+    useOrganisationStore();
 
   const [formData, setFormData] = useState({
     name: authUser?.name || "",
     biodata: authUser?.biodata || "",
   });
-  const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    setFormData({
-      name: authUser?.name || "",
-      biodata: authUser?.biodata || "",
-    });
-  }, [authUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,27 +24,22 @@ const EditOrganisationProfile = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setIsSaving(true);
     setErrorMessage("");
 
-    try {
-      const response = await axiosInstance.put(
-        "/organisation/profile",
-        formData,
-      );
+    const result = await updateOrganisationProfile({
+      name: formData.name,
+      biodata: formData.biodata,
+    });
 
-      if (response.status === 200) {
-        setAuthUser(response.data);
-        navigate("/organisation-dashboard/profile");
-      }
-    } catch (error) {
-      console.error("Update failed:", error.response?.data || error.message);
-      setErrorMessage(
-        "Failed to update profile. Please check the details and try again.",
-      );
-    } finally {
-      setIsSaving(false);
+    if (result.success) {
+      navigate("/organisation-dashboard/profile");
+      return;
     }
+
+    setErrorMessage(
+      result.error ||
+        "Failed to update profile. Please check the details and try again.",
+    );
   };
 
   return (
@@ -79,10 +68,10 @@ const EditOrganisationProfile = () => {
               type="submit"
               form="organisation-edit-form"
               className="org-profile-primary-btn"
-              disabled={isSaving}
+              disabled={isUpdatingOrganisationProfile}
             >
               <Save size={18} />
-              {isSaving ? "Saving..." : "Save Profile"}
+              {isUpdatingOrganisationProfile ? "Saving..." : "Save Profile"}
             </button>
           </div>
         </section>

@@ -1,6 +1,7 @@
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
+import { useAuthStore } from "./useAuthStore";
 
 const mockActiveOpportunities = [
   {
@@ -33,6 +34,42 @@ const mockActiveOpportunities = [
 ];
 
 const mockClosedOpportunities = [
+  {
+    _id: "closed-001",
+    title: "Senior Care Companion",
+    details: "Spent the afternoon supporting seniors through conversation and activities.",
+    fixedDate: "2026-04-15",
+    timeFrame: "01:00 PM - 04:00 PM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
+  {
+    _id: "closed-002",
+    title: "Community Garden Setup",
+    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
+    fixedDate: "2026-04-22",
+    timeFrame: "08:30 AM - 11:30 AM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
+  {
+    _id: "closed-001",
+    title: "Senior Care Companion",
+    details: "Spent the afternoon supporting seniors through conversation and activities.",
+    fixedDate: "2026-04-15",
+    timeFrame: "01:00 PM - 04:00 PM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
+  {
+    _id: "closed-002",
+    title: "Community Garden Setup",
+    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
+    fixedDate: "2026-04-22",
+    timeFrame: "08:30 AM - 11:30 AM",
+    organisationId: "mock-organisation",
+    status: "Closed",
+  },
   {
     _id: "closed-001",
     title: "Senior Care Companion",
@@ -85,9 +122,33 @@ export const useOrganisationStore = create((set, get) => ({
 
     currentTab: "homepage",
     sidebarCollapsed: false,
+    isUpdatingOrganisationProfile: false,
 
     setCurrentTab: (tab) => set({ currentTab: tab }),
     toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+
+    updateOrganisationProfile: async (profileData) => {
+      set({ isUpdatingOrganisationProfile: true });
+      try {
+        const res = await axiosInstance.put("/organisation/profile", profileData);
+        const updatedUser = res.data?.data ?? res.data;
+
+        useAuthStore.getState().setAuthUser(updatedUser);
+        toast.success("Organisation profile updated successfully.");
+
+        return { success: true, user: updatedUser };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update organisation profile";
+
+        toast.error(message);
+        return { success: false, error: message };
+      } finally {
+        set({ isUpdatingOrganisationProfile: false });
+      }
+    },
 
     activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
     isActiveOpportunitiesLoading: false,
@@ -134,50 +195,50 @@ export const useOrganisationStore = create((set, get) => ({
     ),
 
     getPendingApplications: async (userId) => {
-        set({ isPendingApplicationsLoading: true });
-        try {
-            const res = await axiosInstance.get(`/application/pending/${userId}`);
-            set({ pendingApplications: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load pending applications");
-        } finally {
-            set({ isPendingApplicationsLoading: false });
-        }
+        // set({ isPendingApplicationsLoading: true });
+        // try {
+        //     const res = await axiosInstance.get(`/application/pending/${userId}`);
+        //     set({ pendingApplications: res.data });
+        // } catch (error) {
+        //     toast.error(error.response?.data?.message || "Failed to load pending applications");
+        // } finally {
+        //     set({ isPendingApplicationsLoading: false });
+        // }
     },
 
     getApprovedApplications: async (userId) => {
-        set({ isApproveApplicationsLoading: true });
-        try {
-            const res = await axiosInstance.get(`/application/approved/${userId}`);
-            set({ approvedApplications: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load approved applications");
-        } finally {
-            set({ isApproveApplicationsLoading: false });
-        }
+        // set({ isApproveApplicationsLoading: true });
+        // try {
+        //     const res = await axiosInstance.get(`/application/approved/${userId}`);
+        //     set({ approvedApplications: res.data });
+        // } catch (error) {
+        //     toast.error(error.response?.data?.message || "Failed to load approved applications");
+        // } finally {
+        //     set({ isApproveApplicationsLoading: false });
+        // }
     },
 
     getRejectedApplications: async (userId) => {
-        set({ isRejectedApplications: true });
-        try {
-            const res = await axiosInstance.get(`/application/rejected/${userId}`);
-            set({ rejectedApplications: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load rejected applications");
-        } finally {
-            set({ isRejectedApplications: false });
-        }
+        // set({ isRejectedApplications: true });
+        // try {
+        //     const res = await axiosInstance.get(`/application/rejected/${userId}`);
+        //     set({ rejectedApplications: res.data });
+        // } catch (error) {
+        //     toast.error(error.response?.data?.message || "Failed to load rejected applications");
+        // } finally {
+        //     set({ isRejectedApplications: false });
+        // }
     },
 
     getCompletedApplications: async (userId) => {
-        set({ isCompletedApplications: true });
-        try {
-            const res = await axiosInstance.get(`/application/completed/${userId}`);
-            set({ completedApplications: res.data });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load completed applications");
-        } finally {
-            set({ isCompletedApplications: false });
-        }
+        // set({ isCompletedApplications: true });
+        // try {
+        //     const res = await axiosInstance.get(`/application/completed/${userId}`);
+        //     set({ completedApplications: res.data });
+        // } catch (error) {
+        //     toast.error(error.response?.data?.message || "Failed to load completed applications");
+        // } finally {
+        //     set({ isCompletedApplications: false });
+        // }
     },
 }));
