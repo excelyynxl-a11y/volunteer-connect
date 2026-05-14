@@ -10,10 +10,23 @@ export const useOrganisationStore = create((set, get) => ({
     setCurrentTab: (tab) => set({ currentTab: tab }),
     toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
-    activeOpportunities: [],
+    // TODO: "Replace with real API calls and data structure, this mockdata is not even align with model, just for ui development purpose only"
+    activeOpportunities: [
+      { id: 1, title: "Community Food Drive Helper", location: "Kuala Lumpur", time: "Active now", initial: "CF" },
+      { id: 2, title: "Beach Cleanup Volunteer", location: "Port Dickson", time: "2 days left", initial: "BC" },
+      { id: 3, title: "Literacy Tutor", location: "Subang Jaya", time: "Ongoing", initial: "LT" },
+      { id: 4, title: "Animal Shelter Assistant", location: "Petaling Jaya", time: "Starts tomorrow", initial: "AS" },
+      { id: 5, title: "Elderly Care Companion", location: "Bangsar", time: "Urgent", initial: "EC" },
+    ],
     isActiveOpportunitiesLoading: false,
 
-    closedOpportunities: [],
+    closedOpportunities: [
+      { id: 1, title: "Community Food Drive Helper", location: "Kuala Lumpur", time: "Active now", initial: "CF" },
+      { id: 2, title: "Beach Cleanup Volunteer", location: "Port Dickson", time: "2 days left", initial: "BC" },
+      { id: 3, title: "Literacy Tutor", location: "Subang Jaya", time: "Ongoing", initial: "LT" },
+      { id: 4, title: "Animal Shelter Assistant", location: "Petaling Jaya", time: "Starts tomorrow", initial: "AS" },
+      { id: 5, title: "Elderly Care Companion", location: "Bangsar", time: "Urgent", initial: "EC" },
+    ],
     isClosedOpportunitiesLoading: false,
 
     cancelledOpportunities: [],

@@ -978,3 +978,7 @@
     font-size: 22px;
   }
 }
+
+.organisation-content.organisation-content-flush {
+  padding: 0;
+}

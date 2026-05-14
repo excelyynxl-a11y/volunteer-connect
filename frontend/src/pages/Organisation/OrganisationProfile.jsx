@@ -6,18 +6,18 @@ import { useAuthStore } from '../../store/useAuthStore.js';
 import { useOrganisationStore } from '../../store/useOrganisationStore.js';
 import OpportunityCard from '../../components/OpportunityCard.jsx';
 import OrganisationSidebar from '../../components/OrganisationSidebar.jsx';
-import './OrganisationDashboard.css'
+import './OrganisationProfile.css'
 
 const OrganisationProfile = () => {
   const { authUser } = useAuthStore();
-  const { completedOpportunities, activeOpportunities } = useOrganisationStore();
+  const { closedOpportunities, activeOpportunities } = useOrganisationStore();
 
   const navigate = useNavigate();
 
   return (
     <div className="org-container">
 
-      <main className="org-main">
+      <div className="org-main">
         {/* search bar */}
         <header className="org-header">
           <div className="search-bar">
@@ -31,7 +31,7 @@ const OrganisationProfile = () => {
             </div>
           </div>
         </header>
-
+        
         <section className="welcome-banner">
           <div className="banner-text">
             <span className="eyebrow-red">
@@ -63,9 +63,6 @@ const OrganisationProfile = () => {
                   <h2>{authUser.name}</h2>
                 </div>
               </div>
-              {/* <Link to="" className="btn-secondary-org" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <Settings size={18} /> Edit Profile
-              </Link> */}
               <button
                 className="btn-secondary-org"
                 onClick={() => {
@@ -77,7 +74,7 @@ const OrganisationProfile = () => {
           </div>
 
           {/* About Us */}
-          <div className="profile-card about-card">
+          <div className="profile-card">
             <div className="card-accent" />
             <h4><b>About Us</b></h4>
             <p>{authUser.biodata || "No description provided yet."}</p>
@@ -86,14 +83,14 @@ const OrganisationProfile = () => {
           {/* Previous Events */}
           <div className="profile-card events-card">
             <div className="card-accent" />
-            <h4>
-              <b>
-                Previous Events
-              </b>
-            </h4>
+              <h4>
+                <b>
+                  Previous Events
+                </b>
+              </h4>
             <div className="events-list">
-              {completedOpportunities && completedOpportunities.length > 0 ? (
-                completedOpportunities.map((opp) => (
+              {closedOpportunities && closedOpportunities.length > 0 ? (
+                closedOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
                     title={opp.title}
@@ -139,7 +136,7 @@ const OrganisationProfile = () => {
           <button className="view-all-link">Manage all postings</button>
         </div>
 
-      </main>
+      </div>
     </div>
   )
 }
