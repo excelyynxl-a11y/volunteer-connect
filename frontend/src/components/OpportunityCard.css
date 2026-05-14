@@ -31,6 +31,21 @@
     margin-bottom: 10px;
 }
 
+.event-tag.status-active {
+    background: #2c614f;
+    color: #ffffff;
+}
+
+.event-tag.status-closed {
+    background: #e5edf3;
+    color: #3f5f72;
+}
+
+.event-tag.status-cancelled {
+    background: #f9d8d4;
+    color: #9f3f32;
+}
+
 .event-card h5 {
     color: #1a3c34;
     margin: 0 0 6px 0;
