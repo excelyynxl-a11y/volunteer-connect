@@ -1,11 +1,10 @@
 import express from "express";
-import { updateOrgProfile, getOrgPublicProfile } from "../controllers/organisation.controller.js";
-import {protectRoute} from "../middlewares/auth.middleware.js"
+import { updateOrgProfile } from "../controllers/organisation.controller.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
+import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-router.get("/:id", getOrgPublicProfile)
-
-router.put("/profile", protectRoute, updateOrgProfile)
+router.put("/profile", protectRoute, uploadAvatar, updateOrgProfile);
 
 export default router;

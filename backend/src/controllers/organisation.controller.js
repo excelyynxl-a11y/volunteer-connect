@@ -1,49 +1,109 @@
-import { User,Organisation } from "../models/user.model.js";
+import { Organisation } from "../models/user.model.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const updateOrgProfile = async (req, res) => {
   try {
-    // Use 'biodata' to match your model and frontend state
-    const { name, biodata, categories, previousEvents } = req.body;
-    
-    const updatedOrg = await Organisation.findByIdAndUpdate(
-      req.user._id,
-      {
-        $set: {
-          name,
-          biodata, // This must match the key in your User.discriminator
-          categories,
-          previousEvents
-        }
-      },
-      { new: true }
-    );
+    const { name, biodata } = req.body;
+    const userId = req.user._id;
 
-    res.status(200).json(updatedOrg);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating profile", error: error.message });
-  }
-};
+    // at least one field must be provided
+    if (name === undefined && biodata === undefined && !req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one profile field must be provided",
+      });
+    }
 
-export const getOrgPublicProfile = async (req, res) => {
-  try {
-    const { id } = req.params;
+    // name cannot be empty
+    if (name !== undefined && name.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Name cannot be empty",
+      });
+    }
 
-    const org = await User.findById(id).select("-password");
-    if (!org) return res.status(404).json({ message: "Organisation not found" });
+    // biodata cannot be empty
+    if (biodata !== undefined && biodata.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Biodata cannot be empty",
+      });
+    }
 
-    const activePostings = await User.find({
-      organisationId: id,
-      status: "Active"
-    });
+    // biodata cannot be too long (TODO: check how long client wants a orgainsation biodata to be)
+    if (
+      biodata !== undefined &&
+      (typeof biodata !== "string" || biodata.trim().length > 1000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Biodata must be a string with at most 1000 characters",
+      });
+    }
+
+    const organisation = await Organisation.findById(userId);
+
+    if (!organisation) {
+      return res.status(404).json({
+        success: false,
+        message: "Organisation not found",
+      });
+    }
+
+    if (organisation.role !== "organisation") {
+      return res.status(403).json({
+        success: false,
+        message: "Only organisations can update their profile",
+      });
+    }
+
+    if (name !== undefined) {
+      organisation.name = name.trim();
+    }
+
+    if (biodata !== undefined) {
+      organisation.biodata = biodata.trim();
+    }
+
+    // upload avatar to Cloudinary if a file was provided
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "avatars",
+            resource_type: "image",
+            public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          },
+        );
+        stream.end(req.file.buffer);
+      });
+      organisation.avatar = result.secure_url;
+    }
+
+    await organisation.save();
+
+    const updatedOrg = await Organisation.findById(userId).select("-password");
 
     res.status(200).json({
-      profile: org,
-      opportunities: activePostings
+      success: true,
+      message: "Organisation profile updated successfully",
+      data: updatedOrg,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching profile", error: error.message });
+    console.log("Error in updateOrgProfile controller: ", error.message);
+    res.status(500).json({ 
+      message: error.message 
+    });
   }
 };
+
 
 
 
