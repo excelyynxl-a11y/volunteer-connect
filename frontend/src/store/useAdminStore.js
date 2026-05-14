@@ -1,5 +1,5 @@
 import { create } from "zustand";
-
+import { axiosInstance } from "../lib/axios";
 
 const mockStats = [
   { key: "volunteers", value: "69", label: "Active Volunteers" },
@@ -239,6 +239,7 @@ const mockAllOpportunites = [
 export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",
   sidebarCollapsed: false,
+  isUpdating: false,
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
@@ -276,6 +277,29 @@ export const useAdminStore = create((set, get) => ({
   getAllReports: () => {
     // TODO: call getAllReports 
 
+  },
+
+  updateAdminProfile: async ({ name, avatar }) => {
+    try {
+      set({ isUpdating: true });
+
+      // TODO: integrate updateAdminProfile api 
+
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong";
+      toast.error(message);
+      return { 
+        success: false, 
+        error: message 
+      };
+    } finally {
+      set({ 
+        isUpdating: false 
+      });
+    }
   },
 
 }));
