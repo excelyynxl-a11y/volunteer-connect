@@ -60,40 +60,6 @@ export const getApplicationById = async (req, res) => {
   }
 };
 
-export const deleteApplication = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid application ID",
-      });
-    }
-
-    const application = await Application.findById(id);
-
-    if (!application) {
-      return res.status(404).json({
-        success: false,
-        message: "Application not found",
-      });
-    }
-
-    await Application.findByIdAndDelete(id);
-
-    res.status(200).json({
-      success: true,
-      message: "Application deleted successfully",
-    });
-  } catch (err) {
-    console.log("Error in deleteApplication controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
-    });
-  }
-};
-
 export const approveApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,6 +176,40 @@ export const completeApplication = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in completeApplication controller: ", err.message);
+    res.status(500).json({ 
+      message: err.message 
+    });
+  }
+};
+
+export const deleteApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    await Application.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Application deleted successfully",
+    });
+  } catch (err) {
+    console.log("Error in deleteApplication controller: ", err.message);
     res.status(500).json({ 
       message: err.message 
     });
