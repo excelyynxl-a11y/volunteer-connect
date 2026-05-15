@@ -12,18 +12,6 @@ import LoadingPage from "./pages/LoadingPage/LoadingPage";
 import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
-  const location = useLocation();
-  
-  const checkAuth = useAuthStore((state) => state.checkAuth);
-  const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  if (isCheckingAuth) {
-    return <LoadingPage message="Checking your session..." />;
-  }
   
   return (
     <div className="app-shell">
