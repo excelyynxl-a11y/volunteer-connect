@@ -19,7 +19,7 @@ const OrganisationProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getActiveOpportunities(authUser?._id);
+    if (activeOpportunities.length === 0) getActiveOpportunities(authUser?._id);
     getClosedOpportunities(authUser?._id);
     getCancelledOpportunities(authUser?._id);
   }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
