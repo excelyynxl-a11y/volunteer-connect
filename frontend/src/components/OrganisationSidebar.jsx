@@ -28,6 +28,7 @@ const OrganisationSidebar = () => {
 
   const activeKey = location.pathname.startsWith("/organisation-dashboard/profile") ||
     location.pathname.startsWith("/organisation-dashboard/edit-organisation-profile")
+    location.pathname.startsWith("/organisation-dashboard/edit-opportunity")
       ? "profile"
       : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
 
