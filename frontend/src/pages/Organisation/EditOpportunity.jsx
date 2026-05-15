@@ -81,7 +81,8 @@ const EditOpportunity = () => {
 
         const finalDataToSubmit = {
             ...formData,
-            location: `${selectedState}, ${selectedCity}`
+            location: `${selectedState}, ${selectedCity}`,
+            category: selectedCategory
         };
 
         const result = await updateOpportunity(id, finalDataToSubmit);
