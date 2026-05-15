@@ -83,7 +83,12 @@ const normaliseOpportunity = (opportunity) => ({
   detail: opportunity.detail ?? opportunity.details ?? "",
 });
 
-const loadMockOpportunities = async (set, loadingKey, dataKey, mockData) => {
+const loadMockOpportunities = async (set, get, loadingKey, dataKey, mockData) => {
+  const currentData = get()[dataKey];
+  if (currentData && currentData.length > 0) {
+    return currentData;
+  }
+
   set({ [loadingKey]: true });
   try {
     const opportunities = mockData.map(normaliseOpportunity);
@@ -127,7 +132,6 @@ export const useOrganisationStore = create((set, get) => ({
       }
     },
 
-    
     updateOpportunity: async (opportunityId, opportunityData) => {
       set({ isUpdatingOpportunity: true });
       try {
@@ -177,7 +181,7 @@ export const useOrganisationStore = create((set, get) => ({
     isCompletedApplications: false,
 
     getActiveOpportunities: async () => loadMockOpportunities(
-      set,
+      set, get,
       "isActiveOpportunitiesLoading",
       "activeOpportunities",
       mockActiveOpportunities,
