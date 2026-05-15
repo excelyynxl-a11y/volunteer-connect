@@ -137,7 +137,7 @@ export const useOrganisationStore = create((set, get) => ({
 
         set((state) => ({
           activeOpportunities: state.activeOpportunities.map((opp) =>
-            opp._id === opportunityId ? { ...opp, opportunityData } : opp
+            opp._id === opportunityId ? { ...opp, ...opportunityData } : opp
           )
         }));
 
