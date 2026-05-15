@@ -6,12 +6,15 @@ import VolunteerDashboard from "./pages/Volunteer/VolunteerDashboard";
 import OrganisationDashboard from "./pages/Organisation/OrganisationDashboard";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
+import LoggingOut from "./pages/Auth/LoggingOut";
 import Pending from "./pages/Auth/Pending";
 import VolunteerProfile from './pages/Volunteer/VolunteerProfile'
 import EditProfile from './pages/Volunteer/EditProfile'
 import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
+  const location = useLocation();
+  
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
 
@@ -36,6 +39,7 @@ const App = () => {
         {/* authentication and account creation route */}
         <Route path='/sign-up' element={<SignUp />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/logging-out' element={<LoggingOut />} />
         <Route path="/pending-approval" element={<Pending />} />
 
         {/* volunteer route */}

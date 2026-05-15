@@ -3,6 +3,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminSidebar from "../../components/AdminSidebar";
 import { useAdminStore } from "../../store/useAdminStore";
 import AdminHomepage from "./AdminHomepage";
+import ManageVolunteer from "./ManageVolunteer";
+import ManageOrganisation from "./ManageOrganisation";
+import ManageOpportunity from "./ManageOpportunity";
+import ManageReport from "./ManageReport";
+import AdminAnalytics from "./AdminAnalytics";
 import AdminProfile from "./AdminProfile";
 import "./Admin.css";
 
@@ -17,6 +22,11 @@ const AdminDashboard = () => {
       >
         <Routes>
           <Route path="/" element={<AdminHomepage />} />
+          <Route path="manage-volunteer" element={<ManageVolunteer />} />
+          <Route path="manage-organisation" element={<ManageOrganisation />} />
+          <Route path="manage-opportunity" element={<ManageOpportunity />} />
+          <Route path="manage-report" element={<ManageReport />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />
         </Routes>
