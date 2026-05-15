@@ -119,6 +119,7 @@ const OrganisationProfile = () => {
                     title={opp.title}
                     details={opp.details}
                     location={opp.location}
+                    category={opp.category}
                     startAt={opp.startAt}
                     endAt={opp.endAt}
                     organisationId={opp.organisationId}
@@ -136,6 +137,7 @@ const OrganisationProfile = () => {
                     title={opp.title}
                     details={opp.details}
                     location={opp.location}
+                    category={opp.category}
                     startAt={opp.startAt}
                     endAt={opp.endAt}
                     organisationId={opp.organisationId}
@@ -167,6 +169,7 @@ const OrganisationProfile = () => {
                 title={opp.title}
                 details={opp.details}
                 location={opp.location}
+                category={opp.category}
                 startAt={opp.startAt}
                 endAt={opp.endAt}
                 organisationId={opp.organisationId}
