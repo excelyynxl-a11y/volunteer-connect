@@ -5,6 +5,7 @@ import {
   Clock,
   Plus,
   User,
+  X,
 } from 'lucide-react'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
 import {
@@ -25,6 +26,11 @@ const initialEditableProfile = {
   ageGroup: '',
   biodata: '',
 }
+
+const isSameAvailabilitySlot = (leftSlot, rightSlot) =>
+  leftSlot.dayOfWeek === rightSlot.dayOfWeek &&
+  leftSlot.startTime === rightSlot.startTime &&
+  leftSlot.endTime === rightSlot.endTime
 
 // Volunteer edit profile page
 const EditVolunteerProfile = () => {
@@ -108,7 +114,7 @@ const EditVolunteerProfile = () => {
     
     if (startTime >= endTime) {
       setSaveError("End time must be later than start time.");
-      return;
+      return
     }
 
     const newSlot = {
@@ -116,6 +122,11 @@ const EditVolunteerProfile = () => {
       startTime,
       endTime,
       preference,
+    }
+
+    if (availabilitySlots.some((slot) => isSameAvailabilitySlot(slot, newSlot))) {
+      setSaveError('This availability time range has already been added.')
+      return
     }
 
     setAvailabilitySlots((currentSlots) => [...currentSlots, newSlot])
@@ -135,12 +146,27 @@ const EditVolunteerProfile = () => {
     const skillToAdd = selectedSkill === 'Others' ? otherSkill.trim() : selectedSkill
 
     if (!skillToAdd || skillList.includes(skillToAdd)) {
+      if (skillToAdd && skillList.includes(skillToAdd)) {
+        setSaveError('This skill has already been added.')
+      }
       return
     }
 
     setSkillList((currentSkills) => [...currentSkills, skillToAdd])
     setSelectedSkill('')
     setOtherSkill('')
+    setSaveError('')
+  }
+
+  const removeSkill = (skillToRemove) => {
+    setSkillList((currentSkills) => currentSkills.filter((skill) => skill !== skillToRemove))
+    setSaveError('')
+  }
+
+  const removeAvailability = (slotIndexToRemove) => {
+    setAvailabilitySlots((currentSlots) =>
+      currentSlots.filter((_, index) => index !== slotIndexToRemove)
+    )
     setSaveError('')
   }
 
@@ -275,7 +301,17 @@ const EditVolunteerProfile = () => {
               {skillList.length > 0 ? (
                 <ul className="skill-list" aria-label="Added skills">
                   {skillList.map((skill) => (
-                    <li key={skill}>{skill}</li>
+                    <li key={skill}>
+                      <span>{skill}</span>
+                      <button
+                        type="button"
+                        className="remove-chip-button"
+                        aria-label={`Remove ${skill}`}
+                        onClick={() => removeSkill(skill)}
+                      >
+                        <X size={12} />
+                      </button>
+                    </li>
                   ))}
                 </ul>
               ) : (
@@ -352,8 +388,18 @@ const EditVolunteerProfile = () => {
               <ul className="slot-list" aria-label="Added availability">
                 {availabilitySlots.map((slot, index) => (
                   <li key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}-${slot.preference}-${index}`}>
-                    {slot.dayOfWeek}, {slot.startTime} - {slot.endTime} (
-                    {slot.preference === 'preferred' ? 'Preferred' : 'Available'})
+                    <span>
+                      {slot.dayOfWeek}, {slot.startTime} - {slot.endTime} (
+                      {slot.preference === 'preferred' ? 'Preferred' : 'Available'})
+                    </span>
+                    <button
+                      type="button"
+                      className="remove-chip-button"
+                      aria-label={`Remove ${slot.dayOfWeek} ${slot.startTime} to ${slot.endTime}`}
+                      onClick={() => removeAvailability(index)}
+                    >
+                      <X size={12} />
+                    </button>
                   </li>
                 ))}
               </ul>
