@@ -127,6 +127,34 @@ export const useOrganisationStore = create((set, get) => ({
       }
     },
 
+    
+    updateOpportunity: async (opportunityId, opportunityData) => {
+      set({ isUpdatingOpportunity: true });
+      try {
+        const res = await axiosInstance.put(`/opportunity/${opportunityId}`, opportunityData);
+        
+        toast.success("Opportunity updated successfully.");
+
+        set((state) => ({
+          activeOpportunities: state.activeOpportunities.map((opp) =>
+            opp._id === opportunityId ? { ...opp, opportunityData } : opp
+          )
+        }));
+
+        return { success: true, data: res.data };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update opportunity";
+        
+          toast.error(message);
+          return { success: false, error: message };
+      } finally {
+        set({ isUpdatingOpportunity: false });
+      }
+    },
+
     activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
     isActiveOpportunitiesLoading: false,
 
