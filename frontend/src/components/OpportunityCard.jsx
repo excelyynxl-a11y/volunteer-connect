@@ -2,9 +2,11 @@ import React from 'react';
 import './OpportunityCard.css';
 
 const OpportunityCard = ({
+    _id,
     title,
     details,
     location,
+    category,
     startAt,
     endAt,
     status,
@@ -38,6 +40,17 @@ const OpportunityCard = ({
   return (
     <div className="event-card">
       <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
+      <div className="card-category-list">
+        {category && Array.isArray(category) ? (
+          category.map((cat) => (
+            <span key={cat} className="card-category-chip">
+              {cat}
+            </span>
+          ))
+        ) : category ? (
+          <span className="card-category-chip">{category}</span>
+        ) : null}
+      </div>
       <h5>{title}</h5>
       <p>{details}</p>
       <div className="item-sub">
