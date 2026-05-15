@@ -8,8 +8,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import LoggingOut from "./pages/Auth/LoggingOut";
 import Pending from "./pages/Auth/Pending";
-import VolunteerProfile from './pages/Volunteer/VolunteerProfile'
-import EditProfile from './pages/Volunteer/EditProfile'
+import LoadingPage from "./pages/LoadingPage/LoadingPage";
 import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
@@ -23,11 +22,7 @@ const App = () => {
   }, [checkAuth]);
 
   if (isCheckingAuth) {
-    return (
-      <div className="app-shell">
-        <p>Loading...</p>
-      </div>
-    );
+    return <LoadingPage message="Checking your session..." />;
   }
   
   return (
@@ -43,9 +38,7 @@ const App = () => {
         <Route path="/pending-approval" element={<Pending />} />
 
         {/* volunteer route */}
-        <Route path='/volunteer-dashboard' element={<VolunteerDashboard />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/volunteer-profile" element={<VolunteerProfile />} />
+        <Route path='/volunteer-dashboard/*' element={<VolunteerDashboard />} />
 
         {/* organisation route */}
         <Route path='/organisation-dashboard/*' element={<OrganisationDashboard />} />

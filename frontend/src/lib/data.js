@@ -77,3 +77,48 @@ export const landingPageNavItems = [
     {name: "About Us", href: "#about"},
     {name: "How It Work", href: "#howitwork"}
 ]
+
+export const volunteerAgeGroupOptions = ['21-30', '31-40', '41-50', '51-60', '60+']
+
+export const volunteerAvailabilityDays = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+]
+
+export const volunteerAvailabilityTimes = [
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '20:00',
+  '21:00',
+]
+
+export const volunteerSkillOptions = [
+  'Communication',
+  'Event Support',
+  'First Aid',
+  'Food Distribution',
+  'Fundraising',
+  'Teaching',
+  'Teamwork',
+  'Others',
+]
+
+export const volunteerAvailabilityPreferenceOptions = [
+  { label: 'Available', value: 'available' },
+  { label: 'Preferred', value: 'preferred' },
+]
