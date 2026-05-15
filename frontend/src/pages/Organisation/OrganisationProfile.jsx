@@ -117,9 +117,10 @@ const OrganisationProfile = () => {
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
                     title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
+                    details={opp.details}
+                    location={opp.location}
+                    startAt={opp.startAt}
+                    endAt={opp.endAt}
                     organisationId={opp.organisationId}
                     status={opp.status}
                     showActionButtons={false}
@@ -133,9 +134,10 @@ const OrganisationProfile = () => {
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
                     title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
+                    details={opp.details}
+                    location={opp.location}
+                    startAt={opp.startAt}
+                    endAt={opp.endAt}
                     organisationId={opp.organisationId}
                     status={opp.status}
                     showActionButtons={false}
@@ -163,9 +165,10 @@ const OrganisationProfile = () => {
               <OpportunityCard 
                 key={opp._id || opp.title} 
                 title={opp.title}
-                detail={opp.detail}
-                fixedDate={opp.fixedDate}
-                timeFrame={opp.timeFrame}
+                details={opp.details}
+                location={opp.location}
+                startAt={opp.startAt}
+                endAt={opp.endAt}
                 organisationId={opp.organisationId}
                 status={opp.status}
                 showActionButtons={true}
