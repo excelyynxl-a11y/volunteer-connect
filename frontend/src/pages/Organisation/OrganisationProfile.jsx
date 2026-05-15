@@ -116,6 +116,7 @@ const OrganisationProfile = () => {
                 closedOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
+                    _id={opp._id} 
                     title={opp.title}
                     details={opp.details}
                     location={opp.location}
@@ -134,6 +135,7 @@ const OrganisationProfile = () => {
                 cancelledOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
+                    _id={opp._id} 
                     title={opp.title}
                     details={opp.details}
                     location={opp.location}
@@ -165,7 +167,8 @@ const OrganisationProfile = () => {
           <div className="org-profile-opportunity-list">
             {activeOpportunities.map((opp) => (
               <OpportunityCard 
-                key={opp._id || opp.title} 
+                key={opp._id || opp.title}
+                _id={opp._id} 
                 title={opp.title}
                 details={opp.details}
                 location={opp.location}
@@ -174,6 +177,9 @@ const OrganisationProfile = () => {
                 endAt={opp.endAt}
                 organisationId={opp.organisationId}
                 status={opp.status}
+                onEdit={(id) => 
+                  navigate(`/organisation-dashboard/edit-opportunity/${id}`)
+                }
                 showActionButtons={true}
               />
             ))}
