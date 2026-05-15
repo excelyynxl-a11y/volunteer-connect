@@ -5,6 +5,7 @@ import { useOrganisationStore } from "../../store/useOrganisationStore";
 import OrganisationHomepage from "./OrganisationHomepage";
 import OrganisationProfile from "./OrganisationProfile";
 import EditOrganisationProfile from "./EditOrganisationProfile";
+import EditOpportunity from "./EditOpportunity";
 
 import "./Organisation.css";
 
@@ -16,8 +17,9 @@ const OrganisationDashboard = () => {
   const flushPages = [
     "/organisation-dashboard/profile",
     "/organisation-dashboard/edit-organisation-profile",
+    "/organisation-dashboard/edit-opportunity"
   ];
-  const isFlushPage = flushPages.includes(location.pathname);
+  const isFlushPage = flushPages.some(page => location.pathname.startsWith(page));
 
   return (
     <div className="organisation-dashboard">
@@ -29,6 +31,7 @@ const OrganisationDashboard = () => {
           <Route path="/" element={<OrganisationHomepage />} />
           <Route path="profile" element={<OrganisationProfile />} />
           <Route path="edit-organisation-profile" element={<EditOrganisationProfile />} />
+          <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
           <Route path="*" element={<Navigate to="/organisation-dashboard" replace />} />
         </Routes>
       </main>
