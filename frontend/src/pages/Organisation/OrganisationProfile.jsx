@@ -48,7 +48,7 @@ const OrganisationProfile = () => {
               ORGANISATION CONTROL PANEL
             </span>
             <h1>
-              Welcome back, {authUser.name}
+              Welcome back, {authUser?.name} 
             </h1>
             <p>
               Managing {" "}
@@ -67,10 +67,10 @@ const OrganisationProfile = () => {
           <div className="org-profile-card org-profile-header-card">
             <div className="org-profile-header-inner">
               <div className="org-profile-title-row">
-                <div className="org-profile-avatar">{getInitials(authUser.name)}</div>
+                <div className="org-profile-avatar">{getInitials(authUser?.name)}</div>
                 <div>
                   <span className="org-profile-eyebrow"><b>Organisation Profile</b></span>
-                  <h2>{authUser.name}</h2>
+                  <h2>{authUser?.name}</h2>
                 </div>
               </div>
               <button

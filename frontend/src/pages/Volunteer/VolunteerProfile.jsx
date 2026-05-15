@@ -1,108 +1,58 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Award,
   Calendar,
   CheckCircle2,
-  ChevronRight,
-  Clock,
-  FileCheck,
-  LayoutDashboard,
   Mail,
   Pencil,
-  Search,
   User,
 } from 'lucide-react'
-import VolunteerSidebar from '../../components/VolunteerSidebar'
 import VolunteerHoursCard from '../../components/VolunteerHoursCard'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
 import { formatApprovalStatus, getInitials } from '../../lib/utils'
-import { useVolunteerProfileData } from '../../hooks/useVolunteerProfileData'
-import './VolunteerProfile.css'
+import { useAuthStore } from '../../store/useAuthStore'
+import { useVolunteerStore } from '../../store/useVolunteerStore'
 
 // Volunteer profile page
 const VolunteerProfile = () => {
+  const navigate = useNavigate()
+  const authUser = useAuthStore((state) => state.authUser)
+  const volunteerId = authUser?._id || ''
+
   const {
-    volunteerId,
-    profileData,
     participationHistory,
     totalVolunteerHours,
     isLoading,
     loadError,
-  } = useVolunteerProfileData()
+    getVolunteerPastOpportunity,
+  } = useVolunteerStore()
+
+  useEffect(() => {
+    getVolunteerPastOpportunity(volunteerId)
+  }, [getVolunteerPastOpportunity, volunteerId])
 
   // Derived display values
   const volunteerInitials = useMemo(
-    () => getInitials(profileData.fullName),
-    [profileData.fullName]
+    () => getInitials(authUser?.name),
+    [authUser?.name]
   )
   const approvalLabel = useMemo(
-    () => formatApprovalStatus(profileData.approvalStatus),
-    [profileData.approvalStatus]
+    () => formatApprovalStatus(authUser?.approvalStatus),
+    [authUser?.approvalStatus]
   )
-  const profileSummary = profileData.biodata || 'No profile summary provided yet.'
+  const profileSummary = authUser?.biodata || 'No profile summary provided yet.'
 
-  const displaySkills = Array.isArray(profileData.skills) ? profileData.skills : []
+  const displaySkills = Array.isArray(authUser?.skills) ? authUser.skills : []
 
-  const displayAvailabilitySlots = Array.isArray(profileData.availability)
-    ? profileData.availability
+  const displayAvailabilitySlots = Array.isArray(authUser?.availability)
+    ? authUser.availability
     : []
-
-  // Sidebar navigation
-  const sidebarNavItems = useMemo(
-    () => [
-      { label: 'Dashboard', href: '/volunteer-dashboard', icon: LayoutDashboard },
-      { label: 'Discover', href: '/opportunities', icon: Search },
-      { label: 'Applications', href: '/applications', icon: FileCheck },
-      {
-        label: 'My Profile',
-        href: `/volunteer-profile?id=${volunteerId}`,
-        icon: User,
-        isActive: true,
-      },
-      { label: 'Availability', href: '/edit-profile', icon: Calendar },
-      { label: 'History', href: '/volunteer-history', icon: Clock },
-    ],
-    [volunteerId]
-  )
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <main className="volunteer-profile-layout">
-        <section className="volunteer-profile-content">
-          <div className="profile-panel">
-            <p>Loading volunteer profile...</p>
-          </div>
-        </section>
-      </main>
-    )
-  }
-
-  // Error state
-  if (loadError) {
-    return (
-      <main className="volunteer-profile-layout">
-        <section className="volunteer-profile-content">
-          <div className="profile-panel">
-            <p>{loadError}</p>
-          </div>
-        </section>
-      </main>
-    )
-  }
 
   // Main profile layout
   return (
-    <main className="volunteer-profile-layout">
-      <VolunteerSidebar
-        accountLabel="Volunteer Member"
-        fullName={profileData.fullName || 'Volunteer Member'}
-        initials={volunteerInitials}
-        navItems={sidebarNavItems}
-        sidebarClassName="volunteer-profile-sidebar"
-      />
-
-      <section className="volunteer-profile-content">
+    <div className="volunteer-profile-page">
+      <div className="volunteer-profile-content">
         <VolunteerTopbar />
 
         {/* Profile hero section */}
@@ -111,28 +61,19 @@ const VolunteerProfile = () => {
 
           <div className="profile-hero-text">
             <p>PUBLIC VOLUNTEER PROFILE</p>
-            <h1>{profileData.fullName || 'Volunteer Profile'}</h1>
+            <h1>{authUser?.name || 'Volunteer Profile'}</h1>
             <span>{profileSummary}</span>
 
-            <div className="profile-info-pills">
-              <InfoPill icon={Mail} text={profileData.email || 'No email available'} />
-            </div>
           </div>
 
-          <a className="edit-profile-button" href={`/edit-profile?id=${volunteerId}`}>
+          <button
+            type="button"
+            className="edit-profile-button"
+            onClick={() => navigate('/volunteer-dashboard/edit-profile')}
+          >
             <Pencil size={18} />
             Edit Profile
-          </a>
-        </section>
-
-        {/* Summary metrics section */}
-        <section className="summary-grid">
-          <SummaryCard icon={Clock} label="Total Volunteer Hours" value={totalVolunteerHours} />
-          <SummaryCard
-            icon={CheckCircle2}
-            label="Past Participation"
-            value={String(participationHistory.length)}
-          />
+          </button>
         </section>
 
         {/* Main profile content */}
@@ -154,24 +95,19 @@ const VolunteerProfile = () => {
               <div className="profile-detail-grid">
                 <DetailCard
                   label="Full Name"
-                  value={profileData.fullName || 'Not provided'}
+                  value={authUser?.name || 'Not provided'}
                   icon={User}
                 />
                 <DetailCard
                   label="Email Address"
-                  value={profileData.email || 'Not provided'}
+                  value={authUser?.email || 'Not provided'}
                   icon={Mail}
                 />
                 <DetailCard
                   label="Age Group"
-                  value={profileData.ageGroup || 'Not provided'}
+                  value={authUser?.ageGroup || 'Not provided'}
                   icon={User}
                 />
-              </div>
-
-              <div className="past-participation-card">
-                <span>Profile Summary</span>
-                <p>{profileSummary}</p>
               </div>
             </section>
 
@@ -205,7 +141,11 @@ const VolunteerProfile = () => {
               </div>
 
               <div className="participation-list">
-                {participationHistory.length > 0 ? (
+                {loadError ? (
+                  <p>{loadError}</p>
+                ) : isLoading ? (
+                  <p>Loading past opportunities...</p>
+                ) : participationHistory.length > 0 ? (
                   participationHistory.map((activity) => (
                     <article className="participation-item" key={activity.id}>
                       <div className="participation-icon">
@@ -222,9 +162,6 @@ const VolunteerProfile = () => {
 
                       <div className="participation-actions">
                         <span className="completed-pill">{activity.status}</span>
-                        <button type="button" aria-label="View participation details">
-                          <ChevronRight size={18} />
-                        </button>
                       </div>
                     </article>
                   ))
@@ -236,6 +173,8 @@ const VolunteerProfile = () => {
           </div>
 
           <div className="profile-right-column">
+            <VolunteerHoursCard totalVolunteerHours={totalVolunteerHours} />
+
             {/* Availability section */}
             <section className="profile-panel">
               <div className="profile-panel-header">
@@ -275,42 +214,18 @@ const VolunteerProfile = () => {
                 )}
               </div>
             </section>
-
-            <VolunteerHoursCard totalVolunteerHours={totalVolunteerHours} />
           </div>
         </section>
-      </section>
-    </main>
-  )
-}
-
-// Reusable UI helpers
-function InfoPill({ icon: IconComponent, text }) {
-  return (
-    <span className="info-pill">
-      <IconComponent size={15} />
-      {text}
-    </span>
-  )
-}
-
-function SummaryCard({ icon: IconComponent, label, value }) {
-  return (
-    <div className="summary-card">
-      <div className="summary-icon">
-        <IconComponent size={20} />
       </div>
-      <span>{label}</span>
-      <strong>{value}</strong>
     </div>
   )
 }
 
-function DetailCard({ icon: IconComponent, label, value }) {
+function DetailCard({ icon, label, value }) {
   return (
     <div className="profile-detail-card">
       <div className="detail-icon">
-        <IconComponent size={18} />
+        {React.createElement(icon, { size: 18 })}
       </div>
       <span>{label}</span>
       <strong>{value}</strong>
