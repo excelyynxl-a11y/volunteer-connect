@@ -105,9 +105,14 @@ export const signup = async (req, res) => {
         email: newUser.email,
         role: newUser.role,
         approvalStatus: newUser.approvalStatus,
+        avatar: newUser.avatar || "",
         ageGroup: newUser.ageGroup || "",
         resume: newUser.resume || "",
         biodata: newUser.biodata || "",
+        skills: Array.isArray(newUser.skills) ? newUser.skills : [],
+        availability: Array.isArray(newUser.availability)
+          ? newUser.availability
+          : [],
       });
     } else {
       res.status(400).json({
@@ -157,6 +162,10 @@ export const login = async (req, res) => {
       ageGroup: user.ageGroup || "",
       biodata: user.biodata || "",
       approvalStatus: user.approvalStatus,
+      avatar: user.avatar || "",
+      resume: user.resume || "",
+      skills: Array.isArray(user.skills) ? user.skills : [],
+      availability: Array.isArray(user.availability) ? user.availability : [],
     });
   } catch (error) {
     console.log("Error in login controller: ", error.message);
