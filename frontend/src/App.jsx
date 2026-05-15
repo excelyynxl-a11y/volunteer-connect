@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import SignUp from "./pages/Auth/SignUp";
 import VolunteerDashboard from "./pages/Volunteer/VolunteerDashboard";
@@ -12,9 +12,6 @@ import EditProfile from './pages/Volunteer/EditProfile'
 import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
-  const location = useLocation();
-  const hideNavbar = ["/login", "/sign-up"].includes(location.pathname);
-
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const isCheckingAuth = useAuthStore((state) => state.isCheckingAuth);
 
@@ -47,10 +44,10 @@ const App = () => {
         <Route path="/volunteer-profile" element={<VolunteerProfile />} />
 
         {/* organisation route */}
-        <Route path='/organisation-dashboard' element={<OrganisationDashboard />} />
+        <Route path='/organisation-dashboard/*' element={<OrganisationDashboard />} />
 
         {/* admin route */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
 
         {/* catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />

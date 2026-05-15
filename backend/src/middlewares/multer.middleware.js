@@ -1,14 +1,7 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 
-const uploadDir = path.resolve('public', 'resumes');
-
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const fileFilter = (req, file, cb) => {
+// resume only accepts pdf
+const resumeFileFilter = (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
         cb(null, true);
     } else {
@@ -16,10 +9,31 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
-const upload = multer({
+// avatar only accepts png, jped, jpg
+const avatarFileFilter = (req, file, cb) => {
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only PNG, JPEG, and JPG files are allowed for avatar uploads.'), false);
+    }
+}
+
+// method to upload resume
+const resumeUpload = multer({
     storage: multer.memoryStorage(),
-    fileFilter,
+    fileFilter: resumeFileFilter,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit  
 });
  
-export const uploadResume = upload.single('resume');
+export const uploadResume = resumeUpload.single('resume');
+
+
+// method to upload avatar
+const avatarUpload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: avatarFileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+export const uploadAvatar = avatarUpload.single('profilePic');

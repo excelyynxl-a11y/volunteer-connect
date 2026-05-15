@@ -1,11 +1,10 @@
 import express from "express";
-import { deleteOrganisation, getAllOrganisations, getOrganisationById } from "../controllers/organisation.controller.js";
-import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
+import { updateOrgProfile } from "../controllers/organisation.controller.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
+import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllOrganisations);
-router.get("/:id", getOrganisationById);
-router.delete("/:id", protectRoute, adminOnly, deleteOrganisation);
+router.put("/profile", protectRoute, uploadAvatar, updateOrgProfile);
 
 export default router;

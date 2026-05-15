@@ -1,0 +1,61 @@
+.events-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.event-card {
+    position: relative;
+    background: #fdf8ed;
+    border: 1px solid #e9c48b;
+    border-radius: 14px;
+    padding: 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-4px);
+    border-color: #d4a456;
+    box-shadow: 0 10px 22px rgba(212, 164, 86, 0.25);
+}
+
+.event-tag {
+    display: inline-block;
+    background: #2c5f4f;
+    color: #fdf8ed;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+}
+
+.event-tag.status-active {
+    background: #2c614f;
+    color: #ffffff;
+}
+
+.event-tag.status-closed {
+    background: #e5edf3;
+    color: #3f5f72;
+}
+
+.event-tag.status-cancelled {
+    background: #f9d8d4;
+    color: #9f3f32;
+}
+
+.event-card h5 {
+    color: #1a3c34;
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.event-card p {
+    color: #5c726d;
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.5;
+}
