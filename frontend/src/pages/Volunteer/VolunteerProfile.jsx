@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Award,
   Calendar,
@@ -15,6 +16,7 @@ import { useVolunteerStore } from '../../store/useVolunteerStore'
 
 // Volunteer profile page
 const VolunteerProfile = () => {
+  const navigate = useNavigate()
   const authUser = useAuthStore((state) => state.authUser)
   const volunteerId = authUser?._id || ''
 
@@ -64,10 +66,14 @@ const VolunteerProfile = () => {
 
           </div>
 
-          <a className="edit-profile-button" href="/volunteer-dashboard/edit-profile">
+          <button
+            type="button"
+            className="edit-profile-button"
+            onClick={() => navigate('/volunteer-dashboard/edit-profile')}
+          >
             <Pencil size={18} />
             Edit Profile
-          </a>
+          </button>
         </section>
 
         {/* Main profile content */}
