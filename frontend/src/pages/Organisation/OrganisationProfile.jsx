@@ -67,9 +67,15 @@ const OrganisationProfile = () => {
           <div className="org-profile-card org-profile-header-card">
             <div className="org-profile-header-inner">
               <div className="org-profile-title-row">
-                <div className="org-profile-avatar">{getInitials(authUser?.name)}</div>
+                <div className="org-profile-avatar">
+                  {getInitials(authUser?.name)}
+                </div>
                 <div>
-                  <span className="org-profile-eyebrow"><b>Organisation Profile</b></span>
+                  <span className="org-profile-eyebrow">
+                    <b>
+                      Organisation Profile
+                    </b>
+                  </span>
                   <h2>{authUser?.name}</h2>
                 </div>
               </div>
@@ -78,7 +84,8 @@ const OrganisationProfile = () => {
                 onClick={() => {
                   navigate("/organisation-dashboard/edit-organisation-profile");
                 }}
-              >Edit Profile
+              >
+                Edit Profile
               </button>
             </div>
           </div>
@@ -86,8 +93,14 @@ const OrganisationProfile = () => {
           {/* About Us */}
           <div className="org-profile-card">
             <div className="org-profile-card-accent" />
-            <h4><b>About Us</b></h4>
-            <p>{authUser.biodata || "No description provided yet."}</p>
+            <h4>
+              <b>
+                About Us
+              </b>
+            </h4>
+            <p>
+              {authUser?.biodata || "No description provided yet."}
+            </p>
           </div>
 
           {/* Previous Events */}
@@ -129,7 +142,9 @@ const OrganisationProfile = () => {
                   />
                 ))
               ) : (
-                <p className="org-profile-empty-text">No previous events listed.</p>
+                <p className="org-profile-empty-text">
+                  No previous events listed.
+                </p>
               )}
             </div>
           </div>
@@ -137,7 +152,9 @@ const OrganisationProfile = () => {
         
         <div className="org-profile-postings-card">
           <div className="org-profile-card-header">
-            <h3>Active Opportunity Postings</h3>
+            <h3>
+              Active Opportunity Postings
+            </h3>
             <span className="org-profile-count-badge">{activeOpportunities.length} Published</span>
           </div>
 
