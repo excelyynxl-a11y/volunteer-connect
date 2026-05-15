@@ -1,5 +1,6 @@
 import React from 'react';
 import './OpportunityCard.css';
+import { formatDate, formatTime } from '../lib/utils';
 
 const OpportunityCard = ({
     _id,
@@ -14,28 +15,6 @@ const OpportunityCard = ({
 }) => {
   const displayStatus = status || "Active";
   const statusClass = displayStatus.toLowerCase();
-
-  const startDate = new Date(startAt);
-  const endDate = new Date(endAt);
-
-  const dateStr = new Intl.DateTimeFormat('en-MY', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  }).format(startDate);
-
-  const startTimeStr = new Intl.DateTimeFormat('en-MY', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).format(startDate);
-
-  const endTimeStr = new Intl.DateTimeFormat('en-MY', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).format(endDate);
-
 
   return (
     <div className="event-card">
@@ -55,8 +34,8 @@ const OpportunityCard = ({
       <p>{details}</p>
       <div className="item-sub">
         <div style={{ marginBottom: '4px' }}>{location}</div>
-        <div>{dateStr}</div>
-        <div>{startTimeStr} - {endTimeStr}</div>
+        <div>{formatDate(startAt)} - {formatDate(endAt)}</div>
+        <div>{formatTime(startAt)} - {formatTime(endAt)}</div>
       </div>
 
       {showActionButtons && (
