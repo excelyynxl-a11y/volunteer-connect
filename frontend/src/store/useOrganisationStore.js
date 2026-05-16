@@ -8,8 +8,10 @@ const mockActiveOpportunities = [
     _id: "active-001",
     title: "Community Food Drive Helper",
     details: "Support food packing, registration, and distribution for local families.",
-    fixedDate: "2026-05-20",
-    timeFrame: "09:00 AM - 02:00 PM",
+    location: "Selangor, Cheras",
+    category: ["Community"],
+    startAt: "2026-05-20T09:00:00+08:00",
+    endAt: "2026-05-20T14:00:00+08:00",
     organisationId: "mock-organisation",
     status: "Active",
   },
@@ -17,8 +19,10 @@ const mockActiveOpportunities = [
     _id: "active-002",
     title: "Beach Cleanup Volunteer",
     details: "Help collect litter, sort recyclables, and document cleanup progress.",
-    fixedDate: "2026-05-24",
-    timeFrame: "08:00 AM - 12:00 PM",
+    location: "Pulau Pinang, Batu Ferringhi",
+    category: ["Environment", "Community"],
+    startAt: "2026-05-24T08:00:00+08:00",
+    endAt: "2026-05-24T12:00:00+08:00",
     organisationId: "mock-organisation",
     status: "Active",
   },
@@ -26,8 +30,10 @@ const mockActiveOpportunities = [
     _id: "active-003",
     title: "Literacy Tutor",
     details: "Assist children with reading practice and basic writing exercises.",
-    fixedDate: "2026-05-28",
-    timeFrame: "03:00 PM - 06:00 PM",
+    location: "Selangor, Petaling Jaya",
+    category: ["Education"],
+    startAt: "2026-05-28T15:00:00+08:00",
+    endAt: "2026-05-30T18:00:00+08:00",
     organisationId: "mock-organisation",
     status: "Active",
   },
@@ -38,8 +44,10 @@ const mockClosedOpportunities = [
     _id: "closed-001",
     title: "Senior Care Companion",
     details: "Spent the afternoon supporting seniors through conversation and activities.",
-    fixedDate: "2026-04-15",
-    timeFrame: "01:00 PM - 04:00 PM",
+    location: "Selangor, Subang Jaya",
+    category: ["Elderly Care"],
+    startAt: "2026-04-15T13:00:00+08:00",
+    endAt: "2026-04-15T16:00:00+08:00",
     organisationId: "mock-organisation",
     status: "Closed",
   },
@@ -47,8 +55,10 @@ const mockClosedOpportunities = [
     _id: "closed-002",
     title: "Community Garden Setup",
     details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
-    fixedDate: "2026-04-22",
-    timeFrame: "08:30 AM - 11:30 AM",
+    location: "Johor, Johor Bahru",
+    category: ["Environment"],
+    startAt: "2026-04-22T08:30:00+08:00",
+    endAt: "2026-04-23T11:30:00+08:00",
     organisationId: "mock-organisation",
     status: "Closed",
   },
@@ -59,8 +69,10 @@ const mockCancelledOpportunities = [
     _id: "cancelled-001",
     title: "Outdoor Health Booth",
     details: "Cancelled due to severe weather conditions.",
-    fixedDate: "2026-05-02",
-    timeFrame: "10:00 AM - 03:00 PM",
+    location: "Melaka, Ayer Keroh",
+    category: ["Health"],
+    startAt: "2026-05-02T10:00:00+08:00",
+    endAt: "2026-05-02T15:00:00+08:00",
     organisationId: "mock-organisation",
     status: "Cancelled",
   },
@@ -71,7 +83,12 @@ const normaliseOpportunity = (opportunity) => ({
   detail: opportunity.detail ?? opportunity.details ?? "",
 });
 
-const loadMockOpportunities = async (set, loadingKey, dataKey, mockData) => {
+const loadMockOpportunities = async (set, get, loadingKey, dataKey, mockData) => {
+  const currentData = get()[dataKey];
+  if (currentData && currentData.length > 0) {
+    return currentData;
+  }
+
   set({ [loadingKey]: true });
   try {
     const opportunities = mockData.map(normaliseOpportunity);
@@ -87,6 +104,7 @@ export const useOrganisationStore = create((set, get) => ({
     currentTab: "homepage",
     sidebarCollapsed: false,
     isUpdatingOrganisationProfile: false,
+    isUpdatingOpportunity: false,
 
     setCurrentTab: (tab) => set({ currentTab: tab }),
     toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
@@ -114,6 +132,33 @@ export const useOrganisationStore = create((set, get) => ({
       }
     },
 
+    updateOpportunity: async (opportunityId, opportunityData) => {
+      set({ isUpdatingOpportunity: true });
+      try {
+        const res = await axiosInstance.put(`/opportunity/${opportunityId}`, opportunityData);
+        
+        toast.success("Opportunity updated successfully.");
+
+        set((state) => ({
+          activeOpportunities: state.activeOpportunities.map((opp) =>
+            opp._id === opportunityId ? { ...opp, ...opportunityData } : opp
+          )
+        }));
+
+        return { success: true, data: res.data };
+      } catch (error) {
+        const message =
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to update opportunity";
+        
+          toast.error(message);
+          return { success: false, error: message };
+      } finally {
+        set({ isUpdatingOpportunity: false });
+      }
+    },
+
     activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
     isActiveOpportunitiesLoading: false,
 
@@ -136,7 +181,7 @@ export const useOrganisationStore = create((set, get) => ({
     isCompletedApplications: false,
 
     getActiveOpportunities: async () => loadMockOpportunities(
-      set,
+      set, get,
       "isActiveOpportunitiesLoading",
       "activeOpportunities",
       mockActiveOpportunities,

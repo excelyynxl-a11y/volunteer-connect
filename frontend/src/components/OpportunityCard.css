@@ -29,6 +29,8 @@
     padding: 4px 10px;
     border-radius: 999px;
     margin-bottom: 10px;
+    top: 18px;
+    left: 18px;
 }
 
 .event-tag.status-active {
@@ -58,4 +60,97 @@
     font-size: 15px;
     margin: 0;
     line-height: 1.5;
+}
+
+.item-sub {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+    color: #5c726d;
+}
+
+.item-sub div {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    line-height: 1.4;
+}
+
+.item-sub strong, 
+.item-sub b {
+    color: #1a3c34;
+    font-weight: 700;
+    min-width: unset;
+    flex-shrink: 0;
+}
+
+.card-category-list {
+    position: absolute;
+    gap: 6px;
+    margin: 0;
+    top: 18px;
+    right: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 60%;
+}
+
+.card-category-chip {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #f0ede8;
+    color: #8b7355;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid #e0dbd3;
+    top: 18px;
+    right: 18px;
+}
+
+.item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 16px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.action-btn.view {
+    background: #ffffff;
+    border-color: #e9c48b;
+    color: #8b7355;
+}
+
+.action-btn.view:hover {
+    background: #f0ede8;
+    color: #1a3c34;
+}
+
+.action-btn.edit {
+    background: #2c614f;
+    color: #ffffff;
+}
+
+.action-btn.edit:hover {
+    background: #1a3c34;
+    box-shadow: 0 4px 12px rgba(44, 97, 79, 0.2);
+    transform: translateY(-1px);
 }
