@@ -1441,3 +1441,378 @@
     flex-direction: column;
   }
 }
+.organisation-create-page {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  background:
+    radial-gradient(1200px 600px at -10% -20%, rgba(47, 143, 104, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(31, 77, 54, 0.06), transparent 55%),
+    #f4f7f3;
+  min-height: 100vh;
+}
+
+.organisation-create-header {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, #ffffff 0%, #fbfdfa 100%);
+  border-radius: 28px;
+  padding: 40px 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 20px 50px -25px rgba(31, 77, 54, 0.25),
+    0 4px 16px rgba(31, 77, 54, 0.06);
+  border: 1px solid #e6ece6;
+}
+
+.organisation-create-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100%;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(47, 143, 104, 0.12), transparent 60%);
+  pointer-events: none;
+}
+
+.organisation-create-header-left {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+}
+
+.organisation-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  font-weight: 700;
+  color: #2f8f68;
+  background: rgba(47, 143, 104, 0.08);
+  border: 1px solid rgba(47, 143, 104, 0.18);
+  padding: 7px 14px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+.organisation-create-header h1 {
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #1f4d36;
+  margin-bottom: 14px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1f4d36 0%, #2f8f68 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.organisation-create-description {
+  color: #5d6660;
+  font-size: 15.5px;
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.organisation-create-header-actions {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.organisation-back-btn {
+  padding: 13px 22px;
+  border-radius: 14px;
+  border: 1px solid #d7ddd7;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1f4d36;
+  font-size: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.organisation-back-btn:hover {
+  background: #f4f7f4;
+  border-color: #2f8f68;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 77, 54, 0.08);
+}
+
+.organisation-create-btn {
+  padding: 13px 26px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #1f6b4f 0%, #2f8f68 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 25px -8px rgba(31, 107, 79, 0.5),
+    0 4px 12px rgba(31, 107, 79, 0.2);
+}
+
+.organisation-create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 16px 32px -8px rgba(31, 107, 79, 0.55),
+    0 6px 16px rgba(31, 107, 79, 0.25);
+}
+
+.organisation-create-btn:active {
+  transform: translateY(0);
+}
+
+.organisation-create-card {
+  background: white;
+  border-radius: 28px;
+  padding: 40px 44px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 20px 50px -25px rgba(31, 77, 54, 0.18),
+    0 4px 16px rgba(31, 77, 54, 0.04);
+  border: 1px solid #e6ece6;
+}
+
+.organisation-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #eef2ee;
+}
+
+.organisation-card-heading-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(47, 143, 104, 0.12), rgba(31, 77, 54, 0.06));
+  color: #1f6b4f;
+  border: 1px solid rgba(47, 143, 104, 0.18);
+}
+
+.organisation-create-card h2 {
+  color: #1f4d36;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.organisation-card-subtitle {
+  color: #7c8a82;
+  font-size: 13.5px;
+  margin: 4px 0 0 0;
+}
+
+.organisation-create-form {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 48px;
+}
+
+.organisation-form-left,
+.organisation-form-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.organisation-form-group-grow {
+  flex: 1;
+}
+
+.organisation-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.organisation-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.organisation-form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: #1f4d36;
+  letter-spacing: 0.01em;
+}
+
+.organisation-form-group label svg {
+  color: #2f8f68;
+}
+
+.organisation-form-group input,
+.organisation-form-group textarea,
+.organisation-form-group select {
+  border: 1px solid #dde4dd;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1f2d26;
+  background: #fbfcfb;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.organisation-form-group input::placeholder,
+.organisation-form-group textarea::placeholder {
+  color: #a8b0a8;
+}
+
+.organisation-form-group input:hover,
+.organisation-form-group textarea:hover,
+.organisation-form-group select:hover {
+  border-color: #b8c4b8;
+  background: #ffffff;
+}
+
+.organisation-form-group input:focus,
+.organisation-form-group textarea:focus,
+.organisation-form-group select:focus {
+  border-color: #2f8f68;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(47, 143, 104, 0.12),
+    0 2px 8px rgba(47, 143, 104, 0.08);
+}
+
+.organisation-form-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231f4d36' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.organisation-form-group select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: #f3f5f3;
+}
+
+.organisation-form-group textarea {
+  min-height: 240px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.organisation-form-group input[type="date"],
+.organisation-form-group input[type="time"] {
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.organisation-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.organisation-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: #eaefea;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.organisation-progress-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2f8f68, #1f6b4f);
+  border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.organisation-character-count {
+  font-size: 12.5px;
+  color: #8a918a;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  text-align: right;
+}
+
+.organisation-error-text {
+  color: #d83c3c;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 2px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 1100px) {
+  .organisation-create-page {
+    padding: 24px;
+  }
+  .organisation-create-header,
+  .organisation-create-card {
+    padding: 28px;
+  }
+  .organisation-create-header h1 {
+    font-size: 34px;
+  }
+  .organisation-create-form {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .organisation-create-header {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .organisation-create-header-actions {
+    width: 100%;
+  }
+  .organisation-create-btn,
+  .organisation-back-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .organisation-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .organisation-create-header h1 {
+    font-size: 28px;
+  }
+}
