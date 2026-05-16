@@ -5,7 +5,7 @@ import { useOrganisationStore } from "../../store/useOrganisationStore";
 import OrganisationHomepage from "./OrganisationHomepage";
 import OrganisationProfile from "./OrganisationProfile";
 import EditOrganisationProfile from "./EditOrganisationProfile";
-
+import CreateOpportunityPage from "./CreateOpportunityPage";
 import "./Organisation.css";
 
 
@@ -29,6 +29,7 @@ const OrganisationDashboard = () => {
           <Route path="/" element={<OrganisationHomepage />} />
           <Route path="profile" element={<OrganisationProfile />} />
           <Route path="edit-organisation-profile" element={<EditOrganisationProfile />} />
+          <Route path="create-opportunity"element={<CreateOpportunityPage />}/>
           <Route path="*" element={<Navigate to="/organisation-dashboard" replace />} />
         </Routes>
       </main>
