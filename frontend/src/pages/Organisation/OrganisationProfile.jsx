@@ -57,11 +57,14 @@ const OrganisationProfile = () => {
               </b>. Your community impact is growing.
             </p>
           </div>
-          <button className="org-profile-primary-btn"><Plus size={18} />
+          <button
+            className="org-profile-primary-btn"
+            onClick={() => navigate("/organisation-dashboard/create-opportunity")}
+          >
+            <Plus size={18} />
             Create New Posting
           </button>
         </section>
-
         <section className="org-profile-section">
           {/* Header Card with Edit Button */}
           <div className="org-profile-card org-profile-header-card">
