@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import OpportunityCard from "../../components/OpportunityCard";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
@@ -10,14 +10,28 @@ const VolunteerOpportunities = () => {
     opportunitiesError,
     getAllOpportunities,
   } = useVolunteerStore();
+  const [filters] = useState({
+    location: "",
+    category: "",
+    availability: "",
+  });
 
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
 
-  const activeOpportunities = opportunities.filter(
-    (opportunity) => opportunity.status?.toLowerCase() === "active",
-  );
+  const activeOpportunities = opportunities.filter((opportunity) => {
+    const matchesStatus = opportunity.status?.toLowerCase() === "active";
+    const matchesLocation =
+      !filters.location || opportunity.location === filters.location;
+    const matchesCategory =
+      !filters.category || opportunity.category?.includes(filters.category);
+
+    // TODO: Compare opportunity.startAt/endAt with the volunteer availability value.
+    const matchesAvailability = !filters.availability || true;
+
+    return matchesStatus && matchesLocation && matchesCategory && matchesAvailability;
+  });
 
   return (
     <div className="volunteer-opportunities-page">
@@ -34,6 +48,8 @@ const VolunteerOpportunities = () => {
             </label>
             <button type="button">Search</button>
           </div>
+
+          {/* TODO: Add filter controls and update filters for location, category, and availability. */}
         </div>
       </section>
 
