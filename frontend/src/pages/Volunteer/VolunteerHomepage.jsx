@@ -19,6 +19,9 @@ const formatOpportunityTime = (dateString) =>
   });
 
 
+
+
+const VolunteerHomepage = () => {
   const {
     opportunities,
     isOpportunitiesLoading,
@@ -40,8 +43,7 @@ const formatOpportunityTime = (dateString) =>
     const matchesStatus = opportunity.status?.toLowerCase() === "active";
     return matchesStatus;
   });
-
-const VolunteerHomepage = () => {
+  
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
@@ -118,38 +120,25 @@ const VolunteerHomepage = () => {
             </button>
           </div>
 
-          <div className="recommended-opportunities-list">
-            {/* {mockOpportunities.slice(0, 3).map((opportunity) => (
-              <OpportunityCard
-                key={opportunity._id}
-                title={opportunity.title}
-                detail={opportunity.details}
-                fixedDate={formatOpportunityDate(opportunity.startAt)}
-                timeFrame={`${formatOpportunityTime(opportunity.startAt)} - ${formatOpportunityTime(opportunity.endAt)}`}
-                status={opportunity.status}
-                showActionButtons
-              />
-            ))} */}
+          {opportunitiesError ? (
+            <p>{opportunitiesError}</p>
+          ) : isOpportunitiesLoading ? (
+            <p>Loading opportunities...</p>
+          ) : activeOpportunities.length > 0 ? (
+            <div className="volunteer-opportunities-grid">
+              {activeOpportunities.map((opportunity) => (
+                <OpportunityCard
+                  key={opportunity._id}
+                  opportunity={opportunity}
+                  variant="volunteer"
+                  actions={["view"]}
+                />
+              ))}
+            </div>
+          ) : (
+            <p>No active opportunities found.</p>
+          )}
 
-            {opportunitiesError ? (
-              <p>{opportunitiesError}</p>
-            ) : isOpportunitiesLoading ? (
-              <p>Loading opportunities...</p>
-            ) : activeOpportunities.length > 0 ? (
-              <div className="volunteer-opportunities-grid">
-                {activeOpportunities.map((opportunity) => (
-                  <OpportunityCard
-                    key={opportunity._id}
-                    opportunity={opportunity}
-                    variant="volunteer"
-                    actions={["view"]}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p>No active opportunities found.</p>
-            )}
-          </div>
         </div>
       </div>
     </div>
