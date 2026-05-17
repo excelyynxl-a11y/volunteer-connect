@@ -1,3 +1,56 @@
+import OpportunityCard from "../../components/OpportunityCard";
+const mockOpportunities = [
+  {
+    _id: "1",
+    title: "Beach Cleanup",
+    details: "Help clean the beach and protect the local environment.",
+    organisationId: "org1",
+    images: [],
+    location: "Port Dickson",
+    startAt: "2026-06-01T08:00:00+08:00",
+    endAt: "2026-06-01T12:00:00+08:00",
+    applicationDeadline: "2026-05-28T23:59:00.000Z",
+    maxVolunteers: 20,
+    approvedVolunteersCount: 8,
+    category: ["Environment"],
+    requirements: "Comfortable working outdoors.",
+    status: "active",
+    spotsRemaining: 12,
+    isFull: false,
+  },
+  {
+    _id: "2",
+    title: "Food Bank Helper",
+    details: "Support food packing and distribution for local families.",
+    organisationId: "org2",
+    images: [],
+    location: "Subang Jaya",
+    startAt: "2026-06-05T10:00:00+08:00",
+    endAt: "2026-06-05T14:00:00+08:00",
+    applicationDeadline: "2026-06-02T23:59:00.000Z",
+    maxVolunteers: 15,
+    approvedVolunteersCount: 7,
+    category: ["Community"],
+    requirements: "Able to help carry light food packages.",
+    status: "active",
+    spotsRemaining: 8,
+    isFull: false,
+  },
+];
+
+const formatOpportunityDate = (dateString) =>
+  new Date(dateString).toLocaleDateString("en-MY", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+const formatOpportunityTime = (dateString) =>
+  new Date(dateString).toLocaleTimeString("en-MY", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
 const VolunteerHomepage = () => {
   return (
     <div className="volunteer-homepage">
@@ -47,7 +100,17 @@ const VolunteerHomepage = () => {
           </div>
 
           <div className="recommended-opportunities-list">
-            recommended opportunity cards later
+            {mockOpportunities.slice(0, 3).map((opportunity) => (
+              <OpportunityCard
+                key={opportunity._id}
+                title={opportunity.title}
+                detail={opportunity.details}
+                fixedDate={formatOpportunityDate(opportunity.startAt)}
+                timeFrame={`${formatOpportunityTime(opportunity.startAt)} - ${formatOpportunityTime(opportunity.endAt)}`}
+                status={opportunity.status}
+                showActionButtons
+              />
+            ))}
           </div>
         </div>
       </div>
