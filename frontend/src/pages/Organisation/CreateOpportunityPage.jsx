@@ -7,47 +7,60 @@ import {
   FileText,
   AlignLeft,
   CheckCircle2,
+  Users,
+  X,
+  Target
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import OrganisationSidebar from "../../components/OrganisationSidebar";
-import "../../pages/Organisation/Organisation.css";
-import { malaysiaStates, malaysiaStateCities } from "../../lib/data";
+import { malaysiaStates, malaysiaStateCities, EVENT_CATEGORIES } from "../../lib/data";
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: "",
-    summary: "",
-    state: "",
-    city: "",
-    startDate: "",
-    endDate: "",
-    startTime: "",
-    endTime: "",
+    details: "",
+    maxVolunteers: 1,
+    applicationDeadline: "",
+    startAt: "",
+    endAt: "",
   });
 
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState([]);
   const [errors, setErrors] = useState({});
 
-  const selectedCities = malaysiaStateCities[formData.state] || [];
+  const selectedCities = malaysiaStateCities[selectedState] || [];
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const titleProgress = Math.min((formData.title.length / 15) * 100, 100);
+  const detailsProgress = Math.min((formData.details.length / 50) * 100, 100);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategoryAdd = (e) => {
+    const value = e.target.value;
+    if (value && !selectedCategory.includes(value)) {
+      setSelectedCategory([...selectedCategory, value]);
+    }
+    e.target.value = "";
+  };
+
+  const removeCategory = (catToRemove) => {
+    setSelectedCategory(selectedCategory.filter(c => c !== catToRemove));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (formData.title.trim().length < 15)
-      newErrors.title = "Title must be at least 15 characters";
-    if (formData.summary.trim().length < 50)
-      newErrors.summary = "Summary must be at least 50 characters";
-    if (!formData.state) newErrors.state = "Please select a state";
-    if (!formData.city) newErrors.city = "Please select a city";
-    if (!formData.startDate) newErrors.startDate = "Please choose a start date";
-    if (!formData.endDate) newErrors.endDate = "Please choose an end date";
-    if (!formData.startTime) newErrors.startTime = "Please choose a start time";
-    if (!formData.endTime) newErrors.endTime = "Please choose an end time";
+    if (formData.title.trim().length < 15) newErrors.title = "Min 15 characters required";
+    if (formData.details.trim().length < 50) newErrors.details = "Min 50 characters required";
+    if (!selectedState || !selectedCity) newErrors.location = "Location is required";
+    if (selectedCategory.length === 0) newErrors.category = "Select at least one category";
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -55,12 +68,16 @@ const CreateOpportunityPage = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!validateForm()) return;
-    console.log("Opportunity Created:", formData);
+
+    const submissionData = {
+      ...formData,
+      location: `${selectedState}, ${selectedCity}`,
+      category: selectedCategory,
+    };
+
+    console.log("Saving to Database:", submissionData);
     navigate("/organisation-dashboard");
   };
-
-  const titleProgress = Math.min((formData.title.length / 15) * 100, 100);
-  const summaryProgress = Math.min((formData.summary.length / 50) * 100, 100);
 
   return (
     <div className="organisation-layout">
@@ -68,42 +85,27 @@ const CreateOpportunityPage = () => {
 
       <div className="organisation-main-content">
         <div className="organisation-create-page">
-          <div className="organisation-create-header">
+          <header className="organisation-create-header">
             <div className="organisation-create-header-left">
-              <div className="organisation-section-label">
-                <span>ORGANISATION PROFILE</span>
-              </div>
-
+              <span className="organisation-section-label">ORGANISATION PROFILE</span>
               <h1>Create New Opportunity Posting</h1>
-
               <p className="organisation-create-description">
                 Craft a thoughtful volunteer opportunity for your community.
                 Clear details help the right people show up at the right time.
               </p>
             </div>
-
             <div className="organisation-create-header-actions">
-              <button
-                className="organisation-back-btn"
-                onClick={() => navigate(-1)}
-                type="button"
-              >
-                <ArrowLeft size={18} />
-                Back
+              <button className="organisation-back-btn" onClick={() => navigate(-1)} type="button">
+                <ArrowLeft size={18}/> Back
               </button>
-
-              <button
-                className="organisation-create-btn"
-                onClick={handleSubmit}
-                type="button"
-              >
-                <CheckCircle2 size={18} />
-                Publish Opportunity
+              <button className="organisation-create-btn" onClick={handleSubmit} type="button">
+                <CheckCircle2 size={18}/> Publish Opportunity
               </button>
             </div>
-          </div>
+          </header>
 
           <div className="organisation-create-card">
+            {/* RESTORED: The Card Heading section */}
             <div className="organisation-card-heading">
               <div className="organisation-card-heading-icon">
                 <FileText size={20} />
@@ -119,178 +121,95 @@ const CreateOpportunityPage = () => {
             <form className="organisation-create-form" onSubmit={handleSubmit}>
               <div className="organisation-form-left">
                 <div className="organisation-form-group">
-                  <label>
-                    <FileText size={16} />
-                    Event Title
-                  </label>
-
-                  <input
-                    type="text"
-                    name="title"
-                    placeholder="A clear, inviting title for your event"
-                    value={formData.title}
-                    onChange={handleChange}
+                  <label><FileText size={16}/> Event Title</label>
+                  <input 
+                    type="text" 
+                    name="title" 
+                    value={formData.title} 
+                    onChange={handleChange} 
+                    placeholder="A clear, inviting title for your event" 
                   />
-
                   <div className="organisation-progress-row">
                     <div className="organisation-progress-bar">
                       <span style={{ width: `${titleProgress}%` }} />
                     </div>
-                    <div className="organisation-character-count">
-                      {formData.title.length}/15
-                    </div>
+                    <div className="organisation-character-count">{formData.title.length}/15</div>
                   </div>
-
-                  {errors.title && (
-                    <p className="organisation-error-text">{errors.title}</p>
-                  )}
+                  {errors.title && <p className="organisation-error-text">{errors.title}</p>}
                 </div>
 
                 <div className="organisation-form-group organisation-form-group-grow">
-                  <label>
-                    <AlignLeft size={16} />
-                    Event Summary
-                  </label>
-
-                  <textarea
-                    name="summary"
-                    placeholder="Describe what volunteers will do, who they will help, and why it matters"
-                    value={formData.summary}
-                    onChange={handleChange}
+                  <label><AlignLeft size={16}/> Detailed Description</label>
+                  <textarea 
+                    name="details" 
+                    value={formData.details} 
+                    onChange={handleChange} 
+                    placeholder="Describe what volunteers will do, who they will help, and why it matters" 
                   />
-
                   <div className="organisation-progress-row">
                     <div className="organisation-progress-bar">
-                      <span style={{ width: `${summaryProgress}%` }} />
+                      <span style={{ width: `${detailsProgress}%` }} />
                     </div>
-                    <div className="organisation-character-count">
-                      {formData.summary.length}/50
-                    </div>
+                    <div className="organisation-character-count">{formData.details.length}/50</div>
                   </div>
-
-                  {errors.summary && (
-                    <p className="organisation-error-text">{errors.summary}</p>
-                  )}
+                  {errors.details && <p className="organisation-error-text">{errors.details}</p>}
                 </div>
               </div>
 
               <div className="organisation-form-right">
                 <div className="organisation-form-grid">
+                  <div className="organisation-form-group" style={{ gridColumn: "span 2" }}>
+                    <label><Target size={16}/> Categories</label>
+                    <select onChange={handleCategoryAdd} className="org-profile-select" defaultValue="">
+                      <option value="" disabled>Add Category</option>
+                      {EVENT_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                    <div className="selected-category-tags">
+                      {selectedCategory.map(cat => (
+                        <span key={cat} className="category-tag-badge">
+                          {cat} 
+                          <button type="button" onClick={() => removeCategory(cat)} className="remove-tag-btn">
+                            <X size={12}/>
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="organisation-form-group">
-                    <label>
-                      <MapPin size={16} />
-                      State
-                    </label>
-                    <select
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                    >
+                    <label><MapPin size={16}/> State</label>
+                    <select value={selectedState} onChange={(e) => {setSelectedState(e.target.value); setSelectedCity("");}}>
                       <option value="">Select State</option>
-                      {malaysiaStates.map((state) => (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      ))}
+                      {malaysiaStates.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    {errors.state && (
-                      <p className="organisation-error-text">{errors.state}</p>
-                    )}
                   </div>
 
                   <div className="organisation-form-group">
-                    <label>
-                      <MapPin size={16} />
-                      City
-                    </label>
-                    <select
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      disabled={!formData.state}
-                    >
+                    <label><MapPin size={16}/> City</label>
+                    <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} disabled={!selectedState}>
                       <option value="">Select City</option>
-                      {selectedCities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
+                      {selectedCities.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    {errors.city && (
-                      <p className="organisation-error-text">{errors.city}</p>
-                    )}
                   </div>
 
                   <div className="organisation-form-group">
-                    <label>
-                      <CalendarDays size={16} />
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={formData.startDate}
-                      onChange={handleChange}
-                    />
-                    {errors.startDate && (
-                      <p className="organisation-error-text">
-                        {errors.startDate}
-                      </p>
-                    )}
+                    <label><CalendarDays size={16}/> Start Date & Time</label>
+                    <input type="datetime-local" name="startAt" value={formData.startAt} onChange={handleChange} />
                   </div>
 
                   <div className="organisation-form-group">
-                    <label>
-                      <CalendarDays size={16} />
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={formData.endDate}
-                      onChange={handleChange}
-                    />
-                    {errors.endDate && (
-                      <p className="organisation-error-text">
-                        {errors.endDate}
-                      </p>
-                    )}
+                    <label><CalendarDays size={16}/> End Date & Time</label>
+                    <input type="datetime-local" name="endAt" value={formData.endAt} onChange={handleChange} />
                   </div>
 
                   <div className="organisation-form-group">
-                    <label>
-                      <Clock3 size={16} />
-                      Start Time
-                    </label>
-                    <input
-                      type="time"
-                      name="startTime"
-                      value={formData.startTime}
-                      onChange={handleChange}
-                    />
-                    {errors.startTime && (
-                      <p className="organisation-error-text">
-                        {errors.startTime}
-                      </p>
-                    )}
+                    <label><Users size={16}/> Volunteer Capacity</label>
+                    <input type="number" name="maxVolunteers" value={formData.maxVolunteers} onChange={handleChange} min="1" />
                   </div>
 
                   <div className="organisation-form-group">
-                    <label>
-                      <Clock3 size={16} />
-                      End Time
-                    </label>
-                    <input
-                      type="time"
-                      name="endTime"
-                      value={formData.endTime}
-                      onChange={handleChange}
-                    />
-                    {errors.endTime && (
-                      <p className="organisation-error-text">
-                        {errors.endTime}
-                      </p>
-                    )}
+                    <label><Clock3 size={16}/> Application Deadline</label>
+                    <input type="date" name="applicationDeadline" value={formData.applicationDeadline} onChange={handleChange} />
                   </div>
                 </div>
               </div>
