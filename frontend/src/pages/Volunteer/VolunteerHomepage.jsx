@@ -1,44 +1,9 @@
 import OpportunityCard from "../../components/OpportunityCard";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useVolunteerStore } from "../../store/useVolunteerStore";
+import "./Volunteer.css";
 
-const mockOpportunities = [
-  {
-    _id: "1",
-    title: "Beach Cleanup",
-    details: "Help clean the beach and protect the local environment.",
-    organisationId: "org1",
-    images: [],
-    location: "Port Dickson",
-    startAt: "2026-06-01T08:00:00+08:00",
-    endAt: "2026-06-01T12:00:00+08:00",
-    applicationDeadline: "2026-05-28T23:59:00.000Z",
-    maxVolunteers: 20,
-    approvedVolunteersCount: 8,
-    category: ["Environment"],
-    requirements: "Comfortable working outdoors.",
-    status: "active",
-    spotsRemaining: 12,
-    isFull: false,
-  },
-  {
-    _id: "2",
-    title: "Food Bank Helper",
-    details: "Support food packing and distribution for local families.",
-    organisationId: "org2",
-    images: [],
-    location: "Subang Jaya",
-    startAt: "2026-06-05T10:00:00+08:00",
-    endAt: "2026-06-05T14:00:00+08:00",
-    applicationDeadline: "2026-06-02T23:59:00.000Z",
-    maxVolunteers: 15,
-    approvedVolunteersCount: 7,
-    category: ["Community"],
-    requirements: "Able to help carry light food packages.",
-    status: "active",
-    spotsRemaining: 8,
-    isFull: false,
-  },
-];
 
 const formatOpportunityDate = (dateString) =>
   new Date(dateString).toLocaleDateString("en-MY", {
@@ -51,6 +16,29 @@ const formatOpportunityTime = (dateString) =>
   new Date(dateString).toLocaleTimeString("en-MY", {
     hour: "2-digit",
     minute: "2-digit",
+  });
+
+
+  const {
+    opportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
+    getAllOpportunities,
+  } = useVolunteerStore();
+
+  const [filters] = useState({
+    location: "",
+    category: "",
+    availability: "",
+  });
+
+  useEffect(() => {
+    getAllOpportunities();
+  }, [getAllOpportunities]);
+
+  const activeOpportunities = opportunities.filter((opportunity) => {
+    const matchesStatus = opportunity.status?.toLowerCase() === "active";
+    return matchesStatus;
   });
 
 const VolunteerHomepage = () => {
@@ -131,7 +119,7 @@ const VolunteerHomepage = () => {
           </div>
 
           <div className="recommended-opportunities-list">
-            {mockOpportunities.slice(0, 3).map((opportunity) => (
+            {/* {mockOpportunities.slice(0, 3).map((opportunity) => (
               <OpportunityCard
                 key={opportunity._id}
                 title={opportunity.title}
@@ -141,7 +129,26 @@ const VolunteerHomepage = () => {
                 status={opportunity.status}
                 showActionButtons
               />
-            ))}
+            ))} */}
+
+            {opportunitiesError ? (
+              <p>{opportunitiesError}</p>
+            ) : isOpportunitiesLoading ? (
+              <p>Loading opportunities...</p>
+            ) : activeOpportunities.length > 0 ? (
+              <div className="volunteer-opportunities-grid">
+                {activeOpportunities.map((opportunity) => (
+                  <OpportunityCard
+                    key={opportunity._id}
+                    opportunity={opportunity}
+                    variant="volunteer"
+                    actions={["view"]}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>No active opportunities found.</p>
+            )}
           </div>
         </div>
       </div>
