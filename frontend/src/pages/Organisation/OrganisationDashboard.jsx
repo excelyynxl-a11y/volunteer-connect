@@ -7,6 +7,7 @@ import OrganisationProfile from "./OrganisationProfile";
 import EditOrganisationProfile from "./EditOrganisationProfile";
 import EditOpportunity from "./EditOpportunity";
 
+import CreateOpportunityPage from "./CreateOpportunityPage";
 import "./Organisation.css";
 
 
@@ -32,6 +33,7 @@ const OrganisationDashboard = () => {
           <Route path="profile" element={<OrganisationProfile />} />
           <Route path="edit-organisation-profile" element={<EditOrganisationProfile />} />
           <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
+          <Route path="create-opportunity"element={<CreateOpportunityPage />}/>
           <Route path="*" element={<Navigate to="/organisation-dashboard" replace />} />
         </Routes>
       </main>
