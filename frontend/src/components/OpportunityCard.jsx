@@ -27,15 +27,15 @@ const formatTime = (dateValue) => {
 const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
 
 const OpportunityCard = ({
-    opportunity,
-    title,
-    detail,
-    fixedDate,
-    timeFrame,
-    status,
-    showActionButtons,
-    actions,
-    variant = 'default',
+  opportunity,
+  title,
+  detail,
+  fixedDate,
+  timeFrame,
+  status,
+  showActionButtons,
+  actions,
+  variant = 'default',
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
@@ -48,6 +48,7 @@ const OpportunityCard = ({
     ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
     : timeFrame;
   const displayCategory = opportunity?.category?.[0];
+  const displayOrganisationName = opportunity?.organisationId?.name; // new line is added here
   const spotsRemaining = isModelOpportunity
     ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
     : null;
@@ -63,8 +64,8 @@ const OpportunityCard = ({
       <h5>{displayTitle}</h5>
       <p>{displayDetails}</p>
 
-      {opportunity?.organisationName && (
-        <strong className="event-organisation">{opportunity.organisationName}</strong>
+      {displayOrganisationName && (
+        <strong className="event-organisation">{displayOrganisationName}</strong>
       )}
 
       <div className="item-sub">
