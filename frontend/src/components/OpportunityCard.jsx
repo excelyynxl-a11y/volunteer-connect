@@ -48,7 +48,7 @@ const OpportunityCard = ({
     ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
     : timeFrame;
   const displayCategory = opportunity?.category?.[0];
-  const displayOrganisationName = opportunity?.organisationId?.name; // new line is added here
+  const displayOrganisationName = opportunity?.organisationId?.name;
   const spotsRemaining = isModelOpportunity
     ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
     : null;

@@ -28,6 +28,9 @@ export const useVolunteerStore = create((set) => ({
   isLoading: true,
   loadError: "",
   isUpdatingVolunteerProfile: false,
+  opportunities: [],
+  isOpportunitiesLoading: false,
+  opportunitiesError: "",
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -71,6 +74,36 @@ export const useVolunteerStore = create((set) => ({
         totalVolunteerHours: "0.0h",
         loadError: message,
         isLoading: false,
+      });
+
+      return { success: false, error: message };
+    }
+  },
+
+  getAllOpportunities: async () => {
+    set({
+      isOpportunitiesLoading: true,
+      opportunitiesError: "",
+    });
+
+    try {
+      const response = await axiosInstance.get("/opportunity");
+      const opportunities = response.data?.data ?? [];
+
+      set({
+        opportunities,
+        isOpportunitiesLoading: false,
+      });
+
+      return { success: true, opportunities };
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Failed to load opportunities.";
+
+      set({
+        opportunities: [],
+        opportunitiesError: message,
+        isOpportunitiesLoading: false,
       });
 
       return { success: false, error: message };
