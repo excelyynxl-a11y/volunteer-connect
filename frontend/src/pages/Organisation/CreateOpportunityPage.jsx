@@ -4,7 +4,6 @@ import {
   CalendarDays,
   Clock3,
   MapPin,
-  Sparkles,
   FileText,
   AlignLeft,
   CheckCircle2,
@@ -72,7 +71,6 @@ const CreateOpportunityPage = () => {
           <div className="organisation-create-header">
             <div className="organisation-create-header-left">
               <div className="organisation-section-label">
-                <Sparkles size={14} />
                 <span>ORGANISATION PROFILE</span>
               </div>
 
@@ -113,7 +111,7 @@ const CreateOpportunityPage = () => {
               <div>
                 <h2>Opportunity Details</h2>
                 <p className="organisation-card-subtitle">
-                  Fill in the essentials below — all fields are required.
+                  Fill in the essentials below, all fields are required.
                 </p>
               </div>
             </div>
@@ -156,7 +154,7 @@ const CreateOpportunityPage = () => {
 
                   <textarea
                     name="summary"
-                    placeholder="Describe what volunteers will do, who they’ll help, and why it matters…"
+                    placeholder="Describe what volunteers will do, who they will help, and why it matters…"
                     value={formData.summary}
                     onChange={handleChange}
                   />

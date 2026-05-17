@@ -1577,12 +1577,12 @@
 }
 
 .organisation-create-page {
-  padding: 40px;
   display: flex;
   flex-direction: column;
   gap: 28px;
   background: #f5f1eb;
   min-height: 100vh;
+  max-width: 1200px;
 }
 
 .organisation-create-header {
