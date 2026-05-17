@@ -34,6 +34,7 @@ const OpportunityCard = ({
     timeFrame,
     status,
     showActionButtons,
+    onAction,
     actions,
     variant = 'default',
 }) => {
@@ -52,7 +53,7 @@ const OpportunityCard = ({
   const spotsRemaining = isModelOpportunity
     ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
     : null;
-  const displayActions = actions || (showActionButtons ? ['view'] : []);
+  const displayActions = actions || (showActionButtons ? ['view', 'edit'] : []);
 
   return (
     <div className={`event-card opportunity-card-${variant}`}>
@@ -110,7 +111,7 @@ const OpportunityCard = ({
       {displayActions.length > 0 && (
         <div className="item-actions">
           {displayActions.map((action) => (
-            <button className={`action-btn ${action}`} key={action} type="button">
+            <button className={`action-btn ${action}`} key={action} type="button" onClick={() => onAction && onAction(action, opportunity?._id)}>
               {action}
             </button>
           ))}
