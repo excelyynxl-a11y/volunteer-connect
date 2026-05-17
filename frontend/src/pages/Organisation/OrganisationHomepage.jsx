@@ -17,9 +17,6 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import "./Organisation.css";
 import { formatDate } from "../../lib/utils";
-import { formatTime } from "../../lib/utils";
-
-
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
@@ -36,72 +33,84 @@ const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
 );
 
 // ─── Opportunity Row ──────────────────────────────────────────────────────────
-const OpportunityRow = ({ opportunity, tone = "active" }) => (
-  <article className={`org-home-opportunity-row org-home-tone-${tone}`}>
-    <div className="org-home-opportunity-date">
-      <span className="org-home-opportunity-day">
-        {opportunity.fixedDate ? new Date(opportunity.fixedDate).getDate() : "—"}
-      </span>
-      <span className="org-home-opportunity-month">
-        {opportunity.fixedDate
-          ? new Date(opportunity.fixedDate).toLocaleDateString("en-GB", { month: "short" })
-          : "TBD"}
-      </span>
-    </div>
-    <div className="org-home-opportunity-body">
-      <div className="org-home-opportunity-head">
-        <h4>{opportunity.title}</h4>
-        <span className={`org-home-pill org-home-pill-${tone}`}>{opportunity.status}</span>
-      </div>
-      <p>{opportunity.detail || opportunity.details}</p>
-      <div className="org-home-opportunity-meta">
-        <span><CalendarDays size={14} />{formatDate(opportunity.fixedDate)}</span>
-        <span><Clock3 size={14} />{opportunity.timeFrame || "Flexible"}</span>
-      </div>
-    </div>
-    <button type="button" className="org-home-opportunity-action" aria-label="View">
-      <ChevronRight size={18} />
-    </button>
-  </article>
-);
+const OpportunityRow = ({ opportunity, tone = "active" }) => {
+  const date = opportunity.fixedDate || opportunity.startAt;
 
-// ─── Compact Cancelled Row (smaller pill style) ───────────────────────────────
-const CancelledRow = ({ opportunity }) => (
-  <article
-    className="org-home-opportunity-row org-home-tone-cancelled"
-    style={{ padding: "12px 16px", borderRadius: 14 }}
-  >
-    <div className="org-home-opportunity-date" style={{ width: 52, height: 52 }}>
-      <span className="org-home-opportunity-day" style={{ fontSize: 18 }}>
-        {opportunity.fixedDate ? new Date(opportunity.fixedDate).getDate() : "—"}
-      </span>
-      <span className="org-home-opportunity-month">
-        {opportunity.fixedDate
-          ? new Date(opportunity.fixedDate).toLocaleDateString("en-GB", { month: "short" })
-          : "TBD"}
-      </span>
-    </div>
-    <div className="org-home-opportunity-body">
-      <div className="org-home-opportunity-head">
-        <h4 style={{ fontSize: 14 }}>{opportunity.title}</h4>
-        <span className="org-home-pill org-home-pill-cancelled">{opportunity.status}</span>
+  return (
+    <article className={`org-home-opportunity-row org-home-tone-${tone}`}>
+      <div className="org-home-opportunity-date">
+        <span className="org-home-opportunity-day">
+          {date ? new Date(date).getDate() : "—"}
+        </span>
+        <span className="org-home-opportunity-month">
+          {date
+            ? new Date(date).toLocaleDateString("en-GB", { month: "short" })
+            : "TBD"}
+        </span>
       </div>
-      <p style={{ fontSize: 12.5 }}>{opportunity.detail || opportunity.details}</p>
-      <div className="org-home-opportunity-meta">
-        <span><CalendarDays size={12} />{formatDate(opportunity.fixedDate)}</span>
-        <span><Clock3 size={12} />{opportunity.timeFrame || "Flexible"}</span>
+      <div className="org-home-opportunity-body">
+        <div className="org-home-opportunity-head">
+          <h4>{opportunity.title}</h4>
+          <span className={`org-home-pill org-home-pill-${tone}`}>
+            {opportunity.status}
+          </span>
+        </div>
+        <p>{opportunity.detail || opportunity.details}</p>
+        <div className="org-home-opportunity-meta">
+          <span><CalendarDays size={14} />{formatDate(date)}</span>
+          <span><Clock3 size={14} />{opportunity.timeFrame || "Flexible"}</span>
+        </div>
       </div>
-    </div>
-    <button type="button" className="org-home-opportunity-action" aria-label="View">
-      <ChevronRight size={16} />
-    </button>
-  </article>
-);
+      <button type="button" className="org-home-opportunity-action" aria-label="View">
+        <ChevronRight size={18} />
+      </button>
+    </article>
+  );
+};
+
+// ─── Compact Cancelled Row ────────────────────────────────────────────────────
+const CancelledRow = ({ opportunity }) => {
+  const date = opportunity.fixedDate || opportunity.startAt;
+
+  return (
+    <article
+      className="org-home-opportunity-row org-home-tone-cancelled"
+      style={{ padding: "12px 16px", borderRadius: 14 }}
+    >
+      <div className="org-home-opportunity-date" style={{ width: 52, height: 52 }}>
+        <span className="org-home-opportunity-day" style={{ fontSize: 18 }}>
+          {date ? new Date(date).getDate() : "—"}
+        </span>
+        <span className="org-home-opportunity-month">
+          {date
+            ? new Date(date).toLocaleDateString("en-GB", { month: "short" })
+            : "TBD"}
+        </span>
+      </div>
+      <div className="org-home-opportunity-body">
+        <div className="org-home-opportunity-head">
+          <h4 style={{ fontSize: 14 }}>{opportunity.title}</h4>
+          <span className="org-home-pill org-home-pill-cancelled">
+            {opportunity.status}
+          </span>
+        </div>
+        <p style={{ fontSize: 12.5 }}>{opportunity.detail || opportunity.details}</p>
+        <div className="org-home-opportunity-meta">
+          <span><CalendarDays size={12} />{formatDate(date)}</span>
+          <span><Clock3 size={12} />{opportunity.timeFrame || "Flexible"}</span>
+        </div>
+      </div>
+      <button type="button" className="org-home-opportunity-action" aria-label="View">
+        <ChevronRight size={16} />
+      </button>
+    </article>
+  );
+};
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const OrganisationHomePage = () => {
-  const navigate  = useNavigate();
-  const authUser  = useAuthStore((s) => s.authUser);
+  const navigate = useNavigate();
+  const authUser = useAuthStore((s) => s.authUser);
 
   const {
     activeOpportunities,
@@ -125,7 +134,8 @@ const OrganisationHomePage = () => {
   const nextOpportunity = useMemo(() => {
     if (!activeOpportunities?.length) return null;
     return [...activeOpportunities].sort(
-      (a, b) => new Date(a.fixedDate) - new Date(b.fixedDate)
+      (a, b) =>
+        new Date(a.fixedDate || a.startAt) - new Date(b.fixedDate || b.startAt)
     )[0];
   }, [activeOpportunities]);
 
@@ -143,10 +153,15 @@ const OrganisationHomePage = () => {
     return Math.round((totals.closed / total) * 100);
   }, [totals]);
 
+  // date for the next event hero card
+  const nextDate = nextOpportunity
+    ? nextOpportunity.fixedDate || nextOpportunity.startAt
+    : null;
+
   return (
     <div className="org-home-page">
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      {/* ── Hero ── */}
       <section className="org-home-hero">
 
         {/* Left — welcome */}
@@ -162,7 +177,6 @@ const OrganisationHomePage = () => {
             A real-time pulse of every opportunity, applicant and engagement
             you've created. Keep your community moving — beautifully.
           </p>
-          {/* Create new posting CTA */}
           <div className="org-home-hero-actions">
             <button
               type="button"
@@ -187,7 +201,7 @@ const OrganisationHomePage = () => {
               <h3>{nextOpportunity.title}</h3>
               <p>{nextOpportunity.detail || nextOpportunity.details}</p>
               <div className="org-home-hero-card-meta">
-                <span><CalendarDays size={14} />{formatDate(nextOpportunity.fixedDate)}</span>
+                <span><CalendarDays size={14} />{formatDate(nextDate)}</span>
                 <span><Clock3 size={14} />{nextOpportunity.timeFrame || "Flexible"}</span>
               </div>
             </>
@@ -200,7 +214,7 @@ const OrganisationHomePage = () => {
         </div>
       </section>
 
-      {/* ── Stats Row (3 equal columns) ──────────────────────────────────────── */}
+      {/* ── Stats Row (3 equal columns) ── */}
       <section
         className="org-home-stats-grid"
         style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
@@ -228,7 +242,7 @@ const OrganisationHomePage = () => {
         />
       </section>
 
-      {/* ── Main two-column split ─────────────────────────────────────────────── */}
+      {/* ── Main two-column split ── */}
       <section className="org-home-split">
 
         {/* Left column — Active + Cancelled stacked */}
@@ -262,12 +276,9 @@ const OrganisationHomePage = () => {
             </div>
           </div>
 
-          {/* Cancelled — compact rectangular strip below active */}
+          {/* Cancelled — compact strip below active */}
           {cancelledOpportunities?.length > 0 && (
-            <div
-              className="org-home-panel"
-              style={{ padding: "22px 26px" }}
-            >
+            <div className="org-home-panel" style={{ padding: "22px 26px" }}>
               <header className="org-home-panel-head" style={{ marginBottom: 14 }}>
                 <div>
                   <span className="organisation-section-label">
@@ -276,7 +287,6 @@ const OrganisationHomePage = () => {
                   <h3 style={{ margin: "8px 0 0", fontSize: 17 }}>Recently cancelled</h3>
                 </div>
               </header>
-
               <div className="org-home-opportunity-list" style={{ gap: 8 }}>
                 {cancelledOpportunities.slice(0, 3).map((o) => (
                   <CancelledRow key={o._id} opportunity={o} />
@@ -299,7 +309,6 @@ const OrganisationHomePage = () => {
                 <h3>Delivery rate</h3>
               </div>
             </header>
-
             <div className="org-home-ring">
               <svg viewBox="0 0 120 120" className="org-home-ring-svg">
                 <circle cx="60" cy="60" r="52" className="org-home-ring-track" />
@@ -319,7 +328,6 @@ const OrganisationHomePage = () => {
                 <span>completed</span>
               </div>
             </div>
-
             <div className="org-home-ring-legend">
               <span><em className="org-home-dot org-home-dot-emerald" /> Active {totals.active}</span>
               <span><em className="org-home-dot org-home-dot-gold"    /> Closed {totals.closed}</span>
@@ -337,7 +345,6 @@ const OrganisationHomePage = () => {
                 <h3>Wrapped up</h3>
               </div>
             </header>
-
             <div className="org-home-opportunity-list compact">
               {closedOpportunities?.length ? (
                 closedOpportunities.slice(0, 2).map((o) => (
