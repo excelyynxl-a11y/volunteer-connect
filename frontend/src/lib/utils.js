@@ -27,7 +27,14 @@ export function formatDate(dateValue) {
     });
 }
 
-
+export function formatTime(dateValue) {
+    if (!dateValue) return '';
+    return new Date(dateValue).toLocaleTimeString('en-MY', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
 
 export const validateEmail = (email) => {
     if (!email.trim()) {

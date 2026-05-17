@@ -19,7 +19,7 @@ const OrganisationProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getActiveOpportunities(authUser?._id);
+    if (activeOpportunities.length === 0) getActiveOpportunities(authUser?._id);
     getClosedOpportunities(authUser?._id);
     getCancelledOpportunities(authUser?._id);
   }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
@@ -119,12 +119,7 @@ const OrganisationProfile = () => {
                 closedOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
-                    title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
-                    organisationId={opp.organisationId}
-                    status={opp.status}
+                    opportunity={opp}
                     showActionButtons={false}
                   />
                 ))
@@ -135,12 +130,7 @@ const OrganisationProfile = () => {
                 cancelledOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id || opp.title} // Always use keys in maps
-                    title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
-                    organisationId={opp.organisationId}
-                    status={opp.status}
+                    opportunity={opp}
                     showActionButtons={false}
                   />
                 ))
@@ -163,15 +153,16 @@ const OrganisationProfile = () => {
 
           <div className="org-profile-opportunity-list">
             {activeOpportunities.map((opp) => (
-              <OpportunityCard 
-                key={opp._id || opp.title} 
-                title={opp.title}
-                detail={opp.detail}
-                fixedDate={opp.fixedDate}
-                timeFrame={opp.timeFrame}
-                organisationId={opp.organisationId}
-                status={opp.status}
-                showActionButtons={true}
+              <OpportunityCard
+                key={opp._id}
+                opportunity={opp}
+                actions={['view', 'edit']}
+                onAction={(type, id) => {
+                  if (type === 'edit') {
+                    navigate(`/organisation-dashboard/edit-opportunity/${id}`)
+                  } // add view when needed
+                }
+              }
               />
             ))}
             {activeOpportunities.length === 0 && <p className="org-profile-empty-text">No active postings found.</p>}
