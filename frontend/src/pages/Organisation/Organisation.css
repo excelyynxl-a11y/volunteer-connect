@@ -1575,25 +1575,21 @@
     opacity: 1;
     transform: scale(1.1);
 }
-/* ═══════════════════════════════════════════
-   CREATE OPPORTUNITY PAGE  —  matches profile
-   ═══════════════════════════════════════════ */
 
 .organisation-create-page {
   padding: 40px;
   display: flex;
   flex-direction: column;
   gap: 28px;
-  background: #f5f1eb;          /* same warm beige as profile */
+  background: #f5f1eb;
   min-height: 100vh;
 }
 
-/* ── Header card ── */
 .organisation-create-header {
   position: relative;
   overflow: hidden;
   background: #ffffff;
-  border-radius: 14px;           /* matches org-profile-banner */
+  border-radius: 14px;
   border: 1px solid #e8ddd0;
   padding: 32px;
   display: flex;
@@ -1603,7 +1599,6 @@
   box-shadow: none;
 }
 
-/* gold left accent bar — same as org-profile-card-accent */
 .organisation-create-header::before {
   content: "";
   position: absolute;
@@ -1617,10 +1612,9 @@
   position: relative;
   z-index: 1;
   max-width: 640px;
-  padding-left: 8px;            /* breathing room from the accent bar */
+  padding-left: 8px; 
 }
 
-/* eyebrow label — matches org-profile-eyebrow */
 .organisation-section-label {
   display: inline-flex;
   align-items: center;
@@ -1637,10 +1631,9 @@
   font-size: 28px;
   line-height: 1.15;
   letter-spacing: -0.01em;
-  color: #2c614f;               /* matches org-profile-banner-text h1 */
+  color: #2c614f;
   margin: 0 0 8px;
   font-weight: 700;
-  /* no gradient text — keeps it consistent with profile headings */
   -webkit-text-fill-color: unset;
   background: none;
 }
@@ -1660,7 +1653,6 @@
   align-items: center;
 }
 
-/* Back button — matches org-profile-secondary-btn */
 .organisation-back-btn {
   display: inline-flex;
   align-items: center;
@@ -1684,7 +1676,6 @@
   transform: translateY(-1px);
 }
 
-/* Create / Publish button — matches org-profile-primary-btn */
 .organisation-create-btn {
   display: inline-flex;
   align-items: center;
@@ -1693,7 +1684,7 @@
   padding: 0 20px;
   border-radius: 10px;
   border: none;
-  background: #d9aa55;          /* gold — same as org-profile-primary-btn */
+  background: #d9aa55;
   color: #ffffff;
   font-family: inherit;
   font-size: 14px;
@@ -1711,17 +1702,15 @@
   transform: translateY(0);
 }
 
-/* ── Form card ── */
 .organisation-create-card {
   background: #ffffff;
-  border-radius: 14px;           /* matches org-profile-postings-card */
+  border-radius: 14px;
   border: 1px solid #e8ddd0;
   padding: 32px;
   position: relative;
   overflow: hidden;
 }
 
-/* gold left accent — same as org-profile-card-accent */
 .organisation-create-card::before {
   content: "";
   position: absolute;
@@ -1767,7 +1756,6 @@
   margin: 0;
 }
 
-/* ── Two-column form grid ── */
 .organisation-create-form {
   display: grid;
   grid-template-columns: 1fr 1.1fr;
@@ -1792,7 +1780,6 @@
   gap: 16px;
 }
 
-/* ── Field group ── */
 .organisation-form-group {
   display: flex;
   flex-direction: column;
@@ -1812,7 +1799,6 @@
   color: #2c614f;
 }
 
-/* inputs — matches org-profile-edit-input-group inputs */
 .organisation-form-group input,
 .organisation-form-group textarea,
 .organisation-form-group select {
@@ -1846,7 +1832,7 @@
 .organisation-form-group input:focus,
 .organisation-form-group textarea:focus,
 .organisation-form-group select:focus {
-  border-color: #d9aa55;         /* gold focus ring — matches profile */
+  border-color: #d9aa55; 
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
 }
@@ -1871,7 +1857,7 @@
   cursor: pointer;
 }
 
-/* ── Progress bar ── */
+/*Progress bar*/
 .organisation-progress-row {
   display: flex;
   align-items: center;
@@ -1889,7 +1875,7 @@
 .organisation-progress-bar span {
   display: block;
   height: 100%;
-  background: #d9aa55;          /* gold progress — matches accent */
+  background: #d9aa55;
   border-radius: 999px;
   transition: width 0.3s ease;
 }
@@ -1902,7 +1888,7 @@
   text-align: right;
 }
 
-/* ── Error text ── */
+/*Error text*/
 .organisation-error-text {
   color: #dc2626;
   font-size: 12.5px;
@@ -1913,7 +1899,6 @@
   gap: 5px;
 }
 
-/* ── Responsive ── */
 @media (max-width: 1100px) {
   .organisation-create-page { padding: 28px 24px; }
   .organisation-create-header,
@@ -1923,13 +1908,16 @@
     grid-template-columns: 1fr;
     gap: 24px;
   }
+
   .organisation-create-header {
     flex-direction: column;
     gap: 20px;
   }
+
   .organisation-create-header-actions {
     width: 100%;
   }
+
   .organisation-create-btn,
   .organisation-back-btn {
     flex: 1;
@@ -1943,7 +1931,6 @@
   .organisation-create-header h1 { font-size: 22px; }
 }
 
-
 .org-home-page {
   padding: 40px;
   display: flex;
@@ -1953,7 +1940,6 @@
   min-height: 100vh;
 }
 
-/* ── Hero ── */
 .org-home-hero {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -2144,7 +2130,7 @@
   color: #2c614f;
 }
 
-/* ── Split layout ── */
+/* Split layout */
 .org-home-split {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -2158,7 +2144,7 @@
   gap: 24px;
 }
 
-/* ── Panels — matches org-profile-postings-card ── */
+/* Panels matches org-profile-postings-card */
 .org-home-panel {
   background: #ffffff;
   border-radius: 14px;
@@ -2216,7 +2202,7 @@
   transform: translateY(-1px);
 }
 
-/* ── Opportunity rows ── */
+/* Opportunity rows */
 .org-home-opportunity-list {
   display: flex;
   flex-direction: column;
@@ -2334,7 +2320,6 @@
   background: rgba(217, 170, 85, 0.06);
 }
 
-/* ── Status pills — matches organisation-status ── */
 .org-home-pill {
   display: inline-flex;
   align-items: center;
@@ -2362,7 +2347,6 @@
   color: #dc2626;
 }
 
-/* ── Empty state ── */
 .org-home-empty {
   display: flex;
   flex-direction: column;
@@ -2378,7 +2362,6 @@
 
 .org-home-empty p { margin: 0; font-size: 14px; }
 
-/* ── Ring chart ── */
 .org-home-ring {
   position: relative;
   width: 160px;
@@ -2400,7 +2383,7 @@
 
 .org-home-ring-bar {
   fill: none;
-  stroke: #d9aa55;             /* gold — matches profile accent */
+  stroke: #d9aa55;
   stroke-width: 10;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s ease;
@@ -2459,7 +2442,6 @@
 .org-home-dot-gold    { background: #d9aa55; }
 .org-home-dot-rose    { background: #ef4444; }
 
-/* ── Tone accents on rows ── */
 .org-home-tone-closed .org-home-opportunity-date {
   background: rgba(217, 170, 85, 0.1);
   border-color: rgba(217, 170, 85, 0.3);
@@ -2474,7 +2456,6 @@
 }
 .org-home-tone-cancelled .org-home-opportunity-month { color: #dc2626; }
 
-/* ── Responsive ── */
 @media (max-width: 1100px) {
   .org-home-page { padding: 28px 24px; }
   .org-home-hero,
