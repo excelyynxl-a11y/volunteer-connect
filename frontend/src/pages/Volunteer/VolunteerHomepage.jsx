@@ -1,4 +1,6 @@
 import OpportunityCard from "../../components/OpportunityCard";
+import { useNavigate } from "react-router-dom";
+
 const mockOpportunities = [
   {
     _id: "1",
@@ -52,6 +54,13 @@ const formatOpportunityTime = (dateString) =>
   });
 
 const VolunteerHomepage = () => {
+  const navigate = useNavigate();
+
+  const handleSeeMore = () => {
+    navigate("/volunteer-dashboard/opportunities");
+  };
+
+
   return (
     <div className="volunteer-homepage">
       <div className="volunteer-homepage-content">
@@ -70,7 +79,7 @@ const VolunteerHomepage = () => {
           </div>
 
           <div className="profile-detail-card volunteer-summary-card">
-            <span>Past Opportunities</span>
+            <span>Past Participations</span>
             <strong>0</strong>
           </div>
 
@@ -94,7 +103,11 @@ const VolunteerHomepage = () => {
               </p>
             </div>
 
-            <button className="edit-profile-button">
+            <button
+              type="button"
+              className="edit-profile-button"
+              onClick={handleSeeMore}
+            >
               See More
             </button>
           </div>
