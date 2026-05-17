@@ -154,7 +154,7 @@ const CreateOpportunityPage = () => {
 
                   <textarea
                     name="summary"
-                    placeholder="Describe what volunteers will do, who they will help, and why it matters…"
+                    placeholder="Describe what volunteers will do, who they will help, and why it matters"
                     value={formData.summary}
                     onChange={handleChange}
                   />
