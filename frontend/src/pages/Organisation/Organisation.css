@@ -934,10 +934,13 @@
 }
 
 .org-profile-main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 48px;
   display: flex;
   flex-direction: column;
   gap: 32px;
-  padding: 40px 48px;
 }
 
 .org-profile-header {
@@ -1009,6 +1012,7 @@
   border: 1px solid #e8ddd0;
   border-radius: 14px;
   background: #ffffff;
+  width: 100%;
 }
 
 .org-profile-banner-text {
@@ -1440,6 +1444,136 @@
   .org-profile-edit-summary-card {
     flex-direction: column;
   }
+}
+
+.org-profile-postings-card {
+    position: relative;
+    padding: 32px;
+    border: 1px solid #e8ddd0;
+    border-radius: 14px;
+    background: #ffffff;
+    width: 100%;
+}
+
+.org-profile-card-accent {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: #d9aa55;
+}
+
+.org-profile-edit-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+.org-profile-edit-row > * {
+    flex: 1;
+}
+
+.org-profile-edit-input-group {
+    display: grid;
+    gap: 10px;
+}
+
+.org-profile-edit-input-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #1d2a32;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.org-profile-edit-input-group input,
+.org-profile-edit-input-group textarea,
+.org-profile-select {
+    width: 100%;
+    border: 1px solid #ded5ca;
+    border-radius: 10px;
+    background: #fdf9f5;
+    color: #1d2a32;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.org-profile-edit-input-group input,
+.org-profile-select {
+    height: 52px;
+    padding: 0 16px;
+}
+
+.org-profile-edit-input-group textarea {
+    min-height: 180px;
+    padding: 16px;
+    resize: vertical;
+}
+
+.org-profile-select:disabled {
+    background-color: #f4f0ec;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.org-profile-edit-input-group input:focus,
+.org-profile-edit-input-group textarea:focus,
+.org-profile-select:focus {
+    border-color: #d9aa55;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
+}
+
+.org-profile-edit-error {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border: 1px solid rgba(166, 77, 61, 0.3);
+    border-radius: 10px;
+    background: rgba(166, 77, 61, 0.08);
+    color: #8d3f32;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.selected-category-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.category-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c614f;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.remove-tag-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    opacity: 0.8;
+}
+
+.remove-tag-btn:hover {
+    color: #ffffff;
+    opacity: 1;
+    transform: scale(1.1);
 }
 .organisation-create-page {
   padding: 40px;
