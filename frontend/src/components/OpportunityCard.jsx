@@ -1,58 +1,119 @@
 import React from 'react';
+import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
 import './OpportunityCard.css';
-import { formatDate, formatTime } from '../lib/utils';
-import { Eye, Edit2 } from 'lucide-react';
+
+const formatDate = (dateValue) => {
+  if (!dateValue) return '';
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(dateValue));
+};
+
+const formatTime = (dateValue) => {
+  if (!dateValue) return '';
+
+  return new Intl.DateTimeFormat('en-MY', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+    .format(new Date(dateValue))
+    .toLowerCase();
+};
+
+const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
 
 const OpportunityCard = ({
-    _id,
+    opportunity,
     title,
-    details,
-    location,
-    category,
-    startAt,
-    endAt,
+    detail,
+    fixedDate,
+    timeFrame,
     status,
-    onEdit, // For organisation
-    onView,
-    showActionButtons
+    showActionButtons,
+    actions,
+    variant = 'default',
 }) => {
-  const displayStatus = status || "Active";
-  const statusClass = displayStatus.toLowerCase();
+  const isModelOpportunity = Boolean(opportunity);
+  const displayStatus = opportunity?.status || status || "Active";
+  const statusClass = getStatusClass(displayStatus);
+  const displayTitle = opportunity?.title || title;
+  const displayDetails = opportunity?.details || detail;
+  const displayLocation = opportunity?.location;
+  const displayDate = opportunity?.startAt ? formatDate(opportunity.startAt) : fixedDate;
+  const displayTime = opportunity?.startAt && opportunity?.endAt
+    ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
+    : timeFrame;
+  const displayCategory = opportunity?.category?.[0];
+  const displayOrganisationName = opportunity?.organisationId?.name;
+  const spotsRemaining = isModelOpportunity
+    ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
+    : null;
+  const displayActions = actions || (showActionButtons ? ['view'] : []);
 
   return (
-    <div className="event-card">
-      <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-      <div className="card-category-list">
-        {category && Array.isArray(category) ? (
-          category.map((cat) => (
-            <span key={cat} className="card-category-chip">
-              {cat}
-            </span>
-          ))
-        ) : category ? (
-          <span className="card-category-chip">{category}</span>
-        ) : null}
-      </div>
-      <h5>{title}</h5>
-      <p>{details}</p>
-      <div className="item-sub">
-        <div><strong>Location:</strong> {location}</div>
-        <div><strong>Date:</strong> {formatDate(startAt)} - {formatDate(endAt)}</div>
-        <div><strong>Time:</strong> {formatTime(startAt)} - {formatTime(endAt)}</div>
+    <div className={`event-card opportunity-card-${variant}`}>
+      <div className="event-card-header">
+        <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
+        {displayCategory && <div className="event-category-tag">{displayCategory}</div>}
       </div>
 
-      {showActionButtons && (
+      <h5>{displayTitle}</h5>
+      <p>{displayDetails}</p>
+
+      {displayOrganisationName && (
+        <strong className="event-organisation">{displayOrganisationName}</strong>
+      )}
+
+      <div className="item-sub">
+        {isModelOpportunity ? (
+          <>
+            {displayLocation && (
+              <span>
+                <MapPin size={16} />
+                {displayLocation}
+              </span>
+            )}
+            {displayDate && (
+              <span>
+                <CalendarDays size={16} />
+                {displayDate}
+              </span>
+            )}
+            {displayTime && (
+              <span>
+                <Clock size={16} />
+                {displayTime}
+              </span>
+            )}
+            {spotsRemaining !== null && (
+              <span>
+                <Users size={16} />
+                {spotsRemaining} spots left
+              </span>
+            )}
+          </>
+        ) : (
+          `${displayDate} - ${displayTime}`
+        )}
+      </div>
+
+      {opportunity?.applicationDeadline && (
+        <div className="event-deadline">
+          Apply before {formatDate(opportunity.applicationDeadline)}
+        </div>
+      )}
+
+      {displayActions.length > 0 && (
         <div className="item-actions">
-           <button className="action-btn view" onClick={() => onView?.(_id)}>
-             <Eye size={16} /> View
-           </button>
-           
-           {/* ONLY shows if onEdit is passed (Organisation view) */}
-           {onEdit && (
-             <button className="action-btn edit" onClick={() => onEdit(_id)}>
-               <Edit2 size={16} /> Edit
-             </button>
-           )}
+          {displayActions.map((action) => (
+            <button className={`action-btn ${action}`} key={action} type="button">
+              {action}
+            </button>
+          ))}
         </div>
       )}
     </div>
