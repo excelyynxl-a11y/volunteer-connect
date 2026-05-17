@@ -16,20 +16,10 @@ import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import "./Organisation.css";
+import { formatDate } from "../../lib/utils";
+import { formatTime } from "../../lib/utils";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const formatDate = (value) => {
-  if (!value) return "TBD";
-  try {
-    return new Date(value).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return value;
-  }
-};
+
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
