@@ -12,6 +12,7 @@ const VolunteerDashboard = () => {
   const { sidebarCollapsed } = useVolunteerStore();
   const location = useLocation();
   const flushPages = [
+    "/volunteer-dashboard",
     "/volunteer-dashboard/profile",
     "/volunteer-dashboard/edit-profile",
   ];

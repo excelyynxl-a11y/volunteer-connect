@@ -1049,3 +1049,73 @@
     margin-top: 4px;
   }
 }
+
+
+/* Volunteer Homepage */
+.volunteer-homepage {
+  min-height: 100vh;
+  background: var(--profile-cream);
+  color: var(--profile-green-dark);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.volunteer-homepage-content {
+  padding: 38px;
+}
+
+.volunteer-homepage-header {
+  margin-bottom: 28px;
+}
+
+.volunteer-homepage-header h1 {
+  margin: 0 0 10px;
+  color: var(--profile-green-dark);
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.volunteer-homepage-header p {
+  margin: 0;
+  color: var(--profile-muted);
+  font-size: 16px;
+}
+
+.volunteer-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.volunteer-summary-card {
+  min-height: 150px;
+}
+
+.volunteer-summary-card strong {
+  font-size: 36px;
+}
+
+.recommended-opportunities-list {
+  margin-top: 24px;
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 13px;
+  background: #fffdf8;
+  color: var(--profile-muted);
+}
+
+@media (max-width: 1050px) {
+  .volunteer-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .volunteer-homepage-content {
+    padding: 20px;
+  }
+
+  .volunteer-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
