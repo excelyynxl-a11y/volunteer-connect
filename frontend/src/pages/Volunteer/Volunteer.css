@@ -1091,11 +1091,26 @@
   min-height: 150px;
 }
 
+.volunteer-summary-card span {
+  display: block;
+  margin-bottom: 18px;
+}
+
 .volunteer-summary-card strong {
+  display: block;
+  color: var(--profile-green);
   font-size: 36px;
+  line-height: 1;
+}
+
+.recommended-opportunities-panel {
+  margin-top: 0;
 }
 
 .recommended-opportunities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   margin-top: 24px;
   min-height: 120px;
   padding: 18px;
@@ -1117,5 +1132,14 @@
 
   .volunteer-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-heading .edit-profile-button {
+    width: 100%;
   }
 }

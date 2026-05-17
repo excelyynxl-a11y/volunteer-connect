@@ -60,6 +60,32 @@ const VolunteerHomepage = () => {
     navigate("/volunteer-dashboard/opportunities");
   };
 
+  const summaryCards = [
+    {
+      id: "volunteer-hours",
+      label: "Volunteer Hours",
+      value: "0.0h",
+      path: "/volunteer-dashboard/profile",
+    },
+    {
+      id: "past-participations",
+      label: "Past Participation",
+      value: "0",
+      path: "/volunteer-dashboard/profile",
+    },
+    {
+      id: "pending-applications",
+      label: "Pending Applications",
+      value: "0",
+      path: "/volunteer-dashboard/applications",
+    },
+    {
+      id: "availability-slots",
+      label: "Availability Slots",
+      value: "0",
+      path: "/volunteer-dashboard/profile",
+    },
+  ];
 
   return (
     <div className="volunteer-homepage">
@@ -73,25 +99,17 @@ const VolunteerHomepage = () => {
         </div>
 
         <div className="volunteer-summary-grid">
-          <div className="profile-detail-card volunteer-summary-card">
-            <span>Volunteer Hours</span>
-            <strong>0.0h</strong>
-          </div>
-
-          <div className="profile-detail-card volunteer-summary-card">
-            <span>Past Participations</span>
-            <strong>0</strong>
-          </div>
-
-          <div className="profile-detail-card volunteer-summary-card">
-            <span>Pending Applications</span>
-            <strong>0</strong>
-          </div>
-
-          <div className="profile-detail-card volunteer-summary-card">
-            <span>Availability Slots</span>
-            <strong>0</strong>
-          </div>
+          {summaryCards.map((card) => (
+            <button
+              type="button"
+              className="profile-detail-card volunteer-summary-card"
+              key={card.id}
+              onClick={() => navigate(card.path)}
+            >
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+            </button>
+          ))}
         </div>
 
         <div className="profile-panel recommended-opportunities-panel">
