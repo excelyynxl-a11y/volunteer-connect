@@ -1575,17 +1575,14 @@
     opacity: 1;
     transform: scale(1.1);
 }
-/* ═══════════════════════════════════════════
-   CREATE OPPORTUNITY PAGE  —  matches profile
-   ═══════════════════════════════════════════ */
 
 .organisation-create-page {
-  padding: 40px;
   display: flex;
   flex-direction: column;
   gap: 28px;
   background: #f5f1eb;          /* same warm beige as profile */
   min-height: 100vh;
+  max-width: 1200px;
 }
 
 /* ── Header card ── */
