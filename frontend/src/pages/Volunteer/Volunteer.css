@@ -200,27 +200,27 @@
 }
 
 .volunteer-opportunities-hero {
-  margin-bottom: 28px;
-  padding: 34px 38px;
-  border: 4px solid var(--profile-orange);
-  border-radius: 26px;
+  margin-bottom: 22px;
+  padding: 24px 34px;
+  border: 3px solid var(--profile-orange);
+  border-radius: 22px;
   background:
-    radial-gradient(circle at 82% 100%, rgba(47, 104, 71, 0.14) 0 94px, transparent 95px),
+    radial-gradient(circle at 82% 100%, rgba(47, 104, 71, 0.14) 0 78px, transparent 79px),
     linear-gradient(90deg, var(--profile-cream-panel) 0 62%, #ede8df 62% 100%);
 }
 
 .volunteer-opportunities-hero p {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   color: var(--profile-orange-dark);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 4px;
 }
 
 .volunteer-opportunities-hero h1 {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 48px;
+  font-size: 40px;
   line-height: 1;
 }
 
@@ -231,14 +231,14 @@
 
 .volunteer-opportunities-search {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px;
-  gap: 16px;
-  max-width: 850px;
-  margin-top: 24px;
+  grid-template-columns: minmax(0, 1fr) 128px;
+  gap: 14px;
+  max-width: 780px;
+  margin-top: 18px;
 }
 
 .volunteer-opportunities-search label {
-  height: 50px;
+  height: 44px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -261,7 +261,7 @@
 }
 
 .volunteer-opportunities-search button {
-  min-height: 50px;
+  min-height: 44px;
   border: 0;
   border-radius: 999px;
   background: var(--profile-green);
@@ -1304,11 +1304,11 @@
   }
 
   .volunteer-opportunities-hero {
-    padding: 28px;
+    padding: 22px;
   }
 
   .volunteer-opportunities-hero h1 {
-    font-size: 34px;
+    font-size: 32px;
   }
 
   .volunteer-opportunities-header {
