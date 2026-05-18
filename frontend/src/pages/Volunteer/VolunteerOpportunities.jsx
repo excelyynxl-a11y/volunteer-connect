@@ -31,17 +31,11 @@ const formatTimeRange = (startAt, endAt) => {
   return `${formatTime(startAt)} - ${formatTime(endAt)}`;
 };
 
-const calculateDuration = (startAt, endAt) => {
-  if (!startAt || !endAt) return "";
-
-  const durationMs = new Date(endAt).getTime() - new Date(startAt).getTime();
-  const durationHours = Math.max(durationMs / (1000 * 60 * 60), 0);
-
-  return `${Number.isInteger(durationHours) ? durationHours : durationHours.toFixed(1)} Hours`;
-};
-
 const getOrganisationName = (opportunity) =>
   opportunity?.organisationId?.name || opportunity?.organisationName || "Organisation";
+
+const getSpotsRemaining = (opportunity) =>
+  Math.max((opportunity?.maxVolunteers || 0) - (opportunity?.approvedVolunteersCount || 0), 0);
 
 const getRequirementItems = (requirements = "") =>
   requirements
@@ -182,7 +176,7 @@ const VolunteerOpportunities = () => {
               </span>
               <span>
                 <Users size={17} />
-                {calculateDuration(selectedOpportunity.startAt, selectedOpportunity.endAt)}
+                {getSpotsRemaining(selectedOpportunity)} spots left
               </span>
             </div>
 
