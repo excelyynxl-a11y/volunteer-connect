@@ -35,6 +35,7 @@ const OpportunityCard = ({
   status,
   showActionButtons,
   actions,
+  onAction,
   variant = 'default',
 }) => {
   const isModelOpportunity = Boolean(opportunity);
@@ -110,7 +111,12 @@ const OpportunityCard = ({
       {displayActions.length > 0 && (
         <div className="item-actions">
           {displayActions.map((action) => (
-            <button className={`action-btn ${action}`} key={action} type="button">
+            <button
+              className={`action-btn ${action}`}
+              key={action}
+              type="button"
+              onClick={() => onAction?.(action, opportunity)}
+            >
               {action}
             </button>
           ))}
