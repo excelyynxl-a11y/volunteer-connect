@@ -56,6 +56,47 @@ const opportunityCategories = [
   "Other",
 ];
 
+const volunteerAvailability = {
+  day: "Monday",
+  startTime: "09:00",
+  endTime: "11:00",
+};
+
+const getWeekday = (dateValue) => {
+  if (!dateValue) return "";
+
+  return new Intl.DateTimeFormat("en-MY", {
+    weekday: "long",
+  }).format(new Date(dateValue));
+};
+
+const getMinutesFromTime = (timeValue) => {
+  const [hours, minutes] = timeValue.split(":").map(Number);
+
+  return hours * 60 + minutes;
+};
+
+const getMinutesFromDate = (dateValue) => {
+  const date = new Date(dateValue);
+
+  return date.getHours() * 60 + date.getMinutes();
+};
+
+const opportunityFitsVolunteerAvailability = (opportunity) => {
+  if (!opportunity?.startAt || !opportunity?.endAt) return false;
+
+  const opportunityDay = getWeekday(opportunity.startAt);
+
+  if (opportunityDay !== volunteerAvailability.day) return false;
+
+  const opportunityStart = getMinutesFromDate(opportunity.startAt);
+  const opportunityEnd = getMinutesFromDate(opportunity.endAt);
+  const availabilityStart = getMinutesFromTime(volunteerAvailability.startTime);
+  const availabilityEnd = getMinutesFromTime(volunteerAvailability.endTime);
+
+  return opportunityStart < availabilityEnd && opportunityEnd > availabilityStart;
+};
+
 const VolunteerOpportunities = () => {
   const {
     opportunities,
@@ -70,6 +111,7 @@ const VolunteerOpportunities = () => {
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [matchesAvailabilityOnly, setMatchesAvailabilityOnly] = useState(false);
 
   useEffect(() => {
     getAllOpportunities();
@@ -87,8 +129,8 @@ const VolunteerOpportunities = () => {
       selectedCategories.length === 0 ||
       selectedCategories.some((category) => opportunity.category?.includes(category));
 
-    // TODO: Compare opportunity.startAt/endAt with the volunteer availability value.
-    const matchesAvailability = !filters.availability || true;
+    const matchesAvailability =
+      !matchesAvailabilityOnly || opportunityFitsVolunteerAvailability(opportunity);
 
     return matchesStatus && matchesSearch && matchesLocation && matchesCategory && matchesAvailability;
   });
@@ -141,8 +183,14 @@ const VolunteerOpportunities = () => {
           <aside className="volunteer-opportunities-filter" aria-label="Filter opportunities">
             <div className="volunteer-filter-header">
               <h3>Filter</h3>
-              {selectedCategories.length > 0 && (
-                <button type="button" onClick={() => setSelectedCategories([])}>
+              {(selectedCategories.length > 0 || matchesAvailabilityOnly) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategories([]);
+                    setMatchesAvailabilityOnly(false);
+                  }}
+                >
                   Clear
                 </button>
               )}
@@ -160,6 +208,19 @@ const VolunteerOpportunities = () => {
                   <span>{category}</span>
                 </label>
               ))}
+            </fieldset>
+
+            <fieldset className="volunteer-availability-filter">
+              <legend>Availability</legend>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={matchesAvailabilityOnly}
+                  onChange={(event) => setMatchesAvailabilityOnly(event.target.checked)}
+                />
+                <span>Matches my Availability</span>
+              </label>
+              <p>{volunteerAvailability.day}, 09:00 - 11:00</p>
             </fieldset>
           </aside>
 
@@ -186,7 +247,7 @@ const VolunteerOpportunities = () => {
               </div>
             ) : (
               <p>
-                {searchQuery.trim() || selectedCategories.length > 0
+                {searchQuery.trim() || selectedCategories.length > 0 || matchesAvailabilityOnly
                   ? "No opportunities match your search or filters."
                   : "No active opportunities found."}
               </p>
