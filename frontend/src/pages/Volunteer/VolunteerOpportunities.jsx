@@ -56,13 +56,18 @@ const VolunteerOpportunities = () => {
     availability: "",
   });
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
 
   const activeOpportunities = opportunities.filter((opportunity) => {
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
     const matchesStatus = opportunity.status?.toLowerCase() === "active";
+    const matchesSearch =
+      !normalizedSearchQuery ||
+      opportunity.title?.toLowerCase().startsWith(normalizedSearchQuery);
     const matchesLocation =
       !filters.location || opportunity.location === filters.location;
     const matchesCategory =
@@ -71,7 +76,7 @@ const VolunteerOpportunities = () => {
     // TODO: Compare opportunity.startAt/endAt with the volunteer availability value.
     const matchesAvailability = !filters.availability || true;
 
-    return matchesStatus && matchesLocation && matchesCategory && matchesAvailability;
+    return matchesStatus && matchesSearch && matchesLocation && matchesCategory && matchesAvailability;
   });
 
   return (
@@ -85,7 +90,12 @@ const VolunteerOpportunities = () => {
           <div className="volunteer-opportunities-search">
             <label>
               <Search size={20} />
-              <input type="search" placeholder="Search opportunities or organisations" />
+              <input
+                type="search"
+                placeholder="Search opportunities or organisations"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
             </label>
             <button type="button">Search</button>
           </div>
@@ -126,7 +136,11 @@ const VolunteerOpportunities = () => {
             ))}
           </div>
         ) : (
-          <p>No active opportunities found.</p>
+          <p>
+            {searchQuery.trim()
+              ? "No opportunities match your search."
+              : "No active opportunities found."}
+          </p>
         )}
       </section>
 
