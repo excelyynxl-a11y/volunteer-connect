@@ -43,6 +43,19 @@ const getRequirementItems = (requirements = "") =>
     .map((requirement) => requirement.trim())
     .filter(Boolean);
 
+const opportunityCategories = [
+  "Environment",
+  "Education",
+  "Health",
+  "Community",
+  "Animal Welfare",
+  "Elderly Care",
+  "Disability Support",
+  "Event Support",
+  "Fundraising",
+  "Other",
+];
+
 const VolunteerOpportunities = () => {
   const {
     opportunities,
@@ -52,11 +65,11 @@ const VolunteerOpportunities = () => {
   } = useVolunteerStore();
   const [filters] = useState({
     location: "",
-    category: "",
     availability: "",
   });
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   useEffect(() => {
     getAllOpportunities();
@@ -71,13 +84,22 @@ const VolunteerOpportunities = () => {
     const matchesLocation =
       !filters.location || opportunity.location === filters.location;
     const matchesCategory =
-      !filters.category || opportunity.category?.includes(filters.category);
+      selectedCategories.length === 0 ||
+      selectedCategories.some((category) => opportunity.category?.includes(category));
 
     // TODO: Compare opportunity.startAt/endAt with the volunteer availability value.
     const matchesAvailability = !filters.availability || true;
 
     return matchesStatus && matchesSearch && matchesLocation && matchesCategory && matchesAvailability;
   });
+
+  const toggleCategory = (category) => {
+    setSelectedCategories((currentCategories) =>
+      currentCategories.includes(category)
+        ? currentCategories.filter((currentCategory) => currentCategory !== category)
+        : [...currentCategories, category],
+    );
+  };
 
   return (
     <div className="volunteer-opportunities-page">
@@ -115,33 +137,62 @@ const VolunteerOpportunities = () => {
           </span>
         </div>
 
-        {opportunitiesError ? (
-          <p>{opportunitiesError}</p>
-        ) : isOpportunitiesLoading ? (
-          <p>Loading opportunities...</p>
-        ) : activeOpportunities.length > 0 ? (
-          <div className="volunteer-opportunities-grid">
-            {activeOpportunities.map((opportunity) => (
-              <OpportunityCard
-                key={opportunity._id}
-                opportunity={opportunity}
-                variant="volunteer"
-                actions={["view"]}
-                onAction={(action, selectedCardOpportunity) => {
-                  if (action === "view") {
-                    setSelectedOpportunity(selectedCardOpportunity);
-                  }
-                }}
-              />
-            ))}
+        <div className="volunteer-opportunities-body">
+          <aside className="volunteer-opportunities-filter" aria-label="Filter opportunities">
+            <div className="volunteer-filter-header">
+              <h3>Filter</h3>
+              {selectedCategories.length > 0 && (
+                <button type="button" onClick={() => setSelectedCategories([])}>
+                  Clear
+                </button>
+              )}
+            </div>
+
+            <fieldset>
+              <legend>Category</legend>
+              {opportunityCategories.map((category) => (
+                <label key={category}>
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category)}
+                    onChange={() => toggleCategory(category)}
+                  />
+                  <span>{category}</span>
+                </label>
+              ))}
+            </fieldset>
+          </aside>
+
+          <div className="volunteer-opportunities-results">
+            {opportunitiesError ? (
+              <p>{opportunitiesError}</p>
+            ) : isOpportunitiesLoading ? (
+              <p>Loading opportunities...</p>
+            ) : activeOpportunities.length > 0 ? (
+              <div className="volunteer-opportunities-grid">
+                {activeOpportunities.map((opportunity) => (
+                  <OpportunityCard
+                    key={opportunity._id}
+                    opportunity={opportunity}
+                    variant="volunteer"
+                    actions={["view"]}
+                    onAction={(action, selectedCardOpportunity) => {
+                      if (action === "view") {
+                        setSelectedOpportunity(selectedCardOpportunity);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>
+                {searchQuery.trim() || selectedCategories.length > 0
+                  ? "No opportunities match your search or filters."
+                  : "No active opportunities found."}
+              </p>
+            )}
           </div>
-        ) : (
-          <p>
-            {searchQuery.trim()
-              ? "No opportunities match your search."
-              : "No active opportunities found."}
-          </p>
-        )}
+        </div>
       </section>
 
       {selectedOpportunity && (
