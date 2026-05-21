@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ArrowUpDown, AlertCircle, Search } from "lucide-react";
 import ManageOpportunityCard from "../../components/ManageOpportunityCard";
+import PreviewOpportunity from "../../components/PreviewOpportunity";
 import { useAdminStore } from "../../store/useAdminStore";
 
 const STATUS_OPTIONS = ["All", "active", "completed", "closed", "cancelled"];
@@ -9,6 +10,7 @@ const ManageOpportunity = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortDirection, setSortDirection] = useState("descending");
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
   const { getAllOpportunities } = useAdminStore();
   const opportunities = getAllOpportunities();
@@ -44,8 +46,8 @@ const ManageOpportunity = () => {
     return result;
   }, [opportunities, searchTerm, sortDirection, statusFilter]);
 
-  const handlePreview = () => {
-    // TODO: wire up preview modal
+  const handlePreview = (opportunity) => {
+    setSelectedOpportunity(opportunity);
   };
 
   return (
@@ -53,7 +55,7 @@ const ManageOpportunity = () => {
       {/* Manage opportunity header */}
       <div className="admin-page-header">
         <h1>Manage Opportunities</h1>
-        <p>View, edit, and manage all opportunities created by organisation.</p>
+        <p>View all opportunities created by organisation.</p>
       </div>
 
       <div className="admin-table-wrapper">
@@ -124,6 +126,12 @@ const ManageOpportunity = () => {
           </div>
         )}
       </div>
+      {selectedOpportunity && (
+        <PreviewOpportunity
+          opportunity={selectedOpportunity}
+          onClose={() => setSelectedOpportunity(null)}
+        />
+      )}
     </div>
   );
 };

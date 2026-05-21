@@ -1276,6 +1276,28 @@
   font-weight: 600;
 }
 
+/* ── Opportunity preview ── */
+
+.admin-opportunity-details {
+  line-height: 1.5;
+}
+
+.admin-opportunity-image-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.admin-opportunity-image {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e8ddd0;
+  background: #f6f2ed;
+}
+
 /* ── Availability list ── */
 
 .admin-availability-list {
