@@ -1,6 +1,14 @@
 import OpportunityCard from "../../components/OpportunityCard";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import {
+  Clock,
+  CheckCircle2,
+  ClipboardList,
+  CalendarDays,
+  CalendarClock,
+  MapPin,
+} from "lucide-react";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import "./Volunteer.css";
 
@@ -29,11 +37,6 @@ const VolunteerHomepage = () => {
     getAllOpportunities,
   } = useVolunteerStore();
 
-  const [filters] = useState({
-    location: "",
-    category: "",
-    availability: "",
-  });
 
   useEffect(() => {
     getAllOpportunities();
@@ -55,24 +58,32 @@ const VolunteerHomepage = () => {
       id: "volunteer-hours",
       label: "Volunteer Hours",
       value: "0.0h",
+      description: "Total hours contributed",
+      icon: Clock,
       path: "/volunteer-dashboard/profile",
     },
     {
       id: "past-participations",
       label: "Past Participation",
       value: "0",
+      description: "Great job! Keep it up.",
+      icon: CheckCircle2,
       path: "/volunteer-dashboard/profile",
     },
     {
       id: "pending-applications",
       label: "Pending Applications",
       value: "0",
+      description: "Awaiting review",
+      icon: ClipboardList,
       path: "/volunteer-dashboard/applications",
     },
     {
       id: "availability-slots",
       label: "Availability Slots",
-      value: "0",
+      value: "Mon   8:00 am - 19:00 pm",
+      secondValue: "Wed   2:00 pm - 4:00 pm",
+      icon: CalendarDays,
       path: "/volunteer-dashboard/profile",
     },
   ];
