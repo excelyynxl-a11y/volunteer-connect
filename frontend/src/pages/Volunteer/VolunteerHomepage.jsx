@@ -101,17 +101,33 @@ const VolunteerHomepage = () => {
         </div>
 
         <div className="volunteer-summary-grid">
-          {summaryCards.map((card) => (
-            <button
-              type="button"
-              className="profile-detail-card volunteer-summary-card"
-              key={card.id}
-              onClick={() => navigate(card.path)}
-            >
-              <span>{card.label}</span>
-              <strong>{card.value}</strong>
-            </button>
-          ))}
+          {summaryCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <button
+                type="button"
+                className="volunteer-summary-card"
+                key={card.id}
+                onClick={() => navigate(card.path)}
+              >
+                <div className="summary-icon">
+                  <Icon size={24} />
+                </div>
+                <div className="summary-content">
+                  <span>{card.label}</span>
+                  <strong>{card.value}</strong>
+
+                  {card.secondValue && <strong>{card.secondValue}</strong>}
+
+                  {card.description && <p>{card.description}</p>}
+
+                  {card.id === "availability" && (
+                    <span className="summary-edit-button">Edit</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         <div className="profile-panel recommended-opportunities-panel">
