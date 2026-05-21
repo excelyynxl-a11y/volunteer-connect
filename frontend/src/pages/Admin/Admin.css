@@ -415,9 +415,24 @@
   color: #16a34a;
 }
 
+.admin-status.completed {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
 .admin-status.pending {
   background: rgba(217, 170, 85, 0.15);
   color: #b48a2e;
+}
+
+.admin-status.closed {
+  background: rgba(148, 163, 184, 0.2);
+  color: #64748b;
+}
+
+.admin-status.cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
 }
 
 .admin-status.suspended {
@@ -804,6 +819,29 @@
   flex-direction: column;
 }
 
+/* ── Opportunity list (scrollable) ── */
+
+.admin-opportunity-card-list {
+  --opportunity-row-height: 88px;
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.2fr)
+    minmax(180px, 0.8fr)
+    minmax(220px, 1fr)
+    minmax(110px, auto)
+    auto
+    auto;
+  column-gap: 20px;
+  max-height: calc(var(--opportunity-row-height) * 7);
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+.admin-opportunity-card-list .admin-opportunity-card {
+  min-height: var(--opportunity-row-height);
+  box-sizing: border-box;
+}
+
 /* ── Organisation list (scrollable) ── */
 
 .admin-organisation-card-list {
@@ -839,6 +877,15 @@
   padding: 16px 24px;
   border-top: 1px solid #eee8e0;
   transition: background 0.15s;
+}
+
+.admin-opportunity-card {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 12px;
 }
 
 .admin-volunteer-card-avatar {
@@ -888,6 +935,55 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.admin-opportunity-card-info {
+  min-width: 0;
+}
+
+.admin-opportunity-card-title {
+  margin: 0;
+  color: #1d2a32;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-opportunity-card-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-opportunity-card-meta-label {
+  color: #9a8268;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-opportunity-card-meta-value {
+  color: #1d2a32;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  word-break: break-word;
+}
+
+.admin-opportunity-card > .admin-volunteer-card-date,
+.admin-opportunity-card > .admin-status,
+.admin-opportunity-card > .admin-volunteer-card-manage {
+  align-self: center;
+}
+
+.admin-opportunity-card > .admin-status {
+  justify-self: start;
 }
 
 .admin-volunteer-card-email {
