@@ -40,6 +40,80 @@ const getOpportunityImage = (opportunity) => {
   return opportunity.images.find(Boolean) || "";
 };
 
+const mockOpportunities = [
+  {
+    _id: "mock-beach-cleanup",
+    title: "Beach Cleanup",
+    details: "Help clean the beach and protect the local environment.",
+    location: "St Kilda Beach",
+    startAt: "2026-06-01T08:00:00",
+    endAt: "2026-06-01T12:00:00",
+    status: "active",
+    images: [],
+  },
+  {
+    _id: "mock-food-bank-helper",
+    title: "Food Bank Helper",
+    details: "Support food packing and distribution for local families.",
+    location: "Community Food Bank",
+    startAt: "2026-06-03T10:00:00",
+    endAt: "2026-06-03T14:00:00",
+    status: "active",
+    images: [],
+  },
+];
+
+const getWeekdayName = (dateValue) =>
+  new Date(dateValue).toLocaleDateString("en-US", { weekday: "long" });
+
+const getMinutesFromDate = (dateValue) => {
+  const date = new Date(dateValue);
+  return date.getHours() * 60 + date.getMinutes();
+};
+
+const getMinutesFromTime = (timeValue) => {
+  if (!timeValue) return null;
+
+  const [hours, minutes] = timeValue.split(":").map(Number);
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
+};
+
+const isOpportunityInsideAvailability = (opportunity, availabilitySlots) => {
+  if (!opportunity?.startAt || !opportunity?.endAt || availabilitySlots.length === 0) {
+    return false;
+  }
+
+  const opportunityStartDay = getWeekdayName(opportunity.startAt);
+  const opportunityEndDay = getWeekdayName(opportunity.endAt);
+
+  if (opportunityStartDay !== opportunityEndDay) {
+    return false;
+  }
+
+  const opportunityStart = getMinutesFromDate(opportunity.startAt);
+  const opportunityEnd = getMinutesFromDate(opportunity.endAt);
+
+  return availabilitySlots.some((slot) => {
+    const slotStart = getMinutesFromTime(slot.startTime);
+    const slotEnd = getMinutesFromTime(slot.endTime);
+
+    if (slotStart === null || slotEnd === null) {
+      return false;
+    }
+
+    return (
+      slot.dayOfWeek === opportunityStartDay &&
+      opportunityStart >= slotStart &&
+      opportunityEnd <= slotEnd
+    );
+  });
+};
+
 const VolunteerHomepage = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const {
@@ -59,39 +133,6 @@ const VolunteerHomepage = () => {
     }
   }, [authUser?._id, getAllOpportunities, getVolunteerPastOpportunity]);
 
-  const activeOpportunities = opportunities.filter((opportunity) => {
-    const matchesStatus = opportunity.status?.toLowerCase() === "active";
-    return matchesStatus;
-  })
-  .slice(0,2);
-
-  const fallbackOpportunities = [
-    {
-      _id: "sample-beach-cleanup",
-      title: "Beach Cleanup",
-      details: "Help clean the beach and protect the local environment.",
-      startAt: "2026-06-01T08:00:00",
-      endAt: "2026-06-01T12:00:00",
-      location: "St Kilda Beach",
-      status: "active",
-      images: [],
-    },
-    {
-      _id: "sample-food-bank",
-      title: "Food Bank Helper",
-      details: "Support food packing and distribution for local families.",
-      startAt: "2026-06-05T10:00:00",
-      endAt: "2026-06-05T14:00:00",
-      location: "Community Food Bank",
-      status: "active",
-      images: [],
-    },
-  ];
-
-  const recommendedOpportunities = activeOpportunities.length > 0
-    ? activeOpportunities
-    : fallbackOpportunities;
-
   const displayAvailability = Array.isArray(authUser?.availability)
     ? authUser.availability.slice(0, 3)
     : [];
@@ -99,9 +140,31 @@ const VolunteerHomepage = () => {
   const availabilityPreview = displayAvailability.length > 0
     ? displayAvailability.slice(0, 2)
     : [
-        { dayOfWeek: "Monday", startTime: "08:00", endTime: "09:00" },
-        { dayOfWeek: "Wednesday", startTime: "14:00", endTime: "16:00" },
+        { dayOfWeek: "Monday", startTime: "08:00", endTime: "19:00" },
+        { dayOfWeek: "Wednesday", startTime: "10:00", endTime: "18:00" },
       ];
+
+  const availabilityForMatching = Array.isArray(authUser?.availability) && authUser.availability.length > 0
+    ? authUser.availability
+    : availabilityPreview;
+
+  const activeOpportunities = opportunities.filter(
+    (opportunity) => opportunity.status?.toLowerCase() === "active",
+  );
+
+  const matchingOpportunities = activeOpportunities.filter((opportunity) =>
+    isOpportunityInsideAvailability(opportunity, availabilityForMatching),
+  );
+
+  const matchingMockOpportunities = mockOpportunities.filter((opportunity) =>
+    isOpportunityInsideAvailability(opportunity, availabilityForMatching),
+  );
+
+  const recommendedOpportunities = (
+    matchingOpportunities.length > 0
+      ? matchingOpportunities
+      : matchingMockOpportunities
+  ).slice(0, 2);
 
   const nextShift = recommendedOpportunities[0];
   const navigate = useNavigate();
@@ -218,6 +281,10 @@ const VolunteerHomepage = () => {
               <p className="homepage-state-message">{opportunitiesError}</p>
             ) : isOpportunitiesLoading ? (
               <p className="homepage-state-message">Loading opportunities...</p>
+            ) : recommendedOpportunities.length === 0 ? (
+              <p className="homepage-state-message">
+                No opportunities fully match your availability yet.
+              </p>
             ) : (
               <div className="homepage-opportunity-list">
                 {recommendedOpportunities.map((opportunity) => {
