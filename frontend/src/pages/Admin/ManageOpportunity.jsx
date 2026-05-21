@@ -5,10 +5,31 @@ import PreviewOpportunity from "../../components/PreviewOpportunity";
 import { useAdminStore } from "../../store/useAdminStore";
 
 const STATUS_OPTIONS = ["All", "active", "completed", "closed", "cancelled"];
+const CATEGORY_OPTIONS = [
+  "All",
+  "Environment",
+  "Education",
+  "Health",
+  "Community",
+  "Animal Welfare",
+  "Elderly Care",
+  "Disability Support",
+  "Event Support",
+  "Fundraising",
+  "Other",
+];
+const DATE_FILTER_OPTIONS = [
+  { label: "All Time", value: "all" },
+  { label: "Past Day", value: "day" },
+  { label: "Past Week", value: "week" },
+  { label: "Past Month", value: "month" },
+];
 
 const ManageOpportunity = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("all");
   const [sortDirection, setSortDirection] = useState("descending");
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
@@ -21,13 +42,21 @@ const ManageOpportunity = () => {
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result = result.filter((opportunity) => {
-        const categoryText = (opportunity.category || []).join(" ");
-
         return (
           opportunity.title?.toLowerCase().includes(term) ||
-          opportunity.location?.toLowerCase().includes(term) ||
-          categoryText.toLowerCase().includes(term)
+          opportunity.location?.toLowerCase().includes(term)
         );
+      });
+    }
+
+    if (categoryFilter !== "All") {
+      result = result.filter((opportunity) => {
+        const categories = opportunity.category || [];
+        if (categoryFilter === "Other") {
+          return categories.length === 0 || categories.includes("Other");
+        }
+
+        return categories.includes(categoryFilter);
       });
     }
 
@@ -37,6 +66,18 @@ const ManageOpportunity = () => {
       );
     }
 
+    if (dateFilter !== "all") {
+      const now = Date.now();
+      const daysAgo = dateFilter === "day" ? 1 : dateFilter === "week" ? 7 : 30;
+      const cutoff = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
+
+      result = result.filter((opportunity) => {
+        const publishedAt = opportunity.publishedAt || opportunity.createdAt;
+        if (!publishedAt) return false;
+        return new Date(publishedAt) >= cutoff;
+      });
+    }
+
     result = [...result].sort((a, b) => {
       const dateA = new Date(a.startAt || a.publishedAt || a.createdAt);
       const dateB = new Date(b.startAt || b.publishedAt || b.createdAt);
@@ -44,7 +85,14 @@ const ManageOpportunity = () => {
     });
 
     return result;
-  }, [opportunities, searchTerm, sortDirection, statusFilter]);
+  }, [
+    opportunities,
+    searchTerm,
+    sortDirection,
+    statusFilter,
+    categoryFilter,
+    dateFilter,
+  ]);
 
   const handlePreview = (opportunity) => {
     setSelectedOpportunity(opportunity);
@@ -65,11 +113,22 @@ const ManageOpportunity = () => {
             <input
               type="text"
               className="admin-table-search"
-              placeholder="Search by title, category, or location..."
+              placeholder="Search by title or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <select
+            className="admin-table-select"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            {CATEGORY_OPTIONS.map((category) => (
+              <option key={category} value={category}>
+                {category === "All" ? "All Categories" : category}
+              </option>
+            ))}
+          </select>
           <select
             className="admin-table-select"
             value={statusFilter}
@@ -80,6 +139,17 @@ const ManageOpportunity = () => {
                 {status === "All"
                   ? "All Statuses"
                   : status.charAt(0).toUpperCase() + status.slice(1)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="admin-table-select"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+          >
+            {DATE_FILTER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -102,6 +172,8 @@ const ManageOpportunity = () => {
             onClick={() => {
               setSearchTerm("");
               setStatusFilter("All");
+              setCategoryFilter("All");
+              setDateFilter("all");
               setSortDirection("descending");
             }}
           >
