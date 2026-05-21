@@ -45,7 +45,8 @@ const VolunteerHomepage = () => {
   const activeOpportunities = opportunities.filter((opportunity) => {
     const matchesStatus = opportunity.status?.toLowerCase() === "active";
     return matchesStatus;
-  });
+  })
+  .slice(0,2);
   
   const navigate = useNavigate();
 
