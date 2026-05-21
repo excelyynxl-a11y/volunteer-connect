@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
+import { malaysiaStateCities } from "../lib/data";
 
 const mockStats = [
   { key: "volunteers", value: "69", label: "Active Volunteers" },
@@ -307,7 +308,144 @@ const mockAllOrganisation = [
   },
 ];
 
-const mockAllOpportunites = [];
+const locationFrom = (state, city) => {
+  const stateCities = malaysiaStateCities[state] || [];
+  const resolvedCity = stateCities.includes(city)
+    ? city
+    : stateCities[0] || city;
+
+  return `${state}, ${resolvedCity}`;
+};
+
+const mockAllOpportunities = [
+  {
+    _id: "opp001",
+    title: "Community Garden Build Day",
+    details:
+      "Join our volunteers to build raised beds, plant seedlings, and set up irrigation for the new community garden.",
+    organisationId: "o002",
+    images: [
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80",
+    ],
+    location: locationFrom("Selangor", "Shah Alam"),
+    startAt: "2026-06-15T09:00:00.000Z",
+    endAt: "2026-06-15T15:00:00.000Z",
+    applicationDeadline: "2026-06-08T23:59:00.000Z",
+    maxVolunteers: 25,
+    approvedVolunteersCount: 12,
+    category: ["Environment", "Community"],
+    requirements: "Closed-toe shoes, sun protection, and water bottle.",
+    status: "active",
+    publishedAt: "2026-05-20T08:00:00.000Z",
+    createdAt: "2026-05-20T08:00:00.000Z",
+    updatedAt: "2026-05-21T09:15:00.000Z",
+  },
+  {
+    _id: "opp002",
+    title: "After-School Math Mentors",
+    details:
+      "Support local students with weekly math mentoring sessions and homework assistance.",
+    organisationId: "o001",
+    images: [],
+    location: locationFrom("Wp Kuala Lumpur", "Kuala Lumpur"),
+    startAt: "2026-07-06T06:00:00.000Z",
+    endAt: "2026-07-06T08:00:00.000Z",
+    applicationDeadline: "2026-06-25T23:59:00.000Z",
+    maxVolunteers: 10,
+    approvedVolunteersCount: 7,
+    category: ["Education"],
+    requirements:
+      "Working with children check preferred. Confidence in basic algebra.",
+    status: "active",
+    publishedAt: "2026-05-05T05:30:00.000Z",
+    createdAt: "2026-05-05T05:30:00.000Z",
+    updatedAt: "2026-05-18T12:00:00.000Z",
+  },
+  {
+    _id: "opp003",
+    title: "Food Bank Warehouse Sorting",
+    details:
+      "Help us sort incoming pantry donations and pack family meal kits.",
+    organisationId: "o003",
+    images: [
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=80",
+    ],
+    location: locationFrom("Johor", "Johor Bahru"),
+    startAt: "2026-04-10T02:00:00.000Z",
+    endAt: "2026-04-10T07:00:00.000Z",
+    applicationDeadline: "2026-04-03T23:59:00.000Z",
+    maxVolunteers: 18,
+    approvedVolunteersCount: 18,
+    category: ["Community"],
+    requirements: "Comfortable lifting up to 10kg and closed-toe shoes.",
+    status: "completed",
+    publishedAt: "2026-03-15T04:00:00.000Z",
+    createdAt: "2026-03-15T04:00:00.000Z",
+    updatedAt: "2026-04-11T09:00:00.000Z",
+  },
+  {
+    _id: "opp004",
+    title: "Animal Shelter Enrichment Day",
+    details:
+      "Spend a day socializing shelter animals and preparing enrichment activities.",
+    organisationId: "o005",
+    images: [],
+    location: locationFrom("Pulau Pinang", "Bayan Lepas"),
+    startAt: "2026-05-30T00:30:00.000Z",
+    endAt: "2026-05-30T04:30:00.000Z",
+    applicationDeadline: "2026-05-20T23:59:00.000Z",
+    maxVolunteers: 12,
+    approvedVolunteersCount: 9,
+    category: ["Animal Welfare"],
+    requirements: "Comfortable handling animals. Closed-toe shoes required.",
+    status: "closed",
+    publishedAt: "2026-04-22T06:00:00.000Z",
+    createdAt: "2026-04-22T06:00:00.000Z",
+    updatedAt: "2026-05-21T08:10:00.000Z",
+  },
+  {
+    _id: "opp005",
+    title: "TechBridge Intro to Coding",
+    details:
+      "Assist instructors with a one-day coding workshop for adult learners.",
+    organisationId: "o006",
+    images: [],
+    location: locationFrom("Sabah", "Kota Kinabalu"),
+    startAt: "2026-06-22T01:00:00.000Z",
+    endAt: "2026-06-22T07:00:00.000Z",
+    applicationDeadline: "2026-06-10T23:59:00.000Z",
+    maxVolunteers: 8,
+    approvedVolunteersCount: 2,
+    category: ["Education", "Community"],
+    requirements: "Comfortable with basic web development concepts.",
+    status: "cancelled",
+    publishedAt: "2026-05-10T05:00:00.000Z",
+    createdAt: "2026-05-10T05:00:00.000Z",
+    updatedAt: "2026-05-25T10:30:00.000Z",
+  },
+  {
+    _id: "opp006",
+    title: "Harbour Health Outreach",
+    details:
+      "Support clinic staff with check-ins, patient guidance, and health education materials.",
+    organisationId: "o007",
+    images: [
+      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80",
+    ],
+    location: locationFrom("Sarawak", "Kuching"),
+    startAt: "2026-06-05T22:30:00.000Z",
+    endAt: "2026-06-06T04:30:00.000Z",
+    applicationDeadline: "2026-05-28T23:59:00.000Z",
+    maxVolunteers: 15,
+    approvedVolunteersCount: 6,
+    category: ["Health", "Community"],
+    requirements: "Friendly communication and comfort assisting patients.",
+    status: "active",
+    publishedAt: "2026-05-14T07:30:00.000Z",
+    createdAt: "2026-05-14T07:30:00.000Z",
+    updatedAt: "2026-05-21T11:45:00.000Z",
+  },
+];
 
 export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",
@@ -342,6 +480,7 @@ export const useAdminStore = create((set, get) => ({
 
   getAllOpportunities: () => {
     // TODO: call getAllOpportunities
+    return mockAllOpportunities;
   },
 
   getAllReports: () => {
