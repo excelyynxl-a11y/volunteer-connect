@@ -5,6 +5,7 @@ import {
   rejectUserAccount,
   updateAdminProfile,
 } from "../controllers/admin.controller.js";
+import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
@@ -13,7 +14,6 @@ router.patch("/users/:id/approve", protectRoute, adminOnly, approveUserAccount);
 router.patch("/users/:id/reject", protectRoute, adminOnly, rejectUserAccount);
 
 // Admin management 
-router.put("/profle", protectRoute, adminOnly, updateAdminProfile); // TODO: add uploadAvatar from multer.middleware when available 
-// eg: router.put("/profile", protectRoute, adminOnly, uploadAvatar, updateAdminProfile);
+router.put("/profile", protectRoute, adminOnly, uploadAvatar, updateAdminProfile);
 
 export default router;

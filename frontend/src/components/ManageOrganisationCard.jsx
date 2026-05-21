@@ -2,6 +2,15 @@ import React from "react";
 import { Edit } from "lucide-react";
 
 const ManageOrganisationCard = ({ organisation, onManage }) => {
+  const initials = organisation.name
+    ? organisation.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   const statusClass =
     organisation.approvalStatus === "approved"
       ? "active"
@@ -11,6 +20,14 @@ const ManageOrganisationCard = ({ organisation, onManage }) => {
 
   return (
     <div className="admin-volunteer-card">
+      <div className="admin-volunteer-card-avatar">
+        {organisation.avatar ? (
+          <img src={organisation.avatar} alt={`${organisation.name} avatar`} />
+        ) : (
+          <span className="admin-volunteer-card-initials">{initials}</span>
+        )}
+      </div>
+
       <div className="admin-volunteer-card-info">
         <h3 className="admin-volunteer-card-name">{organisation.name}</h3>
         <span className="admin-volunteer-card-email">{organisation.email}</span>
