@@ -63,6 +63,25 @@ const mockOpportunities = [
   },
 ];
 
+const mockApplications = [
+  {
+    _id: "mock-application-community-garden",
+    opportunityTitle: "Community Garden Setup",
+    location: "Semenyih Community Garden",
+    startAt: "2026-06-08T09:00:00",
+    endAt: "2026-06-08T13:00:00",
+    status: "accepted",
+  },
+  {
+    _id: "mock-application-food-bank",
+    opportunityTitle: "Food Bank Helper",
+    location: "Community Food Bank",
+    startAt: "2026-06-03T10:00:00",
+    endAt: "2026-06-03T14:00:00",
+    status: "pending",
+  },
+];
+
 const getWeekdayName = (dateValue) =>
   new Date(dateValue).toLocaleDateString("en-US", { weekday: "long" });
 
@@ -166,7 +185,11 @@ const VolunteerHomepage = () => {
       : matchingMockOpportunities
   ).slice(0, 2);
 
-  const nextShift = recommendedOpportunities[0];
+  const applicationStatuses = mockApplications;
+  const acceptedApplications = applicationStatuses.filter(
+    (application) => application.status === "accepted",
+  );
+  const nextShift = acceptedApplications[0];
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
@@ -337,7 +360,7 @@ const VolunteerHomepage = () => {
               </div>
               <div className="homepage-side-content">
                 <h3>Next Volunteer Shift</h3>
-                <strong>{nextShift?.title || "No shift scheduled"}</strong>
+                <strong>{nextShift?.opportunityTitle || "No shift scheduled"}</strong>
                 <p>
                   {nextShift?.startAt
                     ? formatOpportunityDate(nextShift.startAt)
@@ -381,14 +404,14 @@ const VolunteerHomepage = () => {
               <div className="homepage-side-content">
                 <h3>Application Status</h3>
                 <div className="homepage-application-list">
-                  <p>
-                    Beach Cleanup
-                    <span className="application-pill pending">Pending</span>
-                  </p>
-                  <p>
-                    Food Bank Helper
-                    <span className="application-pill accepted">Accepted</span>
-                  </p>
+                  {applicationStatuses.map((application) => (
+                    <p key={application._id}>
+                      {application.opportunityTitle}
+                      <span className={`application-pill ${application.status}`}>
+                        {application.status}
+                      </span>
+                    </p>
+                  ))}
                 </div>
               </div>
             </section>
