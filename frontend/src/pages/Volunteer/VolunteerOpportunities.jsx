@@ -3,8 +3,8 @@ import { ArrowUp, Search } from "lucide-react";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import {
-  defaultAvailabilityPreview,
   isOpportunityInsideAvailability,
+  opportunityMatchesSearch,
   opportunityCategories,
 } from "../../lib/opportunityUtils";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -18,23 +18,23 @@ const VolunteerOpportunities = () => {
     opportunitiesError,
     getAllOpportunities,
   } = useVolunteerStore();
-  const [filters] = useState({
-    location: "",
-    availability: "",
-  });
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [matchesAvailabilityOnly, setMatchesAvailabilityOnly] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const volunteerAvailability =
-    Array.isArray(authUser?.availability) && authUser.availability.length > 0
-      ? authUser.availability
-      : defaultAvailabilityPreview;
+  const volunteerAvailability = Array.isArray(authUser?.availability)
+    ? authUser.availability
+    : [];
+  const hasVolunteerAvailability = volunteerAvailability.length > 0;
 
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
+
+  const shouldFilterByAvailability =
+    hasVolunteerAvailability && matchesAvailabilityOnly;
+
 
   useEffect(() => {
     const scrollContainer = document.querySelector(".volunteer-content");
@@ -64,26 +64,21 @@ const VolunteerOpportunities = () => {
   };
 
   const activeOpportunities = opportunities.filter((opportunity) => {
-    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
     const matchesStatus = opportunity.status?.toLowerCase() === "active";
-    const matchesSearch =
-      !normalizedSearchQuery ||
-      opportunity.title?.toLowerCase().startsWith(normalizedSearchQuery);
-    const matchesLocation =
-      !filters.location || opportunity.location === filters.location;
+    const matchesSearch = opportunityMatchesSearch(opportunity, searchQuery);
     const matchesCategory =
       selectedCategories.length === 0 ||
       selectedCategories.some((category) =>
         opportunity.category?.includes(category),
       );
     const matchesAvailability =
-      !matchesAvailabilityOnly ||
-      isOpportunityInsideAvailability(opportunity, volunteerAvailability);
+      !shouldFilterByAvailability ||
+      (hasVolunteerAvailability &&
+        isOpportunityInsideAvailability(opportunity, volunteerAvailability));
 
     return (
       matchesStatus &&
       matchesSearch &&
-      matchesLocation &&
       matchesCategory &&
       matchesAvailability
     );
@@ -118,7 +113,6 @@ const VolunteerOpportunities = () => {
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
             </label>
-            <button type="button">Search</button>
           </div>
         </div>
       </section>
@@ -126,11 +120,11 @@ const VolunteerOpportunities = () => {
       <section className="volunteer-opportunities-panel">
         <div className="volunteer-opportunities-header">
           <div>
-            <h2>Active Opportunity Postings</h2>
+            <h2>Opportunity Postings</h2>
             <p>Browse available activities published by organisations.</p>
           </div>
           <span className="volunteer-opportunities-count">
-            {activeOpportunities.length} Active
+            {activeOpportunities.length} results
           </span>
         </div>
 
@@ -141,7 +135,7 @@ const VolunteerOpportunities = () => {
           >
             <div className="volunteer-filter-header">
               <h3>Filter</h3>
-              {(selectedCategories.length > 0 || matchesAvailabilityOnly) && (
+              {(selectedCategories.length > 0 || shouldFilterByAvailability) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -173,20 +167,23 @@ const VolunteerOpportunities = () => {
               <label>
                 <input
                   type="checkbox"
-                  checked={matchesAvailabilityOnly}
+                  checked={shouldFilterByAvailability}
+                  disabled={!hasVolunteerAvailability}
                   onChange={(event) =>
                     setMatchesAvailabilityOnly(event.target.checked)
                   }
                 />
-                <span>Matches my Availability</span>
+                <span>Fits my Availability</span>
               </label>
               <p>
-                {volunteerAvailability
-                  .map(
-                    (slot) =>
-                      `${slot.dayOfWeek}, ${slot.startTime} - ${slot.endTime}`,
-                  )
-                  .join("; ")}
+                {hasVolunteerAvailability
+                  ? volunteerAvailability
+                      .map(
+                        (slot) =>
+                          `${slot.dayOfWeek}, ${slot.startTime} - ${slot.endTime}`,
+                      )
+                      .join("; ")
+                  : "Add availability in your profile to use this filter."}
               </p>
             </fieldset>
           </aside>
@@ -204,6 +201,7 @@ const VolunteerOpportunities = () => {
                     opportunity={opportunity}
                     variant="volunteer"
                     actions={["view"]}
+                    showStatus={false}
                     onAction={(action, selectedCardOpportunity) => {
                       if (action === "view") {
                         setSelectedOpportunity(selectedCardOpportunity);

@@ -56,6 +56,30 @@ export const getOrganisationName = (opportunity) =>
   opportunity?.organisationName ||
   "Organisation";
 
+export const opportunityMatchesSearch = (opportunity, searchQuery) => {
+  const terms = searchQuery
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (terms.length === 0) return true;
+
+  const searchableText = [
+    opportunity?.title,
+    opportunity?.details,
+    opportunity?.location,
+    opportunity?.requirements,
+    getOrganisationName(opportunity),
+    ...(Array.isArray(opportunity?.category) ? opportunity.category : []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return terms.every((term) => searchableText.includes(term));
+};
+
 export const getSpotsRemaining = (opportunity) =>
   Math.max(
     (opportunity?.maxVolunteers || 0) -

@@ -231,9 +231,6 @@
 }
 
 .volunteer-opportunities-search {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 128px;
-  gap: 14px;
   max-width: 780px;
   margin-top: 18px;
 }
@@ -259,21 +256,6 @@
   color: var(--profile-green-dark);
   font: inherit;
   font-size: 16px;
-}
-
-.volunteer-opportunities-search button {
-  min-height: 44px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--profile-green);
-  color: #ffffff;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.volunteer-opportunities-search button:hover {
-  background: var(--profile-green-dark);
 }
 
 .volunteer-opportunities-panel {
@@ -389,6 +371,16 @@
   width: 17px;
   height: 17px;
   accent-color: var(--profile-green);
+}
+
+.volunteer-opportunities-filter input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.volunteer-opportunities-filter label:has(input:disabled) {
+  cursor: not-allowed;
+  color: #8f887d;
 }
 
 .volunteer-opportunities-filter .volunteer-availability-filter {
@@ -1451,10 +1443,6 @@
   .volunteer-opportunities-filter .volunteer-availability-filter {
     display: flex;
     flex-direction: column;
-  }
-
-  .volunteer-opportunities-search {
-    grid-template-columns: 1fr;
   }
 
   .opportunity-detail-overlay {

@@ -17,6 +17,7 @@ const OpportunityCard = ({
   timeFrame,
   status,
   showActionButtons,
+  showStatus = true,
   actions,
   onAction,
   variant = 'default',
@@ -43,10 +44,14 @@ const OpportunityCard = ({
 
   return (
     <div className={`event-card opportunity-card-${variant}`}>
-      <div className="event-card-header">
-        <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-        {displayCategory && <div className="event-category-tag">{displayCategory}</div>}
-      </div>
+      {(showStatus || displayCategory) && (
+        <div className="event-card-header">
+          {showStatus && (
+            <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
+          )}
+          {displayCategory && <div className="event-category-tag">{displayCategory}</div>}
+        </div>
+      )}
 
       <h5>{displayTitle}</h5>
       <p>{displayDetails}</p>
