@@ -27,6 +27,7 @@ import "./Volunteer.css";
 const VolunteerHomepage = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const availabilitySummaryLimit = 3;
   const {
     opportunities,
     isOpportunitiesLoading,
@@ -135,10 +136,64 @@ const VolunteerHomepage = () => {
         <div className="volunteer-summary-grid">
           {summaryCards.map((card) => {
             const Icon = card.icon;
+
+            if (card.id === "availability-slots") {
+              const visibleAvailability = card.availability.slice(
+                0,
+                availabilitySummaryLimit,
+              );
+              const hiddenAvailabilityCount = Math.max(
+                card.availability.length - availabilitySummaryLimit,
+                0,
+              );
+
+              return (
+                <article
+                  className="volunteer-summary-card availability-summary-card"
+                  key={card.id}
+                >
+                  <div className="summary-icon">
+                    <Icon size={23} />
+                  </div>
+                  <div className="summary-content">
+                    <span>{card.label}</span>
+
+                    <div className="summary-availability-list">
+                      {visibleAvailability.map((slot) => (
+                        <p key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`}>
+                          <b>{shortDay(slot.dayOfWeek)}</b>
+                          {slot.startTime} - {slot.endTime}
+                        </p>
+                      ))}
+                    </div>
+
+                    <div className="availability-summary-actions">
+                      {hiddenAvailabilityCount > 0 && (
+                        <button
+                          type="button"
+                          className="summary-more-button"
+                          onClick={() => navigate("/volunteer-dashboard/profile")}
+                        >
+                          +{hiddenAvailabilityCount} more
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="summary-edit-button"
+                        onClick={() => navigate("/volunteer-dashboard/edit-profile")}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            }
+
             return (
               <button
                 type="button"
-                className={`volunteer-summary-card${card.id === "availability-slots" ? " availability-summary-card" : ""}`}
+                className="volunteer-summary-card"
                 key={card.id}
                 onClick={() => navigate(card.path)}
               >
@@ -162,10 +217,6 @@ const VolunteerHomepage = () => {
                   )}
 
                   {card.description && <p>{card.description}</p>}
-
-                  {card.id === "availability-slots" && (
-                    <span className="summary-edit-button">Edit</span>
-                  )}
                 </div>
               </button>
             );

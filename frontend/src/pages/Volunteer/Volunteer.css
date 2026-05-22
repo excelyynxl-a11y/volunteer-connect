@@ -1849,6 +1849,7 @@
 .availability-summary-card {
   padding-right: 28px;
   padding-bottom: 58px;
+  cursor: default;
 }
 
 .summary-icon,
@@ -1914,23 +1915,50 @@
   font-weight: 700;
 }
 
-.volunteer-summary-card .summary-edit-button {
+.availability-summary-actions {
   position: absolute;
   right: 18px;
   bottom: 18px;
-  min-width: 70px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-edit-button,
+.summary-more-button {
   min-height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--profile-green);
-  color: #ffffff;
+  border: 0;
+  font: inherit;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
   text-transform: none;
+  cursor: pointer;
   margin: 0;
+}
+
+.summary-edit-button {
+  min-width: 70px;
+  background: var(--profile-green);
+  color: #ffffff;
+}
+
+.summary-more-button {
+  padding: 0 12px;
+  background: #f4ead4;
+  color: var(--profile-green-dark);
+}
+
+.summary-edit-button:hover {
+  background: var(--profile-green-dark);
+}
+
+.summary-more-button:hover {
+  background: #ead8b4;
 }
 
 .volunteer-homepage-main-grid {
@@ -2245,7 +2273,7 @@
     grid-template-columns: 48px 1fr;
   }
 
-  .summary-edit-button,
+  .availability-summary-actions,
   .homepage-side-card > button {
     position: static;
     grid-column: 2;
