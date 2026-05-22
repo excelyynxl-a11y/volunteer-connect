@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Clock,
@@ -10,6 +10,7 @@ import {
   MapPin,
   CalendarCheck,
 } from "lucide-react";
+import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import {
@@ -24,6 +25,7 @@ import "./Volunteer.css";
 
 const VolunteerHomepage = () => {
   const authUser = useAuthStore((state) => state.authUser);
+  const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const {
     opportunities,
     isOpportunitiesLoading,
@@ -122,10 +124,10 @@ const VolunteerHomepage = () => {
     <div className="volunteer-homepage">
       <div className="volunteer-homepage-content">
         <div className="volunteer-homepage-header">
-          <h1>Volunteer Homepage</h1>
+          <h1>Welcome back, {authUser?.name || "Volunteer"}</h1>
           <p>
-            Welcome back. Track your volunteering progress and find opportunities
-            that match your availability.
+            Track your volunteering progress and find opportunities that match
+            your availability.
           </p>
         </div>
 
@@ -227,7 +229,10 @@ const VolunteerHomepage = () => {
                             )}
                           </span>
                         </div>
-                        <button type="button" onClick={handleSeeMore}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOpportunity(opportunity)}
+                        >
                           View
                           <ArrowRight size={16} />
                         </button>
@@ -277,26 +282,6 @@ const VolunteerHomepage = () => {
               <button type="button" onClick={handleSeeMore}>View Details</button>
             </section>
 
-            <section className="homepage-side-card">
-              <div className="homepage-side-icon">
-                <Clock size={23} />
-              </div>
-              <div className="homepage-side-content">
-                <h3>Availability This Week</h3>
-                <div className="homepage-availability-list">
-                  {availabilityPreview.map((slot) => (
-                    <p key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`}>
-                      <span>{shortDay(slot.dayOfWeek)}</span>
-                      {slot.startTime} - {slot.endTime}
-                    </p>
-                  ))}
-                </div>
-              </div>
-              <button type="button" onClick={() => navigate("/volunteer-dashboard/edit-profile")}>
-                Edit
-              </button>
-            </section>
-
             <section className="homepage-side-card homepage-status-card">
               <div className="homepage-side-icon">
                 <CalendarCheck size={23} />
@@ -318,6 +303,11 @@ const VolunteerHomepage = () => {
           </aside>
         </div>
       </div>
+
+      <OpportunityDetailModal
+        opportunity={selectedOpportunity}
+        onClose={() => setSelectedOpportunity(null)}
+      />
     </div>
   );
 };

@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Clock, MapPin, Search, Users, X } from "lucide-react";
+import { ArrowUp, Search } from "lucide-react";
 import OpportunityCard from "../../components/OpportunityCard";
+import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import {
   defaultAvailabilityPreview,
-  formatOpportunityDate,
-  formatOpportunityTimeRange,
-  getOrganisationName,
-  getRequirementItems,
-  getSpotsRemaining,
   isOpportunityInsideAvailability,
   opportunityCategories,
 } from "../../lib/opportunityUtils";
@@ -30,6 +26,7 @@ const VolunteerOpportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [matchesAvailabilityOnly, setMatchesAvailabilityOnly] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const volunteerAvailability =
     Array.isArray(authUser?.availability) && authUser.availability.length > 0
       ? authUser.availability
@@ -38,6 +35,33 @@ const VolunteerOpportunities = () => {
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector(".volunteer-content");
+    const handleScroll = () => {
+      setShowBackToTop(
+        window.scrollY > 420 || (scrollContainer?.scrollTop ?? 0) > 420,
+      );
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    scrollContainer?.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      scrollContainer?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    document
+      .querySelector(".volunteer-content")
+      ?.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const activeOpportunities = opportunities.filter((opportunity) => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
@@ -201,87 +225,20 @@ const VolunteerOpportunities = () => {
         </div>
       </section>
 
-      {selectedOpportunity && (
-        <div
-          className="opportunity-detail-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="opportunity-detail-title"
+      <OpportunityDetailModal
+        opportunity={selectedOpportunity}
+        onClose={() => setSelectedOpportunity(null)}
+      />
+
+      {showBackToTop && (
+        <button
+          type="button"
+          className="back-to-top-button"
+          aria-label="Back to top"
+          onClick={handleBackToTop}
         >
-          <div className="opportunity-detail-modal">
-            <button
-              className="opportunity-detail-close"
-              type="button"
-              aria-label="Close opportunity details"
-              onClick={() => setSelectedOpportunity(null)}
-            >
-              <X size={22} />
-            </button>
-
-            <div className="opportunity-detail-header">
-              <div>
-                <span className="opportunity-detail-eyebrow">
-                  {selectedOpportunity.category?.[0] || "Opportunity"}
-                </span>
-                <h2 id="opportunity-detail-title">
-                  {selectedOpportunity.title}
-                </h2>
-                <p>{getOrganisationName(selectedOpportunity)}</p>
-              </div>
-
-              <button className="apply-volunteer-button" type="button">
-                Apply As Volunteer
-              </button>
-            </div>
-
-            <div className="opportunity-detail-meta">
-              <span>
-                <MapPin size={17} />
-                {selectedOpportunity.location}
-              </span>
-              <span>
-                <CalendarDays size={17} />
-                {formatOpportunityDate(selectedOpportunity.startAt)}
-              </span>
-              <span>
-                <Clock size={17} />
-                {formatOpportunityTimeRange(
-                  selectedOpportunity.startAt,
-                  selectedOpportunity.endAt,
-                )}
-              </span>
-              <span>
-                <Users size={17} />
-                {getSpotsRemaining(selectedOpportunity)} spots left
-              </span>
-            </div>
-
-            <section className="opportunity-detail-section">
-              <h3>Opportunity Details</h3>
-              <div className="opportunity-detail-box">
-                <p>{selectedOpportunity.details}</p>
-              </div>
-            </section>
-
-            <section className="opportunity-detail-section">
-              <h3>Volunteer Requirements</h3>
-              <div className="opportunity-requirements-box">
-                {getRequirementItems(selectedOpportunity.requirements).length >
-                0 ? (
-                  <ul>
-                    {getRequirementItems(selectedOpportunity.requirements).map(
-                      (requirement) => (
-                        <li key={requirement}>{requirement}</li>
-                      ),
-                    )}
-                  </ul>
-                ) : (
-                  <p>No specific requirements listed.</p>
-                )}
-              </div>
-            </section>
-          </div>
-        </div>
+          <ArrowUp size={20} />
+        </button>
       )}
     </div>
   );
