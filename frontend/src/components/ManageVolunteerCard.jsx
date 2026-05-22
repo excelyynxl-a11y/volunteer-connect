@@ -48,7 +48,6 @@ const ManageVolunteerCard = ({ volunteer, onManage }) => {
         {volunteer.approvalStatus}
       </span>
 
-      {/* TODO: link to PreviewVolunteer page when created */}
       <button
         className="admin-volunteer-card-manage"
         title="Manage volunteer"

@@ -45,8 +45,7 @@ const ManageOrganisationCard = ({ organisation, onManage }) => {
         <span className="admin-status-dot" />
         {organisation.approvalStatus}
       </span>
-
-      {/* TODO: link to PreviewOrganisation page when created */}
+\
       <button
         className="admin-volunteer-card-manage"
         title="Manage organisation"
