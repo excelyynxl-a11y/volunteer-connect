@@ -27,15 +27,16 @@ const formatTime = (dateValue) => {
 const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
 
 const OpportunityCard = ({
-    opportunity,
-    title,
-    detail,
-    fixedDate,
-    timeFrame,
-    status,
-    showActionButtons,
-    actions,
-    variant = 'default',
+  opportunity,
+  title,
+  detail,
+  fixedDate,
+  timeFrame,
+  status,
+  showActionButtons,
+  actions,
+  onAction,
+  variant = 'default',
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
@@ -110,7 +111,12 @@ const OpportunityCard = ({
       {displayActions.length > 0 && (
         <div className="item-actions">
           {displayActions.map((action) => (
-            <button className={`action-btn ${action}`} key={action} type="button">
+            <button
+              className={`action-btn ${action}`}
+              key={action}
+              type="button"
+              onClick={() => onAction?.(action, opportunity)}
+            >
               {action}
             </button>
           ))}
