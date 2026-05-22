@@ -453,6 +453,7 @@ export const useAdminStore = create((set, get) => ({
   sidebarCollapsed: false,
   isUpdating: false,
   isUsersLoading: false,
+  isOpportunitiesLoading: false,
   organisations: [],
   volunteers: [],
   opportunities: [],
@@ -525,10 +526,18 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  getAllOpportunities: () => {
-    // TODO: call getAllOpportunities
+  getAllOpportunities: async () => {
+    set({ isOpportunitiesLoading: true });
+    
+    try {
+        const res = await axiosInstance.get('/opportunity/');
+        set({ opportunities: res.data.data });
+    } catch (error) {
+        toast.error(error.response.data.message);
+    } finally {
+        set({ isOpportunitiesLoading: false });
+    }
 
-    return mockAllOpportunities;
   },
 
   getAllReports: () => {
