@@ -20,6 +20,7 @@ import {
   getOpportunityImage,
   isOpportunityInsideAvailability,
   shortDay,
+  sortAvailabilitySlots,
 } from "../../lib/opportunityUtils";
 import "./Volunteer.css";
 
@@ -46,15 +47,15 @@ const VolunteerHomepage = () => {
   }, [authUser?._id, getAllOpportunities, getVolunteerPastOpportunity]);
 
   const displayAvailability = Array.isArray(authUser?.availability)
-    ? authUser.availability.slice(0, 3)
+    ? sortAvailabilitySlots(authUser.availability)
     : [];
 
   const availabilityPreview = displayAvailability.length > 0
-    ? displayAvailability.slice(0, 2)
+    ? displayAvailability
     : defaultAvailabilityPreview;
 
-  const availabilityForMatching = Array.isArray(authUser?.availability) && authUser.availability.length > 0
-    ? authUser.availability
+  const availabilityForMatching = displayAvailability.length > 0
+    ? displayAvailability
     : availabilityPreview;
 
   const activeOpportunities = opportunities.filter(
@@ -208,36 +209,6 @@ const VolunteerHomepage = () => {
                       className={`homepage-opportunity-card${opportunityImage ? " has-image" : ""}`}
                       key={opportunity._id}
                     >
-                      <div className="homepage-opportunity-copy">
-                        <span className="homepage-status-pill">
-                          {opportunity.status || "active"}
-                        </span>
-                        <h3>{opportunity.title}</h3>
-                        <p>{opportunity.details || "Details will be shared soon."}</p>
-                        <div className="homepage-opportunity-meta">
-                          <CalendarDays size={15} />
-                          <span>
-                            {opportunity.startAt
-                              ? formatOpportunityDate(opportunity.startAt)
-                              : "Date to be confirmed"}
-                          </span>
-                          <span>
-                            {formatOpportunityTimeRange(
-                              opportunity.startAt,
-                              opportunity.endAt,
-                              "Time to be confirmed",
-                            )}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedOpportunity(opportunity)}
-                        >
-                          View
-                          <ArrowRight size={16} />
-                        </button>
-                      </div>
-
                       {opportunityImage && (
                         <img
                           className="homepage-opportunity-image"
@@ -245,6 +216,44 @@ const VolunteerHomepage = () => {
                           alt={opportunity.title}
                         />
                       )}
+
+                      <div className="homepage-opportunity-copy">
+                        <span className="homepage-category-pill">
+                          {opportunity.category?.[0] || "Opportunity"}
+                        </span>
+                        <h3>{opportunity.title}</h3>
+                        <div className="homepage-opportunity-meta">
+                          <span>
+                            <CalendarDays size={15} />
+                            {opportunity.startAt
+                              ? formatOpportunityDate(opportunity.startAt)
+                              : "Date to be confirmed"}
+                          </span>
+                          <span>
+                            <Clock size={15} />
+                            {formatOpportunityTimeRange(
+                              opportunity.startAt,
+                              opportunity.endAt,
+                              "Time to be confirmed",
+                            )}
+                          </span>
+                          {opportunity.location && (
+                            <span>
+                              <MapPin size={15} />
+                              {opportunity.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="homepage-opportunity-view"
+                        onClick={() => setSelectedOpportunity(opportunity)}
+                      >
+                        View
+                        <ArrowRight size={16} />
+                      </button>
                     </article>
                   );
                 })}

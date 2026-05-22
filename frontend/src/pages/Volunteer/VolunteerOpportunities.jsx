@@ -6,8 +6,10 @@ import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import {
   getMinutesFromTime,
   isOpportunityInsideAvailability,
+  formatAvailabilitySlot,
   opportunityMatchesSearch,
   opportunityCategories,
+  sortAvailabilitySlots,
 } from "../../lib/opportunityUtils";
 import {
   volunteerAvailabilityDays,
@@ -44,7 +46,8 @@ const VolunteerOpportunities = () => {
   const volunteerAvailability = Array.isArray(authUser?.availability)
     ? authUser.availability
     : [];
-  const hasVolunteerAvailability = volunteerAvailability.length > 0;
+  const sortedVolunteerAvailability = sortAvailabilitySlots(volunteerAvailability);
+  const hasVolunteerAvailability = sortedVolunteerAvailability.length > 0;
   const hasCustomAvailabilityInput = Object.values(customAvailability).some(Boolean);
   const customAvailabilityStart = getMinutesFromTime(customAvailability.startTime);
   const customAvailabilityEnd = getMinutesFromTime(customAvailability.endTime);
@@ -108,7 +111,7 @@ const VolunteerOpportunities = () => {
     const matchesAvailability =
       (!shouldFilterByAvailability && !shouldFilterByCustomAvailability) ||
       (shouldFilterByAvailability &&
-        isOpportunityInsideAvailability(opportunity, volunteerAvailability)) ||
+        isOpportunityInsideAvailability(opportunity, sortedVolunteerAvailability)) ||
       (shouldFilterByCustomAvailability &&
         isOpportunityInsideAvailability(opportunity, [customAvailability]));
 
@@ -256,16 +259,17 @@ const VolunteerOpportunities = () => {
                 />
                 <span>Fits my Availability</span>
               </label>
-              <p>
-                {hasVolunteerAvailability
-                  ? volunteerAvailability
-                      .map(
-                        (slot) =>
-                          `${slot.dayOfWeek}, ${slot.startTime} - ${slot.endTime}`,
-                      )
-                      .join("; ")
-                  : "Add availability in your profile to use this filter."}
-              </p>
+              {hasVolunteerAvailability ? (
+                <div className="profile-availability-list">
+                  {sortedVolunteerAvailability.map((slot) => (
+                    <span key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`}>
+                      {formatAvailabilitySlot(slot)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p>Add availability in your profile to use this filter.</p>
+              )}
 
               <div className="custom-availability-filter">
                 <button

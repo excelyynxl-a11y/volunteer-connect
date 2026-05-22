@@ -16,6 +16,38 @@ export const defaultAvailabilityPreview = [
   { dayOfWeek: "Wednesday", startTime: "10:00", endTime: "18:00" },
 ];
 
+const availabilityDayOrder = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+export const sortAvailabilitySlots = (availabilitySlots = []) =>
+  [...availabilitySlots].sort((firstSlot, secondSlot) => {
+    const firstDayIndex = availabilityDayOrder.indexOf(firstSlot.dayOfWeek);
+    const secondDayIndex = availabilityDayOrder.indexOf(secondSlot.dayOfWeek);
+    const firstDayOrder =
+      firstDayIndex === -1 ? availabilityDayOrder.length : firstDayIndex;
+    const secondDayOrder =
+      secondDayIndex === -1 ? availabilityDayOrder.length : secondDayIndex;
+
+    if (firstDayOrder !== secondDayOrder) {
+      return firstDayOrder - secondDayOrder;
+    }
+
+    return (
+      (getMinutesFromTime(firstSlot.startTime) ?? 0) -
+      (getMinutesFromTime(secondSlot.startTime) ?? 0)
+    );
+  });
+
+export const formatAvailabilitySlot = (slot) =>
+  `${slot.dayOfWeek}, ${slot.startTime} - ${slot.endTime}`;
+
 export const formatOpportunityDate = (dateValue) => {
   if (!dateValue) return "";
 
