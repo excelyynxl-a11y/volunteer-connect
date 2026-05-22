@@ -3,6 +3,7 @@ import { Search, AlertCircle, ArrowUpDown } from "lucide-react";
 import { useAdminStore } from "../../store/useAdminStore";
 import ManageVolunteerCard from "../../components/ManageVolunteerCard";
 import PreviewVolunteer from "../../components/PreviewVolunteer";
+import { useEffect } from "react";
 
 // ageGroup filter
 const AGE_GROUPS = ["All", "21-30", "31-40", "41-50", "51-60", "60+"];
@@ -21,9 +22,11 @@ const ManageVolunteer = () => {
   // volunteer of the admin clicked on a ManageVolunteerCard "manage button"
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
 
-  const { getAllVolunteers } = useAdminStore();
+  const { getAllVolunteers, volunteers, isUserLoading } = useAdminStore();
 
-  const volunteers = getAllVolunteers();
+  useEffect(() => {
+      getAllVolunteers()
+    }, [getAllVolunteers]);
 
   // filtering functions
   const filteredVolunteers = useMemo(() => {

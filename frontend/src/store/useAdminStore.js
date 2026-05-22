@@ -480,17 +480,29 @@ export const useAdminStore = create((set, get) => ({
 
   },
 
-  getAllVolunteers: () => {
-    // TODO: call getAllVolunteers
-
-    return mockAllVolunteers;
+  getAllVolunteers: async () => {
+    set({ isUsersLoading: true });
+    
+    try {
+        const res = await axiosInstance.get('/user/volunteers');
+        set({ volunteers: res.data.volunteers });
+    } catch (error) {
+        toast.error(error.response.data.message);
+    } finally {
+        set({ isUsersLoading: false });
+    }
   },
 
   rejectUserAccount: async (userId, onClose) => {
     try {
       await axiosInstance.patch(`/admin/users/${userId}/reject`);
       toast.success('User account rejected!');
-      await get().getAllOrganisations();
+      await Promise.all(
+        [
+          get().getAllOrganisations(), 
+          get().getAllVolunteers()
+        ]
+      );
       onClose?.();
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -501,7 +513,12 @@ export const useAdminStore = create((set, get) => ({
     try {
       await axiosInstance.patch(`/admin/users/${userId}/approve`);
       toast.success('User account approved!');
-      await get().getAllOrganisations();
+      await Promise.all(
+        [
+          get().getAllOrganisations(), 
+          get().getAllVolunteers()
+        ]
+      );
       onClose?.();
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
