@@ -3,6 +3,7 @@ import { ArrowUpDown, AlertCircle, Search } from "lucide-react";
 import ManageOpportunityCard from "../../components/ManageOpportunityCard";
 import PreviewOpportunity from "../../components/PreviewOpportunity";
 import { useAdminStore } from "../../store/useAdminStore";
+import { useEffect } from "react";
 
 const STATUS_OPTIONS = ["All", "active", "completed", "closed", "cancelled"];
 const CATEGORY_OPTIONS = [
@@ -33,18 +34,26 @@ const ManageOpportunity = () => {
   const [sortDirection, setSortDirection] = useState("descending");
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
-  const { getAllOpportunities } = useAdminStore();
-  const opportunities = getAllOpportunities();
+  const { getAllOpportunities, isOpportunitiesLoading, opportunities } = useAdminStore();
+  
+  useEffect(() => {
+      getAllOpportunities()
+  }, [getAllOpportunities]); 
 
+  // filter functions
   const filteredOpportunities = useMemo(() => {
     let result = opportunities;
+    console.log(opportunities);
+    
+    console.log(result);
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       result = result.filter((opportunity) => {
         return (
           opportunity.title?.toLowerCase().includes(term) ||
-          opportunity.location?.toLowerCase().includes(term)
+          opportunity.location?.toLowerCase().includes(term) ||
+          opportunity.organisationId?.name?.toLowerCase().includes(term)
         );
       });
     }
@@ -108,16 +117,20 @@ const ManageOpportunity = () => {
 
       <div className="admin-table-wrapper">
         <div className="admin-table-toolbar">
+
+          {/* Search bar */}
           <div className="admin-table-search-wrapper">
             <Search size={16} className="admin-table-search-icon" />
             <input
               type="text"
               className="admin-table-search"
-              placeholder="Search by title or location..."
+              placeholder="Search by title or location or org..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+
+          {/* filter by category */}
           <select
             className="admin-table-select"
             value={categoryFilter}
@@ -129,6 +142,8 @@ const ManageOpportunity = () => {
               </option>
             ))}
           </select>
+
+          {/* filter by status */}
           <select
             className="admin-table-select"
             value={statusFilter}
@@ -142,6 +157,8 @@ const ManageOpportunity = () => {
               </option>
             ))}
           </select>
+
+          {/* filter by last past 24 hrs, past week, past month, all time */}
           <select
             className="admin-table-select"
             value={dateFilter}
@@ -153,6 +170,8 @@ const ManageOpportunity = () => {
               </option>
             ))}
           </select>
+
+          {/* sort date direction */}
           <button
             className="admin-table-sort-btn"
             onClick={() =>
@@ -167,6 +186,8 @@ const ManageOpportunity = () => {
               {sortDirection === "descending" ? "Newest First" : "Oldest First"}
             </span>
           </button>
+
+          {/* clear all filter button */}
           <button
             className="admin-table-clear-btn"
             onClick={() => {
@@ -179,7 +200,9 @@ const ManageOpportunity = () => {
           >
             Clear All
           </button>
+
         </div>
+
         {filteredOpportunities.length > 0 ? (
           <div className="admin-volunteer-card-list admin-opportunity-card-list">
             {filteredOpportunities.map((opportunity) => (
@@ -198,6 +221,7 @@ const ManageOpportunity = () => {
           </div>
         )}
       </div>
+      
       {selectedOpportunity && (
         <PreviewOpportunity
           opportunity={selectedOpportunity}

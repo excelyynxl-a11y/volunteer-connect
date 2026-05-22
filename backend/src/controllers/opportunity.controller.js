@@ -113,7 +113,9 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find();
+    const opportunities = await Opportunity.find()
+      .populate("organisationId", "name")
+      .sort({ publishedAt: -1 });
 
     res.status(200).json({
       success: true,
