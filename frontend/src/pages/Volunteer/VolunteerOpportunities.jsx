@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, Search } from "lucide-react";
+import { ArrowUp, ChevronDown, Search } from "lucide-react";
 import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
@@ -33,10 +33,13 @@ const VolunteerOpportunities = () => {
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [matchesAvailabilityOnly, setMatchesAvailabilityOnly] = useState(false);
   const [customAvailability, setCustomAvailability] = useState(
     initialCustomAvailability,
   );
+  const [isCustomAvailabilityOpen, setIsCustomAvailabilityOpen] =
+    useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const volunteerAvailability = Array.isArray(authUser?.availability)
     ? authUser.availability
@@ -50,6 +53,13 @@ const VolunteerOpportunities = () => {
     customAvailabilityStart !== null &&
     customAvailabilityEnd !== null &&
     customAvailabilityStart < customAvailabilityEnd;
+  const customAvailabilitySummary = hasValidCustomAvailability
+    ? `${customAvailability.dayOfWeek}, ${customAvailability.startTime} - ${customAvailability.endTime}`
+    : "";
+  const categorySummary =
+    selectedCategories.length > 0
+      ? `${selectedCategories.length} selected`
+      : "All categories";
 
   useEffect(() => {
     getAllOpportunities();
@@ -127,8 +137,10 @@ const VolunteerOpportunities = () => {
 
   const clearFilters = () => {
     setSelectedCategories([]);
+    setIsCategoryOpen(true);
     setMatchesAvailabilityOnly(false);
     setCustomAvailability(initialCustomAvailability);
+    setIsCustomAvailabilityOpen(false);
   };
 
   return (
@@ -186,21 +198,49 @@ const VolunteerOpportunities = () => {
               )}
             </div>
 
-            <fieldset className="volunteer-category-filter">
-              <legend>Category</legend>
-              {opportunityCategories.map((category) => (
-                <label
-                  key={category}
-                  className={selectedCategories.includes(category) ? "selected" : ""}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(category)}
-                    onChange={() => toggleCategory(category)}
-                  />
-                  <span>{category}</span>
-                </label>
-              ))}
+            <fieldset
+              className="volunteer-category-filter"
+              aria-label="Category filters"
+            >
+              <button
+                type="button"
+                className="filter-section-toggle"
+                aria-expanded={isCategoryOpen}
+                onClick={() => {
+                  const nextIsOpen = !isCategoryOpen;
+                  setIsCategoryOpen(nextIsOpen);
+
+                  if (nextIsOpen) {
+                    setIsCustomAvailabilityOpen(false);
+                  }
+                }}
+              >
+                <span>
+                  <strong>Category</strong>
+                  <small>{categorySummary}</small>
+                </span>
+                <ChevronDown size={18} />
+              </button>
+
+              {isCategoryOpen && (
+                <div className="volunteer-category-options">
+                  {opportunityCategories.map((category) => (
+                    <label
+                      key={category}
+                      className={
+                        selectedCategories.includes(category) ? "selected" : ""
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => toggleCategory(category)}
+                      />
+                      <span>{category}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </fieldset>
 
             <fieldset className="volunteer-availability-filter">
@@ -228,62 +268,86 @@ const VolunteerOpportunities = () => {
               </p>
 
               <div className="custom-availability-filter">
-                <span className="custom-availability-title">
-                  Choose a custom time
-                </span>
+                <button
+                  type="button"
+                  className="filter-section-toggle custom-availability-toggle"
+                  aria-expanded={isCustomAvailabilityOpen}
+                  onClick={() => {
+                    const nextIsOpen = !isCustomAvailabilityOpen;
+                    setIsCustomAvailabilityOpen(nextIsOpen);
 
-                <label>
-                  <span>Day</span>
-                  <CustomSelect
-                    value={customAvailability.dayOfWeek}
-                    placeholder="Day of Week"
-                    options={volunteerAvailabilityDays}
-                    onChange={(event) =>
-                      updateCustomAvailability("dayOfWeek", event)
+                    if (nextIsOpen) {
+                      setIsCategoryOpen(false);
                     }
-                  />
-                </label>
+                  }}
+                >
+                  <span>
+                    <strong>Choose a custom time</strong>
+                    {customAvailabilitySummary && (
+                      <small>{customAvailabilitySummary}</small>
+                    )}
+                  </span>
+                  <ChevronDown size={18} />
+                </button>
 
-                <div className="custom-availability-time-row">
-                  <label>
-                    <span>Start</span>
-                    <CustomSelect
-                      value={customAvailability.startTime}
-                      placeholder="Start Time"
-                      options={volunteerAvailabilityTimes}
-                      onChange={(value) =>
-                        updateCustomAvailability("startTime", value)
-                      }
-                    />
-                  </label>
+                {isCustomAvailabilityOpen && (
+                  <div className="custom-availability-panel">
+                    <label>
+                      <span>Day</span>
+                      <CustomSelect
+                        value={customAvailability.dayOfWeek}
+                        placeholder="Day of Week"
+                        options={volunteerAvailabilityDays}
+                        onChange={(event) =>
+                          updateCustomAvailability("dayOfWeek", event)
+                        }
+                      />
+                    </label>
 
-                  <label>
-                    <span>End</span>
-                    <CustomSelect
-                      value={customAvailability.endTime}
-                      placeholder="End Time"
-                      options={volunteerAvailabilityTimes}
-                      onChange={(value) =>
-                        updateCustomAvailability("endTime", value)
-                      }
-                    />
-                  </label>
-                </div>
+                    <div className="custom-availability-time-row">
+                      <label>
+                        <span>Start</span>
+                        <CustomSelect
+                          value={customAvailability.startTime}
+                          placeholder="Start Time"
+                          options={volunteerAvailabilityTimes}
+                          onChange={(value) =>
+                            updateCustomAvailability("startTime", value)
+                          }
+                        />
+                      </label>
 
-                {hasCustomAvailabilityInput && !hasValidCustomAvailability && (
-                  <p className="custom-availability-hint">
-                    Select a day and a valid start/end time to filter.
-                  </p>
-                )}
+                      <label>
+                        <span>End</span>
+                        <CustomSelect
+                          value={customAvailability.endTime}
+                          placeholder="End Time"
+                          options={volunteerAvailabilityTimes}
+                          onChange={(value) =>
+                            updateCustomAvailability("endTime", value)
+                          }
+                        />
+                      </label>
+                    </div>
 
-                {hasCustomAvailabilityInput && (
-                  <button
-                    type="button"
-                    className="custom-availability-clear"
-                    onClick={() => setCustomAvailability(initialCustomAvailability)}
-                  >
-                    Clear time
-                  </button>
+                    {hasCustomAvailabilityInput && !hasValidCustomAvailability && (
+                      <p className="custom-availability-hint">
+                        Select a day and a valid start/end time to filter.
+                      </p>
+                    )}
+
+                    {hasCustomAvailabilityInput && (
+                      <button
+                        type="button"
+                        className="custom-availability-clear"
+                        onClick={() =>
+                          setCustomAvailability(initialCustomAvailability)
+                        }
+                      >
+                        Clear time
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </fieldset>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Building2, CalendarDays, Clock, ImageOff, MapPin, Users, X } from "lucide-react";
+import { Building2, CalendarDays, Clock, MapPin, Users, X } from "lucide-react";
 import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
@@ -58,40 +58,32 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
           </button>
         </div>
 
-        <section className="opportunity-detail-media" aria-label="Opportunity photos">
-          {heroImage ? (
-            <>
-              <img
-                className="opportunity-detail-hero-image"
-                src={heroImage}
-                alt={`${opportunity.title} photo`}
-              />
-              {opportunityImages.length > 1 && (
-                <div className="opportunity-detail-thumbnail-list">
-                  {opportunityImages.map((image, index) => (
-                    <button
-                      key={`${image}-${index}`}
-                      type="button"
-                      className={`opportunity-detail-thumbnail-button${
-                        image === heroImage ? " selected" : ""
-                      }`}
-                      aria-label={`View ${opportunity.title} photo ${index + 1}`}
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <img src={image} alt={`${opportunity.title} photo ${index + 1}`} />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="opportunity-detail-no-image">
-              <ImageOff size={32} />
-              <strong>No photos uploaded</strong>
-              <p>The organisation has not added photos for this opportunity yet.</p>
-            </div>
-          )}
-        </section>
+        {heroImage && (
+          <section className="opportunity-detail-media" aria-label="Opportunity photos">
+            <img
+              className="opportunity-detail-hero-image"
+              src={heroImage}
+              alt={`${opportunity.title} photo`}
+            />
+            {opportunityImages.length > 1 && (
+              <div className="opportunity-detail-thumbnail-list">
+                {opportunityImages.map((image, index) => (
+                  <button
+                    key={`${image}-${index}`}
+                    type="button"
+                    className={`opportunity-detail-thumbnail-button${
+                      image === heroImage ? " selected" : ""
+                    }`}
+                    aria-label={`View ${opportunity.title} photo ${index + 1}`}
+                    onClick={() => setSelectedImage(image)}
+                  >
+                    <img src={image} alt={`${opportunity.title} photo ${index + 1}`} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <div className="opportunity-detail-meta">
           {opportunity.location && (
@@ -122,24 +114,22 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
 
         <section className="opportunity-detail-section">
           <h3>Opportunity Details</h3>
-          <div className="opportunity-detail-box">
+          <div className="opportunity-detail-copy">
             <p>{opportunity.details || "Details will be shared soon."}</p>
           </div>
         </section>
 
         <section className="opportunity-detail-section">
           <h3>Volunteer Requirements</h3>
-          <div className="opportunity-requirements-box">
-            {requirementItems.length > 0 ? (
-              <ul>
-                {requirementItems.map((requirement) => (
-                  <li key={requirement}>{requirement}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No specific requirements listed.</p>
-            )}
-          </div>
+          {requirementItems.length > 0 ? (
+            <ul className="opportunity-requirements-list">
+              {requirementItems.map((requirement) => (
+                <li key={requirement}>{requirement}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="opportunity-detail-muted">No specific requirements listed.</p>
+          )}
         </section>
       </div>
     </div>
