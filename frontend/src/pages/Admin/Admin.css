@@ -822,17 +822,9 @@
 
 .admin-opportunity-card-list {
   --opportunity-row-height: 88px;
-  display: grid;
-  grid-template-columns:
-    minmax(220px, 1.2fr)
-    minmax(180px, 0.8fr)
-    minmax(220px, 1fr)
-    minmax(110px, auto)
-    auto
-    auto;
-  column-gap: 20px;
-  max-height: calc(var(--opportunity-row-height) * 7);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
   padding-bottom: 0;
 }
 
@@ -880,12 +872,23 @@
 
 .admin-opportunity-card {
   display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr 90px 90px 40px;
+  grid-template-areas:
+    "title title title title title"
+    "category location date status preview";
   align-items: center;
-  column-gap: 20px;
-  row-gap: 12px;
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 12px 24px;
+  border-top: 1px solid #eee8e0;
 }
+
+.admin-opportunity-card > *:nth-child(1) { grid-area: title; }
+.admin-opportunity-card > *:nth-child(2) { grid-area: category; }
+.admin-opportunity-card > *:nth-child(3) { grid-area: location; }
+.admin-opportunity-card > *:nth-child(4) { grid-area: date; }
+.admin-opportunity-card > *:nth-child(5) { grid-area: status; }
+.admin-opportunity-card > *:nth-child(6) { grid-area: preview; }
 
 .admin-volunteer-card-avatar {
   width: 44px;
@@ -945,9 +948,7 @@
   color: #1d2a32;
   font-size: 15px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
 }
 
 .admin-opportunity-card-column {
