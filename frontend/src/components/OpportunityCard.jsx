@@ -1,28 +1,11 @@
 import React from 'react';
 import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
+import {
+  formatOpportunityDate,
+  formatOpportunityTimeRange,
+  getSpotsRemaining,
+} from '../lib/opportunityUtils';
 import './OpportunityCard.css';
-
-const formatDate = (dateValue) => {
-  if (!dateValue) return '';
-
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(dateValue));
-};
-
-const formatTime = (dateValue) => {
-  if (!dateValue) return '';
-
-  return new Intl.DateTimeFormat('en-MY', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-    .format(new Date(dateValue))
-    .toLowerCase();
-};
 
 const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
 
@@ -42,17 +25,20 @@ const OpportunityCard = ({
   const displayStatus = opportunity?.status || status || "Active";
   const statusClass = getStatusClass(displayStatus);
   const displayTitle = opportunity?.title || title;
-  const displayDetails = opportunity?.details || detail;
+  const displayDetails = opportunity?.details || opportunity?.detail || detail;
   const displayLocation = opportunity?.location;
-  const displayDate = opportunity?.startAt ? formatDate(opportunity.startAt) : fixedDate;
+  const displayDate = opportunity?.startAt
+    ? formatOpportunityDate(opportunity.startAt)
+    : opportunity?.fixedDate || fixedDate;
   const displayTime = opportunity?.startAt && opportunity?.endAt
-    ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
-    : timeFrame;
+    ? formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt)
+    : opportunity?.timeFrame || timeFrame;
   const displayCategory = opportunity?.category?.[0];
   const displayOrganisationName = opportunity?.organisationId?.name;
-  const spotsRemaining = isModelOpportunity
-    ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
-    : null;
+  const spotsRemaining =
+    isModelOpportunity && opportunity?.maxVolunteers !== undefined
+      ? getSpotsRemaining(opportunity)
+      : null;
   const displayActions = actions || (showActionButtons ? ['view'] : []);
 
   return (
@@ -104,7 +90,7 @@ const OpportunityCard = ({
 
       {opportunity?.applicationDeadline && (
         <div className="event-deadline">
-          Apply before {formatDate(opportunity.applicationDeadline)}
+          Apply before {formatOpportunityDate(opportunity.applicationDeadline)}
         </div>
       )}
 

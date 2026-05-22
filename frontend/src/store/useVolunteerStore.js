@@ -19,6 +19,48 @@ const calculateTotalVolunteerHours = (history) =>
     .reduce((total, activity) => total + activity.loggedHours, 0)
     .toFixed(1)}h`;
 
+const mockRecommendedOpportunities = [
+  {
+    _id: "mock-beach-cleanup",
+    title: "Beach Cleanup",
+    details: "Help clean the beach and protect the local environment.",
+    location: "St Kilda Beach",
+    startAt: "2026-06-01T08:00:00",
+    endAt: "2026-06-01T12:00:00",
+    status: "active",
+    images: [],
+  },
+  {
+    _id: "mock-food-bank-helper",
+    title: "Food Bank Helper",
+    details: "Support food packing and distribution for local families.",
+    location: "Community Food Bank",
+    startAt: "2026-06-03T10:00:00",
+    endAt: "2026-06-03T14:00:00",
+    status: "active",
+    images: [],
+  },
+];
+
+const mockVolunteerApplications = [
+  {
+    _id: "mock-application-community-garden",
+    opportunityTitle: "Community Garden Setup",
+    location: "Semenyih Community Garden",
+    startAt: "2026-06-08T09:00:00",
+    endAt: "2026-06-08T13:00:00",
+    status: "accepted",
+  },
+  {
+    _id: "mock-application-food-bank",
+    opportunityTitle: "Food Bank Helper",
+    location: "Community Food Bank",
+    startAt: "2026-06-03T10:00:00",
+    endAt: "2026-06-03T14:00:00",
+    status: "pending",
+  },
+];
+
 export const useVolunteerStore = create((set) => ({
   currentTab: "homepage",
   sidebarCollapsed: false,
@@ -31,6 +73,8 @@ export const useVolunteerStore = create((set) => ({
   opportunities: [],
   isOpportunitiesLoading: false,
   opportunitiesError: "",
+  recommendedFallbackOpportunities: mockRecommendedOpportunities,
+  volunteerApplications: mockVolunteerApplications,
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),

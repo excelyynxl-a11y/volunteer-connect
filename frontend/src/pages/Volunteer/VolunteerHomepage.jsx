@@ -12,126 +12,15 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
+import {
+  defaultAvailabilityPreview,
+  formatOpportunityDate,
+  formatOpportunityTimeRange,
+  getOpportunityImage,
+  isOpportunityInsideAvailability,
+  shortDay,
+} from "../../lib/opportunityUtils";
 import "./Volunteer.css";
-
-const formatOpportunityDate = (dateString) =>
-  new Date(dateString).toLocaleDateString("en-MY", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-const formatOpportunityTime = (dateString) =>
-  new Date(dateString).toLocaleTimeString("en-MY", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-const formatDateRange = (startAt, endAt) => {
-  if (!startAt || !endAt) return "Time to be confirmed";
-  return `${formatOpportunityTime(startAt)} - ${formatOpportunityTime(endAt)}`;
-};
-
-const shortDay = (day) => (day ? day.slice(0, 3) : "Day");
-
-const getOpportunityImage = (opportunity) => {
-  if (!Array.isArray(opportunity?.images)) return "";
-  return opportunity.images.find(Boolean) || "";
-};
-
-const mockOpportunities = [
-  {
-    _id: "mock-beach-cleanup",
-    title: "Beach Cleanup",
-    details: "Help clean the beach and protect the local environment.",
-    location: "St Kilda Beach",
-    startAt: "2026-06-01T08:00:00",
-    endAt: "2026-06-01T12:00:00",
-    status: "active",
-    images: [],
-  },
-  {
-    _id: "mock-food-bank-helper",
-    title: "Food Bank Helper",
-    details: "Support food packing and distribution for local families.",
-    location: "Community Food Bank",
-    startAt: "2026-06-03T10:00:00",
-    endAt: "2026-06-03T14:00:00",
-    status: "active",
-    images: [],
-  },
-];
-
-const mockApplications = [
-  {
-    _id: "mock-application-community-garden",
-    opportunityTitle: "Community Garden Setup",
-    location: "Semenyih Community Garden",
-    startAt: "2026-06-08T09:00:00",
-    endAt: "2026-06-08T13:00:00",
-    status: "accepted",
-  },
-  {
-    _id: "mock-application-food-bank",
-    opportunityTitle: "Food Bank Helper",
-    location: "Community Food Bank",
-    startAt: "2026-06-03T10:00:00",
-    endAt: "2026-06-03T14:00:00",
-    status: "pending",
-  },
-];
-
-const getWeekdayName = (dateValue) =>
-  new Date(dateValue).toLocaleDateString("en-US", { weekday: "long" });
-
-const getMinutesFromDate = (dateValue) => {
-  const date = new Date(dateValue);
-  return date.getHours() * 60 + date.getMinutes();
-};
-
-const getMinutesFromTime = (timeValue) => {
-  if (!timeValue) return null;
-
-  const [hours, minutes] = timeValue.split(":").map(Number);
-
-  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
-    return null;
-  }
-
-  return hours * 60 + minutes;
-};
-
-const isOpportunityInsideAvailability = (opportunity, availabilitySlots) => {
-  if (!opportunity?.startAt || !opportunity?.endAt || availabilitySlots.length === 0) {
-    return false;
-  }
-
-  const opportunityStartDay = getWeekdayName(opportunity.startAt);
-  const opportunityEndDay = getWeekdayName(opportunity.endAt);
-
-  if (opportunityStartDay !== opportunityEndDay) {
-    return false;
-  }
-
-  const opportunityStart = getMinutesFromDate(opportunity.startAt);
-  const opportunityEnd = getMinutesFromDate(opportunity.endAt);
-
-  return availabilitySlots.some((slot) => {
-    const slotStart = getMinutesFromTime(slot.startTime);
-    const slotEnd = getMinutesFromTime(slot.endTime);
-
-    if (slotStart === null || slotEnd === null) {
-      return false;
-    }
-
-    return (
-      slot.dayOfWeek === opportunityStartDay &&
-      opportunityStart >= slotStart &&
-      opportunityEnd <= slotEnd
-    );
-  });
-};
 
 const VolunteerHomepage = () => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -141,6 +30,8 @@ const VolunteerHomepage = () => {
     opportunitiesError,
     participationHistory,
     totalVolunteerHours,
+    recommendedFallbackOpportunities,
+    volunteerApplications,
     getVolunteerPastOpportunity,
     getAllOpportunities,
   } = useVolunteerStore();
@@ -158,10 +49,7 @@ const VolunteerHomepage = () => {
 
   const availabilityPreview = displayAvailability.length > 0
     ? displayAvailability.slice(0, 2)
-    : [
-        { dayOfWeek: "Monday", startTime: "08:00", endTime: "19:00" },
-        { dayOfWeek: "Wednesday", startTime: "10:00", endTime: "18:00" },
-      ];
+    : defaultAvailabilityPreview;
 
   const availabilityForMatching = Array.isArray(authUser?.availability) && authUser.availability.length > 0
     ? authUser.availability
@@ -175,17 +63,17 @@ const VolunteerHomepage = () => {
     isOpportunityInsideAvailability(opportunity, availabilityForMatching),
   );
 
-  const matchingMockOpportunities = mockOpportunities.filter((opportunity) =>
+  const matchingFallbackOpportunities = recommendedFallbackOpportunities.filter((opportunity) =>
     isOpportunityInsideAvailability(opportunity, availabilityForMatching),
   );
 
   const recommendedOpportunities = (
     matchingOpportunities.length > 0
       ? matchingOpportunities
-      : matchingMockOpportunities
+      : matchingFallbackOpportunities
   ).slice(0, 2);
 
-  const applicationStatuses = mockApplications;
+  const applicationStatuses = volunteerApplications;
   const acceptedApplications = applicationStatuses.filter(
     (application) => application.status === "accepted",
   );
@@ -331,7 +219,13 @@ const VolunteerHomepage = () => {
                               ? formatOpportunityDate(opportunity.startAt)
                               : "Date to be confirmed"}
                           </span>
-                          <span>{formatDateRange(opportunity.startAt, opportunity.endAt)}</span>
+                          <span>
+                            {formatOpportunityTimeRange(
+                              opportunity.startAt,
+                              opportunity.endAt,
+                              "Time to be confirmed",
+                            )}
+                          </span>
                         </div>
                         <button type="button" onClick={handleSeeMore}>
                           View
@@ -366,7 +260,13 @@ const VolunteerHomepage = () => {
                     ? formatOpportunityDate(nextShift.startAt)
                     : "Date to be confirmed"}
                 </p>
-                <p>{formatDateRange(nextShift?.startAt, nextShift?.endAt)}</p>
+                <p>
+                  {formatOpportunityTimeRange(
+                    nextShift?.startAt,
+                    nextShift?.endAt,
+                    "Time to be confirmed",
+                  )}
+                </p>
                 {nextShift?.location && (
                   <p className="homepage-location">
                     <MapPin size={14} />
