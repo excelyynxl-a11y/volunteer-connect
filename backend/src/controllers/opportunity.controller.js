@@ -113,7 +113,9 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find();
+    const opportunities = await Opportunity.find()
+      .populate("organisationId", "name")
+      .sort({ publishedAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -139,7 +141,8 @@ export const getOpportunityById = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id);
+    const opportunity = await Opportunity.findById(id)
+      .populate("organisationId", "name");
 
     if (!opportunity) {
       return res.status(404).json({
