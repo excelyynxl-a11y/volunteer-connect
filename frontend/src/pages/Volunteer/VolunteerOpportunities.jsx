@@ -91,10 +91,10 @@ const VolunteerOpportunities = () => {
   }, []);
 
   const handleBackToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    document
-      .querySelector(".volunteer-content")
-      ?.scrollTo({ top: 0, behavior: "smooth" });
+    const scrollContainer = document.querySelector(".volunteer-content");
+
+    scrollContainer?.scrollTo({ top: 0, behavior: "auto" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   const activeOpportunities = opportunities.filter((opportunity) => {
