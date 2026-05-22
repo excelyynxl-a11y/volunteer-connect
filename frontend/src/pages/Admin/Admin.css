@@ -970,6 +970,13 @@
   line-height: 1.4;
 }
 
+.admin-opportunity-card-org {
+  margin-left: 12px;
+  color: #6b7a8d;
+  font-weight: 400;
+  font-size: 13px;
+}
+
 .admin-opportunity-card-column {
   display: flex;
   flex-direction: column;
@@ -1319,15 +1326,26 @@
 }
 
 .admin-opportunity-image-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: flex;
   gap: 10px;
   margin-top: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.admin-opportunity-image-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-opportunity-image-list::-webkit-scrollbar-thumb {
+  background: #d0c8c0;
+  border-radius: 3px;
 }
 
 .admin-opportunity-image {
-  width: 100%;
-  height: 90px;
+  flex: 0 0 auto;
+  width: 180px;
+  height: 120px;
   object-fit: cover;
   border-radius: 10px;
   border: 1px solid #e8ddd0;
