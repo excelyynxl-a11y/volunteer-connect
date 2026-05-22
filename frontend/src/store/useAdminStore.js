@@ -486,12 +486,26 @@ export const useAdminStore = create((set, get) => ({
     return mockAllVolunteers;
   },
 
-  rejectUserAccount: (userId) => {
-    // TODO: call rejectUserAccount
+  rejectUserAccount: async (userId, onClose) => {
+    try {
+      await axiosInstance.patch(`/admin/users/${userId}/reject`);
+      toast.success('User account rejected!');
+      await get().getAllOrganisations();
+      onClose?.();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
   },
 
-  approveUserAccount: (userId) => {
-    // TODO: call approveUserAccount
+  approveUserAccount: async (userId, onClose) => {
+    try {
+      await axiosInstance.patch(`/admin/users/${userId}/approve`);
+      toast.success('User account approved!');
+      await get().getAllOrganisations();
+      onClose?.();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
   },
 
   getAllOpportunities: () => {

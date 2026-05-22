@@ -2,7 +2,10 @@ import React from "react";
 import { X, CheckCircle, XCircle } from "lucide-react";
 import { useAdminStore } from "../store/useAdminStore";
 
-const PreviewOrganisation = ({ organisation, onClose }) => {
+const PreviewOrganisation = ({ 
+  organisation, 
+  onClose 
+}) => {
   const { approveUserAccount, rejectUserAccount } = useAdminStore();
 
   const statusClass =
@@ -73,7 +76,7 @@ const PreviewOrganisation = ({ organisation, onClose }) => {
           <button
             className="admin-modal-approve-btn"
             disabled={organisation.approvalStatus === "approved"}
-            onClick={approveUserAccount(organisation._id)}
+            onClick={() => approveUserAccount(organisation._id, onClose)}
           >
             <CheckCircle size={16} />
             Approve
@@ -81,7 +84,7 @@ const PreviewOrganisation = ({ organisation, onClose }) => {
           <button
             className="admin-modal-reject-btn"
             disabled={organisation.approvalStatus === "rejected"}
-            onClick={rejectUserAccount(organisation._id)}
+            onClick={() => rejectUserAccount(organisation._id, onClose)}
           >
             <XCircle size={16} />
             Reject
