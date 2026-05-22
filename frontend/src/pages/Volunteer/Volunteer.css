@@ -586,6 +586,34 @@
   font-weight: 700;
 }
 
+.opportunity-organisation-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-organisation-button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid #d9c7a5;
+  border-radius: 999px;
+  background: #fffaf0;
+  color: var(--profile-green-dark);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.view-organisation-button:hover {
+  border-color: var(--profile-green);
+  color: var(--profile-green);
+}
+
 .apply-volunteer-button {
   min-width: 170px;
   min-height: 52px;
@@ -602,6 +630,79 @@
 
 .apply-volunteer-button:hover {
   background: var(--profile-green-dark);
+}
+
+.opportunity-detail-media {
+  margin-top: 28px;
+}
+
+.opportunity-detail-hero-image,
+.opportunity-detail-no-image {
+  width: 100%;
+  min-height: 260px;
+  border: 2px solid var(--profile-orange);
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.opportunity-detail-hero-image {
+  display: block;
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.opportunity-detail-thumbnail-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.opportunity-detail-thumbnail-button {
+  width: 100%;
+  padding: 0;
+  border: 1px solid #ead9b8;
+  border-radius: 10px;
+  background: #fffdf8;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.opportunity-detail-thumbnail-button:hover,
+.opportunity-detail-thumbnail-button.selected {
+  border-color: var(--profile-green);
+}
+
+.opportunity-detail-thumbnail-button.selected {
+  box-shadow: 0 0 0 3px rgba(47, 104, 71, 0.16);
+}
+
+.opportunity-detail-thumbnail-button img {
+  width: 100%;
+  height: 88px;
+  display: block;
+  object-fit: cover;
+}
+
+.opportunity-detail-no-image {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 36px;
+  color: var(--profile-muted);
+  text-align: center;
+}
+
+.opportunity-detail-no-image strong {
+  color: var(--profile-green-dark);
+  font-size: 18px;
+}
+
+.opportunity-detail-no-image p {
+  max-width: 420px;
+  margin: 0;
+  color: var(--profile-muted);
 }
 
 .opportunity-detail-meta {

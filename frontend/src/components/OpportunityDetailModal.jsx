@@ -1,5 +1,5 @@
-import React from "react";
-import { CalendarDays, Clock, MapPin, Users, X } from "lucide-react";
+import React, { useState } from "react";
+import { Building2, CalendarDays, Clock, ImageOff, MapPin, Users, X } from "lucide-react";
 import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
@@ -9,9 +9,17 @@ import {
 } from "../lib/opportunityUtils";
 
 const OpportunityDetailModal = ({ opportunity, onClose }) => {
+  const [selectedImage, setSelectedImage] = useState("");
+  const opportunityImages = Array.isArray(opportunity?.images)
+    ? opportunity.images.filter(Boolean)
+    : [];
+
   if (!opportunity) return null;
 
   const requirementItems = getRequirementItems(opportunity.requirements);
+  const heroImage = opportunityImages.includes(selectedImage)
+    ? selectedImage
+    : opportunityImages[0];
 
   return (
     <div
@@ -36,13 +44,54 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
               {opportunity.category?.[0] || "Opportunity"}
             </span>
             <h2 id="opportunity-detail-title">{opportunity.title}</h2>
-            <p>{getOrganisationName(opportunity)}</p>
+            <div className="opportunity-organisation-row">
+              <p>{getOrganisationName(opportunity)}</p>
+              <button type="button" className="view-organisation-button">
+                <Building2 size={16} />
+                View organisation profile
+              </button>
+            </div>
           </div>
 
           <button className="apply-volunteer-button" type="button">
             Apply As Volunteer
           </button>
         </div>
+
+        <section className="opportunity-detail-media" aria-label="Opportunity photos">
+          {heroImage ? (
+            <>
+              <img
+                className="opportunity-detail-hero-image"
+                src={heroImage}
+                alt={`${opportunity.title} photo`}
+              />
+              {opportunityImages.length > 1 && (
+                <div className="opportunity-detail-thumbnail-list">
+                  {opportunityImages.map((image, index) => (
+                    <button
+                      key={`${image}-${index}`}
+                      type="button"
+                      className={`opportunity-detail-thumbnail-button${
+                        image === heroImage ? " selected" : ""
+                      }`}
+                      aria-label={`View ${opportunity.title} photo ${index + 1}`}
+                      onClick={() => setSelectedImage(image)}
+                    >
+                      <img src={image} alt={`${opportunity.title} photo ${index + 1}`} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="opportunity-detail-no-image">
+              <ImageOff size={32} />
+              <strong>No photos uploaded</strong>
+              <p>The organisation has not added photos for this opportunity yet.</p>
+            </div>
+          )}
+        </section>
 
         <div className="opportunity-detail-meta">
           {opportunity.location && (
