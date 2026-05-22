@@ -11,8 +11,16 @@ const AdminProfile = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [newName, setNewName] = useState(authUser?.name || "");
 
-  const handleUpdate = () => {
-    // TODO: call updateAdminProfile from useAuthStore
+  const handleUpdate = async () => {
+    const result = await updateAdminProfile({
+      name: newName,
+      avatar: selectedFile,
+    });
+    if (result.success) {
+      await checkAuth();
+      setIsEditMode(false);
+      setSelectedFile(null);
+    }
   };
 
   const handleCancel = () => {
@@ -45,16 +53,18 @@ const AdminProfile = () => {
         <div className="admin-profile-header">
           <div className="admin-profile-header-main">
             {/* admin avatar */}
-            <div className="admin-profile-avatar">
-              {avatarSrc ? (
-                <img
-                  src={avatarSrc}
-                  alt="Admin avatar"
-                  className="admin-profile-avatar-img"
-                />
-              ) : (
-                avatarInitial
-              )}
+            <div className="admin-profile-avatar-wrapper">
+              <div className="admin-profile-avatar">
+                {avatarSrc ? (
+                  <img
+                    src={avatarSrc}
+                    alt="Admin avatar"
+                    className="admin-profile-avatar-img"
+                  />
+                ) : (
+                  avatarInitial
+                )}
+              </div>
               {isEditMode && (
                 <>
                   <input
