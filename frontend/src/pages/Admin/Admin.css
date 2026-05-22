@@ -1225,6 +1225,23 @@
   padding: 24px;
 }
 
+.admin-modal-resume-btn {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #9a8268;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-modal-resume-btn:hover {
+  background: #7d6b54;
+}
+
 .admin-modal-footer {
   display: flex;
   gap: 12px;

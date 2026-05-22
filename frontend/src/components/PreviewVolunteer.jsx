@@ -131,6 +131,9 @@ const PreviewVolunteer = ({
               {volunteer.resume ? (
                 <a
                   href={volunteer.resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="admin-modal-resume-btn"
                 >
                   View Resume
                 </a>
@@ -166,7 +169,7 @@ const PreviewVolunteer = ({
           <button
             className="admin-modal-approve-btn"
             disabled={volunteer.approvalStatus === "approved"}
-            onClick={approveUserAccount(volunteer._id)}
+            onClick={() => approveUserAccount(volunteer._id, onClose)}
           >
             <CheckCircle size={16} />
             Approve
@@ -174,7 +177,7 @@ const PreviewVolunteer = ({
           <button
             className="admin-modal-reject-btn"
             disabled={volunteer.approvalStatus === "rejected"}
-            onClick={rejectUserAccount(volunteer._id)}
+            onClick={() => rejectUserAccount(volunteer._id, onClose)}
           >
             <XCircle size={16} />
             Reject
