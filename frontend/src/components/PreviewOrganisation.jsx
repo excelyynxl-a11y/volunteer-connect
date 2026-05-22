@@ -22,13 +22,35 @@ const PreviewOrganisation = ({
       year: "numeric",
     });
 
+  const initials = organisation.name
+    ? organisation.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
       <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Organisation header */}
         <div className="admin-modal-header">
-          {/* organisation name */}
-          <h2>{organisation.name}</h2>
+          <div className="admin-modal-header-main">
+            {/* organisation avatar */}
+            <div className="admin-organisation-card-avatar">
+              {organisation.avatar ? (
+                <img src={organisation.avatar} alt={`${organisation.name} avatar`} />
+              ) : (
+                <span className="admin-organisation-card-initials">{initials}</span>
+              )}
+            </div>
+
+            {/* organisation name */}
+            <h2>
+              {organisation.name}
+            </h2>
+          </div>
 
           {/* close button */}
           <button className="admin-modal-close" onClick={onClose}>

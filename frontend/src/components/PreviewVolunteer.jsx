@@ -38,7 +38,7 @@ const PreviewVolunteer = ({
         {/* Volunteer header */}
         <div className="admin-modal-header">
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div className="admin-modal-header-main">
             {/* volunteer avatar */}
             <div className="admin-volunteer-card-avatar">
               {volunteer.avatar ? (
