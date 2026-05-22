@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { malaysiaStateCities } from "../lib/data";
+import toast from 'react-hot-toast';
 
 const mockStats = [
   { key: "volunteers", value: "69", label: "Active Volunteers" },
@@ -451,6 +452,11 @@ export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",
   sidebarCollapsed: false,
   isUpdating: false,
+  isUsersLoading: false,
+  organisations: [],
+  volunteers: [],
+  opportunities: [],
+  reports: [],
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
@@ -460,13 +466,23 @@ export const useAdminStore = create((set, get) => ({
     return mockStats;
   },
 
-  getAllOrganisations: () => {
-    // TODO: call getAllOrganisations
-    return mockAllOrganisation;
+  getAllOrganisations: async () => {
+    set({ isUsersLoading: true });
+    
+    try {
+        const res = await axiosInstance.get('/user/organisations');
+        set({ organisations: res.data.organisations });
+    } catch (error) {
+        toast.error(error.response.data.message);
+    } finally {
+        set({ isUsersLoading: false });
+    }
+
   },
 
   getAllVolunteers: () => {
     // TODO: call getAllVolunteers
+
     return mockAllVolunteers;
   },
 
@@ -480,6 +496,7 @@ export const useAdminStore = create((set, get) => ({
 
   getAllOpportunities: () => {
     // TODO: call getAllOpportunities
+
     return mockAllOpportunities;
   },
 
@@ -508,4 +525,5 @@ export const useAdminStore = create((set, get) => ({
       });
     }
   },
+
 }));
