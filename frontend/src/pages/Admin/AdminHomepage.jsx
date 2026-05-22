@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Users, Building2, Lightbulb, AlertCircle, UserCheck, Building } from "lucide-react";
 import { useAdminStore } from "../../store/useAdminStore";
 import AdminStatsCard from "../../components/AdminStatsCard";
@@ -13,14 +13,18 @@ const iconMap = {
 };
 
 const AdminHomepage = () => {
-  const { getStats } = useAdminStore();
+  const { getStats, adminStats } = useAdminStore();
+
+  useEffect(() => {
+    getStats()
+  }, [getStats]); 
 
   const stats = useMemo(() => {
-    return getStats().map((stat) => ({
+    return adminStats.map((stat) => ({
       ...stat,
       Icon: iconMap[stat.key],
     }));
-  }, [getStats]);
+  }, [adminStats]);
 
   return (
     <div className="admin-page">

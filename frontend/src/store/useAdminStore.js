@@ -454,6 +454,7 @@ export const useAdminStore = create((set, get) => ({
   isUpdating: false,
   isUsersLoading: false,
   isOpportunitiesLoading: false,
+  adminStats: [],
   organisations: [],
   volunteers: [],
   opportunities: [],
@@ -462,9 +463,65 @@ export const useAdminStore = create((set, get) => ({
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
-  getStats: () => {
-    // TODO: call GET to retrived getAllVolunteer, getAllOrg, getAllOpportunities, getAllReport to get their counts
-    return mockStats;
+  getStats: async () => {
+
+    // AdminHomepage has 6 AdminStatsCard of:
+    // [activeVolunteers, activeOrg, activeOpp, openReport, pendingVol, pendingOrg]
+    try {
+      const [volRes, orgRes, oppRes, repRes] = await Promise.all([
+        axiosInstance.get("/user/volunteers"),
+        axiosInstance.get("/user/organisations"),
+        axiosInstance.get("/opportunity/"),
+        axiosInstance.get("/report/"),
+      ]);
+
+      const volunteers = volRes.data.volunteers || [];
+      const organisations = orgRes.data.organisations || [];
+      const opportunities = oppRes.data.data || [];
+      const reports = repRes.data.reports || [];
+
+      set({
+        volunteers,
+        organisations,
+        opportunities,
+        reports,
+        adminStats: [
+          {
+            key: "volunteers",
+            value: String(volunteers.filter((v) => v.approvalStatus === "approved").length),
+            label: "Active Volunteers",
+          },
+          {
+            key: "organisations",
+            value: String(organisations.filter((o) => o.approvalStatus === "approved").length),
+            label: "Active Organisations",
+          },
+          {
+            key: "opportunities",
+            value: String(opportunities.filter((o) => o.status === "active").length),
+            label: "Active Opportunities",
+          },
+          {
+            key: "reports",
+            value: String(reports.filter((r) => r.status === "Pending").length),
+            label: "Open Reports",
+          },
+          {
+            key: "volunteerswaitingapproval",
+            value: String(volunteers.filter((v) => v.approvalStatus === "pending").length),
+            label: "Volunteer Waiting Approval",
+          },
+          {
+            key: "organisationswaitingapproval",
+            value: String(organisations.filter((o) => o.approvalStatus === "pending").length),
+            label: "Organisations Waiting Approval",
+          },
+        ],
+      });
+      
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load stats");
+    }
   },
 
   getAllOrganisations: async () => {
