@@ -811,6 +811,25 @@
   font-size: 14px;
 }
 
+/* ── Loading spinner ── */
+.admin-loading {
+  display: grid;
+  place-items: center;
+  padding: 64px 24px;
+}
+
+.admin-loading-spinner {
+  width: 40px;
+  height: 40px;
+  color: #9a8268;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ── Volunteer card list ── */
 
 .admin-volunteer-card-list {
