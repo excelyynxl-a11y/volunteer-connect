@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown,
   Clock,
   Plus,
   User,
   X,
 } from 'lucide-react'
+import CustomSelect from '../../components/CustomSelect'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
 import {
   volunteerAgeGroupOptions,
@@ -410,53 +410,6 @@ const EditVolunteerProfile = () => {
 
         </form>
       </div>
-    </div>
-  )
-}
-
-function CustomSelect({ value, placeholder, options, onChange }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const normalizedOptions = options.map((option) => (
-    typeof option === 'string' ? { label: option, value: option } : option
-  ))
-  const selectedOption = normalizedOptions.find((option) => option.value === value)
-
-  return (
-    <div
-      className={`custom-select${isOpen ? ' open' : ''}`}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setIsOpen(false)
-        }
-      }}
-    >
-      <button
-        type="button"
-        className={`custom-select-trigger${selectedOption ? '' : ' placeholder'}`}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((currentValue) => !currentValue)}
-      >
-        <span>{selectedOption?.label || placeholder || 'Select'}</span>
-        <ChevronDown size={18} />
-      </button>
-
-      {isOpen ? (
-        <div className="custom-select-menu">
-          {normalizedOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={option.value === value ? 'selected' : undefined}
-              onClick={() => {
-                onChange(option.value)
-                setIsOpen(false)
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

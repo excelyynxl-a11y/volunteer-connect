@@ -396,6 +396,69 @@
   font-weight: 700;
 }
 
+.custom-availability-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #ead9b8;
+}
+
+.custom-availability-title {
+  color: var(--profile-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.custom-availability-filter label {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 7px;
+  color: #213f36;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.custom-availability-filter .custom-select-trigger {
+  width: 100%;
+  height: 40px;
+  font-size: 14px;
+}
+
+.custom-availability-filter .custom-select-trigger span {
+  font-size: 14px;
+}
+
+.custom-availability-time-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.custom-availability-filter .custom-availability-hint {
+  margin: 0;
+  color: var(--profile-orange-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.custom-availability-clear {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--profile-orange-dark);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.custom-availability-clear:hover {
+  color: var(--profile-green-dark);
+}
+
 .volunteer-opportunities-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

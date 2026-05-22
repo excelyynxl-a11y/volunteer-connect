@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, Search } from "lucide-react";
+import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import {
+  getMinutesFromTime,
   isOpportunityInsideAvailability,
   opportunityMatchesSearch,
   opportunityCategories,
 } from "../../lib/opportunityUtils";
+import {
+  volunteerAvailabilityDays,
+  volunteerAvailabilityTimes,
+} from "../../lib/data";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
+
+const initialCustomAvailability = {
+  dayOfWeek: "",
+  startTime: "",
+  endTime: "",
+};
 
 const VolunteerOpportunities = () => {
   const authUser = useAuthStore((state) => state.authUser);
@@ -22,11 +34,22 @@ const VolunteerOpportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [matchesAvailabilityOnly, setMatchesAvailabilityOnly] = useState(false);
+  const [customAvailability, setCustomAvailability] = useState(
+    initialCustomAvailability,
+  );
   const [showBackToTop, setShowBackToTop] = useState(false);
   const volunteerAvailability = Array.isArray(authUser?.availability)
     ? authUser.availability
     : [];
   const hasVolunteerAvailability = volunteerAvailability.length > 0;
+  const hasCustomAvailabilityInput = Object.values(customAvailability).some(Boolean);
+  const customAvailabilityStart = getMinutesFromTime(customAvailability.startTime);
+  const customAvailabilityEnd = getMinutesFromTime(customAvailability.endTime);
+  const hasValidCustomAvailability =
+    Boolean(customAvailability.dayOfWeek) &&
+    customAvailabilityStart !== null &&
+    customAvailabilityEnd !== null &&
+    customAvailabilityStart < customAvailabilityEnd;
 
   useEffect(() => {
     getAllOpportunities();
@@ -34,6 +57,7 @@ const VolunteerOpportunities = () => {
 
   const shouldFilterByAvailability =
     hasVolunteerAvailability && matchesAvailabilityOnly;
+  const shouldFilterByCustomAvailability = hasValidCustomAvailability;
 
 
   useEffect(() => {
@@ -72,9 +96,11 @@ const VolunteerOpportunities = () => {
         opportunity.category?.includes(category),
       );
     const matchesAvailability =
-      !shouldFilterByAvailability ||
-      (hasVolunteerAvailability &&
-        isOpportunityInsideAvailability(opportunity, volunteerAvailability));
+      (!shouldFilterByAvailability && !shouldFilterByCustomAvailability) ||
+      (shouldFilterByAvailability &&
+        isOpportunityInsideAvailability(opportunity, volunteerAvailability)) ||
+      (shouldFilterByCustomAvailability &&
+        isOpportunityInsideAvailability(opportunity, [customAvailability]));
 
     return (
       matchesStatus &&
@@ -90,6 +116,19 @@ const VolunteerOpportunities = () => {
         ? currentCategories.filter((currentCategory) => currentCategory !== category)
         : [...currentCategories, category],
     );
+  };
+
+  const updateCustomAvailability = (field, value) => {
+    setCustomAvailability((currentAvailability) => ({
+      ...currentAvailability,
+      [field]: value,
+    }));
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setMatchesAvailabilityOnly(false);
+    setCustomAvailability(initialCustomAvailability);
   };
 
   return (
@@ -135,13 +174,12 @@ const VolunteerOpportunities = () => {
           >
             <div className="volunteer-filter-header">
               <h3>Filter</h3>
-              {(selectedCategories.length > 0 || shouldFilterByAvailability) && (
+              {(selectedCategories.length > 0 ||
+                shouldFilterByAvailability ||
+                hasCustomAvailabilityInput) && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCategories([]);
-                    setMatchesAvailabilityOnly(false);
-                  }}
+                  onClick={clearFilters}
                 >
                   Clear
                 </button>
@@ -185,6 +223,66 @@ const VolunteerOpportunities = () => {
                       .join("; ")
                   : "Add availability in your profile to use this filter."}
               </p>
+
+              <div className="custom-availability-filter">
+                <span className="custom-availability-title">
+                  Choose a custom time
+                </span>
+
+                <label>
+                  <span>Day</span>
+                  <CustomSelect
+                    value={customAvailability.dayOfWeek}
+                    placeholder="Day of Week"
+                    options={volunteerAvailabilityDays}
+                    onChange={(event) =>
+                      updateCustomAvailability("dayOfWeek", event)
+                    }
+                  />
+                </label>
+
+                <div className="custom-availability-time-row">
+                  <label>
+                    <span>Start</span>
+                    <CustomSelect
+                      value={customAvailability.startTime}
+                      placeholder="Start Time"
+                      options={volunteerAvailabilityTimes}
+                      onChange={(value) =>
+                        updateCustomAvailability("startTime", value)
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    <span>End</span>
+                    <CustomSelect
+                      value={customAvailability.endTime}
+                      placeholder="End Time"
+                      options={volunteerAvailabilityTimes}
+                      onChange={(value) =>
+                        updateCustomAvailability("endTime", value)
+                      }
+                    />
+                  </label>
+                </div>
+
+                {hasCustomAvailabilityInput && !hasValidCustomAvailability && (
+                  <p className="custom-availability-hint">
+                    Select a day and a valid start/end time to filter.
+                  </p>
+                )}
+
+                {hasCustomAvailabilityInput && (
+                  <button
+                    type="button"
+                    className="custom-availability-clear"
+                    onClick={() => setCustomAvailability(initialCustomAvailability)}
+                  >
+                    Clear time
+                  </button>
+                )}
+              </div>
             </fieldset>
           </aside>
 
@@ -214,7 +312,8 @@ const VolunteerOpportunities = () => {
               <p>
                 {searchQuery.trim() ||
                 selectedCategories.length > 0 ||
-                matchesAvailabilityOnly
+                shouldFilterByAvailability ||
+                hasCustomAvailabilityInput
                   ? "No opportunities match your search or filters."
                   : "No active opportunities found."}
               </p>
