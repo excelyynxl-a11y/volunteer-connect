@@ -186,10 +186,13 @@ const VolunteerOpportunities = () => {
               )}
             </div>
 
-            <fieldset>
+            <fieldset className="volunteer-category-filter">
               <legend>Category</legend>
               {opportunityCategories.map((category) => (
-                <label key={category}>
+                <label
+                  key={category}
+                  className={selectedCategories.includes(category) ? "selected" : ""}
+                >
                   <input
                     type="checkbox"
                     checked={selectedCategories.includes(category)}

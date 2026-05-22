@@ -306,12 +306,9 @@
 
 .volunteer-opportunities-filter {
   position: sticky;
-  top: 24px;
+  top: 12px;
   align-self: start;
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 22px;
+  padding: 18px;
   border: 2px solid var(--profile-orange);
   border-radius: 16px;
   background: #fffaf0;
@@ -343,7 +340,7 @@
 .volunteer-opportunities-filter fieldset {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -373,6 +370,54 @@
   accent-color: var(--profile-green);
 }
 
+.volunteer-opportunities-filter .volunteer-category-filter {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.volunteer-category-filter legend {
+  grid-column: 1 / -1;
+}
+
+.volunteer-category-filter label {
+  min-height: 34px;
+  justify-content: center;
+  padding: 7px 8px;
+  border: 1px solid #ead9b8;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: var(--profile-green-dark);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.volunteer-category-filter input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.volunteer-category-filter span {
+  min-width: 0;
+}
+
+.volunteer-category-filter label.selected {
+  border-color: var(--profile-green);
+  background: var(--profile-green);
+  color: #ffffff;
+}
+
+.volunteer-category-filter label:hover {
+  border-color: var(--profile-green);
+}
+
 .volunteer-opportunities-filter input:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -384,30 +429,31 @@
 }
 
 .volunteer-opportunities-filter .volunteer-availability-filter {
-  margin-top: 30px;
-  padding-top: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid #ead9b8;
 }
 
 .volunteer-availability-filter p {
-  margin: -4px 0 0 27px;
+  margin: -6px 0 0 27px;
   color: var(--profile-muted);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.35;
 }
 
 .custom-availability-filter {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 20px;
-  padding-top: 18px;
+  gap: 9px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid #ead9b8;
 }
 
 .custom-availability-title {
   color: var(--profile-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
