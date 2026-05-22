@@ -3,101 +3,101 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 
-const mockActiveOpportunities = [
-  {
-    _id: "active-001",
-    title: "Community Food Drive Helper",
-    details: "Support food packing, registration, and distribution for local families.",
-    location: "Selangor, Cheras",
-    category: ["Community"],
-    startAt: "2026-05-20T09:00:00+08:00",
-    endAt: "2026-05-20T14:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Active",
-  },
-  {
-    _id: "active-002",
-    title: "Beach Cleanup Volunteer",
-    details: "Help collect litter, sort recyclables, and document cleanup progress.",
-    location: "Pulau Pinang, Batu Ferringhi",
-    category: ["Environment", "Community"],
-    startAt: "2026-05-24T08:00:00+08:00",
-    endAt: "2026-05-24T12:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Active",
-  },
-  {
-    _id: "active-003",
-    title: "Literacy Tutor",
-    details: "Assist children with reading practice and basic writing exercises.",
-    location: "Selangor, Petaling Jaya",
-    category: ["Education"],
-    startAt: "2026-05-28T15:00:00+08:00",
-    endAt: "2026-05-30T18:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Active",
-  },
-];
+// const mockActiveOpportunities = [
+//   {
+//     _id: "active-001",
+//     title: "Community Food Drive Helper",
+//     details: "Support food packing, registration, and distribution for local families.",
+//     location: "Selangor, Cheras",
+//     category: ["Community"],
+//     startAt: "2026-05-20T09:00:00+08:00",
+//     endAt: "2026-05-20T14:00:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Active",
+//   },
+//   {
+//     _id: "active-002",
+//     title: "Beach Cleanup Volunteer",
+//     details: "Help collect litter, sort recyclables, and document cleanup progress.",
+//     location: "Pulau Pinang, Batu Ferringhi",
+//     category: ["Environment", "Community"],
+//     startAt: "2026-05-24T08:00:00+08:00",
+//     endAt: "2026-05-24T12:00:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Active",
+//   },
+//   {
+//     _id: "active-003",
+//     title: "Literacy Tutor",
+//     details: "Assist children with reading practice and basic writing exercises.",
+//     location: "Selangor, Petaling Jaya",
+//     category: ["Education"],
+//     startAt: "2026-05-28T15:00:00+08:00",
+//     endAt: "2026-05-30T18:00:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Active",
+//   },
+// ];
 
-const mockClosedOpportunities = [
-  {
-    _id: "closed-001",
-    title: "Senior Care Companion",
-    details: "Spent the afternoon supporting seniors through conversation and activities.",
-    location: "Selangor, Subang Jaya",
-    category: ["Elderly Care"],
-    startAt: "2026-04-15T13:00:00+08:00",
-    endAt: "2026-04-15T16:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
-  {
-    _id: "closed-002",
-    title: "Community Garden Setup",
-    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
-    location: "Johor, Johor Bahru",
-    category: ["Environment"],
-    startAt: "2026-04-22T08:30:00+08:00",
-    endAt: "2026-04-23T11:30:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Closed",
-  },
-];
+// const mockClosedOpportunities = [
+//   {
+//     _id: "closed-001",
+//     title: "Senior Care Companion",
+//     details: "Spent the afternoon supporting seniors through conversation and activities.",
+//     location: "Selangor, Subang Jaya",
+//     category: ["Elderly Care"],
+//     startAt: "2026-04-15T13:00:00+08:00",
+//     endAt: "2026-04-15T16:00:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Closed",
+//   },
+//   {
+//     _id: "closed-002",
+//     title: "Community Garden Setup",
+//     details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
+//     location: "Johor, Johor Bahru",
+//     category: ["Environment"],
+//     startAt: "2026-04-22T08:30:00+08:00",
+//     endAt: "2026-04-23T11:30:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Closed",
+//   },
+// ];
 
-const mockCancelledOpportunities = [
-  {
-    _id: "cancelled-001",
-    title: "Outdoor Health Booth",
-    details: "Cancelled due to severe weather conditions.",
-    location: "Melaka, Ayer Keroh",
-    category: ["Health"],
-    startAt: "2026-05-02T10:00:00+08:00",
-    endAt: "2026-05-02T15:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "Cancelled",
-  },
-];
+// const mockCancelledOpportunities = [
+//   {
+//     _id: "cancelled-001",
+//     title: "Outdoor Health Booth",
+//     details: "Cancelled due to severe weather conditions.",
+//     location: "Melaka, Ayer Keroh",
+//     category: ["Health"],
+//     startAt: "2026-05-02T10:00:00+08:00",
+//     endAt: "2026-05-02T15:00:00+08:00",
+//     organisationId: "mock-organisation",
+//     status: "Cancelled",
+//   },
+// ];
 
 const normaliseOpportunity = (opportunity) => ({
   ...opportunity,
   detail: opportunity.detail ?? opportunity.details ?? "",
 });
 
-const loadMockOpportunities = async (set, get, loadingKey, dataKey, mockData) => {
-  const currentData = get()[dataKey];
-  if (currentData && currentData.length > 0) {
-    return currentData;
-  }
+// const loadMockOpportunities = async (set, get, loadingKey, dataKey, mockData) => {
+//   const currentData = get()[dataKey];
+//   if (currentData && currentData.length > 0) {
+//     return currentData;
+//   }
 
-  set({ [loadingKey]: true });
-  try {
-    const opportunities = mockData.map(normaliseOpportunity);
-    set({ [dataKey]: opportunities });
-    return opportunities;
-  } finally {
-    set({ [loadingKey]: false });
-  }
-};
+//   set({ [loadingKey]: true });
+//   try {
+//     const opportunities = mockData.map(normaliseOpportunity);
+//     set({ [dataKey]: opportunities });
+//     return opportunities;
+//   } finally {
+//     set({ [loadingKey]: false });
+//   }
+// };
 
 export const useOrganisationStore = create((set, get) => ({
 
@@ -159,47 +159,47 @@ export const useOrganisationStore = create((set, get) => ({
       }
     },
 
-    activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
-    isActiveOpportunitiesLoading: false,
+    // activeOpportunities: mockActiveOpportunities.map(normaliseOpportunity),
+    // isActiveOpportunitiesLoading: false,
 
-    closedOpportunities: mockClosedOpportunities.map(normaliseOpportunity),
-    isClosedOpportunitiesLoading: false,
+    // closedOpportunities: mockClosedOpportunities.map(normaliseOpportunity),
+    // isClosedOpportunitiesLoading: false,
 
-    cancelledOpportunities: mockCancelledOpportunities.map(normaliseOpportunity),
-    isCancelledOpportunitiesLoading: false,
+    // cancelledOpportunities: mockCancelledOpportunities.map(normaliseOpportunity),
+    // isCancelledOpportunitiesLoading: false,
 
-    pendingApplications: [],
-    isPendingApplicationsLoading: false,
+    // pendingApplications: [],
+    // isPendingApplicationsLoading: false,
 
-    approvedApplications: [],
-    isApproveApplicationsLoading: false,
+    // approvedApplications: [],
+    // isApproveApplicationsLoading: false,
 
-    rejectedApplications: [],
-    isRejectedApplications: false,
+    // rejectedApplications: [],
+    // isRejectedApplications: false,
     
-    completedApplications: [],
-    isCompletedApplications: false,
+    // completedApplications: [],
+    // isCompletedApplications: false,
 
-    getActiveOpportunities: async () => loadMockOpportunities(
-      set, get,
-      "isActiveOpportunitiesLoading",
-      "activeOpportunities",
-      mockActiveOpportunities,
-    ),
+    // getActiveOpportunities: async () => loadMockOpportunities(
+    //   set, get,
+    //   "isActiveOpportunitiesLoading",
+    //   "activeOpportunities",
+    //   mockActiveOpportunities,
+    // ),
 
-    getClosedOpportunities: async () => loadMockOpportunities(
-      set,
-      "isClosedOpportunitiesLoading",
-      "closedOpportunities",
-      mockClosedOpportunities,
-    ),
+    // getClosedOpportunities: async () => loadMockOpportunities(
+    //   set,
+    //   "isClosedOpportunitiesLoading",
+    //   "closedOpportunities",
+    //   mockClosedOpportunities,
+    // ),
 
-    getCancelledOpportunities: async () => loadMockOpportunities(
-      set,
-      "isCancelledOpportunitiesLoading",
-      "cancelledOpportunities",
-      mockCancelledOpportunities,
-    ),
+    // getCancelledOpportunities: async () => loadMockOpportunities(
+    //   set,
+    //   "isCancelledOpportunitiesLoading",
+    //   "cancelledOpportunities",
+    //   mockCancelledOpportunities,
+    // ),
 
     getPendingApplications: async (userId) => {
         // set({ isPendingApplicationsLoading: true });
@@ -248,4 +248,41 @@ export const useOrganisationStore = create((set, get) => ({
         //     set({ isCompletedApplications: false });
         // }
     },
+
+    activeOpportunities: [],
+    closedOpportunities: [],
+    cancelledOpportunities: [],
+    sidebarCollapsed: false,
+    isLoading: false,
+    setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
+    getActiveOpportunities: async (orgId) => {
+
+    try {
+      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=active`);
+      set({ activeOpportunities: res.data });
+    } catch (error) {
+      console.error("Error fetching active opportunities:", error);
+    }
+  },
+  getClosedOpportunities: async (orgId) => {
+    if (!orgId) return;
+    try {
+      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=closed`);
+      set({ closedOpportunities: res.data });
+    } catch (error) {
+      console.error("Error fetching closed opportunities:", error);
+    }
+  },
+
+  getCancelledOpportunities: async (orgId) => {
+    if (!orgId) return;
+    try {
+      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=cancelled`);
+      set({ cancelledOpportunities: res.data });
+    } catch (error) {
+      console.error("Error fetching cancelled opportunities:", error);
+    }
+  },
+
 }));
