@@ -45,7 +45,7 @@ const ManageOrganisationCard = ({ organisation, onManage }) => {
         <span className="admin-status-dot" />
         {organisation.approvalStatus}
       </span>
-\
+
       <button
         className="admin-volunteer-card-manage"
         title="Manage organisation"
