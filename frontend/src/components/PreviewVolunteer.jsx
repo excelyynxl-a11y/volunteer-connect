@@ -23,16 +23,36 @@ const PreviewVolunteer = ({
       year: "numeric",
     });
 
+  const initials = volunteer.name
+    ? volunteer.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
       <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Volunteer header */}
         <div className="admin-modal-header">
-          
-          {/* volunteer name */}
-          <h2>
-            {volunteer.name}
-          </h2>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* volunteer avatar */}
+            <div className="admin-volunteer-card-avatar">
+              {volunteer.avatar ? (
+                <img src={volunteer.avatar} alt={`${volunteer.name} avatar`} />
+              ) : (
+                <span className="admin-volunteer-card-initials">{initials}</span>
+              )}
+            </div>
+
+            {/* volunteer name */}
+            <h2>
+              {volunteer.name}
+            </h2>
+          </div>
 
           {/* close button */}
           <button className="admin-modal-close" onClick={onClose}>
