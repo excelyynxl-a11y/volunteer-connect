@@ -548,7 +548,17 @@ export const useAdminStore = create((set, get) => ({
     try {
       set({ isUpdating: true });
 
-      // TODO: integrate updateAdminProfile api
+      const formData = new FormData();
+      formData.append("name", name);
+      if (avatar) {
+        formData.append("profilePic", avatar);
+      }
+
+      const res = await axiosInstance.put("/admin/profile", formData);
+
+      toast.success("Admin profile updated successfully.");
+      return { success: true, data: res.data.data };
+
     } catch (error) {
       const message =
         error.response?.data?.message ||
