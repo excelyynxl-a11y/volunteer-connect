@@ -25,12 +25,12 @@ const VolunteerProfile = () => {
     totalVolunteerHours,
     isLoading,
     loadError,
-    getVolunteerPastOpportunity,
+    getVolunteerPastExperience,
   } = useVolunteerStore()
 
   useEffect(() => {
-    getVolunteerPastOpportunity(volunteerId)
-  }, [getVolunteerPastOpportunity, volunteerId])
+    getVolunteerPastExperience(volunteerId)
+  }, [getVolunteerPastExperience, volunteerId])
 
   // Derived display values
   const volunteerInitials = useMemo(

@@ -36,16 +36,16 @@ const VolunteerHomepage = () => {
     totalVolunteerHours,
     recommendedFallbackOpportunities,
     volunteerApplications,
-    getVolunteerPastOpportunity,
+    getVolunteerPastExperience,
     getAllOpportunities,
   } = useVolunteerStore();
 
   useEffect(() => {
     getAllOpportunities();
     if (authUser?._id) {
-      getVolunteerPastOpportunity(authUser._id);
+      getVolunteerPastExperience(authUser._id);
     }
-  }, [authUser?._id, getAllOpportunities, getVolunteerPastOpportunity]);
+  }, [authUser?._id, getAllOpportunities, getVolunteerPastExperience]);
 
   const displayAvailability = Array.isArray(authUser?.availability)
     ? sortAvailabilitySlots(authUser.availability)

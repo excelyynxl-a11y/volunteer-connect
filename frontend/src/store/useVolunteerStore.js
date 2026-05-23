@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import { formatDate } from "../lib/utils";
 import { useAuthStore } from "./useAuthStore";
 
-const mapVolunteerPastOpportunity = (experienceData = []) =>
+const mapVolunteerPastExperience = (experienceData = []) =>
   experienceData.map((activity, index) => ({
     id: activity._id,
     title: `Completed Opportunity ${index + 1}`,
@@ -242,7 +242,7 @@ export const useVolunteerStore = create((set) => ({
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
-  getVolunteerPastOpportunity: async (volunteerId) => {
+  getVolunteerPastExperience: async (volunteerId) => {
     set({
       volunteerId,
       isLoading: true,
@@ -263,7 +263,7 @@ export const useVolunteerStore = create((set) => ({
       const response = await axiosInstance.get(
         `/volunteer/profile/${volunteerId}/past-experience`,
       );
-      const history = mapVolunteerPastOpportunity(response.data?.data ?? []);
+      const history = mapVolunteerPastExperience(response.data?.data ?? []);
 
       set({
         participationHistory: history,
