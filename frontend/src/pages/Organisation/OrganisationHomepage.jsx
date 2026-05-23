@@ -328,7 +328,6 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
                       onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))
