@@ -11,10 +11,10 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
+import { defaultAvailabilityPreview } from "../../lib/data";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import {
-  defaultAvailabilityPreview,
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getOpportunityImage,

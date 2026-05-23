@@ -1,3 +1,5 @@
+import { volunteerAvailabilityDays } from './data';
+
 // reusable method to format time for frontend
 export function formatMessageTime(date) {
     return new Date(date).toLocaleDateString('en-US', {
@@ -77,34 +79,6 @@ export function getInitials(name) {
         .join('');
 }
 
-export const opportunityCategories = [
-    'Environment',
-    'Education',
-    'Health',
-    'Community',
-    'Animal Welfare',
-    'Elderly Care',
-    'Disability Support',
-    'Event Support',
-    'Fundraising',
-    'Other',
-];
-
-export const defaultAvailabilityPreview = [
-    { dayOfWeek: 'Monday', startTime: '08:00', endTime: '19:00' },
-    { dayOfWeek: 'Wednesday', startTime: '10:00', endTime: '18:00' },
-];
-
-const availabilityDayOrder = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-];
-
 export const getMinutesFromTime = (timeValue) => {
     if (!timeValue) return null;
 
@@ -119,12 +93,12 @@ export const getMinutesFromTime = (timeValue) => {
 
 export const sortAvailabilitySlots = (availabilitySlots = []) =>
     [...availabilitySlots].sort((firstSlot, secondSlot) => {
-        const firstDayIndex = availabilityDayOrder.indexOf(firstSlot.dayOfWeek);
-        const secondDayIndex = availabilityDayOrder.indexOf(secondSlot.dayOfWeek);
+        const firstDayIndex = volunteerAvailabilityDays.indexOf(firstSlot.dayOfWeek);
+        const secondDayIndex = volunteerAvailabilityDays.indexOf(secondSlot.dayOfWeek);
         const firstDayOrder =
-            firstDayIndex === -1 ? availabilityDayOrder.length : firstDayIndex;
+            firstDayIndex === -1 ? volunteerAvailabilityDays.length : firstDayIndex;
         const secondDayOrder =
-            secondDayIndex === -1 ? availabilityDayOrder.length : secondDayIndex;
+            secondDayIndex === -1 ? volunteerAvailabilityDays.length : secondDayIndex;
 
         if (firstDayOrder !== secondDayOrder) {
             return firstDayOrder - secondDayOrder;

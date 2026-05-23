@@ -8,10 +8,10 @@ import {
   isOpportunityInsideAvailability,
   formatAvailabilitySlot,
   opportunityMatchesSearch,
-  opportunityCategories,
   sortAvailabilitySlots,
 } from "../../lib/utils";
 import {
+  opportunityCategories,
   volunteerAvailabilityDays,
   volunteerAvailabilityTimes,
 } from "../../lib/data";
