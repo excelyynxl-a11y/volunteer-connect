@@ -142,6 +142,7 @@ const OrganisationHomepage = () => {
     )[0];
   }, [activeOpportunities]);
 
+  
   const totals = {
     active:    activeOpportunities?.length    || 0,
     closed:    closedOpportunities?.length    || 0,
@@ -236,7 +237,7 @@ const OrganisationHomepage = () => {
           <StatCard icon={CheckCircle2} label="Completed" value={totals.closed} accent="gold" hint="Successfully delivered" />
           <StatCard icon={XCircle} label="Cancelled" value={totals.cancelled} accent="rose" hint="No longer running" />
         </section>
-
+          
         <section className="org-home-split">
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 

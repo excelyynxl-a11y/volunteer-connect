@@ -114,23 +114,22 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-  // --- Fetch Opportunities Hook Actions ---
-  getActiveOpportunities: async (orgId) => {
-    if (!orgId) {
-      console.warn("getActiveOpportunities skipped: orgId is undefined.");
-      return;
+
+  getActiveOpportunities: async () => {
+  try {
+    const res = await axiosInstance.get("/opportunities/my-opportunities"); 
+    
+    if (res.data && res.data.success) {
+      const allOpps = res.data.data || [];
+      
+      const active = allOpps.filter(opp => opp.status === "active");
+      
+      set({ activeOpportunities: active });
     }
-    set({ isLoading: true });
-    try {
-      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=active`);
-      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-      set({ activeOpportunities: data.map(normaliseOpportunity) });
-    } catch (error) {
-      console.error("Error fetching active opportunities:", error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+  } catch (error) {
+    console.error("Error fetching active opportunities:", error);
+  }
+},
 
   getClosedOpportunities: async (orgId) => {
     if (!orgId) return;
