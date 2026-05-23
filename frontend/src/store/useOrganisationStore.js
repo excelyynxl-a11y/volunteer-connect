@@ -117,42 +117,44 @@ export const useOrganisationStore = create((set, get) => ({
 
   getActiveOpportunities: async () => {
   try {
-    const res = await axiosInstance.get("/opportunities/my-opportunities"); 
+    const response = await axiosInstance.get("/opportunities/my-opportunities");
+    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
     
-    if (res.data && res.data.success) {
-      const allOpps = res.data.data || [];
-      
-      const active = allOpps.filter(opp => opp.status === "active");
-      
-      set({ activeOpportunities: active });
-    }
+    // Active means everything except closed and cancelled
+    const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "cancelled" && opp.status !== "completed");
+    set({ activeOpportunities: active });
   } catch (error) {
     console.error("Error fetching active opportunities:", error);
+    set({ activeOpportunities: [] });
   }
 },
 
-  getClosedOpportunities: async (orgId) => {
-    if (!orgId) return;
-    try {
-      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=closed`);
-      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-      set({ closedOpportunities: data.map(normaliseOpportunity) });
-    } catch (error) {
-      console.error("Error fetching closed opportunities:", error);
-    }
-  },
+getClosedOpportunities: async () => {
+  try {
+    const response = await axiosInstance.get("/opportunities/my-opportunities");
+    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
+    
+    // Snag anything with 'closed' or 'completed' status string structures
+    const closed = rawData.filter(opp => opp.status === "closed" || opp.status === "completed");
+    set({ closedOpportunities: closed });
+  } catch (error) {
+    console.error("Error fetching closed opportunities:", error);
+    set({ closedOpportunities: [] });
+  }
+},
 
-  getCancelledOpportunities: async (orgId) => {
-    if (!orgId) return;
-    try {
-      const res = await axiosInstance.get(`/opportunities/organisation/${orgId}?status=cancelled`);
-      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-      set({ cancelledOpportunities: data.map(normaliseOpportunity) });
-    } catch (error) {
-      console.error("Error fetching cancelled opportunities:", error);
-    }
-  },
-
+getCancelledOpportunities: async () => {
+  try {
+    const response = await axiosInstance.get("/opportunities/my-opportunities");
+    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
+    
+    const cancelled = rawData.filter(opp => opp.status === "cancelled");
+    set({ cancelledOpportunities: cancelled });
+  } catch (error) {
+    console.error("Error fetching cancelled opportunities:", error);
+    set({ cancelledOpportunities: [] });
+  }
+},
   // --- Application State Actions ---
   getPendingApplications: async (userId) => {
     if (!userId) return;
