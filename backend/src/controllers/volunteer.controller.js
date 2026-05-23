@@ -248,6 +248,13 @@ export const getVolunteerPastExperience = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid volunteer ID",
+      });
+    }
+
     const volunteer = await Volunteer.findById(id).select("-password");
 
     if (!volunteer) {
@@ -257,10 +264,21 @@ export const getVolunteerPastExperience = async (req, res) => {
       });
     }
 
-    const pastExperience = await Application.find({
+    const approvedApplications = await Application.find({
       volunteerId: id,
-      status: "Completed",
+      status: "approved",
+    }).populate({
+      path: "opportunityId",
+      match: { endAt: { $lt: new Date() } },
+      populate: {
+        path: "organisationId",
+        select: "name",
+      },
     });
+
+    const pastExperience = approvedApplications.filter(
+      (application) => application.opportunityId,
+    );
 
     res.status(200).json({
       success: true,
