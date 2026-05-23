@@ -130,8 +130,10 @@ const OrganisationHomepage = () => {
     getCancelledOpportunities();
   }, [getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
 
-  const orgName = authUser?.organisationName || authUser?.fullName || "Organisation";
 
+  const orgName = authUser?.name|| "Organisation";
+
+  
   const nextOpportunity = useMemo(() => {
     if (!activeOpportunities?.length) return null;
     return [...activeOpportunities].sort(
