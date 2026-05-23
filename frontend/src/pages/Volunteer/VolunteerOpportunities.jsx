@@ -10,7 +10,7 @@ import {
   opportunityMatchesSearch,
   opportunityCategories,
   sortAvailabilitySlots,
-} from "../../lib/opportunityUtils";
+} from "../../lib/utils";
 import {
   volunteerAvailabilityDays,
   volunteerAvailabilityTimes,

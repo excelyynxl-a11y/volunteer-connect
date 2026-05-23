@@ -4,7 +4,7 @@ import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getSpotsRemaining,
-} from '../lib/opportunityUtils';
+} from '../lib/utils';
 import './OpportunityCard.css';
 
 const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');

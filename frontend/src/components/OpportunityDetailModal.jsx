@@ -6,7 +6,7 @@ import {
   getOrganisationName,
   getRequirementItems,
   getSpotsRemaining,
-} from "../lib/opportunityUtils";
+} from "../lib/utils";
 
 const OpportunityDetailModal = ({ opportunity, onClose }) => {
   const [selectedImage, setSelectedImage] = useState("");

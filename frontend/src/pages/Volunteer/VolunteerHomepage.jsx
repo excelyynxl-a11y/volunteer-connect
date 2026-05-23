@@ -21,7 +21,7 @@ import {
   isOpportunityInsideAvailability,
   shortDay,
   sortAvailabilitySlots,
-} from "../../lib/opportunityUtils";
+} from "../../lib/utils";
 import "./Volunteer.css";
 
 const VolunteerHomepage = () => {
