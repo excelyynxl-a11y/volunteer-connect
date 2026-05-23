@@ -248,7 +248,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))
                 ) : (
@@ -273,7 +273,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp}
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))}
                 </div>
@@ -329,6 +329,7 @@ const OrganisationHomepage = () => {
                       key={opp._id} 
                       opportunity={opp} 
                       onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))
                 ) : (
