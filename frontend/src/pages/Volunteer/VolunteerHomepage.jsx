@@ -36,7 +36,10 @@ const VolunteerHomepage = () => {
     totalVolunteerHours,
     recommendedFallbackOpportunities,
     volunteerApplications,
+    isVolunteerApplicationsLoading,
+    volunteerApplicationsError,
     getVolunteerPastExperience,
+    getVolunteerApplications,
     getAllOpportunities,
   } = useVolunteerStore();
 
@@ -44,8 +47,14 @@ const VolunteerHomepage = () => {
     getAllOpportunities();
     if (authUser?._id) {
       getVolunteerPastExperience(authUser._id);
+      getVolunteerApplications(authUser._id);
     }
-  }, [authUser?._id, getAllOpportunities, getVolunteerPastExperience]);
+  }, [
+    authUser?._id,
+    getAllOpportunities,
+    getVolunteerApplications,
+    getVolunteerPastExperience,
+  ]);
 
   const displayAvailability = Array.isArray(authUser?.availability)
     ? sortAvailabilitySlots(authUser.availability)
@@ -78,10 +87,17 @@ const VolunteerHomepage = () => {
   ).slice(0, 2);
 
   const applicationStatuses = volunteerApplications;
-  const acceptedApplications = applicationStatuses.filter(
-    (application) => application.status === "accepted",
+  const pendingApplicationsCount = applicationStatuses.filter(
+    (application) => application.status === "pending",
+  ).length;
+  const upcomingApprovedApplications = applicationStatuses.filter(
+    (application) =>
+      application.status === "approved" &&
+      (!application.startAt || new Date(application.startAt) >= new Date()),
+  ).sort((firstApplication, secondApplication) =>
+    new Date(firstApplication.startAt || 0) - new Date(secondApplication.startAt || 0),
   );
-  const nextShift = acceptedApplications[0];
+  const nextShift = upcomingApprovedApplications[0];
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
@@ -108,7 +124,7 @@ const VolunteerHomepage = () => {
     {
       id: "pending-applications",
       label: "Pending Applications",
-      value: "0",
+      value: String(pendingApplicationsCount),
       description: "Awaiting review",
       icon: ClipboardList,
       path: "/volunteer-dashboard/opportunities",
@@ -348,16 +364,24 @@ const VolunteerHomepage = () => {
               </div>
               <div className="homepage-side-content">
                 <h3>Application Status</h3>
-                <div className="homepage-application-list">
-                  {applicationStatuses.map((application) => (
-                    <p key={application._id}>
-                      {application.opportunityTitle}
-                      <span className={`application-pill ${application.status}`}>
-                        {application.status}
-                      </span>
-                    </p>
-                  ))}
-                </div>
+                {volunteerApplicationsError ? (
+                  <p>{volunteerApplicationsError}</p>
+                ) : isVolunteerApplicationsLoading ? (
+                  <p>Loading applications...</p>
+                ) : applicationStatuses.length > 0 ? (
+                  <div className="homepage-application-list">
+                    {applicationStatuses.map((application) => (
+                      <p key={application._id}>
+                        {application.opportunityTitle}
+                        <span className={`application-pill ${application.status}`}>
+                          {application.status}
+                        </span>
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No applications yet.</p>
+                )}
               </div>
             </section>
           </aside>

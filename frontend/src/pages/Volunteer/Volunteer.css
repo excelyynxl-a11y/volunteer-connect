@@ -2223,9 +2223,19 @@
   color: #c6861d;
 }
 
-.application-pill.accepted {
+.application-pill.approved {
   background: #dcefd1;
   color: var(--profile-green);
+}
+
+.application-pill.rejected {
+  background: #f9d8d4;
+  color: #9f3f32;
+}
+
+.application-pill.withdrawn {
+  background: #e5edf3;
+  color: #3f5f72;
 }
 
 .homepage-state-message {
