@@ -56,11 +56,11 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-  // --- Opportunity CRUD Actions ---
   createOpportunity: async (opportunityData) => {
     set({ isCreatingOpportunity: true });
     try {
-    const res = await axiosInstance.post("/opportunity/create", opportunityData);      const newOpp = normaliseOpportunity(res.data?.data ?? res.data);
+      const res = await axiosInstance.post("/opportunities/create", opportunityData);      
+      const newOpp = normaliseOpportunity(res.data?.data ?? res.data);
 
       toast.success("Opportunity created successfully!");
 
@@ -90,17 +90,50 @@ export const useOrganisationStore = create((set, get) => ({
 
     set({ isUpdatingOpportunity: true });
     try {
-      const res = await axiosInstance.put(`/opportunity/${opportunityId}`, opportunityData);
+      const res = await axiosInstance.put(`/opportunities/${opportunityId}`, opportunityData);
       
+      const updatedOpp = normaliseOpportunity(res.data?.data ?? res.data ?? opportunityData);
       toast.success("Opportunity updated successfully.");
 
-      set((state) => ({
-        activeOpportunities: state.activeOpportunities.map((opp) =>
-          opp._id === opportunityId ? { ...opp, ...opportunityData } : opp
-        )
-      }));
+      set((state) => {
+        const filterOut = (list) => list.filter((opp) => opp._id !== opportunityId);
+        const updateInList = (list) => list.map((opp) => opp._id === opportunityId ? { ...opp, ...updatedOpp } : opp);
 
-      return { success: true, data: res.data };
+        const status = (updatedOpp.status || "").toLowerCase();
+
+        let nextActive = updateInList(state.activeOpportunities);
+        let nextClosed = updateInList(state.closedOpportunities);
+        let nextCancelled = updateInList(state.cancelledOpportunities);
+
+        if (status === "closed" || status === "completed") {
+          nextActive = filterOut(state.activeOpportunities);
+          if (!state.closedOpportunities.some(o => o._id === opportunityId)) {
+            nextClosed = [updatedOpp, ...nextClosed];
+          }
+          nextCancelled = filterOut(state.cancelledOpportunities);
+        } else if (status === "cancelled") {
+          nextActive = filterOut(state.activeOpportunities);
+          nextClosed = filterOut(state.closedOpportunities);
+          if (!state.cancelledOpportunities.some(o => o._id === opportunityId)) {
+            nextCancelled = [updatedOpp, ...nextCancelled];
+          }
+        } else {
+          // It's an active status
+          if (!state.activeOpportunities.some(o => o._id === opportunityId)) {
+            nextActive = [updatedOpp, ...nextActive];
+          }
+          nextClosed = filterOut(state.closedOpportunities);
+          nextCancelled = filterOut(state.cancelledOpportunities);
+        }
+
+        return {
+          activeOpportunities: nextActive,
+          closedOpportunities: nextClosed,
+          cancelledOpportunities: nextCancelled,
+        };
+      });
+
+      return { success: true, data: updatedOpp };
     } catch (error) {
       const message =
         error.response?.data?.message ||
@@ -114,47 +147,45 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-
   getActiveOpportunities: async () => {
-  try {
-    const response = await axiosInstance.get("/opportunities/my-opportunities");
-    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-    
-    // Active means everything except closed and cancelled
-    const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "cancelled" && opp.status !== "completed");
-    set({ activeOpportunities: active });
-  } catch (error) {
-    console.error("Error fetching active opportunities:", error);
-    set({ activeOpportunities: [] });
-  }
-},
+    try {
+      const response = await axiosInstance.get("/opportunities/my-opportunities");
+      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
+      
+      const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "cancelled" && opp.status !== "completed");
+      set({ activeOpportunities: active });
+    } catch (error) {
+      console.error("Error fetching active opportunities:", error);
+      set({ activeOpportunities: [] });
+    }
+  },
 
-getClosedOpportunities: async () => {
-  try {
-    const response = await axiosInstance.get("/opportunities/my-opportunities");
-    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-    
-    // Snag anything with 'closed' or 'completed' status string structures
-    const closed = rawData.filter(opp => opp.status === "closed" || opp.status === "completed");
-    set({ closedOpportunities: closed });
-  } catch (error) {
-    console.error("Error fetching closed opportunities:", error);
-    set({ closedOpportunities: [] });
-  }
-},
+  getClosedOpportunities: async () => {
+    try {
+      const response = await axiosInstance.get("/opportunities/my-opportunities");
+      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
+      
+      const closed = rawData.filter(opp => opp.status === "closed" || opp.status === "completed");
+      set({ closedOpportunities: closed });
+    } catch (error) {
+      console.error("Error fetching closed opportunities:", error);
+      set({ closedOpportunities: [] });
+    }
+  },
 
-getCancelledOpportunities: async () => {
-  try {
-    const response = await axiosInstance.get("/opportunities/my-opportunities");
-    const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-    
-    const cancelled = rawData.filter(opp => opp.status === "cancelled");
-    set({ cancelledOpportunities: cancelled });
-  } catch (error) {
-    console.error("Error fetching cancelled opportunities:", error);
-    set({ cancelledOpportunities: [] });
-  }
-},
+  getCancelledOpportunities: async () => {
+    try {
+      const response = await axiosInstance.get("/opportunities/my-opportunities");
+      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
+      
+      const cancelled = rawData.filter(opp => opp.status === "cancelled");
+      set({ cancelledOpportunities: cancelled });
+    } catch (error) {
+      console.error("Error fetching cancelled opportunities:", error);
+      set({ cancelledOpportunities: [] });
+    }
+  },
+
   // --- Application State Actions ---
   getPendingApplications: async (userId) => {
     if (!userId) return;
