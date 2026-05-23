@@ -1,10 +1,16 @@
 import React from "react";
-import { ArrowRight, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
 
-const ManageVolunteerCard = ({ 
-  volunteer, 
-  onManage 
-}) => {
+const ManageVolunteerCard = ({ volunteer, onManage }) => {
+  const initials = volunteer.name
+    ? volunteer.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   const statusClass =
     volunteer.approvalStatus === "approved"
       ? "active"
@@ -14,6 +20,14 @@ const ManageVolunteerCard = ({
 
   return (
     <div className="admin-volunteer-card">
+      <div className="admin-volunteer-card-avatar">
+        {volunteer.avatar ? (
+          <img src={volunteer.avatar} alt={`${volunteer.name} avatar`} />
+        ) : (
+          <span className="admin-volunteer-card-initials">{initials}</span>
+        )}
+      </div>
+
       <div className="admin-volunteer-card-info">
         <h3 className="admin-volunteer-card-name">{volunteer.name}</h3>
         <span className="admin-volunteer-card-email">{volunteer.email}</span>
@@ -34,10 +48,9 @@ const ManageVolunteerCard = ({
         {volunteer.approvalStatus}
       </span>
 
-      {/* TODO: link to PreviewVolunteer page when created */}
-      <button 
-        className="admin-volunteer-card-manage" 
-        title="Manage volunteer" 
+      <button
+        className="admin-volunteer-card-manage"
+        title="Manage volunteer"
         onClick={() => onManage?.(volunteer)}
       >
         <Edit size={16} />

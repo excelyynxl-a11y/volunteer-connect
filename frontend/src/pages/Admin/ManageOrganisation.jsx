@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { Search, AlertCircle, ArrowUpDown } from "lucide-react";
+import { Search, AlertCircle, ArrowUpDown, Loader2 } from "lucide-react";
 import { useAdminStore } from "../../store/useAdminStore";
 import ManageOrganisationCard from "../../components/ManageOrganisationCard";
 import PreviewOrganisation from "../../components/PreviewOrganisation";
+import { useEffect } from "react";
 
 // approvalStatus filter
 const APPROVAL_STATUSES = ["All", "approved", "pending", "rejected"];
@@ -17,9 +18,11 @@ const ManageOrganisation = () => {
   // organisation of the admin clicked on a ManageOrganisationCard "manage button"
   const [selectedOrganisation, setSelectedOrganisation] = useState(null);
 
-  const { getAllOrganisations } = useAdminStore();
+  const { getAllOrganisations, organisations, isUsersLoading } = useAdminStore();
 
-  const organisations = getAllOrganisations();
+  useEffect(() => {
+    getAllOrganisations()
+  }, [getAllOrganisations]); 
 
   // filtering functions
   const filteredOrganisations = useMemo(() => {
@@ -60,81 +63,90 @@ const ManageOrganisation = () => {
         <p>View, edit, and manage all registered organisations.</p>
       </div>
 
+      {/* Organisation table with column [OrgName, dtae, status, preview button] */}
       <div className="admin-table-wrapper">
-        <div className="admin-table-toolbar">
-          {/* search bar */}
-          <div className="admin-table-search-wrapper">
-            <Search size={16} className="admin-table-search-icon" />
-            <input
-              type="text"
-              className="admin-table-search"
-              placeholder="Search by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* filter approval status */}
-          <select
-            className="admin-table-select"
-            value={approvalStatusFilter}
-            onChange={(e) => setApprovalStatusFilter(e.target.value)}
-          >
-            {APPROVAL_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {status === "All"
-                  ? "All Statuses"
-                  : status.charAt(0).toUpperCase() + status.slice(1)}
-              </option>
-            ))}
-          </select>
-
-          {/* sort date direction */}
-          <button
-            className="admin-table-sort-btn"
-            onClick={() =>
-              setSortDirection((direction) =>
-                direction === "descending" ? "ascending" : "descending",
-              )
-            }
-            title={`Sort by date created (${sortDirection})`}
-          >
-            <ArrowUpDown size={16} />
-            <span>
-              {sortDirection === "descending" ? "Newest First" : "Oldest First"}
-            </span>
-          </button>
-
-          {/* clear all filter button */}
-          <button
-            className="admin-table-clear-btn"
-            onClick={() => {
-              setSearchTerm("");
-              setApprovalStatusFilter("All");
-              setSortDirection("descending");
-            }}
-          >
-            Clear All
-          </button>
-        </div>
-
-        {/* organisation cards */}
-        {filteredOrganisations.length > 0 ? (
-          <div className="admin-volunteer-card-list admin-organisation-card-list">
-            {filteredOrganisations.map((organisation) => (
-              <ManageOrganisationCard
-                key={organisation._id}
-                organisation={organisation}
-                onManage={setSelectedOrganisation}
-              />
-            ))}
+        {isUsersLoading ? (
+          <div className="admin-loading">
+            <Loader2 className="admin-loading-spinner" />
           </div>
         ) : (
-          <div className="admin-empty">
-            <AlertCircle className="admin-empty-icon" />
-            <h3>No organisations found</h3>
-            <p>Try adjusting your search or filters.</p>
-          </div>
+          <>
+            <div className="admin-table-toolbar">
+              {/* search bar */}
+              <div className="admin-table-search-wrapper">
+                <Search size={16} className="admin-table-search-icon" />
+                <input
+                  type="text"
+                  className="admin-table-search"
+                  placeholder="Search by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* filter approval status */}
+              <select
+                className="admin-table-select"
+                value={approvalStatusFilter}
+                onChange={(e) => setApprovalStatusFilter(e.target.value)}
+              >
+                {APPROVAL_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status === "All"
+                      ? "All Statuses"
+                      : status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+
+              {/* sort date direction */}
+              <button
+                className="admin-table-sort-btn"
+                onClick={() =>
+                  setSortDirection((direction) =>
+                    direction === "descending" ? "ascending" : "descending",
+                  )
+                }
+                title={`Sort by date created (${sortDirection})`}
+              >
+                <ArrowUpDown size={16} />
+                <span>
+                  {sortDirection === "descending" ? "Newest First" : "Oldest First"}
+                </span>
+              </button>
+
+              {/* clear all filter button */}
+              <button
+                className="admin-table-clear-btn"
+                onClick={() => {
+                  setSearchTerm("");
+                  setApprovalStatusFilter("All");
+                  setSortDirection("descending");
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+
+            {/* organisation cards */}
+            {filteredOrganisations.length > 0 ? (
+              <div className="admin-volunteer-card-list admin-organisation-card-list">
+                {filteredOrganisations.map((organisation) => (
+                  <ManageOrganisationCard
+                    key={organisation._id}
+                    organisation={organisation}
+                    onManage={setSelectedOrganisation}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="admin-empty">
+                <AlertCircle className="admin-empty-icon" />
+                <h3>No organisations found</h3>
+                <p>Try adjusting your search or filters.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
