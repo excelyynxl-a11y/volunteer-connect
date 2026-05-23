@@ -15,7 +15,7 @@ import {
   volunteerAvailabilityTimes,
   volunteerSkillOptions,
 } from '../../lib/data'
-import { formatApprovalStatus } from '../../lib/utils'
+import { formatApprovalStatus, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -77,7 +77,9 @@ const EditVolunteerProfile = () => {
       setSkillList(Array.isArray(authUser?.skills) ? authUser.skills : [])
 
       setAvailabilitySlots(
-        Array.isArray(authUser?.availability) ? authUser.availability : []
+        Array.isArray(authUser?.availability)
+          ? sortAvailabilitySlots(authUser.availability)
+          : []
       )
     })
 
@@ -129,7 +131,9 @@ const EditVolunteerProfile = () => {
       return
     }
 
-    setAvailabilitySlots((currentSlots) => [...currentSlots, newSlot])
+    setAvailabilitySlots((currentSlots) =>
+      sortAvailabilitySlots([...currentSlots, newSlot])
+    )
 
     setAvailability({
       dayOfWeek: '',
@@ -199,7 +203,9 @@ const EditVolunteerProfile = () => {
     }))
     setSkillList(Array.isArray(updatedProfile.skills) ? updatedProfile.skills : skillList)
     setAvailabilitySlots(
-      Array.isArray(updatedProfile.availability) ? updatedProfile.availability : availabilitySlots
+      Array.isArray(updatedProfile.availability)
+        ? sortAvailabilitySlots(updatedProfile.availability)
+        : availabilitySlots
     )
     navigate('/volunteer-dashboard/profile')
   }

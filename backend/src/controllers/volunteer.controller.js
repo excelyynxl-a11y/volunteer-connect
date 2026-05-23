@@ -18,6 +18,11 @@ const validAvailabilityPreferences = ["available", "preferred"];
 
 const time24HourRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+const getMinutesFromTime = (timeValue) => {
+  const [hours, minutes] = timeValue.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
 const normalizeSkills = (skills) => {
   return [
     ...new Set(
@@ -38,15 +43,23 @@ const normalizeAvailability = (availability) => {
 };
 
 const isValidAvailabilitySlot = (slot) => {
+  if (
+    !(
+      slot &&
+      validDays.includes(slot.dayOfWeek) &&
+      typeof slot.startTime === "string" &&
+      typeof slot.endTime === "string" &&
+      time24HourRegex.test(slot.startTime.trim()) &&
+      time24HourRegex.test(slot.endTime.trim()) &&
+      validAvailabilityPreferences.includes(slot.preference || "available")
+    )
+  ) {
+    return false;
+  }
+
   return (
-    slot &&
-    validDays.includes(slot.dayOfWeek) &&
-    typeof slot.startTime === "string" &&
-    typeof slot.endTime === "string" &&
-    time24HourRegex.test(slot.startTime.trim()) &&
-    time24HourRegex.test(slot.endTime.trim()) &&
-    slot.startTime.trim() !== slot.endTime.trim() &&
-    validAvailabilityPreferences.includes(slot.preference || "available")
+    getMinutesFromTime(slot.startTime.trim()) <
+    getMinutesFromTime(slot.endTime.trim())
   );
 };
 

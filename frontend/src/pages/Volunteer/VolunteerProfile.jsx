@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import VolunteerHoursCard from '../../components/VolunteerHoursCard'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
-import { formatApprovalStatus, getInitials } from '../../lib/utils'
+import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -46,7 +46,7 @@ const VolunteerProfile = () => {
   const displaySkills = Array.isArray(authUser?.skills) ? authUser.skills : []
 
   const displayAvailabilitySlots = Array.isArray(authUser?.availability)
-    ? authUser.availability
+    ? sortAvailabilitySlots(authUser.availability)
     : []
 
   // Main profile layout

@@ -3,16 +3,37 @@ import { axiosInstance } from "../lib/axios";
 import { formatDate } from "../lib/utils";
 import { useAuthStore } from "./useAuthStore";
 
+const getOpportunityDurationHours = (opportunity) => {
+  if (!opportunity?.startAt || !opportunity?.endAt) return 0;
+
+  const startAt = new Date(opportunity.startAt);
+  const endAt = new Date(opportunity.endAt);
+
+  if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
+    return 0;
+  }
+
+  return Math.max((endAt - startAt) / (1000 * 60 * 60), 0);
+};
+
 const mapVolunteerPastExperience = (experienceData = []) =>
-  experienceData.map((activity, index) => ({
-    id: activity._id,
-    title: `Completed Opportunity ${index + 1}`,
-    organisation: "Organisation details unavailable",
-    date: formatDate(activity.updatedAt || activity.createdAt),
-    hours: `${Number(activity.loggedHours ?? 0).toFixed(1)} hrs`,
-    loggedHours: Number(activity.loggedHours ?? 0),
-    status: activity.status ?? "Completed",
-  }));
+  experienceData.map((activity, index) => {
+    const opportunity = activity.opportunityId;
+    const loggedHours = Number(
+      activity.loggedHours ?? getOpportunityDurationHours(opportunity),
+    );
+
+    return {
+      id: activity._id,
+      title: opportunity?.title || `Completed Opportunity ${index + 1}`,
+      organisation:
+        opportunity?.organisationId?.name || "Organisation details unavailable",
+      date: formatDate(opportunity?.endAt || activity.updatedAt || activity.createdAt),
+      hours: `${loggedHours.toFixed(1)} hrs`,
+      loggedHours,
+      status: "Completed",
+    };
+  });
 
 const calculateTotalVolunteerHours = (history) =>
   `${history
