@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown,
   Clock,
   Plus,
   User,
   X,
 } from 'lucide-react'
+import CustomSelect from '../../components/CustomSelect'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
 import {
   volunteerAgeGroupOptions,
@@ -15,7 +15,7 @@ import {
   volunteerAvailabilityTimes,
   volunteerSkillOptions,
 } from '../../lib/data'
-import { formatApprovalStatus } from '../../lib/utils'
+import { formatApprovalStatus, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -77,7 +77,9 @@ const EditVolunteerProfile = () => {
       setSkillList(Array.isArray(authUser?.skills) ? authUser.skills : [])
 
       setAvailabilitySlots(
-        Array.isArray(authUser?.availability) ? authUser.availability : []
+        Array.isArray(authUser?.availability)
+          ? sortAvailabilitySlots(authUser.availability)
+          : []
       )
     })
 
@@ -129,7 +131,9 @@ const EditVolunteerProfile = () => {
       return
     }
 
-    setAvailabilitySlots((currentSlots) => [...currentSlots, newSlot])
+    setAvailabilitySlots((currentSlots) =>
+      sortAvailabilitySlots([...currentSlots, newSlot])
+    )
 
     setAvailability({
       dayOfWeek: '',
@@ -199,7 +203,9 @@ const EditVolunteerProfile = () => {
     }))
     setSkillList(Array.isArray(updatedProfile.skills) ? updatedProfile.skills : skillList)
     setAvailabilitySlots(
-      Array.isArray(updatedProfile.availability) ? updatedProfile.availability : availabilitySlots
+      Array.isArray(updatedProfile.availability)
+        ? sortAvailabilitySlots(updatedProfile.availability)
+        : availabilitySlots
     )
     navigate('/volunteer-dashboard/profile')
   }
@@ -410,53 +416,6 @@ const EditVolunteerProfile = () => {
 
         </form>
       </div>
-    </div>
-  )
-}
-
-function CustomSelect({ value, placeholder, options, onChange }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const normalizedOptions = options.map((option) => (
-    typeof option === 'string' ? { label: option, value: option } : option
-  ))
-  const selectedOption = normalizedOptions.find((option) => option.value === value)
-
-  return (
-    <div
-      className={`custom-select${isOpen ? ' open' : ''}`}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setIsOpen(false)
-        }
-      }}
-    >
-      <button
-        type="button"
-        className={`custom-select-trigger${selectedOption ? '' : ' placeholder'}`}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((currentValue) => !currentValue)}
-      >
-        <span>{selectedOption?.label || placeholder || 'Select'}</span>
-        <ChevronDown size={18} />
-      </button>
-
-      {isOpen ? (
-        <div className="custom-select-menu">
-          {normalizedOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={option.value === value ? 'selected' : undefined}
-              onClick={() => {
-                onChange(option.value)
-                setIsOpen(false)
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

@@ -80,7 +80,7 @@ export const approveApplication = async (req, res) => {
       });
     }
 
-    application.status = "Approved";
+    application.status = "approved";
     await application.save();
 
     res.status(200).json({
@@ -114,15 +114,14 @@ export const rejectApplication = async (req, res) => {
       });
     }
 
-    // completed applications cannot be rejected
-    if (application.status === "Completed") {
+    if (application.status === "withdrawn") {
       return res.status(400).json({
         success: false,
-        message: "Completed application cannot be rejected",
+        message: "Withdrawn application cannot be rejected",
       });
     }
 
-    application.status = "Rejected";
+    application.status = "rejected";
     await application.save();
 
     res.status(200).json({
@@ -158,20 +157,16 @@ export const completeApplication = async (req, res) => {
       });
     }
 
-    // only Approved applications can be marked as completed
-    if (application.status !== "Approved") {
+    if (application.status !== "approved") {
       return res.status(400).json({
         success: false,
         message: `Application cannot be completed. Current status is ${application.status}`,
       });
     }
 
-    application.status = "Completed";
-    await application.save();
-
     res.status(200).json({
       success: true,
-      message: "Application completed successfully",
+      message: "Application completion is derived from the opportunity end date",
       data: application,
     });
   } catch (err) {

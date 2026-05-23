@@ -3,6 +3,7 @@ import Badge from "./Badge";
 import {
   Home,
   LogOut,
+  Search,
   User,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -14,6 +15,7 @@ import "../pages/Volunteer/Volunteer.css";
 const navItems = [
   { key: "homepage", path: "/volunteer-dashboard", label: "Homepage", Icon: Home },
   { key: "profile", path: "/volunteer-dashboard/profile", label: "Profile", Icon: User },
+  { key: "opportunities", path: "/volunteer-dashboard/opportunities", label: "Opportunities", Icon: Search },
 ];
 
 const VolunteerSidebar = () => {
