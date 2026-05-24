@@ -42,6 +42,7 @@ const VolunteerProfile = () => {
     [authUser?.approvalStatus]
   )
   const profileSummary = authUser?.biodata || 'No profile summary provided yet.'
+  const avatarSrc = authUser?.avatar || ''
 
   const displaySkills = Array.isArray(authUser?.skills) ? authUser.skills : []
 
@@ -57,7 +58,13 @@ const VolunteerProfile = () => {
 
         {/* Profile hero section */}
         <section className="profile-hero">
-          <div className="profile-avatar-large">{volunteerInitials}</div>
+          <div className="profile-avatar-large">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt={`${authUser?.name || 'Volunteer'} avatar`} />
+            ) : (
+              volunteerInitials
+            )}
+          </div>
 
           <div className="profile-hero-text">
             <p>PUBLIC VOLUNTEER PROFILE</p>

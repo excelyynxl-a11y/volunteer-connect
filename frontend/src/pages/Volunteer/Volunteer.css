@@ -1074,6 +1074,14 @@
   font-size: 32px;
   font-weight: 800;
   box-shadow: 0 10px 22px rgba(47, 104, 71, 0.18);
+  overflow: hidden;
+}
+
+.profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .profile-hero p {
@@ -1340,6 +1348,101 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px 20px;
+}
+
+.edit-profile-avatar-field {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #eee1c7;
+  border-radius: 13px;
+  background: #fffdf8;
+}
+
+.edit-profile-avatar-preview {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--profile-orange);
+  border-radius: 999px;
+  background: var(--profile-green);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.edit-profile-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.edit-profile-avatar-copy {
+  min-width: 0;
+}
+
+.edit-profile-avatar-copy span {
+  display: block;
+  margin-bottom: 6px;
+  color: #817766;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.edit-profile-avatar-copy strong {
+  display: block;
+  color: var(--profile-green-dark);
+  font-size: 17px;
+}
+
+.edit-profile-avatar-copy p {
+  margin: 5px 0 0;
+  color: var(--profile-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.edit-profile-avatar-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edit-profile-avatar-button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--profile-green);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.edit-profile-avatar-button:hover {
+  background: var(--profile-green-dark);
+}
+
+.edit-profile-error {
+  margin: -6px 0 18px;
+  color: var(--profile-orange-dark);
+  font-weight: 700;
 }
 
 .edit-profile-field {
@@ -1692,6 +1795,15 @@
   .skills-input-row,
   .availability-row {
     grid-template-columns: 1fr;
+  }
+
+  .edit-profile-avatar-field {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .edit-profile-avatar-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .volunteer-opportunities-hero {
