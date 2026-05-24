@@ -92,6 +92,18 @@ const EditOpportunity = () => {
             newErrors.location = "Please select both State and City."
         }
 
+        if (selectedCategory.length === 0) {
+            newErrors.category = "Please select at least one category."
+        }
+
+        if (!formData.startAt) {
+            newErrors.startAt = "Start date is required.";
+        }
+
+        if (!formData.endAt) {
+            newErrors.endAt = "End date is required.";
+        }
+
         const validCitiesForState = malaysiaStateCities[selectedState];
         if (!validCitiesForState || !validCitiesForState.includes(selectedCity)) {
             return setErrorMessage("System Error: The selected city does not match the selected state.");
@@ -99,15 +111,13 @@ const EditOpportunity = () => {
 
         const start = new Date(formData.startAt);
         const end = new Date(formData.endAt);
-        const today = new Date();
-
-        if (end <= start) {
+        if (formData.startAt && formData.endAt && end <= start) {
             newErrors.endAt = "End date cannot be before or equal to start date.";
         }
-        
+
         if (Object.keys(newErrors).length > 0) {
             setFieldErrors(newErrors);
-            setErrorMessage("Please correct the errors in the form before saving.");
+            setErrorMessage("Please correct the errors in the form before saving."); 
             return;
         }
 
@@ -189,6 +199,7 @@ const EditOpportunity = () => {
                         id="opportunity-edit-form"
                         onSubmit={handleSubmit}
                         className="org-profile-edit-form"
+                        noValidate
                     >
                         <div className="org-profile-edit-input-group">
                             <label>Event Title</label>
@@ -229,6 +240,7 @@ const EditOpportunity = () => {
                                     </span>
                                 ))}
                             </div>
+                            {renderError("category")}
                         </div>
 
                         <div className="org-profile-edit-input-group">
