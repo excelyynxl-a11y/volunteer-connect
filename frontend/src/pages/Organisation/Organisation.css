@@ -1307,6 +1307,39 @@
   margin: 8px 0 10px;
 }
 
+.preview-avatar {
+    border-radius: 12px !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.preview-content-wrapper {
+    min-width: 0;
+    flex: 1;
+}
+
+.preview-title {
+    word-break: break-word;
+    margin-top: 8px !important;
+    margin-bottom: 10px !important;
+}
+
+.preview-details {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #53645e;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.preview-tags-container {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
 .org-profile-edit-form-card {
   padding: 34px 38px;
 }
