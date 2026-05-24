@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -9,14 +9,26 @@ import {
   CheckCircle2,
   Users,
   X,
-  Target
+  Target,
+  Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import OrganisationSidebar from "../../components/OrganisationSidebar";
 import { malaysiaStates, malaysiaStateCities, EVENT_CATEGORIES } from "../../lib/data";
+import { useOrganisationStore } from "../../store/useOrganisationStore";
+import { useAuthStore } from "../../store/useAuthStore.js";
+import toast from "react-hot-toast";
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
+  const { createOpportunity } = useOrganisationStore();
+  const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    if (!authUser && typeof checkAuth === "function") {
+      checkAuth();
+    }
+  }, [authUser, checkAuth]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -54,30 +66,93 @@ const CreateOpportunityPage = () => {
     setSelectedCategory(selectedCategory.filter(c => c !== catToRemove));
   };
 
-  const validateForm = () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    console.log("Submit button clicked! Current Form state:", formData);
+
+    // 1. Frontend validation rules
     const newErrors = {};
-    if (formData.title.trim().length < 15) newErrors.title = "Min 15 characters required";
-    if (formData.details.trim().length < 50) newErrors.details = "Min 50 characters required";
+    if (!formData.title?.trim() || formData.title.trim().length < 15) newErrors.title = "Min 15 characters required";
+    if (!formData.details?.trim() || formData.details.trim().length < 50) newErrors.details = "Min 50 characters required";
     if (!selectedState || !selectedCity) newErrors.location = "Location is required";
     if (selectedCategory.length === 0) newErrors.category = "Select at least one category";
+    if (!formData.startAt) newErrors.startAt = "Start date is required";
+    if (!formData.endAt) newErrors.endAt = "End date is required";
+    if (!formData.applicationDeadline) newErrors.applicationDeadline = "Deadline is required";
     
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!validateForm()) return;
+    if (Object.keys(newErrors).length > 0) {
+      console.log("Validation BLOCKED execution. Errors found:", newErrors);
+      toast.error("Please fill in all required fields correctly.");
+      return; 
+    }
 
+    if (!authUser?._id && !authUser?.id) {
+      console.error("Auth verification failed: User profile object identifier missing completely.", authUser);
+      toast.error("Authentication error: Session profile not verified.");
+      return;
+    }
+
+    // Process variables accurately for backend model parser targets
+    const rawStartDate = formData.startAt ? formData.startAt.split("T")[0] : "";
+    const startTime = formData.startAt ? formData.startAt.split("T")[1] : "";
+    const endTime = formData.endAt ? formData.endAt.split("T")[1] : "";
+    const computedTimeFrame = startTime && endTime ? `${startTime} - ${endTime}` : "Flexible Session";
+
+    // 2. Exact unified layout object architecture payload mapping
     const submissionData = {
-      ...formData,
+      title: formData.title.trim(),
+      details: formData.details.trim(),
+      maxVolunteers: Number(formData.maxVolunteers),
+      fixedDate: rawStartDate,       
+      timeFrame: computedTimeFrame,  
+      startAt: formData.startAt,
+      endAt: formData.endAt,
+      applicationDeadline: formData.applicationDeadline,
       location: `${selectedState}, ${selectedCity}`,
       category: selectedCategory,
+      // Pass both formats to guard against unaligned auth token property extractions on the backend
+      organisationId: authUser._id || authUser.id 
     };
 
-    console.log("Saving to Database:", submissionData);
-    navigate("/organisation-dashboard");
+    console.log("Dispatching complete unified payload to backend:", submissionData);
+    
+    try {
+      const result = await createOpportunity(submissionData);
+      console.log("Zustand response received:", result);
+      
+      if (result.success) {
+        toast.success("Opportunity published successfully!");
+        setFormData({
+          title: "",
+          details: "",
+          maxVolunteers: 1,
+          applicationDeadline: "",
+          startAt: "",
+          endAt: "",
+        });
+        setSelectedState("");
+        setSelectedCity("");
+        setSelectedCategory([]);
+        navigate("/organisation-dashboard");
+      }
+    } catch (err) {
+      console.error("An unexpected crash occurred during submission pipeline:", err);
+    }
   };
+
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="organisation-layout">
+        <OrganisationSidebar />
+        <div className="organisation-main-content flex flex-col items-center justify-center h-screen gap-4">
+          <Loader2 className="animate-spin text-blue-600" size={40} />
+          <p className="text-gray-600 font-medium">Verifying authorization profile session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="organisation-layout">
@@ -91,21 +166,24 @@ const CreateOpportunityPage = () => {
               <h1>Create New Opportunity Posting</h1>
               <p className="organisation-create-description">
                 Craft a thoughtful volunteer opportunity for your community.
-                Clear details help the right people show up at the right time.
+                Clear details help the right people show show up at the right time.
               </p>
             </div>
             <div className="organisation-create-header-actions">
               <button className="organisation-back-btn" onClick={() => navigate(-1)} type="button">
                 <ArrowLeft size={18}/> Back
               </button>
-              <button className="organisation-create-btn" onClick={handleSubmit} type="button">
+              <button 
+                className="organisation-create-btn" 
+                type="submit" 
+                form="create-opportunity-form"
+              >
                 <CheckCircle2 size={18}/> Publish Opportunity
               </button>
             </div>
           </header>
 
           <div className="organisation-create-card">
-            {/* RESTORED: The Card Heading section */}
             <div className="organisation-card-heading">
               <div className="organisation-card-heading-icon">
                 <FileText size={20} />
@@ -118,7 +196,7 @@ const CreateOpportunityPage = () => {
               </div>
             </div>
 
-            <form className="organisation-create-form" onSubmit={handleSubmit}>
+            <form id="create-opportunity-form" className="organisation-create-form" onSubmit={handleSubmit}>
               <div className="organisation-form-left">
                 <div className="organisation-form-group">
                   <label><FileText size={16}/> Event Title</label>
@@ -174,6 +252,7 @@ const CreateOpportunityPage = () => {
                         </span>
                       ))}
                     </div>
+                    {errors.category && <p className="organisation-error-text">{errors.category}</p>}
                   </div>
 
                   <div className="organisation-form-group">
@@ -182,6 +261,7 @@ const CreateOpportunityPage = () => {
                       <option value="">Select State</option>
                       {malaysiaStates.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
+                    {errors.location && <p className="organisation-error-text">{errors.location}</p>}
                   </div>
 
                   <div className="organisation-form-group">
@@ -195,11 +275,13 @@ const CreateOpportunityPage = () => {
                   <div className="organisation-form-group">
                     <label><CalendarDays size={16}/> Start Date & Time</label>
                     <input type="datetime-local" name="startAt" value={formData.startAt} onChange={handleChange} />
+                    {errors.startAt && <p className="organisation-error-text">{errors.startAt}</p>}
                   </div>
 
                   <div className="organisation-form-group">
                     <label><CalendarDays size={16}/> End Date & Time</label>
                     <input type="datetime-local" name="endAt" value={formData.endAt} onChange={handleChange} />
+                    {errors.endAt && <p className="organisation-error-text">{errors.endAt}</p>}
                   </div>
 
                   <div className="organisation-form-group">
@@ -210,6 +292,7 @@ const CreateOpportunityPage = () => {
                   <div className="organisation-form-group">
                     <label><Clock3 size={16}/> Application Deadline</label>
                     <input type="date" name="applicationDeadline" value={formData.applicationDeadline} onChange={handleChange} />
+                    {errors.applicationDeadline && <p className="organisation-error-text">{errors.applicationDeadline}</p>}
                   </div>
                 </div>
               </div>

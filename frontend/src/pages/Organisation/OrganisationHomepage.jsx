@@ -25,7 +25,10 @@ const OpportunityRow = ({ opportunity, onClick }) => {
     ? `${formatTime(opportunity.startAt).toLowerCase()} - ${formatTime(opportunity.endAt).toLowerCase()}`
     : opportunity.timeFrame || "";
 
-  const currentStatus = opportunity.status ? opportunity.status.toLowerCase().replace(/\s+/g, '-') : "active";
+  // Normalize backend 'closed' or raw statuses to standard UI tokens
+  const rawStatus = opportunity.status || "active";
+  const currentStatus = rawStatus.toLowerCase() === "closed" ? "completed" : rawStatus.toLowerCase().replace(/\s+/g, '-');
+  
   const isCancelled = currentStatus === "cancelled";
   const iconSize = isCancelled ? 12 : 14;
 
@@ -60,7 +63,6 @@ const OpportunityRow = ({ opportunity, onClick }) => {
         </h4>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          {/* Status badge goes first */}
           <span 
             className={`event-tag status-${currentStatus}`}
             style={{ position: 'static', margin: 0, fontSize: '10px', padding: '4px 8px', textTransform: 'uppercase', lineHeight: 1 }}
@@ -130,13 +132,12 @@ const OrganisationHomepage = () => {
     getCancelledOpportunities();
   }, [getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
 
-  const orgName = authUser?.organisationName || authUser?.fullName || "Organisation";
-
+  const orgName = authUser?.name || "Organisation";
+  
   const nextOpportunity = useMemo(() => {
     if (!activeOpportunities?.length) return null;
     return [...activeOpportunities].sort(
-      (a, b) =>
-        new Date(a.fixedDate || a.startAt) - new Date(b.fixedDate || b.startAt)
+      (a, b) => new Date(a.fixedDate || a.startAt) - new Date(b.fixedDate || b.startAt)
     )[0];
   }, [activeOpportunities]);
 
@@ -154,10 +155,7 @@ const OrganisationHomepage = () => {
     return Math.round((totals.closed / total) * 100);
   }, [totals]);
 
-  const nextDate = nextOpportunity
-    ? nextOpportunity.fixedDate || nextOpportunity.startAt
-    : null;
-
+  const nextDate = nextOpportunity ? nextOpportunity.fixedDate || nextOpportunity.startAt : null;
   const nextDisplayTime = nextOpportunity?.startAt && nextOpportunity?.endAt
     ? `${formatTime(nextOpportunity.startAt).toLowerCase()} - ${formatTime(nextOpportunity.endAt).toLowerCase()}`
     : nextOpportunity?.timeFrame || "";
@@ -167,12 +165,9 @@ const OrganisationHomepage = () => {
         <section className="org-home-hero">
           <div className="org-home-hero-left">
             <span className="organisation-section-label">ORGANISATION OVERVIEW</span>
-            <h1>
-              Welcome back, <span className="org-home-hero-name">{orgName}</span>
-            </h1>
+            <h1>Welcome back, <span className="org-home-hero-name">{orgName}</span></h1>
             <p className="org-home-hero-description">
-              A real-time pulse of every opportunity, applicant and engagement
-              you've created. Keep your community moving beautifully.
+              A real-time pulse of every opportunity, applicant and engagement you've created. Keep your community moving beautifully.
             </p>
             <div className="org-home-hero-actions">
               <button
@@ -188,7 +183,6 @@ const OrganisationHomepage = () => {
           <div className="org-home-hero-card">
             <div className="org-home-hero-card-head">
               <span className="org-home-hero-card-eyebrow">Next event</span>
-              {/* Same tag grouping applied to the Hero Card! */}
               <div style={{display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap'}}>
                 <span 
                   className="event-tag status-active"
@@ -211,7 +205,6 @@ const OrganisationHomepage = () => {
               <>
                 <h3>{nextOpportunity.title}</h3>
                 <p>{nextOpportunity.detail || nextOpportunity.details}</p>
-                
                 <div className="org-home-hero-card-meta">
                   {nextDate && <span><CalendarDays size={14} />{formatDate(nextDate)}</span>}
                   {nextDisplayTime && <span><Clock3 size={14} />{nextDisplayTime}</span>}
@@ -226,24 +219,18 @@ const OrganisationHomepage = () => {
           </div>
         </section>
 
-        <section
-          className="org-home-stats-grid"
-          style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-        >
+        <section className="org-home-stats-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
           <StatCard icon={Activity} label="Active" value={totals.active} accent="emerald" hint="Currently open" />
           <StatCard icon={CheckCircle2} label="Completed" value={totals.closed} accent="gold" hint="Successfully delivered" />
           <StatCard icon={XCircle} label="Cancelled" value={totals.cancelled} accent="rose" hint="No longer running" />
         </section>
-
+          
         <section className="org-home-split">
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-
             <div className="org-home-panel">
               <header className="org-home-panel-head">
                 <div>
-                  <span className="organisation-section-label">
-                    <Activity size={12} /> ACTIVE OPPORTUNITIES
-                  </span>
+                  <span className="organisation-section-label"><Activity size={12} /> ACTIVE OPPORTUNITIES</span>
                   <h2>Live right now</h2>
                 </div>
                 <button 
@@ -261,7 +248,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))
                 ) : (
@@ -277,9 +264,7 @@ const OrganisationHomepage = () => {
               <div className="org-home-panel">
                 <header className="org-home-panel-head" style={{ marginBottom: 14 }}>
                   <div>
-                    <span className="organisation-section-label">
-                      <XCircle size={12} /> CANCELLED
-                    </span>
+                    <span className="organisation-section-label"><XCircle size={12} /> CANCELLED</span>
                     <h3 style={{ margin: "8px 0 0", fontSize: 17 }}>Recently cancelled</h3>
                   </div>
                 </header>
@@ -288,7 +273,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp}
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))}
                 </div>
@@ -300,9 +285,7 @@ const OrganisationHomepage = () => {
             <div className="org-home-panel org-home-panel-compact">
               <header className="org-home-panel-head">
                 <div>
-                  <span className="organisation-section-label">
-                    <TrendingUp size={12} /> COMPLETION
-                  </span>
+                  <span className="organisation-section-label"><TrendingUp size={12} /> COMPLETION</span>
                   <h3>Delivery rate</h3>
                 </div>
               </header>
@@ -335,9 +318,7 @@ const OrganisationHomepage = () => {
             <div className="org-home-panel org-home-panel-compact">
               <header className="org-home-panel-head">
                 <div>
-                  <span className="organisation-section-label">
-                    <CheckCircle2 size={12} /> RECENTLY CLOSED
-                  </span>
+                  <span className="organisation-section-label"><CheckCircle2 size={12} /> RECENTLY CLOSED</span>
                   <h3>Wrapped up</h3>
                 </div>
               </header>
@@ -347,7 +328,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate(`/opportunity/${opp._id}`)}
+                      onClick={() => navigate("/organisation-dashboard/profile")}
                     />
                   ))
                 ) : (
