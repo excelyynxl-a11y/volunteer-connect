@@ -100,10 +100,23 @@
     white-space: nowrap;
 }
 
-.event-card .event-category-tag {
-    position: absolute;
-    top: 18px;
-    right: 18px;
+.event-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
 }
 
 .item-actions {
