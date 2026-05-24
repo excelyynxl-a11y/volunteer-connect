@@ -13,7 +13,7 @@ const mockActiveOpportunities = [
     startAt: "2026-05-20T09:00:00+08:00",
     endAt: "2026-05-20T14:00:00+08:00",
     organisationId: "mock-organisation",
-    status: "Active",
+    status: "active",
   },
   {
     _id: "active-002",
@@ -24,7 +24,7 @@ const mockActiveOpportunities = [
     startAt: "2026-05-24T08:00:00+08:00",
     endAt: "2026-05-24T12:00:00+08:00",
     organisationId: "mock-organisation",
-    status: "Active",
+    status: "active",
   },
   {
     _id: "active-003",
@@ -35,7 +35,7 @@ const mockActiveOpportunities = [
     startAt: "2026-05-28T15:00:00+08:00",
     endAt: "2026-05-30T18:00:00+08:00",
     organisationId: "mock-organisation",
-    status: "Active",
+    status: "active",
   },
 ];
 
@@ -49,7 +49,7 @@ const mockClosedOpportunities = [
     startAt: "2026-04-15T13:00:00+08:00",
     endAt: "2026-04-15T16:00:00+08:00",
     organisationId: "mock-organisation",
-    status: "Closed",
+    status: "closed",
   },
   {
     _id: "closed-002",
@@ -60,7 +60,7 @@ const mockClosedOpportunities = [
     startAt: "2026-04-22T08:30:00+08:00",
     endAt: "2026-04-23T11:30:00+08:00",
     organisationId: "mock-organisation",
-    status: "Closed",
+    status: "closed",
   },
 ];
 
@@ -74,7 +74,7 @@ const mockCancelledOpportunities = [
     startAt: "2026-05-02T10:00:00+08:00",
     endAt: "2026-05-02T15:00:00+08:00",
     organisationId: "mock-organisation",
-    status: "Cancelled",
+    status: "cancelled",
   },
 ];
 
@@ -134,6 +134,12 @@ export const useOrganisationStore = create((set, get) => ({
 
     updateOpportunity: async (opportunityId, opportunityData) => {
       set({ isUpdatingOpportunity: true });
+      
+      const updateData = {
+        ...opportunityData,
+        status: opportunityData.status ? opportunityData.status.toLowerCase() : "active"
+      };
+
       try {
         const res = await axiosInstance.put(`/opportunity/${opportunityId}`, opportunityData);
         
@@ -188,14 +194,14 @@ export const useOrganisationStore = create((set, get) => ({
     ),
 
     getClosedOpportunities: async () => loadMockOpportunities(
-      set,
+      set, get,
       "isClosedOpportunitiesLoading",
       "closedOpportunities",
       mockClosedOpportunities,
     ),
 
     getCancelledOpportunities: async () => loadMockOpportunities(
-      set,
+      set, get,
       "isCancelledOpportunitiesLoading",
       "cancelledOpportunities",
       mockCancelledOpportunities,
