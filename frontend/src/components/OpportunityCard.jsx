@@ -62,7 +62,6 @@ const OpportunityCard = ({
             <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
         </div>
         
-        {/* Wrap categories in a dedicated right-side container */}
         {opportunity?.category && opportunity.category.length > 0 && (
             <div className="header-right">
                 <div className="categories-container">
