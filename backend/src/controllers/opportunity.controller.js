@@ -168,7 +168,8 @@ export const updateOpportunity = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { title, details, maxVolunteers, fixedDate, timeFrame, status } = req.body;
+    const { title, details, maxVolunteers, fixedDate, timeFrame, status, category, location, startAt, endAt, applicationDeadline } = req.body;
+    const validStatuses = ["active", "closed", "cancelled", "completed"];
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -292,6 +293,14 @@ export const updateOpportunity = async (req, res) => {
       opportunity.details = details.trim();
     }
 
+    if (category !== undefined) {
+      opportunity.category = category;
+    }
+
+    if (location !== undefined) {
+      opportunity.location = location;
+    }
+
     if (maxVolunteers !== undefined) {
       opportunity.maxVolunteers = maxVolunteers;
     }
@@ -306,6 +315,18 @@ export const updateOpportunity = async (req, res) => {
 
     if (status !== undefined) {
       opportunity.status = status;
+    }
+
+    if (startAt !== undefined) {
+      opportunity.startAt = new Date(startAt);
+    }
+
+    if (endAt !== undefined) {
+      opportunity.endAt = new Date(endAt);
+    }
+
+    if (applicationDeadline !== undefined) {
+      opportunity.applicationDeadline = new Date(applicationDeadline);
     }
 
     await opportunity.save();

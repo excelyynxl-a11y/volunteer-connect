@@ -48,7 +48,7 @@ const OpportunityCard = ({
   const displayTime = opportunity?.startAt && opportunity?.endAt
     ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
     : timeFrame;
-  const displayCategory = opportunity?.category?.[0];
+  // const displayCategory = opportunity?.category?.[0];
   const displayOrganisationName = opportunity?.organisationId?.name;
   const spotsRemaining = isModelOpportunity
     ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
@@ -58,8 +58,19 @@ const OpportunityCard = ({
   return (
     <div className={`event-card opportunity-card-${variant}`}>
       <div className="event-card-header">
-        <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-        {displayCategory && <div className="event-category-tag">{displayCategory}</div>}
+        <div className="header-left">
+            <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
+        </div>
+        
+        {opportunity?.category && opportunity.category.length > 0 && (
+            <div className="header-right">
+                <div className="categories-container">
+                    {opportunity.category.map((cat, index) => (
+                        <div key={index} className="event-category-tag">{cat}</div>
+                    ))}
+                </div>
+            </div>
+          )}
       </div>
 
       <h5>{displayTitle}</h5>
@@ -96,17 +107,18 @@ const OpportunityCard = ({
                 {spotsRemaining} spots left
               </span>
             )}
+
+            {opportunity?.applicationDeadline && (
+              <span>
+                <CalendarDays size={16} /> 
+                Apply before {formatDate(opportunity.applicationDeadline)}
+              </span>
+            )}
           </>
         ) : (
           `${displayDate} - ${displayTime}`
         )}
       </div>
-
-      {opportunity?.applicationDeadline && (
-        <div className="event-deadline">
-          Apply before {formatDate(opportunity.applicationDeadline)}
-        </div>
-      )}
 
       {displayActions.length > 0 && (
         <div className="item-actions">
