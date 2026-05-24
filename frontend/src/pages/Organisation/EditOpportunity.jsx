@@ -48,17 +48,17 @@ const EditOpportunity = () => {
             setFormData({
                 title: opportunityToEdit.title || "",
                 details: opportunityToEdit.details || opportunityToEdit.detail || "",
-                startAt: opportunityToEdit.startAt || "",
-                endAt: opportunityToEdit.endAt || "",
+                startAt: formatDBDateForInput(opportunityToEdit.startAt),
+                endAt: formatDBDateForInput(opportunityToEdit.endAt),
                 maxVolunteers: opportunityToEdit.maxVolunteers || 0,
-                applicationDeadline: opportunityToEdit.applicationDeadline || "",
+                applicationDeadline: opportunityToEdit.applicationDeadline
+                    ? formatDBDateForInput(opportunityToEdit.applicationDeadline) 
+                    : "",
                 status: opportunityToEdit.status || "active"
                 // fixedDate: opportunityToEdit.fixedDate || opportunityToEdit.startAt,
                 // timeFrame: opportunityToEdit.timeFrame || "N/A"
             });
             
-            console.log("Raw Categories from DB:", opportunityToEdit.category);
-            console.log("Available Categories in App:", EVENT_CATEGORIES);
             setSelectedCategory(opportunityToEdit.category || []);
             
             if (opportunityToEdit.location) {
@@ -103,6 +103,13 @@ const EditOpportunity = () => {
 
     const formatForInput = (isoString) => isoString ? isoString.substring(0, 16) : "";
 
+    const formatDBDateForInput = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+        return localDate.toISOString().slice(0, 16);
+    };
+
     const renderError = (field) => {
         return fieldErrors[field] ? <p className="organisation-error-text">{fieldErrors[field]}</p> : null;
     }
@@ -122,8 +129,8 @@ const EditOpportunity = () => {
         if (!formData.endAt) newErrors.endAt = "End date is required.";
 
         if (formData.startAt && formData.endAt) {
-            const startDate = new Date(formatForInput(formData.startAt));
-            const endDate = new Date(formatForInput(formData.endAt));
+            const startDate = new Date(formData.startAt);
+            const endDate = new Date(formData.endAt);
             if (endDate <= startDate) {
                 newErrors.endAt = "End date/time must be after the start date/time.";
             }
@@ -140,14 +147,15 @@ const EditOpportunity = () => {
             details: formData.details,
             category: selectedCategory,
             location: `${selectedState}, ${selectedCity}`,
-            startAt: formData.startAt,
-            endAt: formData.endAt,
+            startAt: new Date(formData.startAt).toISOString(),
+            endAt: new Date(formData.endAt).toISOString(),
             maxVolunteers: Number(formData.maxVolunteers),
-            applicationDeadline: formData.applicationDeadline || formData.startAt,
+            applicationDeadline: formData.applicationDeadline
+                ? new Date(formData.applicationDeadline).toISOString() 
+                : new Date(formData.startAt).toISOString(),
             status: formData.status
         };
 
-        console.log("Sending to backend:", finalDataToSubmit);
         const result = await updateOpportunity(id, finalDataToSubmit);
         if (result?.success) {
             navigate("/organisation-dashboard/profile");
@@ -306,7 +314,7 @@ const EditOpportunity = () => {
                                     <input
                                         type="datetime-local"
                                         name="startAt"
-                                        value={formatForInput(formData.startAt)}
+                                        value={formData.startAt}
                                         onChange={handleChange}
                                         className={fieldErrors.startAt ? "input-error" : ""}
                                     />
@@ -317,7 +325,7 @@ const EditOpportunity = () => {
                                     <input
                                         type="datetime-local"
                                         name="endAt"
-                                        value={formatForInput(formData.endAt)}
+                                        value={formData.endAt}
                                         onChange={handleChange}
                                         className={fieldErrors.endAt ? "input-error" : ""}
                                     />
