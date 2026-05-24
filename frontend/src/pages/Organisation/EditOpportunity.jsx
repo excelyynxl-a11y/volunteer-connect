@@ -32,6 +32,7 @@ const EditOpportunity = () => {
     const [selectedCategory, setSelectedCategory] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
+    const [isLoaded, setIsLoaded] = useState(false); // Added missing state
 
     useEffect(() => {
         if (!activeOpportunities?.length) getActiveOpportunities();
@@ -108,7 +109,7 @@ const EditOpportunity = () => {
     };
 
     const renderError = (field) => {
-        return fieldErrors[field] ? <p className="organisation-error-text">{fieldErrors[field]}</p> : null;
+        return fieldErrors[field] ? <p className="organisation-error-text" style={{ color: '#ef4444', fontSize: '13px', marginTop: '4px', fontWeight: 500 }}>{fieldErrors[field]}</p> : null;
     }
 
     const handleSubmit = async (e) => {
@@ -241,7 +242,7 @@ const EditOpportunity = () => {
                     </div>
 
                     {errorMessage && (
-                        <p className="org-profile-edit-error">{errorMessage}</p>
+                        <p className="org-profile-edit-error" style={{ color: '#ef4444', fontWeight: 600, marginBottom: '16px' }}>{errorMessage}</p>
                     )}
 
                     <form
@@ -250,22 +251,31 @@ const EditOpportunity = () => {
                         className="org-profile-edit-form"
                         noValidate
                     >
+                        {/* Input: Event Title */}
                         <div className="org-profile-edit-input-group">
-                            <label>Event Title</label>
+                            <label htmlFor="event-title">
+                                <AlignLeft size={16} /> Event Title
+                            </label>
                             <input
+                                id="event-title"
                                 type="text"
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
+                                placeholder="e.g. Community Tech Center Open Day Support"
                                 maxLength={120}
                                 required
                             />
                             {renderError("title")}
                         </div>
 
+                        {/* Input: Categories Tag Selection */}
                         <div className="org-profile-edit-input-group">
-                            <label>Event Categories</label>
+                            <label htmlFor="event-categories">
+                                <Tag size={16} /> Event Categories
+                            </label>
                             <select 
+                                id="event-categories"
                                 className="org-profile-select" 
                                 onChange={handleCategoryAdd}
                                 defaultValue=""
@@ -278,48 +288,53 @@ const EditOpportunity = () => {
                                 ))}
                             </select>
                             
-                            {/* Display chosen tags */}
-                            <div className="selected-category-tags">
-                                {selectedCategory.map(cat => (
-                                    <span key={cat} className="category-tag-badge">
-                                        {cat}
-                                        <button type="button" onClick={() => removeCategory(cat)} className="remove-tag-btn">
-                                            <X size={14} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
+                            {selectedCategory.length > 0 && (
+                                <div className="selected-category-tags" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
+                                    {selectedCategory.map(cat => (
+                                        <span key={cat} className="category-tag-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, color: '#334155' }}>
+                                            {cat}
+                                            <button type="button" onClick={() => removeCategory(cat)} className="remove-tag-btn" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
+                                                <X size={14} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                             {renderError("category")}
                         </div>
 
+                        {/* Input: Details */}
                         <div className="org-profile-edit-input-group">
-                            <label>Event Details</label>
+                            <label htmlFor="event-details">
+                                <AlignLeft size={16} /> Event Details / Requirements
+                            </label>
                             <textarea
+                                id="event-details"
                                 name="details"
                                 value={formData.details}
                                 onChange={handleChange}
+                                placeholder="Provide clear descriptions and volunteer expectations..."
                                 maxLength={5000}
-                                rows="5"
+                                rows="6"
                                 required
                             />
                             {renderError("details")}
                         </div>
 
+                        {/* Input: State & City Dropdowns */}
                         <div className="org-profile-edit-input-group">
-                            <label>Location (State & City)</label>
-                            <div className="org-profile-edit-row">
+                            <label><MapPin size={16} /> Location (State & City)</label>
+                            <div className="org-profile-edit-row" style={{ display: 'flex', gap: '16px' }}>
                                 <select
                                     value={selectedState}
                                     onChange={handleStateChange}
                                     required
                                     className="org-profile-select"
+                                    style={{ flex: 1 }}
                                 >
                                     <option value="" disabled>Select State</option>
                                     {malaysiaStates.map((state) => (
-                                        <option
-                                            key={state}
-                                            value={state}
-                                        >{state}</option>
+                                        <option key={state} value={state}>{state}</option>
                                     ))}
                                 </select>
 
@@ -329,146 +344,44 @@ const EditOpportunity = () => {
                                     required
                                     disabled={!selectedState}
                                     className="org-profile-select"
+                                    style={{ flex: 1 }}
                                 >
                                     <option value="" disabled>Select City</option>
-                                    {selectedState && malaysiaStateCities[selectedState].map((city) => (
-                                        <option
-                                            key={city}
-                                            value={city}
-                                        >{city}</option>
+                                    {selectedState && malaysiaStateCities[selectedState]?.map((city) => (
+                                        <option key={city} value={city}>{city}</option>
                                     ))}
                                 </select>
                             </div>
                             {renderError("location")}
                         </div>
 
-                        <div className="org-profile-edit-row">
-                            <div className="org-profile-edit-input-group">
-                                <label htmlFor="event-title">
-                                    <AlignLeft size={16} /> Event Title
-                                </label>
-                                <input
-                                    id="event-title"
-                                    type="text"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                    placeholder="e.g. Community Tech Center Open Day Support"
-                                    maxLength={120}
+                        {/* Input: Dates (Row) */}
+                        <div className="org-profile-edit-row" style={{ display: 'flex', gap: '16px' }}>
+                            <div className="org-profile-edit-input-group" style={{ flex: 1 }}>
+                                <label>Start Date & Time</label>
+                                <input 
+                                    type="datetime-local" 
+                                    name="startAt"
+                                    value={formatForInput(formData.startAt)} 
+                                    onChange={(e) => setFormData({ ...formData, startAt: e.target.value ? e.target.value + ":00+08:00" : "" })}
                                     required
                                 />
+                                {renderError("startAt")}
                             </div>
 
-                            {/* Input: Categories Tag Selection */}
-                            <div className="org-profile-edit-input-group">
-                                <label htmlFor="event-categories">
-                                    <Tag size={16} /> Event Categories
-                                </label>
-                                <select 
-                                    id="event-categories"
-                                    className="org-profile-select" 
-                                    onChange={handleCategoryAdd}
-                                    defaultValue=""
-                                >
-                                    <option value="" disabled>Add a category</option>
-                                    {EVENT_CATEGORIES.map(cat => (
-                                        <option key={cat} value={cat} disabled={selectedCategory.includes(cat)}>
-                                            {cat} {selectedCategory.includes(cat) ? "(Selected)" : ""}
-                                        </option>
-                                    ))}
-                                </select>
-                                
-                                {selectedCategory.length > 0 && (
-                                    <div className="selected-category-tags" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
-                                        {selectedCategory.map(cat => (
-                                            <span key={cat} className="category-tag-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#f1f5f9', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, color: '#334155' }}>
-                                                {cat}
-                                                <button type="button" onClick={() => removeCategory(cat)} className="remove-tag-btn" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
-                                                    <X size={14} />
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Input: Details */}
-                            <div className="org-profile-edit-input-group">
-                                <label htmlFor="event-details">
-                                    <AlignLeft size={16} /> Event Details / Requirements
-                                </label>
-                                <textarea
-                                    id="event-details"
-                                    name="details"
-                                    value={formData.details}
-                                    onChange={handleChange}
-                                    placeholder="Provide clear descriptions and volunteer expectations..."
-                                    maxLength={5000}
-                                    rows="6"
+                            <div className="org-profile-edit-input-group" style={{ flex: 1 }}>
+                                <label>End Date & Time</label>
+                                <input 
+                                    type="datetime-local" 
+                                    name="endAt"
+                                    value={formatForInput(formData.endAt)} 
+                                    onChange={(e) => setFormData({ ...formData, endAt: e.target.value ? e.target.value + ":00+08:00" : "" })}
                                     required
                                 />
                                 {renderError("endAt")}
                             </div>
-
-                            {/* Input: State & City Dropdowns */}
-                            <div className="org-profile-edit-input-group">
-                                <label><MapPin size={16} /> Location (State & City)</label>
-                                <div className="org-profile-edit-row" style={{ display: 'flex', gap: '16px' }}>
-                                    <select
-                                        value={selectedState}
-                                        onChange={handleStateChange}
-                                        required
-                                        className="org-profile-select"
-                                        style={{ flex: 1 }}
-                                    >
-                                        <option value="" disabled>Select State</option>
-                                        {malaysiaStates.map((state) => (
-                                            <option key={state} value={state}>{state}</option>
-                                        ))}
-                                    </select>
-
-                                    <select
-                                        value={selectedCity}
-                                        onChange={handleCityChange}
-                                        required
-                                        disabled={!selectedState}
-                                        className="org-profile-select"
-                                        style={{ flex: 1 }}
-                                    >
-                                        <option value="" disabled>Select City</option>
-                                        {selectedState && malaysiaStateCities[selectedState]?.map((city) => (
-                                            <option key={city} value={city}>{city}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Input: Dates (Row) */}
-                            <div className="org-profile-edit-row" style={{ display: 'flex', gap: '16px' }}>
-                                <div className="org-profile-edit-input-group" style={{ flex: 1 }}>
-                                    <label>Start Date & Time</label>
-                                    <input 
-                                        type="datetime-local" 
-                                        name="startAt"
-                                        value={formatForInput(formData.startAt)} 
-                                        onChange={(e) => setFormData({ ...formData, startAt: e.target.value ? e.target.value + ":00+08:00" : "" })}
-                                        required
-                                    />
-                                </div>
-
-                                <div className="org-profile-edit-input-group" style={{ flex: 1 }}>
-                                    <label>End Date & Time</label>
-                                    <input 
-                                        type="datetime-local" 
-                                        name="endAt"
-                                        value={formatForInput(formData.endAt)} 
-                                        onChange={(e) => setFormData({ ...formData, endAt: e.target.value ? e.target.value + ":00+08:00" : "" })}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </section>
             </main>
         </div>

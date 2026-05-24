@@ -131,38 +131,7 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-    updateOpportunity: async (opportunityId, opportunityData) => {
-      set({ isUpdatingOpportunity: true });
-      
-      const updateData = {
-        ...opportunityData,
-        status: opportunityData.status ? opportunityData.status.toLowerCase() : "active"
-      };
-
-      try {
-        const res = await axiosInstance.put(`/opportunity/${opportunityId}`, opportunityData);
-        
-        toast.success("Opportunity updated successfully.");
-      toast.success("Opportunity created successfully!");
-
-      set((state) => ({
-        activeOpportunities: [newOpp, ...state.activeOpportunities],
-      }));
-
-      return { success: true, data: newOpp };
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to create opportunity";
-
-      toast.error(message);
-      return { success: false, error: message };
-    } finally {
-      set({ isCreatingOpportunity: false });
-    }
-  },
-
+  // --- Opportunity Management Actions ---
   updateOpportunity: async (opportunityId, opportunityData) => {
     if (!opportunityId) {
       console.error("Cannot update opportunity: opportunityId is missing.");
@@ -307,18 +276,4 @@ export const useOrganisationStore = create((set, get) => ({
       console.error("Failed to load completed applications", error);
     }
   },
-
-  getClosedOpportunities: async () => loadMockOpportunities(
-      set, get,
-      "isClosedOpportunitiesLoading",
-      "closedOpportunities",
-      mockClosedOpportunities,
-    ),
-
-    getCancelledOpportunities: async () => loadMockOpportunities(
-      set, get,
-      "isCancelledOpportunitiesLoading",
-      "cancelledOpportunities",
-      mockCancelledOpportunities,
-    ),
 }));

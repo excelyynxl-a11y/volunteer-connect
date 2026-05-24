@@ -124,13 +124,27 @@ const OrganisationHomepage = () => {
     getActiveOpportunities,
     getClosedOpportunities,
     getCancelledOpportunities,
+    getPendingApplications,
+    getApprovedApplications,
   } = useOrganisationStore();
 
   useEffect(() => {
     getActiveOpportunities();
     getClosedOpportunities();
     getCancelledOpportunities();
-  }, [getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
+    
+    if (authUser?._id) {
+      getPendingApplications(authUser._id);
+      getApprovedApplications(authUser._id);
+    }
+  }, [
+    authUser?._id, 
+    getActiveOpportunities, 
+    getClosedOpportunities, 
+    getCancelledOpportunities,
+    getPendingApplications,
+    getApprovedApplications
+  ]);
 
   const orgName = authUser?.name || "Organisation";
   
