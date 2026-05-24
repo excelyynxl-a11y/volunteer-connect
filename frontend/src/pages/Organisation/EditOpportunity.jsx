@@ -16,6 +16,7 @@ const EditOpportunity = () => {
     const [selectedCity, setSelectedCity] = useState("");
     const [selectedCategory, setSelectedCategory] = useState([]);
     const [errorMessage, setErrorMessage] = useState("");
+    const [fieldErrors, setFieldErrors] = useState({});
 
     useEffect(() => {
         const opportunityToEdit = activeOpportunities.find(opp => opp._id === id);
@@ -33,18 +34,24 @@ const EditOpportunity = () => {
         }
     }, [id, activeOpportunities, navigate]);
 
-    const handleChange = (e) => 
+    const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value});
+        if (fieldErrors[e.target.name]) {
+            setFieldErrors(prev => ({ ...prev, [e.target.name]: null}));
+        }
+    }
 
     const handleStateChange = (e) => {
         setSelectedState(e.target.value);
         setSelectedCity("");
         setErrorMessage("");
+        setFieldErrors(prev => ({ ...prev, location: null}));
     };
 
     const handleCityChange = (e) => {
         setSelectedCity(e.target.value);
         setErrorMessage("");
+        setFieldErrors(prev => ({ ...prev, location: null}));
     };
 
     const handleCategoryAdd = (e) => {
@@ -62,21 +69,56 @@ const EditOpportunity = () => {
     const formatForInput = (isoString) =>
         isoString ? isoString.substring(0, 16) : '';
 
+    const renderError = (field) => {
+        return fieldErrors[field] ? <p className="organisation-error-text">{fieldErrors[field]}</p> : null;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage("");
+        setFieldErrors({})
 
-        if (!selectedState) {
-            return setErrorMessage("Please select a State.");
+        const newErrors = {};
+
+        if (!formData.title?.trim()) {
+            newErrors.title = "Event title is required.";
         }
 
-        if (!selectedCity) {
-            return setErrorMessage("Please select a City.");
+        if (!formData.details?.trim()) {
+            newErrors.details = "Event details are required.";
+        }
+
+        if (!selectedState || !selectedCity) {
+            newErrors.location = "Please select both State and City."
+        }
+
+        if (selectedCategory.length === 0) {
+            newErrors.category = "Please select at least one category."
+        }
+
+        if (!formData.startAt) {
+            newErrors.startAt = "Start date is required.";
+        }
+
+        if (!formData.endAt) {
+            newErrors.endAt = "End date is required.";
         }
 
         const validCitiesForState = malaysiaStateCities[selectedState];
         if (!validCitiesForState || !validCitiesForState.includes(selectedCity)) {
             return setErrorMessage("System Error: The selected city does not match the selected state.");
+        }
+
+        const start = new Date(formData.startAt);
+        const end = new Date(formData.endAt);
+        if (formData.startAt && formData.endAt && end <= start) {
+            newErrors.endAt = "End date cannot be before or equal to start date.";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setFieldErrors(newErrors);
+            setErrorMessage("Please correct the errors in the form before saving."); 
+            return;
         }
 
         const finalDataToSubmit = {
@@ -157,6 +199,7 @@ const EditOpportunity = () => {
                         id="opportunity-edit-form"
                         onSubmit={handleSubmit}
                         className="org-profile-edit-form"
+                        noValidate
                     >
                         <div className="org-profile-edit-input-group">
                             <label>Event Title</label>
@@ -167,7 +210,8 @@ const EditOpportunity = () => {
                                 onChange={handleChange}
                                 maxLength={120}
                                 required
-                            ></input>
+                            />
+                            {renderError("title")}
                         </div>
 
                         <div className="org-profile-edit-input-group">
@@ -196,6 +240,7 @@ const EditOpportunity = () => {
                                     </span>
                                 ))}
                             </div>
+                            {renderError("category")}
                         </div>
 
                         <div className="org-profile-edit-input-group">
@@ -208,6 +253,7 @@ const EditOpportunity = () => {
                                 rows="5"
                                 required
                             />
+                            {renderError("details")}
                         </div>
 
                         <div className="org-profile-edit-input-group">
@@ -244,6 +290,7 @@ const EditOpportunity = () => {
                                     ))}
                                 </select>
                             </div>
+                            {renderError("location")}
                         </div>
 
                         <div className="org-profile-edit-row">
@@ -267,6 +314,7 @@ const EditOpportunity = () => {
                                     onChange={(e) => setFormData({ ...formData, endAt: e.target.value + ":00+08:00" })}
                                     required
                                 />
+                                {renderError("endAt")}
                             </div>
                         </div>
                     </form>
