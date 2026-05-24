@@ -382,9 +382,25 @@ export const useVolunteerStore = create((set) => ({
     set({ isUpdatingVolunteerProfile: true });
 
     try {
+      const hasAvatarFile =
+        typeof File !== "undefined" && profilePayload?.avatar instanceof File;
+      const requestPayload = hasAvatarFile ? new FormData() : profilePayload;
+
+      if (hasAvatarFile) {
+        requestPayload.append("fullName", profilePayload.fullName ?? "");
+        requestPayload.append("ageGroup", profilePayload.ageGroup ?? "");
+        requestPayload.append("biodata", profilePayload.biodata ?? "");
+        requestPayload.append("skills", JSON.stringify(profilePayload.skills ?? []));
+        requestPayload.append(
+          "availability",
+          JSON.stringify(profilePayload.availability ?? []),
+        );
+        requestPayload.append("profilePic", profilePayload.avatar);
+      }
+
       const response = await axiosInstance.put(
         `/volunteer/profile/${volunteerId}`,
-        profilePayload,
+        requestPayload,
       );
       const updatedProfile = response.data?.data ?? {};
 

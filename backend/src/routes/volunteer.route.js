@@ -1,6 +1,7 @@
 import express from "express";
-import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
 import { getVolunteers, getVolunteerProfile, updateVolunteerProfile, getVolunteerPastExperience } from "../controllers/volunteer.controller.js";
+import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get("/", getVolunteers);
 router.get("/profile/:id", getVolunteerProfile);
 
 // Update volunteer profile
-router.put("/profile/:id", updateVolunteerProfile);
+router.put("/profile/:id", protectRoute, uploadAvatar, updateVolunteerProfile);
 
 // Get volunteer past experience
 router.get("/profile/:id/past-experience", getVolunteerPastExperience);

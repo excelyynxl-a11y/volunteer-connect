@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  Camera,
   Clock,
   Plus,
   User,
@@ -15,7 +16,7 @@ import {
   volunteerAvailabilityTimes,
   volunteerSkillOptions,
 } from '../../lib/data'
-import { formatApprovalStatus, sortAvailabilitySlots } from '../../lib/utils'
+import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -55,6 +56,9 @@ const EditVolunteerProfile = () => {
   const [selectedSkill, setSelectedSkill] = useState('')
   const [otherSkill, setOtherSkill] = useState('')
   const [skillList, setSkillList] = useState([])
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState('')
+  const avatarPreviewUrlRef = useRef('')
   const [saveError, setSaveError] = useState('')
 
   // Sync authenticated profile data into editable form state
@@ -88,6 +92,12 @@ const EditVolunteerProfile = () => {
     }
   }, [authUser])
 
+  useEffect(() => () => {
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+    }
+  }, [])
+
   // Form field handlers
   const handleEditableProfileChange = (event) => {
     const { name, value } = event.target
@@ -95,6 +105,26 @@ const EditVolunteerProfile = () => {
       ...currentProfile,
       [name]: value,
     }))
+    setSaveError('')
+  }
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0] || null
+
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+      avatarPreviewUrlRef.current = ''
+    }
+
+    if (file) {
+      const previewUrl = URL.createObjectURL(file)
+      avatarPreviewUrlRef.current = previewUrl
+      setAvatarPreviewUrl(previewUrl)
+    } else {
+      setAvatarPreviewUrl('')
+    }
+
+    setSelectedAvatarFile(file)
     setSaveError('')
   }
 
@@ -185,6 +215,7 @@ const EditVolunteerProfile = () => {
       biodata: editableProfile.biodata,
       skills: skillList,
       availability: availabilitySlots,
+      avatar: selectedAvatarFile,
     })
 
     if (!result.success) {
@@ -207,8 +238,22 @@ const EditVolunteerProfile = () => {
         ? sortAvailabilitySlots(updatedProfile.availability)
         : availabilitySlots
     )
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+      avatarPreviewUrlRef.current = ''
+    }
+    setSelectedAvatarFile(null)
+    setAvatarPreviewUrl('')
     navigate('/volunteer-dashboard/profile')
   }
+
+  const avatarSrc = avatarPreviewUrl || authUser?.avatar || ''
+  const avatarLabel = selectedAvatarFile?.name || 'PNG, JPG, or JPEG up to 5MB'
+  const avatarStatusText = selectedAvatarFile
+    ? 'New photo selected'
+    : authUser?.avatar
+      ? 'Current profile photo'
+      : 'No profile photo yet'
 
   // Main edit profile layout
   return (
@@ -241,9 +286,37 @@ const EditVolunteerProfile = () => {
             </div>
           </div>
 
-          {saveError ? <p>{saveError}</p> : null}
+          {saveError ? <p className="edit-profile-error">{saveError}</p> : null}
           {/* Profile details fields */}
           <div className="profile-form-grid">
+            <div className="edit-profile-avatar-field">
+              <div className="edit-profile-avatar-preview">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="Volunteer avatar preview" />
+                ) : (
+                  getInitials(editableProfile.name || authUser?.name)
+                )}
+              </div>
+
+              <div className="edit-profile-avatar-copy">
+                <span>Profile Photo</span>
+                <strong>{avatarStatusText}</strong>
+                <p>{avatarLabel}</p>
+              </div>
+
+              <input
+                id="volunteer-avatar-upload"
+                className="edit-profile-avatar-input"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                onChange={handleAvatarChange}
+              />
+              <label className="edit-profile-avatar-button" htmlFor="volunteer-avatar-upload">
+                <Camera size={16} />
+                Change Photo
+              </label>
+            </div>
+
             <label className="edit-profile-field">
               <span>Full Name</span>
               <input
