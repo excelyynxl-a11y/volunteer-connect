@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import './Header.css'
+import './LandingPage.css'
 import { landingPageNavItems } from '../../lib/data'
 import Badge from '../../components/Badge'
 

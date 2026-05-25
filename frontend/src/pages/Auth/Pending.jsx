@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AlertTriangle, Clock } from "lucide-react";
-import "./Pending.css";
+import "./Auth.css";
 import Badge from "../../components/Badge";
 import { useAuthStore } from "../../store/useAuthStore";
 

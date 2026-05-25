@@ -38,7 +38,8 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
           <X size={22} />
         </button>
 
-        <div className="opportunity-detail-header">
+        <div className="opportunity-detail-modal-scroll">
+          <div className="opportunity-detail-header">
           <div>
             <span className="opportunity-detail-eyebrow">
               {opportunity.category?.[0] || "Opportunity"}
@@ -131,6 +132,7 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
             <p className="opportunity-detail-muted">No specific requirements listed.</p>
           )}
         </section>
+        </div>
       </div>
     </div>
   );

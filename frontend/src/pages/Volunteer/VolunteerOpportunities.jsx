@@ -162,7 +162,7 @@ const VolunteerOpportunities = () => {
               <Search size={20} />
               <input
                 type="search"
-                placeholder="Search opportunities or organisations"
+                placeholder="Search opportunities, organisations or location"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
