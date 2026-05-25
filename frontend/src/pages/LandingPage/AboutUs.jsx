@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import { aboutUsCards } from '../../lib/data'
 import AboutUsCard from '../../components/AboutUsCard'
-import './AboutUs.css'
+import './LandingPage.css'
 
 const AboutUs = () => {
   const cardRefs = useRef([])
