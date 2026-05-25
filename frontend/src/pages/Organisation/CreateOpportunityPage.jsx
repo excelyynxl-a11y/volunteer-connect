@@ -227,10 +227,9 @@ const CreateOpportunityPage = () => {
       maxVolunteers: Number(formData.maxVolunteers),
       fixedDate: rawStartDate,
       timeFrame: computedTimeFrame,
-      startAt: formData.startAt,
-      endAt: formData.endAt,
-      applicationDeadline:
-        formData.applicationDeadline,
+      startAt: new Date(formData.startAt).toISOString(),
+      endAt: new Date(formData.endAt).toISOString(),
+      applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
       location: `${selectedState}, ${selectedCity}`,
       category: selectedCategory,
       organisationId:
