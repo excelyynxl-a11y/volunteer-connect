@@ -197,6 +197,32 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
+  // --- Opportunity Management Actions ---
+  createOpportunity: async (opportunityData) => {
+    set({ isCreatingOpportunity: true });
+    try {
+      const res = await axiosInstance.post("/opportunities/create", opportunityData);
+      const newOpp = normaliseOpportunity(res.data?.data ?? res.data);
+      
+      // Add the newly created opportunity to the top of the active list
+      set((state) => ({
+        activeOpportunities: [newOpp, ...state.activeOpportunities],
+      }));
+
+      return { success: true, data: newOpp };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create opportunity";
+
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      set({ isCreatingOpportunity: false });
+    }
+  },
+
   getActiveOpportunities: async () => {
     try {
       const response = await axiosInstance.get("/opportunities/my-opportunities");
