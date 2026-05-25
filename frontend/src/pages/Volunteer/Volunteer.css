@@ -1441,8 +1441,29 @@
 
 .edit-profile-error {
   margin: -6px 0 18px;
-  color: var(--profile-orange-dark);
+  color: #ef4444;
   font-weight: 700;
+}
+
+.edit-profile-field-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.edit-profile-error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.edit-profile-field input.error,
+.edit-profile-field textarea.error {
+  border-color: #ef4444;
 }
 
 .edit-profile-field {
@@ -1687,6 +1708,7 @@
   align-items: center;
   gap: 14px;
   margin-top: 18px;
+  margin-bottom: 18px;
 }
 
 .add-slot-button {
