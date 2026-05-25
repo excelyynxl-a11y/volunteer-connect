@@ -9,6 +9,7 @@ import VolunteerOpportunities from "./VolunteerOpportunities";
 import VolunteerReport from "./VolunteerReport";
 
 import "./Volunteer.css";
+import VolunteerApplication from "./VolunteerApplication";
 
 const VolunteerDashboard = () => {
   const { sidebarCollapsed } = useVolunteerStore();
@@ -28,10 +29,11 @@ const VolunteerDashboard = () => {
       >
         <Routes>
           <Route path="/" element={<VolunteerHomepage />} />
+          <Route path="opportunities" element={<VolunteerOpportunities />} />
+          <Route path="applications" element={<VolunteerApplication />} />
+          <Route path="report" element={<VolunteerReport />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="edit-profile" element={<EditVolunteerProfile />} />
-          <Route path="opportunities" element={<VolunteerOpportunities />} />
-          <Route path="report" element={<VolunteerReport />} />
           <Route path="*" element={<Navigate to="/volunteer-dashboard" replace />} />
         </Routes>
       </main>

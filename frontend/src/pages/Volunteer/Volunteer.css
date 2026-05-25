@@ -2624,3 +2624,170 @@
     font-size: 24px;
   }
 }
+
+/* Volunteer Application */
+.volunteer-application-page {
+  min-height: 100vh;
+  color: var(--profile-green-dark);
+}
+
+.volunteer-application-hero {
+  margin-bottom: 22px;
+  padding: 24px 34px;
+  border: 3px solid var(--profile-orange);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 82% 100%, rgba(44, 97, 79, 0.14) 0 78px, transparent 79px),
+    linear-gradient(90deg, var(--profile-cream-panel) 0 62%, #f5f1eb 62% 100%);
+}
+
+.volunteer-application-hero p {
+  margin: 0 0 8px;
+  color: var(--profile-orange-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+.volunteer-application-hero h1 {
+  margin: 0 0 8px;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.volunteer-application-hero span {
+  color: var(--profile-muted);
+  font-size: 16px;
+}
+
+.volunteer-application-panel {
+  padding: 28px;
+  border: 3px solid var(--profile-orange);
+  border-radius: 18px;
+  background: var(--profile-cream-panel);
+}
+
+.volunteer-application-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.volunteer-application-header h2 {
+  margin: 0;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.volunteer-application-header p {
+  margin: 6px 0 0;
+  color: var(--profile-muted);
+}
+
+.volunteer-application-body {
+  display: flex;
+  justify-content: center;
+}
+
+.volunteer-application-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 540px;
+  padding: 48px 36px;
+  border: 2px dashed #ded5ca;
+  border-radius: 18px;
+  background: #faf8f4;
+  text-align: center;
+}
+
+.volunteer-application-coming-soon-icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 999px;
+  background: #fff1d5;
+  color: var(--profile-orange-dark);
+}
+
+.volunteer-application-coming-soon h3 {
+  margin: 0 0 10px;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--profile-green-dark);
+}
+
+.volunteer-application-coming-soon > p {
+  margin: 0 0 28px;
+  color: var(--profile-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.volunteer-application-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+.volunteer-application-preview-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid #ded5ca;
+  border-radius: 13px;
+  background: #ffffff;
+  opacity: 0.55;
+}
+
+.volunteer-application-preview-item svg {
+  justify-self: center;
+  color: var(--profile-green);
+}
+
+.volunteer-application-preview-item strong {
+  display: block;
+  color: var(--profile-green-dark);
+  font-size: 14px;
+}
+
+.volunteer-application-preview-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--profile-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .volunteer-application-hero {
+    padding: 22px;
+  }
+
+  .volunteer-application-hero h1 {
+    font-size: 32px;
+  }
+
+  .volunteer-application-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .volunteer-application-coming-soon {
+    padding: 32px 22px;
+  }
+
+  .volunteer-application-coming-soon h3 {
+    font-size: 24px;
+  }
+}
