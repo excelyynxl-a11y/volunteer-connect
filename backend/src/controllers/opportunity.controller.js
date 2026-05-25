@@ -5,7 +5,7 @@ import Opportunity from "../models/opportunity.model.js";
 export const createOpportunity = async (req, res) => {
 
   try {
-    const { title, details, maxVolunteers, fixedDate, timeFrame, startAt, endAt, applicationDeadline, location } = req.body;
+    const { title, details, maxVolunteers, fixedDate, timeFrame, startAt, endAt, applicationDeadline, location, category } = req.body;
 
     if (req.user.role !== "organisation") {
       return res.status(403).json({
@@ -98,6 +98,7 @@ export const createOpportunity = async (req, res) => {
   endAt,
   applicationDeadline,
   location,
+  category
 });
 
     await newOpportunity.save();
