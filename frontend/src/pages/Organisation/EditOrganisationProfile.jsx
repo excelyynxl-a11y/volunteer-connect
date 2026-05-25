@@ -15,16 +15,43 @@ const EditOrganisationProfile = () => {
     name: authUser?.name || "",
     biodata: authUser?.biodata || "",
   });
+
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const renderError = (field) => {
+    return fieldErrors[field] ? (
+      <p className="organisation-error-text">{fieldErrors[field]}</p>
+    ) : null
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+    setFieldErrors({});
+
+    const newErrors = {};
+    if (!formData.name.trim()) {
+      newErrors.name = "Organisation name is required.";
+    }
+    if (!formData.biodata.trim()) {
+      newErrors.biodata = "About Us / Biodata is required.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setErrorMessage("Please correct the errors in the form before saving.");
+      return;
+    }
 
     const result = await updateOrganisationProfile({
       name: formData.name,
@@ -90,7 +117,7 @@ const EditOrganisationProfile = () => {
             </div>
           </div>
 
-          <div className="org-profile-card org-profile-edit-form-card">
+          <div className="org-profile-postings-card">
             <div className="org-profile-card-accent" />
             <div className="org-profile-edit-card-header">
               <div>
@@ -109,6 +136,7 @@ const EditOrganisationProfile = () => {
               id="organisation-edit-form"
               onSubmit={handleSave}
               className="org-profile-edit-form"
+              noValidate
             >
               <div className="org-profile-edit-input-group">
                 <label htmlFor="organisation-name">
@@ -124,6 +152,7 @@ const EditOrganisationProfile = () => {
                   placeholder="Enter organisation name"
                   required
                 />
+                {renderError("name")}
               </div>
 
               <div className="org-profile-edit-input-group">
@@ -139,6 +168,7 @@ const EditOrganisationProfile = () => {
                   placeholder="Describe your mission..."
                   rows="7"
                 />
+                {renderError("biodata")}
               </div>
             </form>
           </div>
