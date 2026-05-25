@@ -619,13 +619,21 @@
   position: relative;
   width: min(980px, 100%);
   max-height: min(860px, calc(100vh - 64px));
-  overflow-y: auto;
-  padding: 34px 36px 38px;
+  display: flex;
+  flex-direction: column;
   border: 3px solid var(--profile-orange);
   border-radius: 22px;
   background: var(--profile-cream-panel);
   color: var(--profile-green-dark);
   box-shadow: 0 24px 70px rgba(29, 42, 50, 0.28);
+  overflow: hidden;
+}
+
+.opportunity-detail-modal-scroll {
+  overflow-y: auto;
+  padding: 34px 36px 38px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .opportunity-detail-close {
@@ -1870,6 +1878,9 @@
 
   .opportunity-detail-modal {
     max-height: calc(100vh - 36px);
+  }
+
+  .opportunity-detail-modal-scroll {
     padding: 28px;
   }
 
