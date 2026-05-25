@@ -1,6 +1,7 @@
 import React from "react";
 import Badge from "./Badge";
 import {
+  AlertCircle,
   Home,
   LogOut,
   Search,
@@ -16,6 +17,7 @@ const navItems = [
   { key: "homepage", path: "/volunteer-dashboard", label: "Homepage", Icon: Home },
   { key: "profile", path: "/volunteer-dashboard/profile", label: "Profile", Icon: User },
   { key: "opportunities", path: "/volunteer-dashboard/opportunities", label: "Opportunities", Icon: Search },
+  { key: "report", path: "/volunteer-dashboard/report", label: "Report", Icon: AlertCircle },
 ];
 
 const VolunteerSidebar = () => {
