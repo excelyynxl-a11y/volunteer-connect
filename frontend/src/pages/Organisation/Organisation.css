@@ -1927,20 +1927,7 @@
   text-align: right;
 }
 
-/*Error text*/
-.organisation-error-text {
-  color: #dc2626;
-  font-size: 12.5px;
-  font-weight: 600;
-  margin: 2px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  position: absolute;
-    bottom: 0;
-    left: 0;
-    white-space: nowrap;
-}
+
 
 @media (max-width: 1100px) {
   .organisation-create-page { padding: 28px 24px; }
@@ -2518,4 +2505,32 @@
   .org-home-opportunity-row { grid-template-columns: 52px 1fr; }
   .org-home-opportunity-action { display: none; }
   .org-home-hero-left h1 { font-size: 22px; }
+}
+.organisation-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ERROR TEXT FIXED */
+.organisation-error-text {
+  display: block;
+
+  width: 100%;
+  margin-top: 6px;
+
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  white-space: normal;
+  word-break: break-word;
+
+  position: static; /* IMPORTANT */
+}
+
+.error {
+  border: 1px solid #dc2626 !important;
 }
