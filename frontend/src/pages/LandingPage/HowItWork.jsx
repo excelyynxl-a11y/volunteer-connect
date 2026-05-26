@@ -5,6 +5,7 @@ import './LandingPage.css'
 
 const HowItWork = () => {
   const cardRefs = useRef([])
+  const bannerRef = useRef(null)
 
   // subtle fade-in effect
   useEffect(() => {
@@ -24,6 +25,8 @@ const HowItWork = () => {
       if (el) observer.observe(el)
     })
 
+    if (bannerRef.current) observer.observe(bannerRef.current)
+
     return () => observer.disconnect()
   }, [])
 
@@ -40,6 +43,10 @@ const HowItWork = () => {
         </h2>
       </div>
 
+      <div ref={bannerRef} className="workflow-banner animate-in">
+        <img src="/vc4.png" alt="Connecting hands" loading="lazy" />
+      </div>
+
       {/* steps card display */}
       <div className="workflow-grid">
         {howItWorkSteps.map((item, index) => (
@@ -53,6 +60,7 @@ const HowItWork = () => {
               step={item.step}
               title={item.title}
               text={item.text}
+              image={item.image}
             />
           </div>
         ))}

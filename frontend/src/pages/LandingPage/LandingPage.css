@@ -130,7 +130,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 26px 40px;
+  padding: 16px 40px;
   background: #ffffff;
   border-bottom: 1px solid #e5ddd2;
   color: #000000;
@@ -276,31 +276,92 @@
 
 /* Hero */
 .hero-section {
-  padding: 150px 48px;
+  padding: 30px 48px 80px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .hero-section .section-header p {
-  max-width: 690px;
+  max-width: 750px;
   margin: 12px auto 0;
   color: #000000;
   font-size: 15px;
   line-height: 1.7;
 }
 
+.hero-image {
+  max-width: 640px;
+  margin: 40px auto 0;
+  opacity: 0;
+  animation: fadeInUp 1s ease forwards;
+  animation-delay: 0.8s;
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(44, 97, 79, 0.14);
+  transition: transform 0.4s ease;
+}
+
+.hero-image img:hover {
+  transform: scale(1.02);
+}
+
+@keyframes heroImageFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.hero-image.visible {
+  animation: fadeInUp 1s ease forwards, heroImageFloat 4s ease-in-out infinite;
+  animation-delay: 0.8s, 1.8s;
+}
+
 @media (max-width: 720px) {
   .hero-section {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding: 80px 18px 48px;
+  }
+
+  .hero-image {
+    margin-top: 28px;
   }
 }
 
 /* AboutUs */
 .about-section {
-  padding: 72px 48px;
-  padding-top: 48px;
+  padding: 40px 48px;
+  padding-top: 30px;
+}
+
+.about-banner {
+  max-width: 900px;
+  margin: 0 auto 48px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(44, 97, 79, 0.12);
+}
+
+.about-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.about-banner.visible img {
+  transform: scale(1);
+}
+
+.about-banner:not(.visible) img {
+  transform: scale(1.06);
 }
 
 .about-grid {
@@ -320,12 +381,39 @@
     padding-left: 18px;
     padding-right: 18px;
   }
+
+  .about-banner {
+    margin-bottom: 36px;
+  }
 }
 
 /* HowItWork */
 .workflow-section {
   padding: 72px 48px;
-  padding-top: 48px;
+  padding-top: 30px;
+}
+
+.workflow-banner {
+  max-width: 800px;
+  margin: 0 auto 48px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(44, 97, 79, 0.12);
+}
+
+.workflow-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.workflow-banner.visible img {
+  transform: scale(1);
+}
+
+.workflow-banner:not(.visible) img {
+  transform: scale(1.06);
 }
 
 .workflow-grid {
@@ -344,6 +432,10 @@
   .workflow-section {
     padding-left: 18px;
     padding-right: 18px;
+  }
+
+  .workflow-banner {
+    margin-bottom: 36px;
   }
 }
 

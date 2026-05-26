@@ -16,6 +16,9 @@ const Hero = () => {
           organizations. Track your impact, schedule your time, and build a
           better world - one hour at a time.
         </p>
+        <div className="hero-image">
+          <img src="/vc2.png" alt="Volunteer community impact" loading="eager" />
+        </div>
       </div>
     </section>
   )
