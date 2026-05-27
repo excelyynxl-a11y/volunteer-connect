@@ -153,8 +153,8 @@ export const useOrganisationStore = create((set, get) => ({
     try {
       const response = await axiosInstance.get("/opportunities/my-opportunities");
       const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-      
-      const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "cancelled" && opp.status !== "completed");
+
+      const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "completed" && opp.status !== "cancelled");
       set({ activeOpportunities: active });
     } catch (error) {
       console.error("Error fetching active opportunities:", error);
@@ -198,44 +198,4 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-  // --- Application State Actions ---
-  getPendingApplications: async (userId) => {
-    if (!userId) return;
-    try {
-      const res = await axiosInstance.get(`/application/pending/${userId}`);
-      set({ pendingApplications: res.data });
-    } catch (error) {
-      console.error("Failed to load pending applications", error);
-    }
-  },
-
-  getApprovedApplications: async (userId) => {
-    if (!userId) return;
-    try {
-      const res = await axiosInstance.get(`/application/approved/${userId}`);
-      set({ approvedApplications: res.data });
-    } catch (error) {
-      console.error("Failed to load approved applications", error);
-    }
-  },
-
-  getRejectedApplications: async (userId) => {
-    if (!userId) return;
-    try {
-      const res = await axiosInstance.get(`/application/rejected/${userId}`);
-      set({ rejectedApplications: res.data });
-    } catch (error) {
-      console.error("Failed to load rejected applications", error);
-    }
-  },
-
-  getCompletedApplications: async (userId) => {
-    if (!userId) return;
-    try {
-      const res = await axiosInstance.get(`/application/completed/${userId}`);
-      set({ completedApplications: res.data });
-    } catch (error) {
-      console.error("Failed to load completed applications", error);
-    }
-  },
 }));
