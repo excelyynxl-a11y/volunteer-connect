@@ -227,10 +227,10 @@ const ViewOpportunity = () => {
               <b>Requirements</b>
             </h4>
             {requirements.length > 0 ? (
-              <div className="organisation-skill-tags">
+              <div className="org-view-requirement-tags">
                 {requirements.map((requirement) => (
-                  <span key={requirement} className="organisation-skill-tag">
-                    <FileText size={14} />
+                  <span key={requirement} className="org-view-requirement-tag">
+                    <FileText size={16} />
                     {requirement}
                   </span>
                 ))}

@@ -2761,6 +2761,33 @@
   overflow-wrap: anywhere;
 }
 
+.org-view-requirement-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.org-view-requirement-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(44, 97, 79, 0.08);
+  color: #2c614f;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.org-view-requirement-tag svg {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 640px) {
   .org-view-detail-grid {
     grid-template-columns: 1fr;
