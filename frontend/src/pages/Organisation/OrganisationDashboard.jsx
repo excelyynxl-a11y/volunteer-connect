@@ -12,6 +12,7 @@ import "./Organisation.css";
 import OrganisationOpportunity from "./OrganisationOpportunity";
 import OrganisationApplication from "./OrganisationApplication";
 import OrganisationReport from "./OrganisationReport";
+import ViewOpportunity from "./ViewOpportunity";
 
 
 
@@ -37,6 +38,7 @@ const OrganisationDashboard = () => {
           <Route path="applications" element={<OrganisationApplication />} />
           <Route path="report" element={<OrganisationReport />} />
           <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
+          <Route path="view-opportunity/:id" element={<ViewOpportunity />} />
           <Route path="create-opportunity"element={<CreateOpportunityPage />}/>
           <Route path="profile" element={<OrganisationProfile />} />
           <Route path="edit-organisation-profile" element={<EditOrganisationProfile />} />
