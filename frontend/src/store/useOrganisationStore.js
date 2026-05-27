@@ -3,81 +3,6 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 
-const mockActiveOpportunities = [
-  {
-    _id: "active-001",
-    title: "Community Food Drive Helper",
-    details: "Support food packing, registration, and distribution for local families.",
-    location: "Selangor, Cheras",
-    category: ["Community"],
-    startAt: "2026-05-20T09:00:00+08:00",
-    endAt: "2026-05-20T14:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "active",
-  },
-  {
-    _id: "active-002",
-    title: "Beach Cleanup Volunteer",
-    details: "Help collect litter, sort recyclables, and document cleanup progress.",
-    location: "Pulau Pinang, Batu Ferringhi",
-    category: ["Environment", "Community"],
-    startAt: "2026-05-24T08:00:00+08:00",
-    endAt: "2026-05-24T12:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "active",
-  },
-  {
-    _id: "active-003",
-    title: "Literacy Tutor",
-    details: "Assist children with reading practice and basic writing exercises.",
-    location: "Selangor, Petaling Jaya",
-    category: ["Education"],
-    startAt: "2026-05-28T15:00:00+08:00",
-    endAt: "2026-05-30T18:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "active",
-  },
-];
-
-const mockClosedOpportunities = [
-  {
-    _id: "closed-001",
-    title: "Senior Care Companion",
-    details: "Spent the afternoon supporting seniors through conversation and activities.",
-    location: "Selangor, Subang Jaya",
-    category: ["Elderly Care"],
-    startAt: "2026-04-15T13:00:00+08:00",
-    endAt: "2026-04-15T16:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "closed",
-  },
-  {
-    _id: "closed-002",
-    title: "Community Garden Setup",
-    details: "Prepared planting beds, labelled seedlings, and arranged gardening tools.",
-    location: "Johor, Johor Bahru",
-    category: ["Environment"],
-    startAt: "2026-04-22T08:30:00+08:00",
-    endAt: "2026-04-23T11:30:00+08:00",
-    organisationId: "mock-organisation",
-    status: "closed",
-  },
-];
-
-const mockCancelledOpportunities = [
-  {
-    _id: "cancelled-001",
-    title: "Outdoor Health Booth",
-    details: "Cancelled due to severe weather conditions.",
-    location: "Melaka, Ayer Keroh",
-    category: ["Health"],
-    startAt: "2026-05-02T10:00:00+08:00",
-    endAt: "2026-05-02T15:00:00+08:00",
-    organisationId: "mock-organisation",
-    status: "cancelled",
-  },
-];
-
 const normaliseOpportunity = (opportunity) => ({
   ...opportunity,
   detail: opportunity.detail ?? opportunity.details ?? "",
@@ -101,6 +26,7 @@ export const useOrganisationStore = create((set, get) => ({
   activeOpportunities: [],
   closedOpportunities: [],
   cancelledOpportunities: [],
+  allMyOpportunities: [],
   
   pendingApplications: [],
   approvedApplications: [],
@@ -259,6 +185,16 @@ export const useOrganisationStore = create((set, get) => ({
     } catch (error) {
       console.error("Error fetching cancelled opportunities:", error);
       set({ cancelledOpportunities: [] });
+    }
+  },
+
+  getAllMyOpportunities: async () => {
+    try {
+      const response = await axiosInstance.get("/opportunities/my-opportunities");
+      set({ allMyOpportunities: response.data });
+    } catch (error) {
+      console.error("Error fetching all my opportunities:", error);
+      set({ allMyOpportunities: [] });
     }
   },
 
