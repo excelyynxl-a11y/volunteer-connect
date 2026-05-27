@@ -140,7 +140,7 @@ export const getAllOpportunities = async (req, res) => {
       .populate("organisationId", "name")
       .sort({ publishedAt: -1 });
 
-    const opportunities = await Opportunity.find({ status: "active" });
+    // const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
       count: opportunities.length,
@@ -384,6 +384,7 @@ export const updateOpportunity = async (req, res) => {
       message: "Opportunity updated successfully",
       data: opportunity,
     });
+  } 
   } catch (err) {
     console.log("Error in updateOpportunity controller: ", err.message);
     res.status(500).json({ 
