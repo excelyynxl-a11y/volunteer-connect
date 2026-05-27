@@ -2027,6 +2027,25 @@
   cursor: pointer;
 }
 
+.organisation-form-group .organisation-date-input {
+  border-radius: 11px;
+  background: #ffffff;
+  color: #1f3f35;
+  font-weight: 600;
+}
+
+.organisation-form-group .organisation-date-input::-webkit-calendar-picker-indicator {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  opacity: 0.75;
+  filter: invert(29%) sepia(24%) saturate(1062%) hue-rotate(108deg) brightness(88%) contrast(88%);
+}
+
+.organisation-form-group .organisation-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 /*Progress bar*/
 .organisation-progress-row {
   display: flex;

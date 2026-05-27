@@ -485,13 +485,12 @@ const CreateOpportunityPage = () => {
                       State
                     </label>
 
-                    <select
+                    <CustomSelect
                       value={selectedState}
-                      onChange={(e) => {
-                        setSelectedState(
-                          e.target.value
-                        );
-
+                      placeholder="Select State"
+                      options={malaysiaStates}
+                      onChange={(value) => {
+                        setSelectedState(value);
                         setSelectedCity("");
 
                         if (errors.location) {
@@ -501,25 +500,8 @@ const CreateOpportunityPage = () => {
                           }));
                         }
                       }}
-                      className={
-                        errors.location
-                          ? "error"
-                          : ""
-                      }
-                    >
-                      <option value="">
-                        Select State
-                      </option>
-
-                      {malaysiaStates.map((s) => (
-                        <option
-                          key={s}
-                          value={s}
-                        >
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                      className={errors.location ? "error" : ""}
+                    />
 
                     {errors.location && (
                       <p className="organisation-error-text">
@@ -535,12 +517,12 @@ const CreateOpportunityPage = () => {
                       City
                     </label>
 
-                    <select
+                    <CustomSelect
                       value={selectedCity}
-                      onChange={(e) => {
-                        setSelectedCity(
-                          e.target.value
-                        );
+                      placeholder={selectedState ? "Select City" : "Select a state first"}
+                      options={selectedCities}
+                      onChange={(value) => {
+                        setSelectedCity(value);
 
                         if (errors.location) {
                           setErrors((prev) => ({
@@ -549,26 +531,9 @@ const CreateOpportunityPage = () => {
                           }));
                         }
                       }}
+                      className={errors.location ? "error" : ""}
                       disabled={!selectedState}
-                      className={
-                        errors.location
-                          ? "error"
-                          : ""
-                      }
-                    >
-                      <option value="">
-                        Select City
-                      </option>
-
-                      {selectedCities.map((c) => (
-                        <option
-                          key={c}
-                          value={c}
-                        >
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
                   {/* START DATE */}
@@ -585,8 +550,8 @@ const CreateOpportunityPage = () => {
                       onChange={handleChange}
                       className={
                         errors.startDate
-                          ? "error"
-                          : ""
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 
@@ -637,8 +602,8 @@ const CreateOpportunityPage = () => {
                       onChange={handleChange}
                       className={
                         errors.endDate
-                          ? "error"
-                          : ""
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 
@@ -718,8 +683,8 @@ const CreateOpportunityPage = () => {
                       onChange={handleChange}
                       className={
                         errors.applicationDeadline
-                          ? "error"
-                          : ""
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 
