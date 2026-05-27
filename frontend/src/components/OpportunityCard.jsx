@@ -1,13 +1,30 @@
 import React from 'react';
 import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
-import {
-  formatOpportunityDate,
-  formatOpportunityTimeRange,
-  getSpotsRemaining,
-} from '../lib/utils';
 import './OpportunityCard.css';
 
 const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
+
+const formatDate = (dateValue) => {
+  if (!dateValue) return '';
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(dateValue));
+};
+
+const formatTime = (dateValue) => {
+  if (!dateValue) return '';
+
+  return new Intl.DateTimeFormat('en-MY', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+    .format(new Date(dateValue))
+    .toLowerCase();
+};
 
 const OpportunityCard = ({
   opportunity,
@@ -18,40 +35,52 @@ const OpportunityCard = ({
   status,
   showActionButtons,
   showStatus = true,
-  actions,
   onAction,
+  actions,
   variant = 'default',
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
   const statusClass = getStatusClass(displayStatus);
   const displayTitle = opportunity?.title || title;
-  const displayDetails = opportunity?.details || opportunity?.detail || detail;
+  const displayDetails = opportunity?.details || detail;
   const displayLocation = opportunity?.location;
-  const displayDate = opportunity?.startAt
-    ? formatOpportunityDate(opportunity.startAt)
-    : opportunity?.fixedDate || fixedDate;
+  
+  const displayDate = opportunity?.startAt 
+    ? formatDate(opportunity.startAt) 
+    : fixedDate;
+    
   const displayTime = opportunity?.startAt && opportunity?.endAt
-    ? formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt)
-    : opportunity?.timeFrame || timeFrame;
-  const displayCategory = opportunity?.category?.[0];
+    ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
+    : timeFrame;
+
   const displayOrganisationName = opportunity?.organisationId?.name;
-  const spotsRemaining =
-    isModelOpportunity && opportunity?.maxVolunteers !== undefined
-      ? getSpotsRemaining(opportunity)
-      : null;
-  const displayActions = actions || (showActionButtons ? ['view'] : []);
+  
+  const spotsRemaining = isModelOpportunity
+    ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
+    : null;
+    
+  const displayActions = actions || (showActionButtons ? ['view', 'edit'] : []);
 
   return (
     <div className={`event-card opportunity-card-${variant}`}>
-      {(showStatus || displayCategory) && (
-        <div className="event-card-header">
-          {showStatus && (
+      <div className="event-card-header">
+        {showStatus && (
+          <div className="header-left">
             <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-          )}
-          {displayCategory && <div className="event-category-tag">{displayCategory}</div>}
-        </div>
-      )}
+          </div>
+        )}
+        
+        {opportunity?.category && opportunity.category.length > 0 && (
+          <div className="header-right">
+            <div className="categories-container">
+              {opportunity.category.map((cat, index) => (
+                <div key={index} className="event-category-tag">{cat}</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       <h5>{displayTitle}</h5>
       <p>{displayDetails}</p>
@@ -87,26 +116,27 @@ const OpportunityCard = ({
                 {spotsRemaining} spots left
               </span>
             )}
+
+            {opportunity?.applicationDeadline && (
+              <span>
+                <CalendarDays size={16} /> 
+                Apply before {formatDate(opportunity.applicationDeadline)}
+              </span>
+            )}
           </>
         ) : (
           `${displayDate} - ${displayTime}`
         )}
       </div>
 
-      {opportunity?.applicationDeadline && (
-        <div className="event-deadline">
-          Apply before {formatOpportunityDate(opportunity.applicationDeadline)}
-        </div>
-      )}
-
       {displayActions.length > 0 && (
         <div className="item-actions">
           {displayActions.map((action) => (
-            <button
-              className={`action-btn ${action}`}
-              key={action}
-              type="button"
-              onClick={() => onAction?.(action, opportunity)}
+            <button 
+              className={`action-btn ${action}`} 
+              key={action} 
+              type="button" 
+              onClick={() => onAction && onAction(action, opportunity?._id || opportunity)}
             >
               {action}
             </button>
@@ -115,6 +145,6 @@ const OpportunityCard = ({
       )}
     </div>
   );
-}
+};
 
-export default OpportunityCard
+export default OpportunityCard;

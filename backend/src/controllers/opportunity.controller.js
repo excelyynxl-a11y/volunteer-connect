@@ -6,18 +6,7 @@ const validStatuses = ["active", "closed", "cancelled", "completed"];
 export const createOpportunity = async (req, res) => {
 
   try {
-    const {
-      title,
-      details,
-      location,
-      startAt,
-      endAt,
-      applicationDeadline,
-      maxVolunteers,
-      category = [],
-      requirements = "",
-      images = [],
-    } = req.body;
+    const { title, details, maxVolunteers, fixedDate, timeFrame, startAt, endAt, applicationDeadline, location, category } = req.body;
 
     if (req.user.role !== "organisation") {
       return res.status(403).json({
@@ -123,8 +112,10 @@ export const createOpportunity = async (req, res) => {
       applicationDeadline: parsedApplicationDeadline,
       maxVolunteers: parsedMaxVolunteers,
       category,
-      requirements: requirements.trim(),
+      requirements: requirements ? requirements.trim() : undefined,
       images,
+      fixedDate: parsedDate,
+      timeFrame: timeFrame ? timeFrame.trim() : undefined,
       organisationId: req.user._id,
     });
 
@@ -149,6 +140,7 @@ export const getAllOpportunities = async (req, res) => {
       .populate("organisationId", "name")
       .sort({ publishedAt: -1 });
 
+    const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
       count: opportunities.length,
@@ -199,19 +191,8 @@ export const updateOpportunity = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const {
-      title,
-      details,
-      location,
-      maxVolunteers,
-      startAt,
-      endAt,
-      applicationDeadline,
-      status,
-      category,
-      requirements,
-      images,
-    } = req.body;
+    const { title, details, maxVolunteers, fixedDate, timeFrame, status, category, location, startAt, endAt, applicationDeadline } = req.body;
+    const validStatuses = ["active", "closed", "cancelled", "completed"];
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -363,6 +344,9 @@ export const updateOpportunity = async (req, res) => {
 
     if (location !== undefined) {
       opportunity.location = location.trim();
+
+    if (category !== undefined) {
+      opportunity.category = category;
     }
 
     if (maxVolunteers !== undefined) {
@@ -383,10 +367,6 @@ export const updateOpportunity = async (req, res) => {
 
     if (status !== undefined) {
       opportunity.status = status;
-    }
-
-    if (category !== undefined) {
-      opportunity.category = category;
     }
 
     if (requirements !== undefined) {
@@ -440,6 +420,30 @@ export const deleteOpportunity = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in deleteOpportunity controller: ", err.message);
+    res.status(500).json({ 
+      message: err.message 
+    });
+  }
+};
+
+export const getOrganisationOpportunities = async (req, res) => {
+  try {
+    if (req.user.role !== "organisation") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Authorised for organisations only.",
+      });
+    }
+
+    const opportunities = await Opportunity.find({ organisationId: req.user._id });
+
+    res.status(200).json({
+      success: true,
+      count: opportunities.length,
+      data: opportunities,
+    });
+  } catch (err) {
+    console.log("Error in getOrganisationOpportunities controller: ", err.message);
     res.status(500).json({ 
       message: err.message 
     });

@@ -19,9 +19,11 @@ const OrganisationProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getActiveOpportunities(authUser?._id);
-    getClosedOpportunities(authUser?._id);
-    getCancelledOpportunities(authUser?._id);
+    if (authUser?._id) {
+      getActiveOpportunities(authUser._id);
+      getClosedOpportunities(authUser._id);
+      getCancelledOpportunities(authUser._id);
+    }
   }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
 
   return (
@@ -57,11 +59,14 @@ const OrganisationProfile = () => {
               </b>. Your community impact is growing.
             </p>
           </div>
-          <button className="org-profile-primary-btn"><Plus size={18} />
+          <button
+            className="org-profile-primary-btn"
+            onClick={() => navigate("/organisation-dashboard/create-opportunity")}
+          >
+            <Plus size={18} />
             Create New Posting
           </button>
         </section>
-
         <section className="org-profile-section">
           {/* Header Card with Edit Button */}
           <div className="org-profile-card org-profile-header-card">
@@ -106,75 +111,67 @@ const OrganisationProfile = () => {
           {/* Previous Events */}
           <div className="org-profile-card org-profile-events-card">
             <div className="org-profile-card-accent" />
-              <h4>
-                <b>
-                  Previous Events
-                </b>
-              </h4>
+            <h4><b>Previous Events</b></h4>
             <div className="org-profile-events-list">
               {closedOpportunities && closedOpportunities.length > 0 ? (
                 closedOpportunities.map((opp) => (
                   <OpportunityCard 
-                    key={opp._id || opp.title} // Always use keys in maps
-                    title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
-                    organisationId={opp.organisationId}
-                    status={opp.status}
+                    key={opp._id} 
+                    opportunity={opp}
                     showActionButtons={false}
                   />
                 ))
-              ) : (
-                <p className="org-profile-empty-text">No previous events listed.</p>
-              )}
+              ) : null}
+
               {cancelledOpportunities && cancelledOpportunities.length > 0 ? (
                 cancelledOpportunities.map((opp) => (
                   <OpportunityCard 
-                    key={opp._id || opp.title} // Always use keys in maps
-                    title={opp.title}
-                    detail={opp.detail}
-                    fixedDate={opp.fixedDate}
-                    timeFrame={opp.timeFrame}
-                    organisationId={opp.organisationId}
-                    status={opp.status}
+                    key={opp._id} 
+                    opportunity={opp}
                     showActionButtons={false}
                   />
                 ))
-              ) : (
-                <p className="org-profile-empty-text">
-                  No previous events listed.
-                </p>
+              ) : null}
+
+              {(!closedOpportunities?.length && !cancelledOpportunities?.length) && (
+                <p className="org-profile-empty-text">No previous or historical events found in the database.</p>
               )}
             </div>
           </div>
         </section>
-        
+
+
+        {/* Current Active events */}
         <div className="org-profile-postings-card">
           <div className="org-profile-card-header">
-            <h3>
-              Active Opportunity Postings
-            </h3>
-            <span className="org-profile-count-badge">{activeOpportunities.length} Published</span>
+            <h3>Active Opportunity Postings</h3>
+            <span className="org-profile-count-badge">
+              {activeOpportunities?.length || 0} Published
+            </span>
           </div>
 
           <div className="org-profile-opportunity-list">
-            {activeOpportunities.map((opp) => (
-              <OpportunityCard 
-                key={opp._id || opp.title} 
-                title={opp.title}
-                detail={opp.detail}
-                fixedDate={opp.fixedDate}
-                timeFrame={opp.timeFrame}
-                organisationId={opp.organisationId}
-                status={opp.status}
-                showActionButtons={true}
-              />
-            ))}
-            {activeOpportunities.length === 0 && <p className="org-profile-empty-text">No active postings found.</p>}
+            {activeOpportunities && activeOpportunities.length > 0 ? (
+              activeOpportunities.map((opp) => (
+                <OpportunityCard
+                  key={opp._id}
+                  opportunity={opp}
+                  actions={['view', 'edit']}
+                  onAction={(type, id) => {
+                    if (type === 'edit') {
+                      navigate(`/organisation-dashboard/edit-opportunity/${id}`);
+                    }
+                  }}
+                />
+              ))
+            ) : (
+              <p className="org-profile-empty-text">No active postings found. Click 'Create New Posting' above to publish one.</p>
+            )}
           </div>
 
-          <button className="org-profile-view-all-link">Manage all postings</button>
+          <button className="org-profile-view-all-link" onClick={() => navigate("/organisation-dashboard")}>
+        Manage all postings
+        </button>
         </div>
 
       </div>

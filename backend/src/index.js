@@ -50,7 +50,7 @@ app.use("/api/application", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/notification", notificationRoutes);
-app.use("/api/opportunity", opportunityRoutes);
+app.use("/api/opportunities", opportunityRoutes)
 app.use("/api/organisation", organisationRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/volunteer", volunteerRoutes);

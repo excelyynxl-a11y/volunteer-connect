@@ -9,6 +9,9 @@ import Login from "./pages/Auth/Login";
 import LoggingOut from "./pages/Auth/LoggingOut";
 import Pending from "./pages/Auth/Pending";
 import { Toaster } from "react-hot-toast";  
+import LoadingPage from "./pages/LoadingPage/LoadingPage";
+import { useAuthStore } from "./store/useAuthStore";
+import CreateOpportunityPage from "./pages/Organisation/CreateOpportunityPage";
 
 const App = () => {
   

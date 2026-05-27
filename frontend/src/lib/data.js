@@ -638,4 +638,17 @@ export const malaysiaStateCities = {
   ]
 };
 
+export const EVENT_CATEGORIES = [
+  "Environment",
+  "Education",
+  "Health",
+  "Community",
+  "Animal Welfare",
+  "Elderly Care",
+  "Disability Support",
+  "Event Support",
+  "Fundraising",
+  "Other",
+];
+
 export const malaysiaStates = Object.keys(malaysiaStateCities);
