@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-const CustomSelect = ({ value, placeholder, options, onChange }) => {
+const CustomSelect = ({
+  value,
+  placeholder,
+  options,
+  onChange,
+  className = "",
+  disabled = false,
+  emptyMessage = "No options available",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const normalizedOptions = options.map((option) =>
     typeof option === "string" ? { label: option, value: option } : option,
@@ -10,7 +18,14 @@ const CustomSelect = ({ value, placeholder, options, onChange }) => {
 
   return (
     <div
-      className={`custom-select${isOpen ? " open" : ""}`}
+      className={[
+        "custom-select",
+        isOpen ? "open" : "",
+        disabled ? "disabled" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
           setIsOpen(false);
@@ -21,6 +36,7 @@ const CustomSelect = ({ value, placeholder, options, onChange }) => {
         type="button"
         className={`custom-select-trigger${selectedOption ? "" : " placeholder"}`}
         aria-expanded={isOpen}
+        disabled={disabled}
         onClick={() => setIsOpen((currentValue) => !currentValue)}
       >
         <span>{selectedOption?.label || placeholder || "Select"}</span>
@@ -29,19 +45,23 @@ const CustomSelect = ({ value, placeholder, options, onChange }) => {
 
       {isOpen ? (
         <div className="custom-select-menu">
-          {normalizedOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={option.value === value ? "selected" : undefined}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
+          {normalizedOptions.length > 0 ? (
+            normalizedOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={option.value === value ? "selected" : undefined}
+                onClick={() => {
+                  onChange(option.value);
+                  setIsOpen(false);
+                }}
+              >
+                {option.label}
+              </button>
+            ))
+          ) : (
+            <span className="custom-select-empty">{emptyMessage}</span>
+          )}
         </div>
       ) : null}
     </div>

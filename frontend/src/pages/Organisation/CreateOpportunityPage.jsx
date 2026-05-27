@@ -18,6 +18,7 @@ import {
   malaysiaStateCities,
   EVENT_CATEGORIES
 } from "../../lib/data";
+import CustomSelect from "../../components/CustomSelect";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore.js";
 import toast from "react-hot-toast";
@@ -47,6 +48,9 @@ const CreateOpportunityPage = () => {
   const [errors, setErrors] = useState({});
 
   const selectedCities = malaysiaStateCities[selectedState] || [];
+  const availableCategories = EVENT_CATEGORIES.filter(
+    (category) => !selectedCategory.includes(category),
+  );
 
   const titleProgress = Math.min(
     (formData.title.length / 15) * 100,
@@ -75,9 +79,7 @@ const CreateOpportunityPage = () => {
     }
   };
 
-  const handleCategoryAdd = (e) => {
-    const value = e.target.value;
-
+  const handleCategoryAdd = (value) => {
     if (value && !selectedCategory.includes(value)) {
       setSelectedCategory([...selectedCategory, value]);
     }
@@ -89,7 +91,6 @@ const CreateOpportunityPage = () => {
       }));
     }
 
-    e.target.value = "";
   };
 
   const removeCategory = (catToRemove) => {
@@ -408,28 +409,18 @@ const CreateOpportunityPage = () => {
                       Categories
                     </label>
 
-                    <select
-                      onChange={handleCategoryAdd}
-                      className={
-                        errors.category
-                          ? "org-profile-select error"
-                          : "org-profile-select"
+                    <CustomSelect
+                      value=""
+                      placeholder={
+                        availableCategories.length > 0
+                          ? "Add Category"
+                          : "All categories selected"
                       }
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        Add Category
-                      </option>
-
-                      {EVENT_CATEGORIES.map((cat) => (
-                        <option
-                          key={cat}
-                          value={cat}
-                        >
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                      options={availableCategories}
+                      onChange={handleCategoryAdd}
+                      className={errors.category ? "error" : ""}
+                      disabled={availableCategories.length === 0}
+                    />
 
                     <div className="selected-category-tags">
                       {selectedCategory.map((cat) => (

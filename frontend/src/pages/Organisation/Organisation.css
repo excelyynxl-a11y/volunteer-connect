@@ -1581,6 +1581,119 @@
     margin-bottom: 5px;
 }
 
+.organisation-form-group .custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.organisation-form-group .custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid #ded5ca;
+    border-radius: 11px;
+    background: #ffffff;
+    color: #1f3f35;
+    font: inherit;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.organisation-form-group .custom-select-trigger span {
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.organisation-form-group .custom-select-trigger.placeholder {
+    color: #6b7280;
+}
+
+.organisation-form-group .custom-select-trigger:hover,
+.organisation-form-group .custom-select.open .custom-select-trigger {
+    border-color: #d9aa55;
+}
+
+.organisation-form-group .custom-select.open .custom-select-trigger {
+    box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
+}
+
+.organisation-form-group .custom-select.error .custom-select-trigger {
+    border-color: #c94f4f;
+}
+
+.organisation-form-group .custom-select.disabled .custom-select-trigger {
+    background: #f4f0ec;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.organisation-form-group .custom-select-trigger svg {
+    flex-shrink: 0;
+    color: #2c614f;
+    transition: transform 0.2s;
+}
+
+.organisation-form-group .custom-select.open .custom-select-trigger svg {
+    transform: rotate(180deg);
+}
+
+.organisation-form-group .custom-select-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    z-index: 30;
+    max-height: 230px;
+    padding: 8px;
+    overflow-y: auto;
+    border: 1px solid #ded5ca;
+    border-radius: 13px;
+    background: #ffffff;
+    box-shadow: 0 18px 36px rgba(44, 97, 79, 0.16);
+}
+
+.organisation-form-group .custom-select-menu button,
+.organisation-form-group .custom-select-empty {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #1f3f35;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+}
+
+.organisation-form-group .custom-select-menu button {
+    cursor: pointer;
+}
+
+.organisation-form-group .custom-select-menu button:hover,
+.organisation-form-group .custom-select-menu button.selected {
+    background: rgba(217, 170, 85, 0.12);
+    color: #2c614f;
+}
+
+.organisation-form-group .custom-select-empty {
+    color: #8a7d70;
+}
+
 .category-tag-badge {
     display: inline-flex;
     align-items: center;
