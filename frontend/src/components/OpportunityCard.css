@@ -6,6 +6,8 @@
 
 .event-card {
     position: relative;
+    display: flex;
+    flex-direction: column; /* Allows margin-top: auto to push buttons down */
     background: #fdf8ed;
     border: 1px solid #e9c48b;
     border-radius: 14px;
@@ -19,6 +21,27 @@
     box-shadow: 0 10px 22px rgba(212, 164, 86, 0.25);
 }
 
+.event-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
 .event-tag {
     display: inline-block;
     background: #2c5f4f;
@@ -28,9 +51,6 @@
     letter-spacing: 0.8px;
     padding: 4px 10px;
     border-radius: 999px;
-    margin-bottom: 10px;
-    top: 18px;
-    left: 18px;
 }
 
 .event-tag.status-active {
@@ -48,43 +68,12 @@
     color: #9f3f32;
 }
 
-.event-card h5 {
-    color: #1a3c34;
-    margin: 0 0 6px 0;
-    font-size: 18px;
-    font-weight: bold;
+.event-tag.status-completed {
+    background: #dcefd1;
+    color: #2c614f;
 }
 
-.event-card p {
-    color: #5c726d;
-    font-size: 15px;
-    margin: 0;
-    line-height: 1.5;
-}
-
-.item-sub {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 14px;
-    color: #5c726d;
-}
-
-.item-sub div {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    line-height: 1.4;
-}
-
-.item-sub strong, 
-.item-sub b {
-    color: #1a3c34;
-    font-weight: 700;
-    min-width: unset;
-    flex-shrink: 0;
-}
-
+/* Merged tag styles: Clean box style from team branch */
 .event-category-tag {
     display: inline-flex;
     align-items: center;
@@ -100,30 +89,62 @@
     white-space: nowrap;
 }
 
-.event-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
+.event-card h5 {
+    color: #1a3c34;
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-.header-right {
-    display: flex;
-    justify-content: flex-end;
+.event-card p {
+    color: #5c726d;
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.5;
 }
 
-.categories-container {
+.event-organisation {
+    display: block;
+    margin-top: 10px;
+    color: #1a3c34;
+    font-size: 15px;
+}
+
+/* Kept the stylish horizontal pill layout from HEAD */
+.item-sub {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+    color: #9a8268;
+    font-size: 14px;
+    line-height: 1.35;
 }
 
+.item-sub span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #f4ead4;
+    color: #1a3c34;
+    font-weight: 700;
+}
+
+.event-deadline {
+    margin-top: 16px;
+    color: #786f5f;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Team layout alignment with smooth modern action button variants */
 .item-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: auto;
+    margin-top: auto; /* Aligns buttons to bottom of card if content sizes vary */
     padding-top: 16px;
 }
 
@@ -139,6 +160,7 @@
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid transparent;
+    text-transform: capitalize;
 }
 
 .action-btn.view {

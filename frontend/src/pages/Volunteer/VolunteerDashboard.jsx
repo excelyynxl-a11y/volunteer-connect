@@ -5,13 +5,17 @@ import { useVolunteerStore } from "../../store/useVolunteerStore";
 import VolunteerHomepage from "./VolunteerHomepage";
 import VolunteerProfile from "./VolunteerProfile";
 import EditVolunteerProfile from "./EditVolunteerProfile";
+import VolunteerOpportunities from "./VolunteerOpportunities";
+import VolunteerReport from "./VolunteerReport";
 
 import "./Volunteer.css";
+import VolunteerApplication from "./VolunteerApplication";
 
 const VolunteerDashboard = () => {
   const { sidebarCollapsed } = useVolunteerStore();
   const location = useLocation();
   const flushPages = [
+    "/volunteer-dashboard",
     "/volunteer-dashboard/profile",
     "/volunteer-dashboard/edit-profile",
   ];
@@ -25,6 +29,9 @@ const VolunteerDashboard = () => {
       >
         <Routes>
           <Route path="/" element={<VolunteerHomepage />} />
+          <Route path="opportunities" element={<VolunteerOpportunities />} />
+          <Route path="applications" element={<VolunteerApplication />} />
+          <Route path="report" element={<VolunteerReport />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="edit-profile" element={<EditVolunteerProfile />} />
           <Route path="*" element={<Navigate to="/volunteer-dashboard" replace />} />

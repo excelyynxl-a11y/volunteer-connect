@@ -2,6 +2,8 @@ import React from 'react';
 import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
 import './OpportunityCard.css';
 
+const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
+
 const formatDate = (dateValue) => {
   if (!dateValue) return '';
 
@@ -24,19 +26,18 @@ const formatTime = (dateValue) => {
     .toLowerCase();
 };
 
-const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
-
 const OpportunityCard = ({
-    opportunity,
-    title,
-    detail,
-    fixedDate,
-    timeFrame,
-    status,
-    showActionButtons,
-    onAction,
-    actions,
-    variant = 'default',
+  opportunity,
+  title,
+  detail,
+  fixedDate,
+  timeFrame,
+  status,
+  showActionButtons,
+  showStatus = true,
+  onAction,
+  actions,
+  variant = 'default',
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
@@ -44,33 +45,41 @@ const OpportunityCard = ({
   const displayTitle = opportunity?.title || title;
   const displayDetails = opportunity?.details || detail;
   const displayLocation = opportunity?.location;
-  const displayDate = opportunity?.startAt ? formatDate(opportunity.startAt) : fixedDate;
+  
+  const displayDate = opportunity?.startAt 
+    ? formatDate(opportunity.startAt) 
+    : fixedDate;
+    
   const displayTime = opportunity?.startAt && opportunity?.endAt
     ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
     : timeFrame;
-  // const displayCategory = opportunity?.category?.[0];
+
   const displayOrganisationName = opportunity?.organisationId?.name;
+  
   const spotsRemaining = isModelOpportunity
     ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
     : null;
+    
   const displayActions = actions || (showActionButtons ? ['view', 'edit'] : []);
 
   return (
     <div className={`event-card opportunity-card-${variant}`}>
       <div className="event-card-header">
-        <div className="header-left">
+        {showStatus && (
+          <div className="header-left">
             <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-        </div>
+          </div>
+        )}
         
         {opportunity?.category && opportunity.category.length > 0 && (
-            <div className="header-right">
-                <div className="categories-container">
-                    {opportunity.category.map((cat, index) => (
-                        <div key={index} className="event-category-tag">{cat}</div>
-                    ))}
-                </div>
+          <div className="header-right">
+            <div className="categories-container">
+              {opportunity.category.map((cat, index) => (
+                <div key={index} className="event-category-tag">{cat}</div>
+              ))}
             </div>
-          )}
+          </div>
+        )}
       </div>
 
       <h5>{displayTitle}</h5>
@@ -123,7 +132,12 @@ const OpportunityCard = ({
       {displayActions.length > 0 && (
         <div className="item-actions">
           {displayActions.map((action) => (
-            <button className={`action-btn ${action}`} key={action} type="button" onClick={() => onAction && onAction(action, opportunity?._id)}>
+            <button 
+              className={`action-btn ${action}`} 
+              key={action} 
+              type="button" 
+              onClick={() => onAction && onAction(action, opportunity?._id || opportunity)}
+            >
               {action}
             </button>
           ))}
@@ -131,6 +145,6 @@ const OpportunityCard = ({
       )}
     </div>
   );
-}
+};
 
-export default OpportunityCard
+export default OpportunityCard;

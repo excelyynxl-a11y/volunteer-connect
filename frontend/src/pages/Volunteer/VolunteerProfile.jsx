@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import VolunteerHoursCard from '../../components/VolunteerHoursCard'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
-import { formatApprovalStatus, getInitials } from '../../lib/utils'
+import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -25,12 +25,12 @@ const VolunteerProfile = () => {
     totalVolunteerHours,
     isLoading,
     loadError,
-    getVolunteerPastOpportunity,
+    getVolunteerPastExperience,
   } = useVolunteerStore()
 
   useEffect(() => {
-    getVolunteerPastOpportunity(volunteerId)
-  }, [getVolunteerPastOpportunity, volunteerId])
+    getVolunteerPastExperience(volunteerId)
+  }, [getVolunteerPastExperience, volunteerId])
 
   // Derived display values
   const volunteerInitials = useMemo(
@@ -42,11 +42,12 @@ const VolunteerProfile = () => {
     [authUser?.approvalStatus]
   )
   const profileSummary = authUser?.biodata || 'No profile summary provided yet.'
+  const avatarSrc = authUser?.avatar || ''
 
   const displaySkills = Array.isArray(authUser?.skills) ? authUser.skills : []
 
   const displayAvailabilitySlots = Array.isArray(authUser?.availability)
-    ? authUser.availability
+    ? sortAvailabilitySlots(authUser.availability)
     : []
 
   // Main profile layout
@@ -57,7 +58,13 @@ const VolunteerProfile = () => {
 
         {/* Profile hero section */}
         <section className="profile-hero">
-          <div className="profile-avatar-large">{volunteerInitials}</div>
+          <div className="profile-avatar-large">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt={`${authUser?.name || 'Volunteer'} avatar`} />
+            ) : (
+              volunteerInitials
+            )}
+          </div>
 
           <div className="profile-hero-text">
             <p>PUBLIC VOLUNTEER PROFILE</p>

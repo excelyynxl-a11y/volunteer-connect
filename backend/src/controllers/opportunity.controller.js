@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/opportunity.model.js";
 
-// TODO: update createOpportunity() after verifying with client what are required in createOpportunity
+const validStatuses = ["active", "closed", "cancelled", "completed"];
+
 export const createOpportunity = async (req, res) => {
 
   try {
@@ -30,7 +31,13 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
-    // maxVolunteer cannot be empty
+    if (!location || location.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Location is required",
+      });
+    }
+
     if (maxVolunteers === undefined || maxVolunteers === null) {
       return res.status(400).json({
         success: false,
@@ -38,11 +45,10 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
-    // maxVolunteer must a positive number
+    const parsedMaxVolunteers = Number(maxVolunteers);
     if (
-      typeof maxVolunteers !== "number" ||
-      maxVolunteers < 1 ||
-      !Number.isInteger(maxVolunteers)
+      !Number.isInteger(parsedMaxVolunteers) ||
+      parsedMaxVolunteers < 1
     ) {
       return res.status(400).json({
         success: false,
@@ -50,56 +56,68 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
-    // fixedDate cannot be empty
-    if (!fixedDate) {
+    if (!startAt || !endAt || !applicationDeadline) {
       return res.status(400).json({
         success: false,
-        message: "Fixed date is required",
+        message: "Start time, end time, and application deadline are required",
       });
     }
 
-    // fixedDate must be valid date format
-    const parsedDate = new Date(fixedDate);
-    if (isNaN(parsedDate.getTime())) {
+    const parsedStartAt = new Date(startAt);
+    const parsedEndAt = new Date(endAt);
+    const parsedApplicationDeadline = new Date(applicationDeadline);
+
+    if (
+      isNaN(parsedStartAt.getTime()) ||
+      isNaN(parsedEndAt.getTime()) ||
+      isNaN(parsedApplicationDeadline.getTime())
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Invalid fixed date format",
+        message: "Invalid opportunity date format",
       });
     }
 
-    // fixedDate cannot be before today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const fixedDateOnly = new Date(parsedDate);
-    fixedDateOnly.setHours(0, 0, 0, 0);
-    if (fixedDateOnly < today) {
+    const startDateOnly = new Date(parsedStartAt);
+    startDateOnly.setHours(0, 0, 0, 0);
+    if (startDateOnly < today) {
       return res.status(400).json({
         success: false,
-        message: "Fixed date cannot be before today",
+        message: "Start date cannot be before today",
       });
     }
 
-    // timeFrame cannot empty
-    if (!timeFrame || timeFrame.trim() === "") {
+    if (parsedEndAt <= parsedStartAt) {
       return res.status(400).json({
         success: false,
-        message: "Time frame is required",
+        message: "End time must be after start time",
+      });
+    }
+
+    if (parsedApplicationDeadline >= parsedStartAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Application deadline must be before start time",
       });
     }
 
     const newOpportunity = new Opportunity({
-  title: title.trim(),
-  details: details.trim(),
-  maxVolunteers,
-  fixedDate: parsedDate,
-  timeFrame: timeFrame.trim(),
-  organisationId: req.user._id,
-  startAt,
-  endAt,
-  applicationDeadline,
-  location,
-  category
-});
+      title: title.trim(),
+      details: details.trim(),
+      location: location.trim(),
+      startAt: parsedStartAt,
+      endAt: parsedEndAt,
+      applicationDeadline: parsedApplicationDeadline,
+      maxVolunteers: parsedMaxVolunteers,
+      category,
+      requirements: requirements ? requirements.trim() : undefined,
+      images,
+      fixedDate: parsedDate,
+      timeFrame: timeFrame ? timeFrame.trim() : undefined,
+      organisationId: req.user._id,
+    });
 
     await newOpportunity.save();
 
@@ -118,6 +136,10 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
+    const opportunities = await Opportunity.find()
+      .populate("organisationId", "name")
+      .sort({ publishedAt: -1 });
+
     const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
@@ -143,7 +165,8 @@ export const getOpportunityById = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id);
+    const opportunity = await Opportunity.findById(id)
+      .populate("organisationId", "name");
 
     if (!opportunity) {
       return res.status(404).json({
@@ -164,7 +187,6 @@ export const getOpportunityById = async (req, res) => {
   }
 };
 
-// TODO: update createOpportunity() after verifying with client what are required in createOpportunity
 export const updateOpportunity = async (req, res) => {
 
   try {
@@ -182,10 +204,15 @@ export const updateOpportunity = async (req, res) => {
     if (
       title === undefined &&
       details === undefined &&
+      location === undefined &&
       maxVolunteers === undefined &&
-      fixedDate === undefined &&
-      timeFrame === undefined &&
-      status === undefined
+      startAt === undefined &&
+      endAt === undefined &&
+      applicationDeadline === undefined &&
+      status === undefined &&
+      category === undefined &&
+      requirements === undefined &&
+      images === undefined
     ) {
       return res.status(400).json({
         success: false,
@@ -209,17 +236,22 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
-    // maxVolunteers cannot be empty, must be an integer
+    if (location !== undefined && location.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Location cannot be empty",
+      });
+    }
+
     if (maxVolunteers !== undefined) {
-      if (typeof maxVolunteers !== "number" || !Number.isInteger(maxVolunteers)) {
+      const parsedMaxVolunteers = Number(maxVolunteers);
+      if (!Number.isInteger(parsedMaxVolunteers)) {
         return res.status(400).json({
           success: false,
-          message: "Max volunteers must be a integer number",
+          message: "Max volunteers must be an integer number",
         });
       }
-      if (
-        maxVolunteers < 1
-      ) {
+      if (parsedMaxVolunteers < 1) {
         return res.status(400).json({
           success: false,
           message: "Max volunteers must be a positive integer",
@@ -227,42 +259,39 @@ export const updateOpportunity = async (req, res) => {
       }
     }
 
-    // fixedDate cannot be empty, must be of valid date format
-    if (fixedDate !== undefined) {
-      const parsedDate = new Date(fixedDate);
-      if (isNaN(parsedDate.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid fixed date format",
-        });
-      }
+    const parsedStartAt = startAt !== undefined ? new Date(startAt) : undefined;
+    const parsedEndAt = endAt !== undefined ? new Date(endAt) : undefined;
+    const parsedApplicationDeadline =
+      applicationDeadline !== undefined ? new Date(applicationDeadline) : undefined;
 
-      // fixedDate cannot be before today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const fixedDateOnly = new Date(parsedDate);
-      fixedDateOnly.setHours(0, 0, 0, 0);
-      if (fixedDateOnly < today) {
-        return res.status(400).json({
-          success: false,
-          message: "Fixed date cannot be before today",
-        });
-      }
-    }
-
-    // timeFrame cannot be empty
-    if (timeFrame !== undefined && timeFrame.trim() === "") {
+    if (
+      (parsedStartAt && isNaN(parsedStartAt.getTime())) ||
+      (parsedEndAt && isNaN(parsedEndAt.getTime())) ||
+      (parsedApplicationDeadline && isNaN(parsedApplicationDeadline.getTime()))
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Time frame cannot be empty",
+        message: "Invalid opportunity date format",
       });
     }
 
-    // status cannot be empty, must be of either [active, closed, cancelled]
+    if (parsedStartAt) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDateOnly = new Date(parsedStartAt);
+      startDateOnly.setHours(0, 0, 0, 0);
+      if (startDateOnly < today) {
+        return res.status(400).json({
+          success: false,
+          message: "Start date cannot be before today",
+        });
+      }
+    }
+
     if (status !== undefined && !validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Status must be one of: Active, Closed, Cancelled",
+        message: "Status must be one of: active, closed, cancelled, completed",
       });
     }
 
@@ -272,6 +301,25 @@ export const updateOpportunity = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Opportunity not found",
+      });
+    }
+
+    const nextStartAt = parsedStartAt ?? opportunity.startAt;
+    const nextEndAt = parsedEndAt ?? opportunity.endAt;
+    const nextApplicationDeadline =
+      parsedApplicationDeadline ?? opportunity.applicationDeadline;
+
+    if (nextEndAt <= nextStartAt) {
+      return res.status(400).json({
+        success: false,
+        message: "End time must be after start time",
+      });
+    }
+
+    if (nextApplicationDeadline >= nextStartAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Application deadline must be before start time",
       });
     }
 
@@ -294,40 +342,39 @@ export const updateOpportunity = async (req, res) => {
       opportunity.details = details.trim();
     }
 
+    if (location !== undefined) {
+      opportunity.location = location.trim();
+
     if (category !== undefined) {
       opportunity.category = category;
     }
 
-    if (location !== undefined) {
-      opportunity.location = location;
-    }
-
     if (maxVolunteers !== undefined) {
-      opportunity.maxVolunteers = maxVolunteers;
+      opportunity.maxVolunteers = Number(maxVolunteers);
     }
 
-    if (fixedDate !== undefined) {
-      opportunity.fixedDate = new Date(fixedDate);
+    if (startAt !== undefined) {
+      opportunity.startAt = parsedStartAt;
     }
 
-    if (timeFrame !== undefined) {
-      opportunity.timeFrame = timeFrame.trim();
+    if (endAt !== undefined) {
+      opportunity.endAt = parsedEndAt;
+    }
+
+    if (applicationDeadline !== undefined) {
+      opportunity.applicationDeadline = parsedApplicationDeadline;
     }
 
     if (status !== undefined) {
       opportunity.status = status;
     }
 
-    if (startAt !== undefined) {
-      opportunity.startAt = new Date(startAt);
+    if (requirements !== undefined) {
+      opportunity.requirements = requirements.trim();
     }
 
-    if (endAt !== undefined) {
-      opportunity.endAt = new Date(endAt);
-    }
-
-    if (applicationDeadline !== undefined) {
-      opportunity.applicationDeadline = new Date(applicationDeadline);
+    if (images !== undefined) {
+      opportunity.images = images;
     }
 
     await opportunity.save();

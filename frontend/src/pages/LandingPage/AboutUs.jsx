@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react'
 import { aboutUsCards } from '../../lib/data'
 import AboutUsCard from '../../components/AboutUsCard'
-import './AboutUs.css'
+import './LandingPage.css'
 
 const AboutUs = () => {
   const cardRefs = useRef([])
+  const bannerRef = useRef(null)
 
   // subtle fade-in effect
   useEffect(() => {
@@ -24,6 +25,8 @@ const AboutUs = () => {
       if (el) observer.observe(el)
     })
 
+    if (bannerRef.current) observer.observe(bannerRef.current)
+
     return () => observer.disconnect()
   }, [])
 
@@ -35,6 +38,10 @@ const AboutUs = () => {
           VolunteerConnect is built on a foundation of three core pillars
           that guide everything we do.
         </h2>
+      </div>
+
+      <div ref={bannerRef} className="about-banner animate-in">
+        <img src="/vc1.png" alt="Community working together" loading="lazy" />
       </div>
 
       <div className="about-grid">

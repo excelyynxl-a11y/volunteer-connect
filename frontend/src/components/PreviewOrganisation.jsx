@@ -2,7 +2,10 @@ import React from "react";
 import { X, CheckCircle, XCircle } from "lucide-react";
 import { useAdminStore } from "../store/useAdminStore";
 
-const PreviewOrganisation = ({ organisation, onClose }) => {
+const PreviewOrganisation = ({ 
+  organisation, 
+  onClose 
+}) => {
   const { approveUserAccount, rejectUserAccount } = useAdminStore();
 
   const statusClass =
@@ -19,13 +22,35 @@ const PreviewOrganisation = ({ organisation, onClose }) => {
       year: "numeric",
     });
 
+  const initials = organisation.name
+    ? organisation.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
       <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Organisation header */}
         <div className="admin-modal-header">
-          {/* organisation name */}
-          <h2>{organisation.name}</h2>
+          <div className="admin-modal-header-main">
+            {/* organisation avatar */}
+            <div className="admin-organisation-card-avatar">
+              {organisation.avatar ? (
+                <img src={organisation.avatar} alt={`${organisation.name} avatar`} />
+              ) : (
+                <span className="admin-organisation-card-initials">{initials}</span>
+              )}
+            </div>
+
+            {/* organisation name */}
+            <h2>
+              {organisation.name}
+            </h2>
+          </div>
 
           {/* close button */}
           <button className="admin-modal-close" onClick={onClose}>
@@ -73,7 +98,7 @@ const PreviewOrganisation = ({ organisation, onClose }) => {
           <button
             className="admin-modal-approve-btn"
             disabled={organisation.approvalStatus === "approved"}
-            onClick={approveUserAccount(organisation._id)}
+            onClick={() => approveUserAccount(organisation._id, onClose)}
           >
             <CheckCircle size={16} />
             Approve
@@ -81,7 +106,7 @@ const PreviewOrganisation = ({ organisation, onClose }) => {
           <button
             className="admin-modal-reject-btn"
             disabled={organisation.approvalStatus === "rejected"}
-            onClick={rejectUserAccount(organisation._id)}
+            onClick={() => rejectUserAccount(organisation._id, onClose)}
           >
             <XCircle size={16} />
             Reject

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown,
+  AlertCircle,
+  Camera,
   Clock,
   Plus,
   User,
   X,
 } from 'lucide-react'
+import CustomSelect from '../../components/CustomSelect'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
 import {
   volunteerAgeGroupOptions,
@@ -15,7 +17,7 @@ import {
   volunteerAvailabilityTimes,
   volunteerSkillOptions,
 } from '../../lib/data'
-import { formatApprovalStatus } from '../../lib/utils'
+import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -55,7 +57,10 @@ const EditVolunteerProfile = () => {
   const [selectedSkill, setSelectedSkill] = useState('')
   const [otherSkill, setOtherSkill] = useState('')
   const [skillList, setSkillList] = useState([])
-  const [saveError, setSaveError] = useState('')
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState('')
+  const avatarPreviewUrlRef = useRef('')
+  const [errors, setErrors] = useState({})
 
   // Sync authenticated profile data into editable form state
   useEffect(() => {
@@ -77,7 +82,9 @@ const EditVolunteerProfile = () => {
       setSkillList(Array.isArray(authUser?.skills) ? authUser.skills : [])
 
       setAvailabilitySlots(
-        Array.isArray(authUser?.availability) ? authUser.availability : []
+        Array.isArray(authUser?.availability)
+          ? sortAvailabilitySlots(authUser.availability)
+          : []
       )
     })
 
@@ -86,6 +93,12 @@ const EditVolunteerProfile = () => {
     }
   }, [authUser])
 
+  useEffect(() => () => {
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+    }
+  }, [])
+
   // Form field handlers
   const handleEditableProfileChange = (event) => {
     const { name, value } = event.target
@@ -93,7 +106,37 @@ const EditVolunteerProfile = () => {
       ...currentProfile,
       [name]: value,
     }))
-    setSaveError('')
+    setErrors((prev) => {
+      if (!prev[name]) return prev
+      const next = { ...prev }
+      delete next[name]
+      return next
+    })
+  }
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0] || null
+
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+      avatarPreviewUrlRef.current = ''
+    }
+
+    if (file) {
+      const previewUrl = URL.createObjectURL(file)
+      avatarPreviewUrlRef.current = previewUrl
+      setAvatarPreviewUrl(previewUrl)
+    } else {
+      setAvatarPreviewUrl('')
+    }
+
+    setSelectedAvatarFile(file)
+    setErrors((prev) => {
+      if (!prev.avatar) return prev
+      const next = { ...prev }
+      delete next.avatar
+      return next
+    })
   }
 
   // Availability handlers
@@ -109,11 +152,12 @@ const EditVolunteerProfile = () => {
     const { dayOfWeek, startTime, endTime, preference } = availability
 
     if (!dayOfWeek || !startTime || !endTime) {
+      setErrors((prev) => ({ ...prev, availability: 'Please fill in all availability fields.' }))
       return
     }
-    
+
     if (startTime >= endTime) {
-      setSaveError("End time must be later than start time.");
+      setErrors((prev) => ({ ...prev, availability: 'End time must be later than start time.' }))
       return
     }
 
@@ -125,11 +169,13 @@ const EditVolunteerProfile = () => {
     }
 
     if (availabilitySlots.some((slot) => isSameAvailabilitySlot(slot, newSlot))) {
-      setSaveError('This availability time range has already been added.')
+      setErrors((prev) => ({ ...prev, availability: 'This availability time range has already been added.' }))
       return
     }
 
-    setAvailabilitySlots((currentSlots) => [...currentSlots, newSlot])
+    setAvailabilitySlots((currentSlots) =>
+      sortAvailabilitySlots([...currentSlots, newSlot])
+    )
 
     setAvailability({
       dayOfWeek: '',
@@ -138,42 +184,75 @@ const EditVolunteerProfile = () => {
       preference: 'available',
     })
 
-    setSaveError('')
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.availability
+      return next
+    })
   }
 
   // Skills handlers
   const addSkill = () => {
     const skillToAdd = selectedSkill === 'Others' ? otherSkill.trim() : selectedSkill
 
-    if (!skillToAdd || skillList.includes(skillToAdd)) {
-      if (skillToAdd && skillList.includes(skillToAdd)) {
-        setSaveError('This skill has already been added.')
-      }
+    if (!skillToAdd) {
+      setErrors((prev) => ({ ...prev, skills: 'Please select or enter a skill.' }))
+      return
+    }
+
+    if (skillList.includes(skillToAdd)) {
+      setErrors((prev) => ({ ...prev, skills: 'This skill has already been added.' }))
       return
     }
 
     setSkillList((currentSkills) => [...currentSkills, skillToAdd])
     setSelectedSkill('')
     setOtherSkill('')
-    setSaveError('')
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.skills
+      return next
+    })
   }
 
   const removeSkill = (skillToRemove) => {
     setSkillList((currentSkills) => currentSkills.filter((skill) => skill !== skillToRemove))
-    setSaveError('')
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.skills
+      return next
+    })
   }
 
   const removeAvailability = (slotIndexToRemove) => {
     setAvailabilitySlots((currentSlots) =>
       currentSlots.filter((_, index) => index !== slotIndexToRemove)
     )
-    setSaveError('')
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next.availability
+      return next
+    })
   }
 
   // Profile save handler
   const handleSubmit = async (event) => {
     event.preventDefault()
-    setSaveError('')
+
+    const validationErrors = {}
+    if (!editableProfile.name.trim()) {
+      validationErrors.name = 'Full name is required.'
+    }
+    if (!editableProfile.ageGroup) {
+      validationErrors.ageGroup = 'Age group is required.'
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    setErrors({})
 
     const result = await updateVolunteerProfile(volunteerId, {
       fullName: editableProfile.name,
@@ -181,10 +260,11 @@ const EditVolunteerProfile = () => {
       biodata: editableProfile.biodata,
       skills: skillList,
       availability: availabilitySlots,
+      avatar: selectedAvatarFile,
     })
 
     if (!result.success) {
-      setSaveError(result.error || 'Failed to save profile details.')
+      setErrors({ submit: result.error || 'Failed to save profile details.' })
       return
     }
 
@@ -199,10 +279,26 @@ const EditVolunteerProfile = () => {
     }))
     setSkillList(Array.isArray(updatedProfile.skills) ? updatedProfile.skills : skillList)
     setAvailabilitySlots(
-      Array.isArray(updatedProfile.availability) ? updatedProfile.availability : availabilitySlots
+      Array.isArray(updatedProfile.availability)
+        ? sortAvailabilitySlots(updatedProfile.availability)
+        : availabilitySlots
     )
+    if (avatarPreviewUrlRef.current) {
+      URL.revokeObjectURL(avatarPreviewUrlRef.current)
+      avatarPreviewUrlRef.current = ''
+    }
+    setSelectedAvatarFile(null)
+    setAvatarPreviewUrl('')
     navigate('/volunteer-dashboard/profile')
   }
+
+  const avatarSrc = avatarPreviewUrl || authUser?.avatar || ''
+  const avatarLabel = selectedAvatarFile?.name || 'PNG, JPG, or JPEG up to 5MB'
+  const avatarStatusText = selectedAvatarFile
+    ? 'New photo selected'
+    : authUser?.avatar
+      ? 'Current profile photo'
+      : 'No profile photo yet'
 
   // Main edit profile layout
   return (
@@ -235,9 +331,43 @@ const EditVolunteerProfile = () => {
             </div>
           </div>
 
-          {saveError ? <p>{saveError}</p> : null}
+          {errors.submit ? (
+            <p className="edit-profile-error">
+              <AlertCircle className="edit-profile-error-icon" />
+              {errors.submit}
+            </p>
+          ) : null}
+
           {/* Profile details fields */}
           <div className="profile-form-grid">
+            <div className="edit-profile-avatar-field">
+              <div className="edit-profile-avatar-preview">
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="Volunteer avatar preview" />
+                ) : (
+                  getInitials(editableProfile.name || authUser?.name)
+                )}
+              </div>
+
+              <div className="edit-profile-avatar-copy">
+                <span>Profile Photo</span>
+                <strong>{avatarStatusText}</strong>
+                <p>{avatarLabel}</p>
+              </div>
+
+              <input
+                id="volunteer-avatar-upload"
+                className="edit-profile-avatar-input"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                onChange={handleAvatarChange}
+              />
+              <label className="edit-profile-avatar-button" htmlFor="volunteer-avatar-upload">
+                <Camera size={16} />
+                Change Photo
+              </label>
+            </div>
+
             <label className="edit-profile-field">
               <span>Full Name</span>
               <input
@@ -245,7 +375,14 @@ const EditVolunteerProfile = () => {
                 type="text"
                 value={editableProfile.name}
                 onChange={handleEditableProfileChange}
+                className={errors.name ? 'error' : ''}
               />
+              {errors.name && (
+                <p className="edit-profile-field-error">
+                  <AlertCircle className="edit-profile-error-icon" />
+                  {errors.name}
+                </p>
+              )}
             </label>
 
             <label className="edit-profile-field">
@@ -269,6 +406,12 @@ const EditVolunteerProfile = () => {
                   target: { name: 'ageGroup', value },
                 })}
               />
+              {errors.ageGroup && (
+                <p className="edit-profile-field-error">
+                  <AlertCircle className="edit-profile-error-icon" />
+                  {errors.ageGroup}
+                </p>
+              )}
             </label>
 
             {/* Skills section */}
@@ -297,6 +440,13 @@ const EditVolunteerProfile = () => {
                   placeholder="Type your other skill"
                 />
               ) : null}
+
+              {errors.skills && (
+                <p className="edit-profile-field-error">
+                  <AlertCircle className="edit-profile-error-icon" />
+                  {errors.skills}
+                </p>
+              )}
 
               {skillList.length > 0 ? (
                 <ul className="skill-list" aria-label="Added skills">
@@ -377,12 +527,19 @@ const EditVolunteerProfile = () => {
                   target: { name: 'preference', value },
                 })}
               />
-              
+
               <button className="add-slot-button" type="button" onClick={addAvailability}>
                 <Plus size={18} />
                 Add
               </button>
             </div>
+
+            {errors.availability && (
+              <p className="edit-profile-field-error">
+                <AlertCircle className="edit-profile-error-icon" />
+                {errors.availability}
+              </p>
+            )}
 
             {availabilitySlots.length > 0 ? (
               <ul className="slot-list" aria-label="Added availability">
@@ -410,53 +567,6 @@ const EditVolunteerProfile = () => {
 
         </form>
       </div>
-    </div>
-  )
-}
-
-function CustomSelect({ value, placeholder, options, onChange }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const normalizedOptions = options.map((option) => (
-    typeof option === 'string' ? { label: option, value: option } : option
-  ))
-  const selectedOption = normalizedOptions.find((option) => option.value === value)
-
-  return (
-    <div
-      className={`custom-select${isOpen ? ' open' : ''}`}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setIsOpen(false)
-        }
-      }}
-    >
-      <button
-        type="button"
-        className={`custom-select-trigger${selectedOption ? '' : ' placeholder'}`}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((currentValue) => !currentValue)}
-      >
-        <span>{selectedOption?.label || placeholder || 'Select'}</span>
-        <ChevronDown size={18} />
-      </button>
-
-      {isOpen ? (
-        <div className="custom-select-menu">
-          {normalizedOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={option.value === value ? 'selected' : undefined}
-              onClick={() => {
-                onChange(option.value)
-                setIsOpen(false)
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

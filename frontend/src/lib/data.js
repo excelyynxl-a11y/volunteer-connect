@@ -54,21 +54,25 @@ export const howItWorkSteps = [
     step: '1',
     title: 'Create Your Profile',
     text: 'Sign up as a volunteer or organization. Set your availability, skills, and interests to get personalized matches.',
+    image: '/vc7.png',
   },
   {
     step: '2',
     title: 'Discover Opportunities',
     text: 'Browse curated volunteer postings from verified non-profits filtered by cause, location, and time commitment.',
+    image: '/vc5.png',
   },
   {
     step: '3',
     title: 'Apply & Get Approved',
     text: 'Submit your application in seconds. Organizations review and approve through our dual-approval workflow.',
+    image: '/vc6.png',
   },
   {
     step: '4',
     title: 'Track Your Impact',
     text: 'Log hours, earn recognition, and build a verified volunteering history you can share with the world.',
+    image: '/vc3.png',
   },
 ]
 
@@ -88,6 +92,24 @@ export const volunteerAvailabilityDays = [
   'Friday',
   'Saturday',
   'Sunday',
+]
+
+export const defaultAvailabilityPreview = [
+  { dayOfWeek: 'Monday', startTime: '08:00', endTime: '19:00' },
+  { dayOfWeek: 'Wednesday', startTime: '10:00', endTime: '18:00' },
+]
+
+export const opportunityCategories = [
+  'Environment',
+  'Education',
+  'Health',
+  'Community',
+  'Animal Welfare',
+  'Elderly Care',
+  'Disability Support',
+  'Event Support',
+  'Fundraising',
+  'Other',
 ]
 
 export const volunteerAvailabilityTimes = [

@@ -1,3 +1,4 @@
+import cloudinary from "../lib/cloudinary.js";
 import { Admin, User } from "../models/user.model.js";
 
 export const approveUserAccount = async (req, res) => {
@@ -58,7 +59,6 @@ export const rejectUserAccount = async (req, res) => {
   }
 };
 
-// TODO: test updateAdminProfile on Postman after uploadAvatar is available in multer.middleware.js
 export const updateAdminProfile = async (req, res) => {
   try {
     const { name } = req.body;
@@ -84,6 +84,8 @@ export const updateAdminProfile = async (req, res) => {
         message: "Only admin can update their profile",
       });
     }
+
+    admin.name = name.trim();
 
     // upload avatar to Cloudinary if a file was provided
     if (req.file) {
@@ -114,7 +116,7 @@ export const updateAdminProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Admin profile updated successfully",
-      data: updatedOrg,
+      data: updatedAdmin,
     });
 
   } catch (err) {

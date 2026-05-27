@@ -1,6 +1,7 @@
 import { Volunteer } from "../models/user.model.js";
 import Application from "../models/application.model.js";
 import mongoose from "mongoose";
+import cloudinary from "../lib/cloudinary.js";
 
 const validAgeGroups = ["21-30", "31-40", "41-50", "51-60", "60+"];
 
@@ -17,6 +18,11 @@ const validDays = [
 const validAvailabilityPreferences = ["available", "preferred"];
 
 const time24HourRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+const getMinutesFromTime = (timeValue) => {
+  const [hours, minutes] = timeValue.split(":").map(Number);
+  return hours * 60 + minutes;
+};
 
 const normalizeSkills = (skills) => {
   return [
@@ -38,16 +44,66 @@ const normalizeAvailability = (availability) => {
 };
 
 const isValidAvailabilitySlot = (slot) => {
+  if (
+    !(
+      slot &&
+      validDays.includes(slot.dayOfWeek) &&
+      typeof slot.startTime === "string" &&
+      typeof slot.endTime === "string" &&
+      time24HourRegex.test(slot.startTime.trim()) &&
+      time24HourRegex.test(slot.endTime.trim()) &&
+      validAvailabilityPreferences.includes(slot.preference || "available")
+    )
+  ) {
+    return false;
+  }
+
   return (
-    slot &&
-    validDays.includes(slot.dayOfWeek) &&
-    typeof slot.startTime === "string" &&
-    typeof slot.endTime === "string" &&
-    time24HourRegex.test(slot.startTime.trim()) &&
-    time24HourRegex.test(slot.endTime.trim()) &&
-    slot.startTime.trim() !== slot.endTime.trim() &&
-    validAvailabilityPreferences.includes(slot.preference || "available")
+    getMinutesFromTime(slot.startTime.trim()) <
+    getMinutesFromTime(slot.endTime.trim())
   );
+};
+
+const parseArrayField = (fieldValue) => {
+  if (fieldValue === undefined) {
+    return undefined;
+  }
+
+  if (Array.isArray(fieldValue)) {
+    return fieldValue;
+  }
+
+  if (typeof fieldValue === "string") {
+    try {
+      return JSON.parse(fieldValue);
+    } catch {
+      return fieldValue;
+    }
+  }
+
+  return fieldValue;
+};
+
+const uploadAvatarToCloudinary = async (fileBuffer) => {
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "avatars",
+        resource_type: "image",
+        public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      },
+    );
+    stream.end(fileBuffer);
+  });
+
+  return result.secure_url;
 };
 
 // Get all volunteers (Admin only)
@@ -106,6 +162,8 @@ export const updateVolunteerProfile = async (req, res) => {
   try {
     const { id } = req.params;
     const { fullName, ageGroup, biodata, skills, availability } = req.body;
+    const parsedSkills = parseArrayField(skills);
+    const parsedAvailability = parseArrayField(availability);
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -114,12 +172,20 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
+    if (req.user.role !== "volunteer" || String(req.user._id) !== id) {
+      return res.status(403).json({
+        success: false,
+        message: "Only volunteers can update their own profile",
+      });
+    }
+
     if (
       fullName === undefined &&
       ageGroup === undefined &&
       biodata === undefined &&
-      skills === undefined &&
-      availability === undefined
+      parsedSkills === undefined &&
+      parsedAvailability === undefined &&
+      !req.file
     ) {
       return res.status(400).json({
         success: false,
@@ -151,7 +217,7 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    if (skills !== undefined && !Array.isArray(skills)) {
+    if (parsedSkills !== undefined && !Array.isArray(parsedSkills)) {
       return res.status(400).json({
         success: false,
         message: "Skills must be an array",
@@ -159,7 +225,7 @@ export const updateVolunteerProfile = async (req, res) => {
     }
 
     const normalizedSkills =
-      skills !== undefined ? normalizeSkills(skills) : undefined;
+      parsedSkills !== undefined ? normalizeSkills(parsedSkills) : undefined;
 
     if (normalizedSkills !== undefined && normalizedSkills.length > 20) {
       return res.status(400).json({
@@ -178,7 +244,7 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    if (availability !== undefined && !Array.isArray(availability)) {
+    if (parsedAvailability !== undefined && !Array.isArray(parsedAvailability)) {
       return res.status(400).json({
         success: false,
         message: "Availability must be an array",
@@ -186,7 +252,9 @@ export const updateVolunteerProfile = async (req, res) => {
     }
 
     const normalizedAvailability =
-      availability !== undefined ? normalizeAvailability(availability) : undefined;
+      parsedAvailability !== undefined
+        ? normalizeAvailability(parsedAvailability)
+        : undefined;
 
     if (
       normalizedAvailability !== undefined &&
@@ -228,6 +296,10 @@ export const updateVolunteerProfile = async (req, res) => {
       volunteer.availability = normalizedAvailability;
     }
 
+    if (req.file) {
+      volunteer.avatar = await uploadAvatarToCloudinary(req.file.buffer);
+    }
+
     await volunteer.save();
 
     const updatedVolunteer = await Volunteer.findById(id).select("-password");
@@ -248,6 +320,13 @@ export const getVolunteerPastExperience = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid volunteer ID",
+      });
+    }
+
     const volunteer = await Volunteer.findById(id).select("-password");
 
     if (!volunteer) {
@@ -257,10 +336,21 @@ export const getVolunteerPastExperience = async (req, res) => {
       });
     }
 
-    const pastExperience = await Application.find({
+    const approvedApplications = await Application.find({
       volunteerId: id,
-      status: "Completed",
+      status: "approved",
+    }).populate({
+      path: "opportunityId",
+      match: { endAt: { $lt: new Date() } },
+      populate: {
+        path: "organisationId",
+        select: "name",
+      },
     });
+
+    const pastExperience = approvedApplications.filter(
+      (application) => application.opportunityId,
+    );
 
     res.status(200).json({
       success: true,

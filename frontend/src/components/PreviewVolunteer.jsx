@@ -23,16 +23,36 @@ const PreviewVolunteer = ({
       year: "numeric",
     });
 
+  const initials = volunteer.name
+    ? volunteer.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join("")
+    : "?";
+
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
       <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Volunteer header */}
         <div className="admin-modal-header">
-          
-          {/* volunteer name */}
-          <h2>
-            {volunteer.name}
-          </h2>
+
+          <div className="admin-modal-header-main">
+            {/* volunteer avatar */}
+            <div className="admin-volunteer-card-avatar">
+              {volunteer.avatar ? (
+                <img src={volunteer.avatar} alt={`${volunteer.name} avatar`} />
+              ) : (
+                <span className="admin-volunteer-card-initials">{initials}</span>
+              )}
+            </div>
+
+            {/* volunteer name */}
+            <h2>
+              {volunteer.name}
+            </h2>
+          </div>
 
           {/* close button */}
           <button className="admin-modal-close" onClick={onClose}>
@@ -131,6 +151,9 @@ const PreviewVolunteer = ({
               {volunteer.resume ? (
                 <a
                   href={volunteer.resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="admin-modal-resume-btn"
                 >
                   View Resume
                 </a>
@@ -166,7 +189,7 @@ const PreviewVolunteer = ({
           <button
             className="admin-modal-approve-btn"
             disabled={volunteer.approvalStatus === "approved"}
-            onClick={approveUserAccount(volunteer._id)}
+            onClick={() => approveUserAccount(volunteer._id, onClose)}
           >
             <CheckCircle size={16} />
             Approve
@@ -174,7 +197,7 @@ const PreviewVolunteer = ({
           <button
             className="admin-modal-reject-btn"
             disabled={volunteer.approvalStatus === "rejected"}
-            onClick={rejectUserAccount(volunteer._id)}
+            onClick={() => rejectUserAccount(volunteer._id, onClose)}
           >
             <XCircle size={16} />
             Reject

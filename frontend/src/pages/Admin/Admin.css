@@ -27,8 +27,7 @@
   padding: 28px 20px;
   background: #2c614f;
   color: #ffffff;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   z-index: 100;
   transition:
     width 0.3s ease,
@@ -415,9 +414,24 @@
   color: #16a34a;
 }
 
+.admin-status.completed {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
 .admin-status.pending {
   background: rgba(217, 170, 85, 0.15);
   color: #b48a2e;
+}
+
+.admin-status.closed {
+  background: rgba(148, 163, 184, 0.2);
+  color: #64748b;
+}
+
+.admin-status.cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
 }
 
 .admin-status.suspended {
@@ -468,31 +482,164 @@
 /* ── Profile page ── */
 
 .admin-profile-card {
-  max-width: 640px;
-  padding: 36px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
   border-radius: 14px;
   background: #ffffff;
   border: 1px solid #e8ddd0;
 }
 
+.admin-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee8e0;
+}
+
+.admin-profile-header-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-profile-avatar-wrapper {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  box-shadow:
+    0 0 0 4px rgba(217, 170, 85, 0.28),
+    0 12px 22px rgba(217, 170, 85, 0.18);
+  border-radius: 50%;
+}
+
 .admin-profile-avatar {
   display: grid;
   place-items: center;
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  overflow: hidden;
   background: #d9aa55;
   color: #ffffff;
   font-size: 32px;
   font-weight: 700;
-  margin-bottom: 24px;
+}
+
+.admin-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.admin-profile-avatar-input {
+  display: none;
+}
+
+.admin-profile-avatar-edit {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: translate(10%, 10%);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #2c614f;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.admin-profile-avatar-edit:hover {
+  background: #255142;
+  transform: translate(10%, 10%) scale(1.05);
+}
+
+.admin-profile-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-profile-header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.admin-profile-header-name {
+  margin: 0;
+  color: #1d2a32;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.admin-profile-header-name-empty {
+  color: #9aa2a9;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.admin-profile-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(44, 97, 79, 0.12);
+  border: 1px solid rgba(44, 97, 79, 0.25);
+  color: #2c614f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-profile-fields {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
 }
 
 .admin-profile-field {
   display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee8e0;
+}
+
+.admin-profile-field:last-of-type {
+  border-bottom: none;
+}
+
+.admin-profile-field-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f6f2ed;
+  border: 1px solid #eee8e0;
+  color: #2c614f;
+  flex-shrink: 0;
+}
+
+.admin-profile-field-body {
+  display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 20px;
+  flex: 1;
 }
 
 .admin-profile-field label {
@@ -509,13 +656,18 @@
   font-weight: 500;
 }
 
+.admin-profile-field-empty {
+  color: #9aa2a9;
+  font-style: italic;
+}
+
 .admin-profile-edit-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 44px;
   padding: 0 24px;
-  margin-top: 8px;
+  margin-top: 0;
   border: 2px solid #2c614f;
   border-radius: 10px;
   background: transparent;
@@ -536,18 +688,9 @@
   transform: translateY(-1px);
 }
 
-.admin-profile-avatar {
-  overflow: hidden;
-}
-
-.admin-profile-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .admin-profile-input {
   min-height: 42px;
+  width: 100%;
   padding: 0 14px;
   border: 1px solid #ded5ca;
   border-radius: 10px;
@@ -568,6 +711,7 @@
 }
 
 .admin-profile-file-input {
+  width: 100%;
   padding: 8px 0;
   color: #1d2a32;
   font-family: inherit;
@@ -578,7 +722,8 @@
 .admin-profile-actions {
   display: flex;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 20px;
+  align-self: flex-start;
 }
 
 .admin-profile-update-btn {
@@ -672,11 +817,45 @@
   font-size: 14px;
 }
 
+/* ── Loading spinner ── */
+.admin-loading {
+  display: grid;
+  place-items: center;
+  padding: 64px 24px;
+}
+
+.admin-loading-spinner {
+  width: 40px;
+  height: 40px;
+  color: #9a8268;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ── Volunteer card list ── */
 
 .admin-volunteer-card-list {
   display: flex;
   flex-direction: column;
+}
+
+/* ── Opportunity list (scrollable) ── */
+
+.admin-opportunity-card-list {
+  --opportunity-row-height: 88px;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  padding-bottom: 0;
+}
+
+.admin-opportunity-card-list .admin-opportunity-card {
+  min-height: var(--opportunity-row-height);
+  box-sizing: border-box;
 }
 
 /* ── Organisation list (scrollable) ── */
@@ -716,6 +895,78 @@
   transition: background 0.15s;
 }
 
+.admin-opportunity-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr 90px 90px 40px;
+  grid-template-areas:
+    "title title title title title"
+    "category location date status preview";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 8px;
+  padding: 12px 24px;
+  border-top: 1px solid #eee8e0;
+}
+
+.admin-opportunity-card > *:nth-child(1) { grid-area: title; }
+.admin-opportunity-card > *:nth-child(2) { grid-area: category; }
+.admin-opportunity-card > *:nth-child(3) { grid-area: location; }
+.admin-opportunity-card > *:nth-child(4) { grid-area: date; }
+.admin-opportunity-card > *:nth-child(5) { grid-area: status; }
+.admin-opportunity-card > *:nth-child(6) { grid-area: preview; }
+
+.admin-volunteer-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f6f2ed;
+  border: 1px solid #eee8e0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.admin-volunteer-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-volunteer-card-initials {
+  color: #9a8268;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.admin-organisation-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f6f2ed;
+  border: 1px solid #eee8e0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.admin-organisation-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-organisation-card-initials {
+  color: #9a8268;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .admin-volunteer-card:first-child {
   border-top: none;
 }
@@ -737,6 +988,60 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.admin-opportunity-card-info {
+  min-width: 0;
+}
+
+.admin-opportunity-card-title {
+  margin: 0;
+  color: #1d2a32;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.admin-opportunity-card-org {
+  margin-left: 12px;
+  color: #6b7a8d;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.admin-opportunity-card-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin-opportunity-card-meta-label {
+  color: #9a8268;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-opportunity-card-meta-value {
+  color: #1d2a32;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  word-break: break-word;
+}
+
+.admin-opportunity-card > .admin-volunteer-card-date,
+.admin-opportunity-card > .admin-status,
+.admin-opportunity-card > .admin-volunteer-card-manage {
+  align-self: center;
+}
+
+.admin-opportunity-card > .admin-status {
+  justify-self: start;
 }
 
 .admin-volunteer-card-email {
@@ -925,6 +1230,12 @@
   border-bottom: 1px solid #eee8e0;
 }
 
+.admin-modal-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .admin-modal-header h2 {
   margin: 0;
   color: #2c614f;
@@ -957,6 +1268,23 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+}
+
+.admin-modal-resume-btn {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #9a8268;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-modal-resume-btn:hover {
+  background: #7d6b54;
 }
 
 .admin-modal-footer {
@@ -1027,6 +1355,39 @@
   color: #2c614f;
   font-size: 12px;
   font-weight: 600;
+}
+
+/* ── Opportunity preview ── */
+
+.admin-opportunity-details {
+  line-height: 1.5;
+}
+
+.admin-opportunity-image-list {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.admin-opportunity-image-list::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-opportunity-image-list::-webkit-scrollbar-thumb {
+  background: #d0c8c0;
+  border-radius: 3px;
+}
+
+.admin-opportunity-image {
+  flex: 0 0 auto;
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e8ddd0;
+  background: #f6f2ed;
 }
 
 /* ── Availability list ── */

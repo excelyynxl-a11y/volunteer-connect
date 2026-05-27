@@ -61,6 +61,83 @@ export const getApplicationById = async (req, res) => {
   }
 };
 
+export const approveApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id).populate("opportunityId");
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    application.status = "approved";
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Application approved successfully",
+      data: application,
+    });
+  } catch (err) {
+    console.log("Error in approveApplication controller: ", err.message);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const rejectApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id).populate("opportunityId");
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    if (application.status === "withdrawn") {
+      return res.status(400).json({
+        success: false,
+        message: "Withdrawn application cannot be rejected",
+      });
+    }
+
+    application.status = "rejected";
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Application rejected successfully",
+      data: application,
+    });
+  } catch (err) {
+    console.log("Error in rejectApplication controller: ", err.message);
+    res.status(500).json({ 
+      message: err.message 
+    });
+  }
+};
+
 export const completeApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,20 +158,16 @@ export const completeApplication = async (req, res) => {
       });
     }
 
-    // only Approved applications can be marked as completed
-    if (application.status !== "Approved") {
+    if (application.status !== "approved") {
       return res.status(400).json({
         success: false,
         message: `Application cannot be completed. Current status is ${application.status}`,
       });
     }
 
-    application.status = "Completed";
-    await application.save();
-
     res.status(200).json({
       success: true,
-      message: "Application completed successfully",
+      message: "Application completion is derived from the opportunity end date",
       data: application,
     });
   } catch (err) {
