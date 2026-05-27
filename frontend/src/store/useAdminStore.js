@@ -35,7 +35,7 @@ export const useAdminStore = create((set, get) => ({
       const [volRes, orgRes, oppRes, repRes] = await Promise.all([
         axiosInstance.get("/user/volunteers"),
         axiosInstance.get("/user/organisations"),
-        axiosInstance.get("/opportunity/"),
+        axiosInstance.get("/opportunities"),
         axiosInstance.get("/report/"),
       ]);
 
@@ -151,7 +151,7 @@ export const useAdminStore = create((set, get) => ({
     set({ isOpportunitiesLoading: true });
     
     try {
-        const res = await axiosInstance.get('/opportunity/');
+        const res = await axiosInstance.get('/opportunities');
         set({ opportunities: res.data.data });
     } catch (error) {
         toast.error(error.response.data.message);

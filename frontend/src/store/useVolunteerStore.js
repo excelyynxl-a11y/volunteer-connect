@@ -325,7 +325,7 @@ export const useVolunteerStore = create((set) => ({
     });
 
     try {
-      const response = await axiosInstance.get("/opportunity");
+      const response = await axiosInstance.get("/opportunities");
       const opportunities = response.data?.data ?? [];
       const displayOpportunities =
         import.meta.env.MODE === "development"
