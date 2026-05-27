@@ -15,8 +15,8 @@ import "../pages/Organisation/Organisation.css";
 
 const navItems = [
   { key: "homepage", path: "/organisation-dashboard", label: "Homepage", Icon: Home },
-  { key: "opportunities", path: "/organisation-dashboard/opportunities", label: "Opportunities", Icon: Search },
-  { key: "applications", path: "/organisation-dashboard/applications", label: "Applications", Icon: File },
+  { key: "opportunities", path: "/organisation-dashboard/opportunities", label: "Opportunity", Icon: Search },
+  { key: "applications", path: "/organisation-dashboard/applications", label: "Application", Icon: File },
   { key: "report", path: "/organisation-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/organisation-dashboard/profile", label: "Profile", Icon: User },
 
