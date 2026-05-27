@@ -343,7 +343,8 @@ export const updateOpportunity = async (req, res) => {
     }
 
     if (location !== undefined) {
-      opportunity.location = location.trim();
+      opportunity.location = location.trim()
+    }
 
     if (category !== undefined) {
       opportunity.category = category;
@@ -384,7 +385,6 @@ export const updateOpportunity = async (req, res) => {
       message: "Opportunity updated successfully",
       data: opportunity,
     });
-  } 
   } catch (err) {
     console.log("Error in updateOpportunity controller: ", err.message);
     res.status(500).json({ 
