@@ -18,7 +18,11 @@ import { formatDate, formatTime } from "../../lib/utils";
 import "./Organisation.css";
 import "../../components/OpportunityCard.css";
 
-const OpportunityRow = ({ opportunity, onClick }) => {
+const OpportunityRow = ({ 
+  opportunity, 
+  onClick 
+}) => {
+  const id = opportunity._id;
   const date = opportunity.fixedDate || opportunity.startAt;
   const categories = opportunity.category || [];
   const displayTime = opportunity.startAt && opportunity.endAt
@@ -35,7 +39,7 @@ const OpportunityRow = ({ opportunity, onClick }) => {
   return (
     <article 
       className={`org-home-opportunity-row org-home-tone-${currentStatus}`}
-      onClick={onClick}
+      onClick={() => onClick && onClick(id)}
       style={{ 
         cursor: onClick ? 'pointer' : 'default',
         ...(isCancelled && { padding: "12px 16px", borderRadius: 14 })
@@ -113,19 +117,16 @@ const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
 
 const OrganisationHomepage = () => {
   const navigate = useNavigate();
-  const authUser = useAuthStore((s) => s.authUser);
+  const { authUser } = useAuthStore();
+  console.log(authUser);
 
   const {
     activeOpportunities,
     closedOpportunities,
     cancelledOpportunities,
-    pendingApplications,
-    approvedApplications,
     getActiveOpportunities,
     getClosedOpportunities,
     getCancelledOpportunities,
-    getPendingApplications,
-    getApprovedApplications,
   } = useOrganisationStore();
 
   useEffect(() => {
@@ -133,17 +134,11 @@ const OrganisationHomepage = () => {
     getClosedOpportunities();
     getCancelledOpportunities();
     
-    if (authUser?._id) {
-      getPendingApplications(authUser._id);
-      getApprovedApplications(authUser._id);
-    }
   }, [
     authUser?._id, 
     getActiveOpportunities, 
     getClosedOpportunities, 
     getCancelledOpportunities,
-    getPendingApplications,
-    getApprovedApplications
   ]);
 
   const orgName = authUser?.name || "Organisation";
@@ -159,8 +154,6 @@ const OrganisationHomepage = () => {
     active:    activeOpportunities?.length    || 0,
     closed:    closedOpportunities?.length    || 0,
     cancelled: cancelledOpportunities?.length || 0,
-    pending:   pendingApplications?.length    || 0,
-    approved:  approvedApplications?.length   || 0,
   };
 
   const completionRate = useMemo(() => {
@@ -262,7 +255,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate("/organisation-dashboard/opportunities")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))
                 ) : (
@@ -287,7 +280,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp}
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))}
                 </div>
@@ -342,7 +335,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))
                 ) : (
