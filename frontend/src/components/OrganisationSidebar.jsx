@@ -1,8 +1,11 @@
 import React from "react";
 import Badge from "./Badge";
 import {
+  AlertCircle,
+  File,
   Home,
   LogOut,
+  Search,
   User,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
@@ -12,7 +15,11 @@ import "../pages/Organisation/Organisation.css";
 
 const navItems = [
   { key: "homepage", path: "/organisation-dashboard", label: "Homepage", Icon: Home },
+  { key: "opportunities", path: "/organisation-dashboard/opportunities", label: "Opportunities", Icon: Search },
+  { key: "applications", path: "/organisation-dashboard/applications", label: "Applications", Icon: File },
+  { key: "report", path: "/organisation-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/organisation-dashboard/profile", label: "Profile", Icon: User },
+
 ];
 
 const OrganisationSidebar = () => {
@@ -26,11 +33,7 @@ const OrganisationSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = location.pathname.startsWith("/organisation-dashboard/profile") ||
-    location.pathname.startsWith("/organisation-dashboard/edit-organisation-profile")
-    location.pathname.startsWith("/organisation-dashboard/edit-opportunity")
-      ? "profile"
-      : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || "homepage";
 
   return (
     <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
