@@ -12,19 +12,15 @@ const OrganisationProfile = () => {
     closedOpportunities,
     activeOpportunities,
     cancelledOpportunities,
-    getActiveOpportunities,
-    getClosedOpportunities,
-    getCancelledOpportunities,
+    getMyOpportunities,
   } = useOrganisationStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (authUser?._id) {
-      getActiveOpportunities();
-      getClosedOpportunities();
-      getCancelledOpportunities();
+      getMyOpportunities();
     }
-  }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
+  }, [authUser?._id, getMyOpportunities]);
 
   return (
     <div className="org-profile-page">

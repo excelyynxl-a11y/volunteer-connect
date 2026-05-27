@@ -102,10 +102,10 @@ const OpportunityRow = ({
   );
 };
 
-const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
+const StatCard = ({ icon, label, value, accent, hint }) => (
   <div className={`org-home-stat-card org-home-stat-${accent}`}>
     <div className="org-home-stat-icon">
-      <Icon size={20} strokeWidth={2.2} />
+      {React.createElement(icon, { size: 20, strokeWidth: 2.2 })}
     </div>
     <div className="org-home-stat-body">
       <span className="org-home-stat-label">{label}</span>
@@ -118,28 +118,19 @@ const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
 const OrganisationHomepage = () => {
   const navigate = useNavigate();
   const { authUser } = useAuthStore();
-  console.log(authUser);
 
   const {
     activeOpportunities,
     closedOpportunities,
     cancelledOpportunities,
-    getActiveOpportunities,
-    getClosedOpportunities,
-    getCancelledOpportunities,
+    getMyOpportunities,
   } = useOrganisationStore();
 
   useEffect(() => {
-    getActiveOpportunities();
-    getClosedOpportunities();
-    getCancelledOpportunities();
-    
-  }, [
-    authUser?._id, 
-    getActiveOpportunities, 
-    getClosedOpportunities, 
-    getCancelledOpportunities,
-  ]);
+    if (authUser?._id) {
+      getMyOpportunities();
+    }
+  }, [authUser?._id, getMyOpportunities]);
 
   const orgName = authUser?.name || "Organisation";
   
@@ -150,11 +141,11 @@ const OrganisationHomepage = () => {
     )[0];
   }, [activeOpportunities]);
 
-  const totals = {
-    active:    activeOpportunities?.length    || 0,
-    closed:    closedOpportunities?.length    || 0,
+  const totals = useMemo(() => ({
+    active: activeOpportunities?.length || 0,
+    closed: closedOpportunities?.length || 0,
     cancelled: cancelledOpportunities?.length || 0,
-  };
+  }), [activeOpportunities, closedOpportunities, cancelledOpportunities]);
 
   const completionRate = useMemo(() => {
     const total = totals.active + totals.closed + totals.cancelled;

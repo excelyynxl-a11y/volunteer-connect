@@ -8,6 +8,28 @@ const normaliseOpportunity = (opportunity) => ({
   detail: opportunity.detail ?? opportunity.details ?? "",
 });
 
+const getOpportunitiesFromResponse = (responseData) => {
+  const opportunities = Array.isArray(responseData)
+    ? responseData
+    : responseData?.opportunities || responseData?.data || [];
+
+  return opportunities.map(normaliseOpportunity);
+};
+
+const splitOpportunitiesByStatus = (opportunities) => ({
+  activeOpportunities: opportunities.filter((opp) => {
+    const status = (opp.status || "").toLowerCase();
+    return !["closed", "completed", "cancelled"].includes(status);
+  }),
+  closedOpportunities: opportunities.filter((opp) => {
+    const status = (opp.status || "").toLowerCase();
+    return status === "closed" || status === "completed";
+  }),
+  cancelledOpportunities: opportunities.filter(
+    (opp) => (opp.status || "").toLowerCase() === "cancelled"
+  ),
+});
+
 export const useOrganisationStore = create((set, get) => ({
   // --- UI State ---
   currentTab: "homepage",
@@ -106,6 +128,7 @@ export const useOrganisationStore = create((set, get) => ({
           activeOpportunities: nextActive,
           closedOpportunities: nextClosed,
           cancelledOpportunities: nextCancelled,
+          allMyOpportunities: updateInList(state.allMyOpportunities),
         };
       });
 
@@ -133,6 +156,7 @@ export const useOrganisationStore = create((set, get) => ({
       // Add the newly created opportunity to the top of the active list
       set((state) => ({
         activeOpportunities: [newOpp, ...state.activeOpportunities],
+        allMyOpportunities: [newOpp, ...state.allMyOpportunities],
       }));
 
       return { success: true, data: newOpp };
@@ -149,53 +173,39 @@ export const useOrganisationStore = create((set, get) => ({
     }
   },
 
-  getActiveOpportunities: async () => {
+  getMyOpportunities: async () => {
     try {
       const response = await axiosInstance.get("/opportunities/my-opportunities");
-      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-
-      const active = rawData.filter(opp => opp.status !== "closed" && opp.status !== "completed" && opp.status !== "cancelled");
-      set({ activeOpportunities: active });
+      const opportunities = getOpportunitiesFromResponse(response.data);
+      set({
+        allMyOpportunities: opportunities,
+        ...splitOpportunitiesByStatus(opportunities),
+      });
     } catch (error) {
-      console.error("Error fetching active opportunities:", error);
-      set({ activeOpportunities: [] });
+      console.error("Error fetching organisation opportunities:", error);
+      set({
+        activeOpportunities: [],
+        closedOpportunities: [],
+        cancelledOpportunities: [],
+        allMyOpportunities: [],
+      });
     }
+  },
+
+  getActiveOpportunities: async () => {
+    await get().getMyOpportunities();
   },
 
   getClosedOpportunities: async () => {
-    try {
-      const response = await axiosInstance.get("/opportunities/my-opportunities");
-      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-      
-      const closed = rawData.filter(opp => opp.status === "closed" || opp.status === "completed");
-      set({ closedOpportunities: closed });
-    } catch (error) {
-      console.error("Error fetching closed opportunities:", error);
-      set({ closedOpportunities: [] });
-    }
+    await get().getMyOpportunities();
   },
 
   getCancelledOpportunities: async () => {
-    try {
-      const response = await axiosInstance.get("/opportunities/my-opportunities");
-      const rawData = Array.isArray(response.data) ? response.data : (response.data.opportunities || response.data.data || []);
-      
-      const cancelled = rawData.filter(opp => opp.status === "cancelled");
-      set({ cancelledOpportunities: cancelled });
-    } catch (error) {
-      console.error("Error fetching cancelled opportunities:", error);
-      set({ cancelledOpportunities: [] });
-    }
+    await get().getMyOpportunities();
   },
 
   getAllMyOpportunities: async () => {
-    try {
-      const response = await axiosInstance.get("/opportunities/my-opportunities");
-      set({ allMyOpportunities: response.data });
-    } catch (error) {
-      console.error("Error fetching all my opportunities:", error);
-      set({ allMyOpportunities: [] });
-    }
+    await get().getMyOpportunities();
   },
 
 }));
