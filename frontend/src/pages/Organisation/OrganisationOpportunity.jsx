@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, ArrowUpDown, X, Inbox } from "lucide-react";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import OpportunityCard from "../../components/OpportunityCard";
@@ -14,6 +15,7 @@ const TIME_OPTIONS = [
 ];
 
 const OrganisationOpportunity = () => {
+  const navigate = useNavigate();
   const { allMyOpportunities, getAllMyOpportunities } = useOrganisationStore();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,6 +176,15 @@ const OrganisationOpportunity = () => {
                 opportunity={opp}
                 showActionButtons
                 actions={["view", "edit"]}
+                onAction={(type, id) => {
+                    if (type === 'edit') {
+                      navigate(`/organisation-dashboard/edit-opportunity/${id}`);
+                    }
+                    if (type === 'view') {
+                      navigate(`/organisation-dashboard/view-opportunity/${id}`);
+                    }
+                  }
+                }
               />
             ))
           ) : (
