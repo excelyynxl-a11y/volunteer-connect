@@ -373,7 +373,10 @@ const VolunteerOpportunities = () => {
                     showStatus={false}
                     onAction={(action, selectedCardOpportunity) => {
                       if (action === "view") {
-                        setSelectedOpportunity(selectedCardOpportunity);
+                        const opportunityToView = activeOpportunities.find(
+                          (opportunity) => opportunity._id === selectedCardOpportunity,
+                        );
+                        setSelectedOpportunity(opportunityToView || null);
                       }
                     }}
                   />
