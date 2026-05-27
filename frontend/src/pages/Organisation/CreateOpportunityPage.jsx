@@ -13,7 +13,6 @@ import {
   Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import OrganisationSidebar from "../../components/OrganisationSidebar";
 import {
   malaysiaStates,
   malaysiaStateCities,
@@ -25,7 +24,7 @@ import toast from "react-hot-toast";
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
-  const { createOpportunity, setCurrentTab } = useOrganisationStore();
+  const { createOpportunity, isCreatingOpportunity, setCurrentTab } = useOrganisationStore();
   const { authUser } = useAuthStore();
 
   useEffect(() => {
@@ -101,6 +100,7 @@ const CreateOpportunityPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isCreatingOpportunity) return;
 
     const newErrors = {};
 
@@ -194,31 +194,10 @@ const CreateOpportunityPage = () => {
       return;
     }
 
-
-    // backend payload processing
-    const rawStartDate = formData.startAt
-      ? formData.startAt.split("T")[0]
-      : "";
-
-    const startTime = formData.startAt
-      ? formData.startAt.split("T")[1]
-      : "";
-
-    const endTime = formData.endAt
-      ? formData.endAt.split("T")[1]
-      : "";
-
-    const computedTimeFrame =
-      startTime && endTime
-        ? `${startTime} - ${endTime}`
-        : "Flexible Session";
-
     const submissionData = {
       title: formData.title.trim(),
       details: formData.details.trim(),
       maxVolunteers: Number(formData.maxVolunteers),
-      fixedDate: rawStartDate,
-      timeFrame: computedTimeFrame,
       startAt: new Date(formData.startAt).toISOString(),
       endAt: new Date(formData.endAt).toISOString(),
       applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
@@ -303,9 +282,14 @@ const CreateOpportunityPage = () => {
                 className="organisation-create-btn"
                 type="submit"
                 form="create-opportunity-form"
+                disabled={isCreatingOpportunity}
               >
-                <CheckCircle2 size={18} />
-                Publish Opportunity
+                {isCreatingOpportunity ? (
+                  <Loader2 size={18} className="organisation-submit-loader" />
+                ) : (
+                  <CheckCircle2 size={18} />
+                )}
+                {isCreatingOpportunity ? "Publishing..." : "Publish Opportunity"}
               </button>
             </div>
           </header>
