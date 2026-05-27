@@ -12,8 +12,7 @@ const EditOpportunity = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     
     const { 
-        activeOpportunities, closedOpportunities, cancelledOpportunities,
-        updateOpportunity, isUpdatingOpportunity, getActiveOpportunities 
+        allMyOpportunities, getAllMyOpportunities, updateOpportunity, setCurrentTab
     } = useOrganisationStore();
 
     const [formData, setFormData] = useState({
@@ -32,17 +31,18 @@ const EditOpportunity = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
 
-    // Fetch data when component mounts
     useEffect(() => {
-        getActiveOpportunities();
+        getAllMyOpportunities();
+        setCurrentTab('opportunity');
     }, []);
 
-    // Process data once it arrives
     useEffect(() => {
-        const allCombined = [...activeOpportunities, ...closedOpportunities, ...cancelledOpportunities];
-        if (allCombined.length === 0) return;
+        const raw = allMyOpportunities?.data ?? allMyOpportunities;
+        const list = Array.isArray(raw) ? raw : [];
 
-        const opportunityToEdit = allCombined.find(opp => opp._id === id);
+        if (list.length === 0) return;
+
+        const opportunityToEdit = list.find(opp => opp._id === id);
 
         if (opportunityToEdit) {
             setFormData({
@@ -55,8 +55,6 @@ const EditOpportunity = () => {
                     ? formatDBDateForInput(opportunityToEdit.applicationDeadline) 
                     : "",
                 status: opportunityToEdit.status || "active"
-                // fixedDate: opportunityToEdit.fixedDate || opportunityToEdit.startAt,
-                // timeFrame: opportunityToEdit.timeFrame || "N/A"
             });
             
             setSelectedCategory(opportunityToEdit.category || []);
@@ -68,9 +66,9 @@ const EditOpportunity = () => {
             }
             setIsLoaded(true);
         } else {
-            navigate("/organisation-dashboard/profile");
+            navigate("/organisation-dashboard/opportunities");
         }
-    }, [id, activeOpportunities, closedOpportunities, cancelledOpportunities, navigate]);
+    }, [id, allMyOpportunities, navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value});
@@ -167,16 +165,6 @@ const EditOpportunity = () => {
         }
     };
 
-    if (!isLoaded) {
-        return (
-            <div className="org-profile-page">
-                <main className="org-profile-main" style={{ justifyContent: 'center', alignItems: 'center', display: 'flex', minHeight: '80vh' }}>
-                    <p style={{ fontSize: '16px', color: '#64748b', fontWeight: 500 }}>Loading posting details...</p>
-                </main>
-            </div>
-        );
-    }
-
     return (
         <div className="org-profile-page org-profile-edit-page">
             <main className="org-profile-main org-profile-edit-main">
@@ -193,9 +181,6 @@ const EditOpportunity = () => {
                         <button type="button" className="org-profile-secondary-btn" onClick={() => navigate("/organisation-dashboard/profile")}>
                             <ArrowLeft size={18} /> Back
                         </button>
-                        <button type="submit" form="opportunity-edit-form" className="org-profile-primary-btn" disabled={isUpdatingOpportunity}>
-                            <Save size={18} /> {isUpdatingOpportunity ? "Saving..." : "Save Changes"}
-                        </button>
                     </div>
                 </section>
 
@@ -210,11 +195,11 @@ const EditOpportunity = () => {
                             <span className="org-profile-eyebrow"><b>Live Preview</b></span>
                             
                             <h2 className="preview-title">
-                                {formData.title || "Untitled Opportunity"}
+                                {formData?.title || "Untitled Opportunity"}
                             </h2>
                             
                             <p className="preview-details">
-                                {formData.details || "No description written yet."}
+                                {formData?.details || "No description written yet."}
                             </p>
                             
                             {selectedCategory.length > 0 && (
