@@ -25,14 +25,13 @@ import toast from "react-hot-toast";
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
-  const { createOpportunity } = useOrganisationStore();
-  const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+  const { createOpportunity, setCurrentTab } = useOrganisationStore();
+  const { authUser } = useAuthStore();
 
   useEffect(() => {
-    if (!authUser && typeof checkAuth === "function") {
-      checkAuth();
-    }
-  }, [authUser, checkAuth]);
+    setCurrentTab('opportunity')
+  }, []);
+
 
   const [formData, setFormData] = useState({
     title: "",
@@ -195,13 +194,6 @@ const CreateOpportunityPage = () => {
       return;
     }
 
-    // auth check
-    if (!authUser?._id && !authUser?.id) {
-      toast.error(
-        "Authentication error: Session profile not verified."
-      );
-      return;
-    }
 
     // backend payload processing
     const rawStartDate = formData.startAt
@@ -274,28 +266,8 @@ const CreateOpportunityPage = () => {
     }
   };
 
-  if (isCheckingAuth && !authUser) {
-    return (
-      <div className="organisation-layout">
-        <OrganisationSidebar />
-
-        <div className="organisation-main-content flex flex-col items-center justify-center h-screen gap-4">
-          <Loader2
-            className="animate-spin text-blue-600"
-            size={40}
-          />
-
-          <p className="text-gray-600 font-medium">
-            Verifying authorization profile session...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="organisation-layout">
-      <OrganisationSidebar />
 
       <div className="organisation-main-content">
         <div className="organisation-create-page">
