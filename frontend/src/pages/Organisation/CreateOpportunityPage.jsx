@@ -30,7 +30,7 @@ const CreateOpportunityPage = () => {
 
   useEffect(() => {
     setCurrentTab('opportunity')
-  }, []);
+  }, [setCurrentTab]);
 
 
   const [formData, setFormData] = useState({
