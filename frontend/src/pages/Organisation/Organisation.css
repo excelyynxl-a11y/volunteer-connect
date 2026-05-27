@@ -2513,7 +2513,20 @@
   width: 100%;
 }
 
-/* ERROR TEXT FIXED */
+/* Opportunity list grid (Opportunity page) */
+
+.org-opp-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.org-opp-list .organisation-empty {
+  grid-column: 1 / -1;
+}
+
+/* Error text fixed */
 .organisation-error-text {
   display: block;
 

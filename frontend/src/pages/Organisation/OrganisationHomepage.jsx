@@ -250,7 +250,7 @@ const OrganisationHomepage = () => {
                 <button 
                   type="button" 
                   className="org-home-link"
-                  onClick={() => navigate("/organisation-dashboard/profile")}
+                  onClick={() => navigate("/organisation-dashboard/opportunities")}
                 >
                   View all <ArrowUpRight size={14} />
                 </button>
@@ -262,7 +262,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={() => navigate("/organisation-dashboard/opportunities")}
                     />
                   ))
                 ) : (
