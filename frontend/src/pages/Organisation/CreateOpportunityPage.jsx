@@ -23,6 +23,22 @@ import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore.js";
 import toast from "react-hot-toast";
 
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hours = Math.floor(index / 2).toString().padStart(2, "0");
+  const minutes = index % 2 === 0 ? "00" : "30";
+  const value = `${hours}:${minutes}`;
+
+  return {
+    label: value,
+    value,
+  };
+});
+
+const buildLocalDateTime = (date, time) => {
+  if (!date || !time) return null;
+  return new Date(`${date}T${time}`);
+};
+
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
   const { createOpportunity, isCreatingOpportunity, setCurrentTab } = useOrganisationStore();
@@ -38,8 +54,10 @@ const CreateOpportunityPage = () => {
     details: "",
     maxVolunteers: 1,
     applicationDeadline: "",
-    startAt: "",
-    endAt: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
   });
 
   const [selectedState, setSelectedState] = useState("");
@@ -108,16 +126,18 @@ const CreateOpportunityPage = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const startDate = formData.startAt
-      ? new Date(formData.startAt)
-      : null;
+    const startDateTime = buildLocalDateTime(
+      formData.startDate,
+      formData.startTime,
+    );
 
-    const endDate = formData.endAt
-      ? new Date(formData.endAt)
-      : null;
+    const endDateTime = buildLocalDateTime(
+      formData.endDate,
+      formData.endTime,
+    );
 
     const deadlineDate = formData.applicationDeadline
-      ? new Date(formData.applicationDeadline)
+      ? new Date(`${formData.applicationDeadline}T00:00`)
       : null;
 
     // title validation
@@ -149,22 +169,28 @@ const CreateOpportunityPage = () => {
     }
 
     // start datetime validation
-    if (!formData.startAt) {
-      newErrors.startAt =
-        "Start date & time is required";
+    if (!formData.startDate) {
+      newErrors.startDate = "Start date is required";
+    }
+
+    if (!formData.startTime) {
+      newErrors.startTime = "Start time is required";
     }
 
     // end datetime validation
-    if (!formData.endAt) {
-      newErrors.endAt =
-        "End date & time is required";
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+    }
+
+    if (!formData.endTime) {
+      newErrors.endTime = "End time is required";
     } else if (
-      startDate &&
-      endDate &&
-      endDate < startDate
+      startDateTime &&
+      endDateTime &&
+      endDateTime <= startDateTime
     ) {
-      newErrors.endAt =
-        "End datetime cannot be before start datetime";
+      newErrors.endTime =
+        "End date and time must be after start date and time";
     }
 
     // volunteer capacity validation
@@ -199,9 +225,9 @@ const CreateOpportunityPage = () => {
       title: formData.title.trim(),
       details: formData.details.trim(),
       maxVolunteers: Number(formData.maxVolunteers),
-      startAt: new Date(formData.startAt).toISOString(),
-      endAt: new Date(formData.endAt).toISOString(),
-      applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+      startAt: startDateTime.toISOString(),
+      endAt: endDateTime.toISOString(),
+      applicationDeadline: deadlineDate.toISOString(),
       location: `${selectedState}, ${selectedCity}`,
       category: selectedCategory,
       organisationId:
@@ -223,8 +249,10 @@ const CreateOpportunityPage = () => {
           details: "",
           maxVolunteers: 1,
           applicationDeadline: "",
-          startAt: "",
-          endAt: "",
+          startDate: "",
+          startTime: "",
+          endDate: "",
+          endTime: "",
         });
 
         setSelectedState("");
@@ -543,54 +571,106 @@ const CreateOpportunityPage = () => {
                     </select>
                   </div>
 
-                  {/* START */}
+                  {/* START DATE */}
                   <div className="organisation-form-group">
                     <label>
                       <CalendarDays size={16} />
-                      Start Date & Time
+                      Start Date
                     </label>
 
                     <input
-                      type="datetime-local"
-                      name="startAt"
-                      value={formData.startAt}
+                      type="date"
+                      name="startDate"
+                      value={formData.startDate}
                       onChange={handleChange}
                       className={
-                        errors.startAt
+                        errors.startDate
                           ? "error"
                           : ""
                       }
                     />
 
-                    {errors.startAt && (
+                    {errors.startDate && (
                       <p className="organisation-error-text">
-                        {errors.startAt}
+                        {errors.startDate}
                       </p>
                     )}
                   </div>
 
-                  {/* END */}
+                  {/* START TIME */}
+                  <div className="organisation-form-group">
+                    <label>
+                      <Clock3 size={16} />
+                      Start Time
+                    </label>
+
+                    <CustomSelect
+                      value={formData.startTime}
+                      placeholder="Select start time"
+                      options={TIME_OPTIONS}
+                      onChange={(value) =>
+                        handleChange({
+                          target: { name: "startTime", value },
+                        })
+                      }
+                      className={errors.startTime ? "error" : ""}
+                    />
+
+                    {errors.startTime && (
+                      <p className="organisation-error-text">
+                        {errors.startTime}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* END DATE */}
                   <div className="organisation-form-group">
                     <label>
                       <CalendarDays size={16} />
-                      End Date & Time
+                      End Date
                     </label>
 
                     <input
-                      type="datetime-local"
-                      name="endAt"
-                      value={formData.endAt}
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate}
                       onChange={handleChange}
                       className={
-                        errors.endAt
+                        errors.endDate
                           ? "error"
                           : ""
                       }
                     />
 
-                    {errors.endAt && (
+                    {errors.endDate && (
                       <p className="organisation-error-text">
-                        {errors.endAt}
+                        {errors.endDate}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* END TIME */}
+                  <div className="organisation-form-group">
+                    <label>
+                      <Clock3 size={16} />
+                      End Time
+                    </label>
+
+                    <CustomSelect
+                      value={formData.endTime}
+                      placeholder="Select end time"
+                      options={TIME_OPTIONS}
+                      onChange={(value) =>
+                        handleChange({
+                          target: { name: "endTime", value },
+                        })
+                      }
+                      className={errors.endTime ? "error" : ""}
+                    />
+
+                    {errors.endTime && (
+                      <p className="organisation-error-text">
+                        {errors.endTime}
                       </p>
                     )}
                   </div>
