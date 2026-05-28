@@ -18,7 +18,11 @@ import { formatDate, formatTime } from "../../lib/utils";
 import "./Organisation.css";
 import "../../components/OpportunityCard.css";
 
-const OpportunityRow = ({ opportunity, onClick }) => {
+const OpportunityRow = ({ 
+  opportunity, 
+  onClick 
+}) => {
+  const id = opportunity._id;
   const date = opportunity.fixedDate || opportunity.startAt;
   const categories = opportunity.category || [];
   const displayTime = opportunity.startAt && opportunity.endAt
@@ -35,7 +39,7 @@ const OpportunityRow = ({ opportunity, onClick }) => {
   return (
     <article 
       className={`org-home-opportunity-row org-home-tone-${currentStatus}`}
-      onClick={onClick}
+      onClick={() => onClick && onClick(id)}
       style={{ 
         cursor: onClick ? 'pointer' : 'default',
         ...(isCancelled && { padding: "12px 16px", borderRadius: 14 })
@@ -98,10 +102,10 @@ const OpportunityRow = ({ opportunity, onClick }) => {
   );
 };
 
-const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
+const StatCard = ({ icon, label, value, accent, hint }) => (
   <div className={`org-home-stat-card org-home-stat-${accent}`}>
     <div className="org-home-stat-icon">
-      <Icon size={20} strokeWidth={2.2} />
+      {React.createElement(icon, { size: 20, strokeWidth: 2.2 })}
     </div>
     <div className="org-home-stat-body">
       <span className="org-home-stat-label">{label}</span>
@@ -113,38 +117,20 @@ const StatCard = ({ icon: Icon, label, value, accent, hint }) => (
 
 const OrganisationHomepage = () => {
   const navigate = useNavigate();
-  const authUser = useAuthStore((s) => s.authUser);
+  const { authUser } = useAuthStore();
 
   const {
     activeOpportunities,
     closedOpportunities,
     cancelledOpportunities,
-    pendingApplications,
-    approvedApplications,
-    getActiveOpportunities,
-    getClosedOpportunities,
-    getCancelledOpportunities,
-    getPendingApplications,
-    getApprovedApplications,
+    getMyOpportunities,
   } = useOrganisationStore();
 
   useEffect(() => {
-    getActiveOpportunities();
-    getClosedOpportunities();
-    getCancelledOpportunities();
-    
     if (authUser?._id) {
-      getPendingApplications(authUser._id);
-      getApprovedApplications(authUser._id);
+      getMyOpportunities();
     }
-  }, [
-    authUser?._id, 
-    getActiveOpportunities, 
-    getClosedOpportunities, 
-    getCancelledOpportunities,
-    getPendingApplications,
-    getApprovedApplications
-  ]);
+  }, [authUser?._id, getMyOpportunities]);
 
   const orgName = authUser?.name || "Organisation";
   
@@ -155,13 +141,11 @@ const OrganisationHomepage = () => {
     )[0];
   }, [activeOpportunities]);
 
-  const totals = {
-    active:    activeOpportunities?.length    || 0,
-    closed:    closedOpportunities?.length    || 0,
+  const totals = useMemo(() => ({
+    active: activeOpportunities?.length || 0,
+    closed: closedOpportunities?.length || 0,
     cancelled: cancelledOpportunities?.length || 0,
-    pending:   pendingApplications?.length    || 0,
-    approved:  approvedApplications?.length   || 0,
-  };
+  }), [activeOpportunities, closedOpportunities, cancelledOpportunities]);
 
   const completionRate = useMemo(() => {
     const total = totals.active + totals.closed + totals.cancelled;
@@ -250,7 +234,7 @@ const OrganisationHomepage = () => {
                 <button 
                   type="button" 
                   className="org-home-link"
-                  onClick={() => navigate("/organisation-dashboard/profile")}
+                  onClick={() => navigate("/organisation-dashboard/opportunities")}
                 >
                   View all <ArrowUpRight size={14} />
                 </button>
@@ -262,7 +246,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))
                 ) : (
@@ -287,7 +271,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp}
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))}
                 </div>
@@ -342,7 +326,7 @@ const OrganisationHomepage = () => {
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
-                      onClick={() => navigate("/organisation-dashboard/profile")}
+                      onClick={(id) => navigate(`/organisation-dashboard/view-opportunity/${id}`)}
                     />
                   ))
                 ) : (

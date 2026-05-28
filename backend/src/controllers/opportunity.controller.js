@@ -3,10 +3,28 @@ import Opportunity from "../models/opportunity.model.js";
 
 const validStatuses = ["active", "closed", "cancelled", "completed"];
 
+const normalizeStringArray = (value) => {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) return null;
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+};
+
 export const createOpportunity = async (req, res) => {
 
   try {
-    const { title, details, maxVolunteers, fixedDate, timeFrame, startAt, endAt, applicationDeadline, location, category } = req.body;
+    const {
+      title,
+      details,
+      maxVolunteers,
+      startAt,
+      endAt,
+      applicationDeadline,
+      location,
+      category,
+      requirements,
+      images,
+    } = req.body;
 
     if (req.user.role !== "organisation") {
       return res.status(403).json({
@@ -103,6 +121,32 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
+    const normalizedCategory = normalizeStringArray(category);
+    if (normalizedCategory === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Category must be an array",
+      });
+    }
+
+    if (
+      requirements !== undefined &&
+      (typeof requirements !== "string" || requirements.trim().length > 2000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Requirements must be a string with at most 2000 characters",
+      });
+    }
+
+    const normalizedImages = normalizeStringArray(images);
+    if (normalizedImages === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Images must be an array",
+      });
+    }
+
     const newOpportunity = new Opportunity({
       title: title.trim(),
       details: details.trim(),
@@ -111,11 +155,9 @@ export const createOpportunity = async (req, res) => {
       endAt: parsedEndAt,
       applicationDeadline: parsedApplicationDeadline,
       maxVolunteers: parsedMaxVolunteers,
-      category,
-      requirements: requirements ? requirements.trim() : undefined,
-      images,
-      fixedDate: parsedDate,
-      timeFrame: timeFrame ? timeFrame.trim() : undefined,
+      category: normalizedCategory ?? [],
+      requirements: requirements !== undefined ? requirements.trim() : "",
+      images: normalizedImages ?? [],
       organisationId: req.user._id,
     });
 
@@ -140,7 +182,7 @@ export const getAllOpportunities = async (req, res) => {
       .populate("organisationId", "name")
       .sort({ publishedAt: -1 });
 
-    const opportunities = await Opportunity.find({ status: "active" });
+    // const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
       count: opportunities.length,
@@ -191,8 +233,19 @@ export const updateOpportunity = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { title, details, maxVolunteers, fixedDate, timeFrame, status, category, location, startAt, endAt, applicationDeadline } = req.body;
-    const validStatuses = ["active", "closed", "cancelled", "completed"];
+    const {
+      title,
+      details,
+      maxVolunteers,
+      status,
+      category,
+      location,
+      startAt,
+      endAt,
+      applicationDeadline,
+      requirements,
+      images,
+    } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -295,6 +348,32 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
+    const normalizedCategory = normalizeStringArray(category);
+    if (normalizedCategory === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Category must be an array",
+      });
+    }
+
+    if (
+      requirements !== undefined &&
+      (typeof requirements !== "string" || requirements.trim().length > 2000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Requirements must be a string with at most 2000 characters",
+      });
+    }
+
+    const normalizedImages = normalizeStringArray(images);
+    if (normalizedImages === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Images must be an array",
+      });
+    }
+
     const opportunity = await Opportunity.findById(id);
 
     if (!opportunity) {
@@ -344,9 +423,10 @@ export const updateOpportunity = async (req, res) => {
 
     if (location !== undefined) {
       opportunity.location = location.trim();
+    }
 
-    if (category !== undefined) {
-      opportunity.category = category;
+    if (normalizedCategory !== undefined) {
+      opportunity.category = normalizedCategory;
     }
 
     if (maxVolunteers !== undefined) {
@@ -373,8 +453,8 @@ export const updateOpportunity = async (req, res) => {
       opportunity.requirements = requirements.trim();
     }
 
-    if (images !== undefined) {
-      opportunity.images = images;
+    if (normalizedImages !== undefined) {
+      opportunity.images = normalizedImages;
     }
 
     await opportunity.save();

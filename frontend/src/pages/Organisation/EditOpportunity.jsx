@@ -1,113 +1,134 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganisationStore } from '../../store/useOrganisationStore';
 import { malaysiaStateCities, malaysiaStates, EVENT_CATEGORIES } from '../../lib/data';
 import { ArrowLeft, Save, X, Calendar, MapPin, Tag, AlignLeft } from 'lucide-react';
 
+const formatDBDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    return localDate.toISOString().slice(0, 16);
+};
+
+const getInitialFormData = (opportunity) => ({
+    title: opportunity?.title || "",
+    details: opportunity?.details || opportunity?.detail || "",
+    startAt: formatDBDateForInput(opportunity?.startAt),
+    endAt: formatDBDateForInput(opportunity?.endAt),
+    maxVolunteers: opportunity?.maxVolunteers || 0,
+    applicationDeadline: opportunity?.applicationDeadline
+        ? formatDBDateForInput(opportunity.applicationDeadline)
+        : "",
+    status: opportunity?.status || "active"
+});
+
+const getInitialLocation = (opportunity) => {
+    if (!opportunity?.location) {
+        return { state: "", city: "" };
+    }
+
+    const [state, city] = opportunity.location.split(", ");
+    return {
+        state: state || "",
+        city: city || "",
+    };
+};
+
 const EditOpportunity = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    
-    // State to prevent rendering before data arrives
-    const [isLoaded, setIsLoaded] = useState(false);
-    
+
     const { 
-        activeOpportunities, closedOpportunities, cancelledOpportunities,
-        updateOpportunity, isUpdatingOpportunity, getActiveOpportunities 
+        allMyOpportunities,
+        getAllMyOpportunities,
+        updateOpportunity,
+        isUpdatingOpportunity,
+        setCurrentTab,
     } = useOrganisationStore();
 
-    const [formData, setFormData] = useState({
-        title: "",
-        details: "",
-        startAt: "",
-        endAt: "",
-        maxVolunteers: 0,
-        applicationDeadline: "",
-        status: "active"
-    });
-    
-    const [selectedState, setSelectedState] = useState("");
-    const [selectedCity, setSelectedCity] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState([]);
+    const opportunities = useMemo(() => {
+        const raw = allMyOpportunities?.data ?? allMyOpportunities;
+        return Array.isArray(raw) ? raw : [];
+    }, [allMyOpportunities]);
+
+    const opportunityToEdit = useMemo(
+        () => opportunities.find((opp) => opp._id === id),
+        [id, opportunities],
+    );
+
+    const initialFormData = useMemo(
+        () => getInitialFormData(opportunityToEdit),
+        [opportunityToEdit],
+    );
+
+    const initialLocation = useMemo(
+        () => getInitialLocation(opportunityToEdit),
+        [opportunityToEdit],
+    );
+
+    const initialCategory = useMemo(
+        () => opportunityToEdit?.category || [],
+        [opportunityToEdit],
+    );
+
+    const [formDataOverrides, setFormDataOverrides] = useState({});
+    const [selectedStateOverride, setSelectedStateOverride] = useState(null);
+    const [selectedCityOverride, setSelectedCityOverride] = useState(null);
+    const [selectedCategoryOverride, setSelectedCategoryOverride] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
 
-    // Fetch data when component mounts
+    const formData = {
+        ...initialFormData,
+        ...formDataOverrides,
+    };
+
+    const selectedState = selectedStateOverride ?? initialLocation.state;
+    const selectedCity = selectedCityOverride ?? initialLocation.city;
+    const selectedCategory = selectedCategoryOverride ?? initialCategory;
+
     useEffect(() => {
-        getActiveOpportunities();
-    }, []);
+        getAllMyOpportunities();
+        setCurrentTab('opportunity');
+    }, [getAllMyOpportunities, setCurrentTab]);
 
-    // Process data once it arrives
     useEffect(() => {
-        const allCombined = [...activeOpportunities, ...closedOpportunities, ...cancelledOpportunities];
-        if (allCombined.length === 0) return;
-
-        const opportunityToEdit = allCombined.find(opp => opp._id === id);
-
-        if (opportunityToEdit) {
-            setFormData({
-                title: opportunityToEdit.title || "",
-                details: opportunityToEdit.details || opportunityToEdit.detail || "",
-                startAt: formatDBDateForInput(opportunityToEdit.startAt),
-                endAt: formatDBDateForInput(opportunityToEdit.endAt),
-                maxVolunteers: opportunityToEdit.maxVolunteers || 0,
-                applicationDeadline: opportunityToEdit.applicationDeadline
-                    ? formatDBDateForInput(opportunityToEdit.applicationDeadline) 
-                    : "",
-                status: opportunityToEdit.status || "active"
-                // fixedDate: opportunityToEdit.fixedDate || opportunityToEdit.startAt,
-                // timeFrame: opportunityToEdit.timeFrame || "N/A"
-            });
-            
-            setSelectedCategory(opportunityToEdit.category || []);
-            
-            if (opportunityToEdit.location) {
-                const [dbState, dbCity] = opportunityToEdit.location.split(", ");
-                setSelectedState(dbState || "");
-                setSelectedCity(dbCity || "");
-            }
-            setIsLoaded(true);
-        } else {
-            navigate("/organisation-dashboard/profile");
+        if (opportunities.length > 0 && !opportunityToEdit) {
+            navigate("/organisation-dashboard/opportunities");
         }
-    }, [id, activeOpportunities, closedOpportunities, cancelledOpportunities, navigate]);
+    }, [navigate, opportunities.length, opportunityToEdit]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value});
+        setFormDataOverrides((currentFormData) => ({
+            ...currentFormData,
+            [e.target.name]: e.target.value,
+        }));
         if (fieldErrors[e.target.name]) {
             setFieldErrors(prev => ({ ...prev, [e.target.name]: null}));
         }
     }
 
     const handleStateChange = (e) => {
-        setSelectedState(e.target.value);
-        setSelectedCity("");
+        setSelectedStateOverride(e.target.value);
+        setSelectedCityOverride("");
         setFieldErrors(prev => ({ ...prev, location: null}));
     };
 
     const handleCityChange = (e) => {
-        setSelectedCity(e.target.value);
+        setSelectedCityOverride(e.target.value);
         setFieldErrors(prev => ({ ...prev, location: null}));
     };
 
     const handleCategoryAdd = (e) => {
         const value = e.target.value;
         if (value && !selectedCategory.includes(value)) {
-            setSelectedCategory(prev => [...prev, value]);
+            setSelectedCategoryOverride([...selectedCategory, value]);
         }
     };
 
     const removeCategory = (catToRemove) => {
-        setSelectedCategory(selectedCategory.filter(c => c !== catToRemove));
-    };
-
-    const formatForInput = (isoString) => isoString ? isoString.substring(0, 16) : "";
-
-    const formatDBDateForInput = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-        return localDate.toISOString().slice(0, 16);
+        setSelectedCategoryOverride(selectedCategory.filter(c => c !== catToRemove));
     };
 
     const renderError = (field) => {
@@ -118,7 +139,6 @@ const EditOpportunity = () => {
         e.preventDefault();
         setErrorMessage("");
         setFieldErrors({});
-        const validStatuses = ["active", "closed", "cancelled", "completed"];
 
         const newErrors = {};
         if (!formData.title?.trim()) newErrors.title = "Event title is required.";
@@ -160,22 +180,10 @@ const EditOpportunity = () => {
         if (result?.success) {
             navigate("/organisation-dashboard/profile");
         } else {
-            const displayError = result?.error === "validStatuses is not defined" 
-                ? "Server configuration error. Please contact the administrator." 
-                : (result?.error || "Failed to update opportunity.");
+            const displayError = result?.error || "Failed to update opportunity.";
             setErrorMessage(displayError);
         }
     };
-
-    if (!isLoaded) {
-        return (
-            <div className="org-profile-page">
-                <main className="org-profile-main" style={{ justifyContent: 'center', alignItems: 'center', display: 'flex', minHeight: '80vh' }}>
-                    <p style={{ fontSize: '16px', color: '#64748b', fontWeight: 500 }}>Loading posting details...</p>
-                </main>
-            </div>
-        );
-    }
 
     return (
         <div className="org-profile-page org-profile-edit-page">
@@ -210,11 +218,11 @@ const EditOpportunity = () => {
                             <span className="org-profile-eyebrow"><b>Live Preview</b></span>
                             
                             <h2 className="preview-title">
-                                {formData.title || "Untitled Opportunity"}
+                                {formData?.title || "Untitled Opportunity"}
                             </h2>
                             
                             <p className="preview-details">
-                                {formData.details || "No description written yet."}
+                                {formData?.details || "No description written yet."}
                             </p>
                             
                             {selectedCategory.length > 0 && (

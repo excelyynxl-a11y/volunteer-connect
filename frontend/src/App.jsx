@@ -14,7 +14,12 @@ import { useAuthStore } from "./store/useAuthStore";
 import CreateOpportunityPage from "./pages/Organisation/CreateOpportunityPage";
 
 const App = () => {
-  
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <div className="app-shell">
       <Toaster />

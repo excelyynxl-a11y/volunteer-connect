@@ -13,34 +13,51 @@ import {
   Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import OrganisationSidebar from "../../components/OrganisationSidebar";
 import {
   malaysiaStates,
   malaysiaStateCities,
   EVENT_CATEGORIES
 } from "../../lib/data";
+import CustomSelect from "../../components/CustomSelect";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore.js";
 import toast from "react-hot-toast";
 
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hours = Math.floor(index / 2).toString().padStart(2, "0");
+  const minutes = index % 2 === 0 ? "00" : "30";
+  const value = `${hours}:${minutes}`;
+
+  return {
+    label: value,
+    value,
+  };
+});
+
+const buildLocalDateTime = (date, time) => {
+  if (!date || !time) return null;
+  return new Date(`${date}T${time}`);
+};
+
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
-  const { createOpportunity } = useOrganisationStore();
-  const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+  const { createOpportunity, isCreatingOpportunity, setCurrentTab } = useOrganisationStore();
+  const { authUser } = useAuthStore();
 
   useEffect(() => {
-    if (!authUser && typeof checkAuth === "function") {
-      checkAuth();
-    }
-  }, [authUser, checkAuth]);
+    setCurrentTab('opportunity')
+  }, [setCurrentTab]);
+
 
   const [formData, setFormData] = useState({
     title: "",
     details: "",
     maxVolunteers: 1,
     applicationDeadline: "",
-    startAt: "",
-    endAt: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
   });
 
   const [selectedState, setSelectedState] = useState("");
@@ -49,6 +66,9 @@ const CreateOpportunityPage = () => {
   const [errors, setErrors] = useState({});
 
   const selectedCities = malaysiaStateCities[selectedState] || [];
+  const availableCategories = EVENT_CATEGORIES.filter(
+    (category) => !selectedCategory.includes(category),
+  );
 
   const titleProgress = Math.min(
     (formData.title.length / 15) * 100,
@@ -77,9 +97,7 @@ const CreateOpportunityPage = () => {
     }
   };
 
-  const handleCategoryAdd = (e) => {
-    const value = e.target.value;
-
+  const handleCategoryAdd = (value) => {
     if (value && !selectedCategory.includes(value)) {
       setSelectedCategory([...selectedCategory, value]);
     }
@@ -91,7 +109,6 @@ const CreateOpportunityPage = () => {
       }));
     }
 
-    e.target.value = "";
   };
 
   const removeCategory = (catToRemove) => {
@@ -102,22 +119,25 @@ const CreateOpportunityPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isCreatingOpportunity) return;
 
     const newErrors = {};
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const startDate = formData.startAt
-      ? new Date(formData.startAt)
-      : null;
+    const startDateTime = buildLocalDateTime(
+      formData.startDate,
+      formData.startTime,
+    );
 
-    const endDate = formData.endAt
-      ? new Date(formData.endAt)
-      : null;
+    const endDateTime = buildLocalDateTime(
+      formData.endDate,
+      formData.endTime,
+    );
 
     const deadlineDate = formData.applicationDeadline
-      ? new Date(formData.applicationDeadline)
+      ? new Date(`${formData.applicationDeadline}T00:00`)
       : null;
 
     // title validation
@@ -149,22 +169,28 @@ const CreateOpportunityPage = () => {
     }
 
     // start datetime validation
-    if (!formData.startAt) {
-      newErrors.startAt =
-        "Start date & time is required";
+    if (!formData.startDate) {
+      newErrors.startDate = "Start date is required";
+    }
+
+    if (!formData.startTime) {
+      newErrors.startTime = "Start time is required";
     }
 
     // end datetime validation
-    if (!formData.endAt) {
-      newErrors.endAt =
-        "End date & time is required";
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+    }
+
+    if (!formData.endTime) {
+      newErrors.endTime = "End time is required";
     } else if (
-      startDate &&
-      endDate &&
-      endDate < startDate
+      startDateTime &&
+      endDateTime &&
+      endDateTime <= startDateTime
     ) {
-      newErrors.endAt =
-        "End datetime cannot be before start datetime";
+      newErrors.endTime =
+        "End date and time must be after start date and time";
     }
 
     // volunteer capacity validation
@@ -195,41 +221,13 @@ const CreateOpportunityPage = () => {
       return;
     }
 
-    // auth check
-    if (!authUser?._id && !authUser?.id) {
-      toast.error(
-        "Authentication error: Session profile not verified."
-      );
-      return;
-    }
-
-    // backend payload processing
-    const rawStartDate = formData.startAt
-      ? formData.startAt.split("T")[0]
-      : "";
-
-    const startTime = formData.startAt
-      ? formData.startAt.split("T")[1]
-      : "";
-
-    const endTime = formData.endAt
-      ? formData.endAt.split("T")[1]
-      : "";
-
-    const computedTimeFrame =
-      startTime && endTime
-        ? `${startTime} - ${endTime}`
-        : "Flexible Session";
-
     const submissionData = {
       title: formData.title.trim(),
       details: formData.details.trim(),
       maxVolunteers: Number(formData.maxVolunteers),
-      fixedDate: rawStartDate,
-      timeFrame: computedTimeFrame,
-      startAt: new Date(formData.startAt).toISOString(),
-      endAt: new Date(formData.endAt).toISOString(),
-      applicationDeadline: new Date(formData.applicationDeadline).toISOString(),
+      startAt: startDateTime.toISOString(),
+      endAt: endDateTime.toISOString(),
+      applicationDeadline: deadlineDate.toISOString(),
       location: `${selectedState}, ${selectedCity}`,
       category: selectedCategory,
       organisationId:
@@ -251,8 +249,10 @@ const CreateOpportunityPage = () => {
           details: "",
           maxVolunteers: 1,
           applicationDeadline: "",
-          startAt: "",
-          endAt: "",
+          startDate: "",
+          startTime: "",
+          endDate: "",
+          endTime: "",
         });
 
         setSelectedState("");
@@ -274,28 +274,8 @@ const CreateOpportunityPage = () => {
     }
   };
 
-  if (isCheckingAuth && !authUser) {
-    return (
-      <div className="organisation-layout">
-        <OrganisationSidebar />
-
-        <div className="organisation-main-content flex flex-col items-center justify-center h-screen gap-4">
-          <Loader2
-            className="animate-spin text-blue-600"
-            size={40}
-          />
-
-          <p className="text-gray-600 font-medium">
-            Verifying authorization profile session...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="organisation-layout">
-      <OrganisationSidebar />
 
       <div className="organisation-main-content">
         <div className="organisation-create-page">
@@ -331,9 +311,14 @@ const CreateOpportunityPage = () => {
                 className="organisation-create-btn"
                 type="submit"
                 form="create-opportunity-form"
+                disabled={isCreatingOpportunity}
               >
-                <CheckCircle2 size={18} />
-                Publish Opportunity
+                {isCreatingOpportunity ? (
+                  <Loader2 size={18} className="organisation-submit-loader" />
+                ) : (
+                  <CheckCircle2 size={18} />
+                )}
+                {isCreatingOpportunity ? "Publishing..." : "Publish Opportunity"}
               </button>
             </div>
           </header>
@@ -452,28 +437,18 @@ const CreateOpportunityPage = () => {
                       Categories
                     </label>
 
-                    <select
-                      onChange={handleCategoryAdd}
-                      className={
-                        errors.category
-                          ? "org-profile-select error"
-                          : "org-profile-select"
+                    <CustomSelect
+                      value=""
+                      placeholder={
+                        availableCategories.length > 0
+                          ? "Add Category"
+                          : "All categories selected"
                       }
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        Add Category
-                      </option>
-
-                      {EVENT_CATEGORIES.map((cat) => (
-                        <option
-                          key={cat}
-                          value={cat}
-                        >
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
+                      options={availableCategories}
+                      onChange={handleCategoryAdd}
+                      className={errors.category ? "error" : ""}
+                      disabled={availableCategories.length === 0}
+                    />
 
                     <div className="selected-category-tags">
                       {selectedCategory.map((cat) => (
@@ -510,13 +485,12 @@ const CreateOpportunityPage = () => {
                       State
                     </label>
 
-                    <select
+                    <CustomSelect
                       value={selectedState}
-                      onChange={(e) => {
-                        setSelectedState(
-                          e.target.value
-                        );
-
+                      placeholder="Select State"
+                      options={malaysiaStates}
+                      onChange={(value) => {
+                        setSelectedState(value);
                         setSelectedCity("");
 
                         if (errors.location) {
@@ -526,25 +500,8 @@ const CreateOpportunityPage = () => {
                           }));
                         }
                       }}
-                      className={
-                        errors.location
-                          ? "error"
-                          : ""
-                      }
-                    >
-                      <option value="">
-                        Select State
-                      </option>
-
-                      {malaysiaStates.map((s) => (
-                        <option
-                          key={s}
-                          value={s}
-                        >
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                      className={errors.location ? "error" : ""}
+                    />
 
                     {errors.location && (
                       <p className="organisation-error-text">
@@ -560,12 +517,12 @@ const CreateOpportunityPage = () => {
                       City
                     </label>
 
-                    <select
+                    <CustomSelect
                       value={selectedCity}
-                      onChange={(e) => {
-                        setSelectedCity(
-                          e.target.value
-                        );
+                      placeholder={selectedState ? "Select City" : "Select a state first"}
+                      options={selectedCities}
+                      onChange={(value) => {
+                        setSelectedCity(value);
 
                         if (errors.location) {
                           setErrors((prev) => ({
@@ -574,76 +531,111 @@ const CreateOpportunityPage = () => {
                           }));
                         }
                       }}
+                      className={errors.location ? "error" : ""}
                       disabled={!selectedState}
-                      className={
-                        errors.location
-                          ? "error"
-                          : ""
-                      }
-                    >
-                      <option value="">
-                        Select City
-                      </option>
-
-                      {selectedCities.map((c) => (
-                        <option
-                          key={c}
-                          value={c}
-                        >
-                          {c}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
-                  {/* START */}
+                  {/* START DATE */}
                   <div className="organisation-form-group">
                     <label>
                       <CalendarDays size={16} />
-                      Start Date & Time
+                      Start Date
                     </label>
 
                     <input
-                      type="datetime-local"
-                      name="startAt"
-                      value={formData.startAt}
+                      type="date"
+                      name="startDate"
+                      value={formData.startDate}
                       onChange={handleChange}
                       className={
-                        errors.startAt
-                          ? "error"
-                          : ""
+                        errors.startDate
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 
-                    {errors.startAt && (
+                    {errors.startDate && (
                       <p className="organisation-error-text">
-                        {errors.startAt}
+                        {errors.startDate}
                       </p>
                     )}
                   </div>
 
-                  {/* END */}
+                  {/* START TIME */}
+                  <div className="organisation-form-group">
+                    <label>
+                      <Clock3 size={16} />
+                      Start Time
+                    </label>
+
+                    <CustomSelect
+                      value={formData.startTime}
+                      placeholder="Select start time"
+                      options={TIME_OPTIONS}
+                      onChange={(value) =>
+                        handleChange({
+                          target: { name: "startTime", value },
+                        })
+                      }
+                      className={errors.startTime ? "error" : ""}
+                    />
+
+                    {errors.startTime && (
+                      <p className="organisation-error-text">
+                        {errors.startTime}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* END DATE */}
                   <div className="organisation-form-group">
                     <label>
                       <CalendarDays size={16} />
-                      End Date & Time
+                      End Date
                     </label>
 
                     <input
-                      type="datetime-local"
-                      name="endAt"
-                      value={formData.endAt}
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate}
                       onChange={handleChange}
                       className={
-                        errors.endAt
-                          ? "error"
-                          : ""
+                        errors.endDate
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 
-                    {errors.endAt && (
+                    {errors.endDate && (
                       <p className="organisation-error-text">
-                        {errors.endAt}
+                        {errors.endDate}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* END TIME */}
+                  <div className="organisation-form-group">
+                    <label>
+                      <Clock3 size={16} />
+                      End Time
+                    </label>
+
+                    <CustomSelect
+                      value={formData.endTime}
+                      placeholder="Select end time"
+                      options={TIME_OPTIONS}
+                      onChange={(value) =>
+                        handleChange({
+                          target: { name: "endTime", value },
+                        })
+                      }
+                      className={errors.endTime ? "error" : ""}
+                    />
+
+                    {errors.endTime && (
+                      <p className="organisation-error-text">
+                        {errors.endTime}
                       </p>
                     )}
                   </div>
@@ -691,8 +683,8 @@ const CreateOpportunityPage = () => {
                       onChange={handleChange}
                       className={
                         errors.applicationDeadline
-                          ? "error"
-                          : ""
+                          ? "organisation-date-input error"
+                          : "organisation-date-input"
                       }
                     />
 

@@ -1,8 +1,11 @@
 import React from "react";
 import Badge from "./Badge";
 import {
+  AlertCircle,
+  File,
   Home,
   LogOut,
+  Search,
   User,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
@@ -12,12 +15,16 @@ import "../pages/Organisation/Organisation.css";
 
 const navItems = [
   { key: "homepage", path: "/organisation-dashboard", label: "Homepage", Icon: Home },
+  { key: "opportunity", path: "/organisation-dashboard/opportunities", label: "Opportunity", Icon: Search },
+  { key: "application", path: "/organisation-dashboard/applications", label: "Application", Icon: File },
+  { key: "report", path: "/organisation-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/organisation-dashboard/profile", label: "Profile", Icon: User },
+
 ];
 
 const OrganisationSidebar = () => {
   const { authUser, logout } = useAuthStore();
-  const { sidebarCollapsed, toggleSidebar, setCurrentTab } = useOrganisationStore();
+  const { sidebarCollapsed, toggleSidebar, setCurrentTab, currentTab } = useOrganisationStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,11 +33,7 @@ const OrganisationSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = location.pathname.startsWith("/organisation-dashboard/profile") ||
-    location.pathname.startsWith("/organisation-dashboard/edit-organisation-profile")
-    location.pathname.startsWith("/organisation-dashboard/edit-opportunity")
-      ? "profile"
-      : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || currentTab;
 
   return (
     <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>

@@ -12,19 +12,15 @@ const OrganisationProfile = () => {
     closedOpportunities,
     activeOpportunities,
     cancelledOpportunities,
-    getActiveOpportunities,
-    getClosedOpportunities,
-    getCancelledOpportunities,
+    getMyOpportunities,
   } = useOrganisationStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (authUser?._id) {
-      getActiveOpportunities(authUser._id);
-      getClosedOpportunities(authUser._id);
-      getCancelledOpportunities(authUser._id);
+      getMyOpportunities();
     }
-  }, [authUser?._id, getActiveOpportunities, getClosedOpportunities, getCancelledOpportunities]);
+  }, [authUser?._id, getMyOpportunities]);
 
   return (
     <div className="org-profile-page">
@@ -161,7 +157,11 @@ const OrganisationProfile = () => {
                     if (type === 'edit') {
                       navigate(`/organisation-dashboard/edit-opportunity/${id}`);
                     }
-                  }}
+                    if (type === 'view') {
+                      navigate(`/organisation-dashboard/view-opportunity/${id}`);
+                    }
+                  }
+                }
                 />
               ))
             ) : (
