@@ -14,30 +14,25 @@ export const updateOrgProfile = async (req, res) => {
       });
     }
 
-    // name cannot be empty
-    if (name !== undefined && name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Name cannot be empty",
-      });
-    }
-
-    // biodata cannot be empty
-    if (biodata !== undefined && biodata.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Biodata cannot be empty",
-      });
-    }
-
-    // biodata cannot be too long (TODO: check how long client wants a orgainsation biodata to be)
     if (
-      biodata !== undefined &&
-      (typeof biodata !== "string" || biodata.trim().length > 1000)
+      name !== undefined &&
+      (typeof name !== "string" || name.trim() === "")
     ) {
       return res.status(400).json({
         success: false,
-        message: "Biodata must be a string with at most 1000 characters",
+        message: "Name must be a non-empty string",
+      });
+    }
+
+    if (
+      biodata !== undefined &&
+      (typeof biodata !== "string" ||
+        biodata.trim() === "" ||
+        biodata.trim().length > 1000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Biodata must be a non-empty string with at most 1000 characters",
       });
     }
 
@@ -47,13 +42,6 @@ export const updateOrgProfile = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Organisation not found",
-      });
-    }
-
-    if (organisation.role !== "organisation") {
-      return res.status(403).json({
-        success: false,
-        message: "Only organisations can update their profile",
       });
     }
 
