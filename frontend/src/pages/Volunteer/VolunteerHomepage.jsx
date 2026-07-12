@@ -11,7 +11,6 @@ import {
   CalendarCheck,
 } from "lucide-react";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
-import { defaultAvailabilityPreview } from "../../lib/data";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import {
@@ -34,7 +33,6 @@ const VolunteerHomepage = () => {
     opportunitiesError,
     participationHistory,
     totalVolunteerHours,
-    recommendedFallbackOpportunities,
     volunteerApplications,
     isVolunteerApplicationsLoading,
     volunteerApplicationsError,
@@ -60,31 +58,17 @@ const VolunteerHomepage = () => {
     ? sortAvailabilitySlots(authUser.availability)
     : [];
 
-  const availabilityPreview = displayAvailability.length > 0
-    ? displayAvailability
-    : defaultAvailabilityPreview;
-
-  const availabilityForMatching = displayAvailability.length > 0
-    ? displayAvailability
-    : availabilityPreview;
-
   const activeOpportunities = opportunities.filter(
     (opportunity) => opportunity.status?.toLowerCase() === "active",
   );
 
-  const matchingOpportunities = activeOpportunities.filter((opportunity) =>
-    isOpportunityInsideAvailability(opportunity, availabilityForMatching),
-  );
+  const matchingOpportunities = displayAvailability.length > 0
+    ? activeOpportunities.filter((opportunity) =>
+        isOpportunityInsideAvailability(opportunity, displayAvailability),
+      )
+    : [];
 
-  const matchingFallbackOpportunities = recommendedFallbackOpportunities.filter((opportunity) =>
-    isOpportunityInsideAvailability(opportunity, availabilityForMatching),
-  );
-
-  const recommendedOpportunities = (
-    matchingOpportunities.length > 0
-      ? matchingOpportunities
-      : matchingFallbackOpportunities
-  ).slice(0, 2);
+  const recommendedOpportunities = matchingOpportunities.slice(0, 2);
 
   const applicationStatuses = volunteerApplications;
   const pendingApplicationsCount = applicationStatuses.filter(
@@ -132,7 +116,7 @@ const VolunteerHomepage = () => {
     {
       id: "availability-slots",
       label: "Availability Slots",
-      availability: availabilityPreview,
+      availability: displayAvailability,
       icon: CalendarDays,
       path: "/volunteer-dashboard/edit-profile",
     },
@@ -262,6 +246,10 @@ const VolunteerHomepage = () => {
               <p className="homepage-state-message">{opportunitiesError}</p>
             ) : isOpportunitiesLoading ? (
               <p className="homepage-state-message">Loading opportunities...</p>
+            ) : displayAvailability.length === 0 ? (
+              <p className="homepage-state-message">
+                Add your availability to receive matching opportunities.
+              </p>
             ) : recommendedOpportunities.length === 0 ? (
               <p className="homepage-state-message">
                 No opportunities fully match your availability yet.

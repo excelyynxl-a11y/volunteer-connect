@@ -94,11 +94,6 @@ export const volunteerAvailabilityDays = [
   'Sunday',
 ]
 
-export const defaultAvailabilityPreview = [
-  { dayOfWeek: 'Monday', startTime: '08:00', endTime: '19:00' },
-  { dayOfWeek: 'Wednesday', startTime: '10:00', endTime: '18:00' },
-]
-
 export const opportunityCategories = [
   'Environment',
   'Education',
