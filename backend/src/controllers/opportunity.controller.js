@@ -1,14 +1,35 @@
 import mongoose from "mongoose";
-import Opportunity from "../models/opportunity.model.js";
+import Opportunity, {
+  OPPORTUNITY_CATEGORIES,
+  OPPORTUNITY_STATUSES,
+} from "../models/opportunity.model.js";
 
-const validStatuses = ["active", "closed", "cancelled", "completed"];
+const STRING_LIMITS = {
+  title: 120,
+  details: 5000,
+  location: 300,
+  requirements: 2000,
+};
 
 const normalizeStringArray = (value) => {
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) return null;
+  if (value.some((item) => typeof item !== "string")) return null;
 
-  return value.map((item) => String(item).trim()).filter(Boolean);
+  return [...new Set(value.map((item) => item.trim()).filter(Boolean))];
 };
+
+const isValidHttpUrl = (value) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const isValidationError = (error) =>
+  error.name === "ValidationError" || error.name === "CastError";
 
 export const createOpportunity = async (req, res) => {
 
@@ -26,26 +47,36 @@ export const createOpportunity = async (req, res) => {
       images,
     } = req.body;
 
-    // title cannot be empty
-    if (!title || title.trim() === "") {
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      title.trim().length > STRING_LIMITS.title
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Title is required",
+        message: `Title must be a non-empty string with at most ${STRING_LIMITS.title} characters`,
       });
     }
 
-    // details cannot be empty
-    if (!details || details.trim() === "") {
+    if (
+      typeof details !== "string" ||
+      !details.trim() ||
+      details.trim().length > STRING_LIMITS.details
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Details are required",
+        message: `Details must be a non-empty string with at most ${STRING_LIMITS.details} characters`,
       });
     }
 
-    if (!location || location.trim() === "") {
+    if (
+      typeof location !== "string" ||
+      !location.trim() ||
+      location.trim().length > STRING_LIMITS.location
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Location is required",
+        message: `Location must be a non-empty string with at most ${STRING_LIMITS.location} characters`,
       });
     }
 
@@ -123,8 +154,20 @@ export const createOpportunity = async (req, res) => {
     }
 
     if (
+      normalizedCategory?.some(
+        (item) => !OPPORTUNITY_CATEGORIES.includes(item),
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Category contains an unsupported value",
+      });
+    }
+
+    if (
       requirements !== undefined &&
-      (typeof requirements !== "string" || requirements.trim().length > 2000)
+      (typeof requirements !== "string" ||
+        requirements.trim().length > STRING_LIMITS.requirements)
     ) {
       return res.status(400).json({
         success: false,
@@ -137,6 +180,14 @@ export const createOpportunity = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Images must be an array",
+      });
+    }
+
+
+    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
+      return res.status(400).json({
+        success: false,
+        message: "Images must contain valid HTTP or HTTPS URLs",
       });
     }
 
@@ -163,8 +214,9 @@ export const createOpportunity = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in createOpportunity controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
+    res.status(isValidationError(err) ? 400 : 500).json({ 
+      success: false,
+      message: isValidationError(err) ? err.message : "Internal Server Error",
     });
   }
 };
@@ -266,26 +318,39 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
-    // title cannot be empty
-    if (title !== undefined && title.trim() === "") {
+    if (
+      title !== undefined &&
+      (typeof title !== "string" ||
+        !title.trim() ||
+        title.trim().length > STRING_LIMITS.title)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Title cannot be empty",
+        message: `Title must be a non-empty string with at most ${STRING_LIMITS.title} characters`,
       });
     }
 
-    // details cannot be empty
-    if (details !== undefined && details.trim() === "") {
+    if (
+      details !== undefined &&
+      (typeof details !== "string" ||
+        !details.trim() ||
+        details.trim().length > STRING_LIMITS.details)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Details cannot be empty",
+        message: `Details must be a non-empty string with at most ${STRING_LIMITS.details} characters`,
       });
     }
 
-    if (location !== undefined && location.trim() === "") {
+    if (
+      location !== undefined &&
+      (typeof location !== "string" ||
+        !location.trim() ||
+        location.trim().length > STRING_LIMITS.location)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Location cannot be empty",
+        message: `Location must be a non-empty string with at most ${STRING_LIMITS.location} characters`,
       });
     }
 
@@ -334,7 +399,7 @@ export const updateOpportunity = async (req, res) => {
       }
     }
 
-    if (status !== undefined && !validStatuses.includes(status)) {
+    if (status !== undefined && !OPPORTUNITY_STATUSES.includes(status)) {
       return res.status(400).json({
         success: false,
         message: "Status must be one of: active, closed, cancelled, completed",
@@ -350,8 +415,20 @@ export const updateOpportunity = async (req, res) => {
     }
 
     if (
+      normalizedCategory?.some(
+        (item) => !OPPORTUNITY_CATEGORIES.includes(item),
+      )
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Category contains an unsupported value",
+      });
+    }
+
+    if (
       requirements !== undefined &&
-      (typeof requirements !== "string" || requirements.trim().length > 2000)
+      (typeof requirements !== "string" ||
+        requirements.trim().length > STRING_LIMITS.requirements)
     ) {
       return res.status(400).json({
         success: false,
@@ -367,12 +444,30 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
+
+    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
+      return res.status(400).json({
+        success: false,
+        message: "Images must contain valid HTTP or HTTPS URLs",
+      });
+    }
+
     const opportunity = await Opportunity.findById(id);
 
     if (!opportunity) {
       return res.status(404).json({
         success: false,
         message: "Opportunity not found",
+      });
+    }
+
+    if (
+      maxVolunteers !== undefined &&
+      Number(maxVolunteers) < opportunity.approvedVolunteersCount
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Max volunteers cannot be lower than the approved volunteer count",
       });
     }
 
@@ -459,8 +554,9 @@ export const updateOpportunity = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in updateOpportunity controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
+    res.status(isValidationError(err) ? 400 : 500).json({ 
+      success: false,
+      message: isValidationError(err) ? err.message : "Internal Server Error",
     });
   }
 };

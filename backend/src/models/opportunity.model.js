@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const CATEGORY_ENUM = [
+export const OPPORTUNITY_CATEGORIES = [
   "Environment",
   "Education",
   "Health",
@@ -13,7 +13,12 @@ const CATEGORY_ENUM = [
   "Other",
 ];
 
-const STATUS_ENUM = ["active", "closed", "cancelled", "completed"];
+export const OPPORTUNITY_STATUSES = [
+  "active",
+  "closed",
+  "cancelled",
+  "completed",
+];
 
 const opportunitySchema = new mongoose.Schema(
   {
@@ -94,7 +99,7 @@ const opportunitySchema = new mongoose.Schema(
       type: [
         {
           type: String,
-          enum: CATEGORY_ENUM,
+          enum: OPPORTUNITY_CATEGORIES,
         },
       ],
       default: [],
@@ -111,7 +116,7 @@ const opportunitySchema = new mongoose.Schema(
     // Opportunity lifecycle
     status: {
       type: String,
-      enum: STATUS_ENUM,
+      enum: OPPORTUNITY_STATUSES,
       default: "active",
       index: true,
     },
