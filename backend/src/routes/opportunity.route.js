@@ -7,17 +7,32 @@ import {
   updateOpportunity,
   getOrganisationOpportunities
 } from "../controllers/opportunity.controller.js";
-import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
+import { allowRoles, adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 router.get("/", getAllOpportunities);
 
-router.get("/my-opportunities", protectRoute, getOrganisationOpportunities);
+router.get(
+  "/my-opportunities",
+  protectRoute,
+  allowRoles("organisation"),
+  getOrganisationOpportunities,
+);
 
 router.get("/:id", getOpportunityById);
 router.delete("/:id", protectRoute, adminOnly, deleteOpportunity);
-router.put("/:id", protectRoute, updateOpportunity);
-router.post("/create", protectRoute, createOpportunity);
+router.put(
+  "/:id",
+  protectRoute,
+  allowRoles("organisation", "admin"),
+  updateOpportunity,
+);
+router.post(
+  "/create",
+  protectRoute,
+  allowRoles("organisation"),
+  createOpportunity,
+);
 
 export default router;

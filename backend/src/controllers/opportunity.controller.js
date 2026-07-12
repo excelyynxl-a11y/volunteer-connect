@@ -26,13 +26,6 @@ export const createOpportunity = async (req, res) => {
       images,
     } = req.body;
 
-    if (req.user.role !== "organisation") {
-      return res.status(403).json({
-        success: false,
-        message: "Only organisations can create opportunities",
-      });
-    }
-
     // title cannot be empty
     if (!title || title.trim() === "") {
       return res.status(400).json({
@@ -508,13 +501,6 @@ export const deleteOpportunity = async (req, res) => {
 
 export const getOrganisationOpportunities = async (req, res) => {
   try {
-    if (req.user.role !== "organisation") {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied. Authorised for organisations only.",
-      });
-    }
-
     const opportunities = await Opportunity.find({ organisationId: req.user._id });
 
     res.status(200).json({
