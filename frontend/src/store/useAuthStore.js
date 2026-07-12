@@ -5,7 +5,7 @@ import { create } from "zustand";
 const BASE_URL =
   import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
 
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,

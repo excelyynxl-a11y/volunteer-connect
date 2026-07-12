@@ -1,16 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
-import { malaysiaStateCities } from "../lib/data";
 import toast from 'react-hot-toast';
-
-const locationFrom = (state, city) => {
-  const stateCities = malaysiaStateCities[state] || [];
-  const resolvedCity = stateCities.includes(city)
-    ? city
-    : stateCities[0] || city;
-
-  return `${state}, ${resolvedCity}`;
-};
 
 export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",

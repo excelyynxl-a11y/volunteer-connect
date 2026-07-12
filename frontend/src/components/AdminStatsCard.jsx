@@ -31,7 +31,7 @@ const AdminStatsCard = ({
       style={{ cursor: "pointer" }}
     >
       <div className="stat-icon">
-        <Icon size={22} />
+        {React.createElement(Icon, { size: 22 })}
       </div>
       <p className="stat-value">
         {value}

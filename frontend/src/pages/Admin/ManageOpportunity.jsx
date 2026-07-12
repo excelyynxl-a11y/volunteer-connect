@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowUpDown, AlertCircle, Search } from "lucide-react";
+import { ArrowUpDown, AlertCircle, Loader2, Search } from "lucide-react";
 import ManageOpportunityCard from "../../components/ManageOpportunityCard";
 import PreviewOpportunity from "../../components/PreviewOpportunity";
 import { useAdminStore } from "../../store/useAdminStore";
@@ -31,6 +31,7 @@ const ManageOpportunity = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("all");
+  const [dateFilterReferenceTime, setDateFilterReferenceTime] = useState(null);
   const [sortDirection, setSortDirection] = useState("descending");
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
@@ -76,9 +77,10 @@ const ManageOpportunity = () => {
     }
 
     if (dateFilter !== "all") {
-      const now = Date.now();
       const daysAgo = dateFilter === "day" ? 1 : dateFilter === "week" ? 7 : 30;
-      const cutoff = new Date(now - daysAgo * 24 * 60 * 60 * 1000);
+      const cutoff = new Date(
+        dateFilterReferenceTime - daysAgo * 24 * 60 * 60 * 1000,
+      );
 
       result = result.filter((opportunity) => {
         const publishedAt = opportunity.publishedAt || opportunity.createdAt;
@@ -101,6 +103,7 @@ const ManageOpportunity = () => {
     statusFilter,
     categoryFilter,
     dateFilter,
+    dateFilterReferenceTime,
   ]);
 
   const handlePreview = (opportunity) => {
@@ -162,7 +165,10 @@ const ManageOpportunity = () => {
           <select
             className="admin-table-select"
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            onChange={(e) => {
+              setDateFilter(e.target.value);
+              setDateFilterReferenceTime(Date.now());
+            }}
           >
             {DATE_FILTER_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -195,6 +201,7 @@ const ManageOpportunity = () => {
               setStatusFilter("All");
               setCategoryFilter("All");
               setDateFilter("all");
+              setDateFilterReferenceTime(null);
               setSortDirection("descending");
             }}
           >
@@ -203,7 +210,12 @@ const ManageOpportunity = () => {
 
         </div>
 
-        {filteredOpportunities.length > 0 ? (
+        {isOpportunitiesLoading ? (
+          <div className="admin-empty">
+            <Loader2 className="admin-empty-icon" />
+            <h3>Loading opportunities</h3>
+          </div>
+        ) : filteredOpportunities.length > 0 ? (
           <div className="admin-volunteer-card-list admin-opportunity-card-list">
             {filteredOpportunities.map((opportunity) => (
               <ManageOpportunityCard

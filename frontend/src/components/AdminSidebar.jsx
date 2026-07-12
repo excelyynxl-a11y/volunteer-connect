@@ -73,7 +73,7 @@ const AdminSidebar = () => {
             }}
             title={sidebarCollapsed ? label : undefined}
           >
-            <Icon size={20} />
+            {React.createElement(Icon, { size: 20 })}
             {!sidebarCollapsed && <span>{label}</span>}
           </button>
         ))}
