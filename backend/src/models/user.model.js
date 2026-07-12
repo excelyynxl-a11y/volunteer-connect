@@ -9,8 +9,8 @@ const baseOptions = {
 // Base User Schema (Only fields that EVERYONE shares)
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
     approvalStatus: {
       type: String,
@@ -100,12 +100,6 @@ const Volunteer = User.discriminator(
       default: "",
       trim: true,
     },
-
-    approvalStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
   }),
 );
 
@@ -113,7 +107,7 @@ const Volunteer = User.discriminator(
 const Organisation = User.discriminator(
   "organisation",
   new mongoose.Schema({
-    biodata: { type: String },
+    biodata: { type: String, trim: true, maxlength: 1000 },
   }),
 );
 
