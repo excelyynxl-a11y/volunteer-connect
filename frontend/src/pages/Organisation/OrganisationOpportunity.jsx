@@ -16,7 +16,12 @@ const TIME_OPTIONS = [
 
 const OrganisationOpportunity = () => {
   const navigate = useNavigate();
-  const { allMyOpportunities, getAllMyOpportunities } = useOrganisationStore();
+  const {
+    allMyOpportunities,
+    getAllMyOpportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
+  } = useOrganisationStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -43,7 +48,6 @@ const OrganisationOpportunity = () => {
       result = result.filter((opp) => {
         const text = [
           opp.title,
-          opp.detail,
           opp.details,
           opp.location,
           opp.requirements,
@@ -169,7 +173,19 @@ const OrganisationOpportunity = () => {
         </div>
 
         <div className="org-opp-list">
-          {filtered.length > 0 ? (
+          {isOpportunitiesLoading ? (
+            <div className="organisation-empty">
+              <Inbox size={40} className="organisation-empty-icon" />
+              <h3>Loading opportunities</h3>
+              <p>Please wait while your postings are loaded.</p>
+            </div>
+          ) : opportunitiesError ? (
+            <div className="organisation-empty">
+              <Inbox size={40} className="organisation-empty-icon" />
+              <h3>Unable to load opportunities</h3>
+              <p>{opportunitiesError}</p>
+            </div>
+          ) : filtered.length > 0 ? (
             filtered.map((opp) => (
               <OpportunityCard
                 key={opp._id}

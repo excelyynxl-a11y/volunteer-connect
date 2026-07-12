@@ -86,7 +86,7 @@ const OpportunityRow = ({
         </div>
         
         <p style={{ margin: 0, fontSize: isCancelled ? 12.5 : 13 }}>
-          {opportunity.detail || opportunity.details}
+          {opportunity.details}
         </p>
         
         <div className="org-home-opportunity-meta" style={{ marginTop: '2px' }}>

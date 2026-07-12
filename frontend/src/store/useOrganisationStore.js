@@ -3,17 +3,10 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 
-const normaliseOpportunity = (opportunity) => ({
-  ...opportunity,
-  detail: opportunity.detail ?? opportunity.details ?? "",
-});
-
 const getOpportunitiesFromResponse = (responseData) => {
-  const opportunities = Array.isArray(responseData)
+  return Array.isArray(responseData)
     ? responseData
     : responseData?.opportunities || responseData?.data || [];
-
-  return opportunities.map(normaliseOpportunity);
 };
 
 const splitOpportunitiesByStatus = (opportunities) => ({
@@ -39,7 +32,8 @@ export const useOrganisationStore = create((set, get) => ({
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   // --- Loading States ---
-  isLoading: false,
+  isOpportunitiesLoading: false,
+  opportunitiesError: "",
   isUpdatingOrganisationProfile: false,
   isUpdatingOpportunity: false,
   isCreatingOpportunity: false,
@@ -90,7 +84,7 @@ export const useOrganisationStore = create((set, get) => ({
     try {
       const res = await axiosInstance.put(`/opportunities/${opportunityId}`, opportunityData);
       
-      const updatedOpp = normaliseOpportunity(res.data?.data ?? res.data ?? opportunityData);
+      const updatedOpp = res.data?.data ?? res.data ?? opportunityData;
       toast.success("Opportunity updated successfully.");
 
       set((state) => {
@@ -151,7 +145,7 @@ export const useOrganisationStore = create((set, get) => ({
     set({ isCreatingOpportunity: true });
     try {
       const res = await axiosInstance.post("/opportunities/create", opportunityData);
-      const newOpp = normaliseOpportunity(res.data?.data ?? res.data);
+      const newOpp = res.data?.data ?? res.data;
       
       // Add the newly created opportunity to the top of the active list
       set((state) => ({
@@ -174,6 +168,7 @@ export const useOrganisationStore = create((set, get) => ({
   },
 
   getMyOpportunities: async () => {
+    set({ isOpportunitiesLoading: true, opportunitiesError: "" });
     try {
       const response = await axiosInstance.get("/opportunities/my-opportunities");
       const opportunities = getOpportunitiesFromResponse(response.data);
@@ -181,14 +176,23 @@ export const useOrganisationStore = create((set, get) => ({
         allMyOpportunities: opportunities,
         ...splitOpportunitiesByStatus(opportunities),
       });
+      return { success: true, data: opportunities };
     } catch (error) {
-      console.error("Error fetching organisation opportunities:", error);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load opportunities";
+
       set({
         activeOpportunities: [],
         closedOpportunities: [],
         cancelledOpportunities: [],
         allMyOpportunities: [],
+        opportunitiesError: message,
       });
+      return { success: false, error: message };
+    } finally {
+      set({ isOpportunitiesLoading: false });
     }
   },
 

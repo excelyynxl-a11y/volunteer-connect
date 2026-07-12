@@ -13,7 +13,7 @@ const formatDBDateForInput = (dateString) => {
 
 const getInitialFormData = (opportunity) => ({
     title: opportunity?.title || "",
-    details: opportunity?.details || opportunity?.detail || "",
+    details: opportunity?.details || "",
     startAt: formatDBDateForInput(opportunity?.startAt),
     endAt: formatDBDateForInput(opportunity?.endAt),
     maxVolunteers: opportunity?.maxVolunteers || 0,

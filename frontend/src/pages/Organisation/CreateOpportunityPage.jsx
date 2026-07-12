@@ -20,7 +20,6 @@ import {
 } from "../../lib/data";
 import CustomSelect from "../../components/CustomSelect";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
-import { useAuthStore } from "../../store/useAuthStore.js";
 import toast from "react-hot-toast";
 
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
@@ -42,7 +41,6 @@ const buildLocalDateTime = (date, time) => {
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
   const { createOpportunity, isCreatingOpportunity, setCurrentTab } = useOrganisationStore();
-  const { authUser } = useAuthStore();
 
   useEffect(() => {
     setCurrentTab('opportunity')
@@ -230,8 +228,6 @@ const CreateOpportunityPage = () => {
       applicationDeadline: deadlineDate.toISOString(),
       location: `${selectedState}, ${selectedCity}`,
       category: selectedCategory,
-      organisationId:
-        authUser._id || authUser.id,
     };
 
     try {
