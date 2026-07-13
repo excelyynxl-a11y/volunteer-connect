@@ -77,7 +77,10 @@ export const useVolunteerStore = create((set) => ({
       const response = await axiosInstance.get(
         `/volunteer/profile/${volunteerId}/past-experience`,
       );
-      const history = mapVolunteerPastExperience(response.data?.data ?? []);
+      const experienceData = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
+      const history = mapVolunteerPastExperience(experienceData);
 
       set({
         participationHistory: history,
@@ -109,7 +112,9 @@ export const useVolunteerStore = create((set) => ({
 
     try {
       const response = await axiosInstance.get("/opportunities");
-      const opportunities = response.data?.data ?? [];
+      const opportunities = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
 
       set({
         opportunities,

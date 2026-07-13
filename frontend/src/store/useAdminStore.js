@@ -73,12 +73,22 @@ export const useAdminStore = create((set, get) => ({
     set({ isUsersLoading: true });
     
     try {
-        const res = await axiosInstance.get('/user/organisations');
-        set({ organisations: res.data.organisations });
+      const res = await axiosInstance.get('/user/organisations');
+      const organisations = Array.isArray(res.data?.organisations)
+        ? res.data.organisations
+        : [];
+      set({ organisations });
+      return { success: true, organisations };
     } catch (error) {
-        toast.error(error.response.data.message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load organisations";
+      set({ organisations: [] });
+      toast.error(message);
+      return { success: false, error: message };
     } finally {
-        set({ isUsersLoading: false });
+      set({ isUsersLoading: false });
     }
 
   },
@@ -87,12 +97,22 @@ export const useAdminStore = create((set, get) => ({
     set({ isUsersLoading: true });
     
     try {
-        const res = await axiosInstance.get('/user/volunteers');
-        set({ volunteers: res.data.volunteers });
+      const res = await axiosInstance.get('/user/volunteers');
+      const volunteers = Array.isArray(res.data?.volunteers)
+        ? res.data.volunteers
+        : [];
+      set({ volunteers });
+      return { success: true, volunteers };
     } catch (error) {
-        toast.error(error.response.data.message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load volunteers";
+      set({ volunteers: [] });
+      toast.error(message);
+      return { success: false, error: message };
     } finally {
-        set({ isUsersLoading: false });
+      set({ isUsersLoading: false });
     }
   },
 
