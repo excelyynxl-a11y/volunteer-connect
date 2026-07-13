@@ -40,33 +40,6 @@ const calculateTotalVolunteerHours = (history) =>
     .reduce((total, activity) => total + activity.loggedHours, 0)
     .toFixed(1)}h`;
 
-const mockVolunteerApplications = [
-  {
-    _id: "mock-application-community-garden",
-    opportunityTitle: "Community Garden Setup",
-    location: "Semenyih Community Garden",
-    startAt: "2026-06-08T09:00:00",
-    endAt: "2026-06-08T13:00:00",
-    status: "approved",
-  },
-  {
-    _id: "mock-application-food-bank",
-    opportunityTitle: "Food Bank Helper",
-    location: "Community Food Bank",
-    startAt: "2026-06-03T10:00:00",
-    endAt: "2026-06-03T14:00:00",
-    status: "pending",
-  },
-  {
-    _id: "mock-application-recycling",
-    opportunityTitle: "Recycling Drive Sorter",
-    location: "Butterworth Community Hall",
-    startAt: "2026-06-13T09:00:00",
-    endAt: "2026-06-13T12:30:00",
-    status: "rejected",
-  },
-];
-
 export const useVolunteerStore = create((set) => ({
   currentTab: "homepage",
   sidebarCollapsed: false,
@@ -79,9 +52,6 @@ export const useVolunteerStore = create((set) => ({
   opportunities: [],
   isOpportunitiesLoading: false,
   opportunitiesError: "",
-  volunteerApplications: [],
-  isVolunteerApplicationsLoading: false,
-  volunteerApplicationsError: "",
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -159,32 +129,6 @@ export const useVolunteerStore = create((set) => ({
 
       return { success: false, error: message };
     }
-  },
-
-  getVolunteerApplications: async (volunteerId) => {
-    set({
-      isVolunteerApplicationsLoading: true,
-      volunteerApplicationsError: "",
-    });
-
-    if (!volunteerId) {
-      set({
-        volunteerApplications: [],
-        isVolunteerApplicationsLoading: false,
-        volunteerApplicationsError:
-          "Unable to load applications because no volunteer ID is available.",
-      });
-      return { success: false };
-    }
-
-    const applications = mockVolunteerApplications;
-
-    set({
-      volunteerApplications: applications,
-      isVolunteerApplicationsLoading: false,
-    });
-
-    return { success: true, applications };
   },
 
   updateVolunteerProfile: async (volunteerId, profilePayload) => {

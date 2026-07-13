@@ -4,11 +4,8 @@ import {
   ArrowRight,
   Clock,
   CheckCircle2,
-  ClipboardList,
   CalendarDays,
-  CalendarClock,
   MapPin,
-  CalendarCheck,
 } from "lucide-react";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -22,6 +19,7 @@ import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getOpportunityImage,
+  getUpcomingOpportunities,
 } from "../../lib/opportunity";
 import "./Volunteer.css";
 
@@ -35,11 +33,9 @@ const VolunteerHomepage = () => {
     opportunitiesError,
     participationHistory,
     totalVolunteerHours,
-    volunteerApplications,
-    isVolunteerApplicationsLoading,
-    volunteerApplicationsError,
+    isLoading,
+    loadError,
     getVolunteerPastExperience,
-    getVolunteerApplications,
     getAllOpportunities,
   } = useVolunteerStore();
 
@@ -47,12 +43,10 @@ const VolunteerHomepage = () => {
     getAllOpportunities();
     if (authUser?._id) {
       getVolunteerPastExperience(authUser._id);
-      getVolunteerApplications(authUser._id);
     }
   }, [
     authUser?._id,
     getAllOpportunities,
-    getVolunteerApplications,
     getVolunteerPastExperience,
   ]);
 
@@ -64,26 +58,16 @@ const VolunteerHomepage = () => {
     (opportunity) => opportunity.status?.toLowerCase() === "active",
   );
 
+  const upcomingOpportunities = getUpcomingOpportunities(activeOpportunities);
+
   const matchingOpportunities = displayAvailability.length > 0
-    ? activeOpportunities.filter((opportunity) =>
+    ? upcomingOpportunities.filter((opportunity) =>
         isOpportunityInsideAvailability(opportunity, displayAvailability),
       )
     : [];
 
   const recommendedOpportunities = matchingOpportunities.slice(0, 2);
 
-  const applicationStatuses = volunteerApplications;
-  const pendingApplicationsCount = applicationStatuses.filter(
-    (application) => application.status === "pending",
-  ).length;
-  const upcomingApprovedApplications = applicationStatuses.filter(
-    (application) =>
-      application.status === "approved" &&
-      (!application.startAt || new Date(application.startAt) >= new Date()),
-  ).sort((firstApplication, secondApplication) =>
-    new Date(firstApplication.startAt || 0) - new Date(secondApplication.startAt || 0),
-  );
-  const nextShift = upcomingApprovedApplications[0];
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
@@ -94,26 +78,26 @@ const VolunteerHomepage = () => {
     {
       id: "volunteer-hours",
       label: "Volunteer Hours",
-      value: totalVolunteerHours || "0.0h",
-      description: "Total hours contributed",
+      value: isLoading || loadError ? "—" : totalVolunteerHours || "0.0h",
+      description: isLoading
+        ? "Loading volunteer history..."
+        : loadError
+          ? "History unavailable"
+          : "Total hours contributed",
       icon: Clock,
       path: "/volunteer-dashboard/profile",
     },
     {
       id: "past-participations",
       label: "Events Completed",
-      value: String(participationHistory.length || 0),
-      description: "Great job! Keep it up.",
+      value: isLoading || loadError ? "—" : String(participationHistory.length),
+      description: isLoading
+        ? "Loading volunteer history..."
+        : loadError
+          ? "History unavailable"
+          : "Completed participation records",
       icon: CheckCircle2,
       path: "/volunteer-dashboard/profile",
-    },
-    {
-      id: "pending-applications",
-      label: "Pending Applications",
-      value: String(pendingApplicationsCount),
-      description: "Awaiting review",
-      icon: ClipboardList,
-      path: "/volunteer-dashboard/opportunities",
     },
     {
       id: "availability-slots",
@@ -161,12 +145,16 @@ const VolunteerHomepage = () => {
                     <span>{card.label}</span>
 
                     <div className="summary-availability-list">
-                      {visibleAvailability.map((slot) => (
-                        <p key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`}>
-                          <b>{shortDay(slot.dayOfWeek)}</b>
-                          {slot.startTime} - {slot.endTime}
-                        </p>
-                      ))}
+                      {visibleAvailability.length ? (
+                        visibleAvailability.map((slot) => (
+                          <p key={`${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`}>
+                            <b>{shortDay(slot.dayOfWeek)}</b>
+                            {slot.startTime} - {slot.endTime}
+                          </p>
+                        ))
+                      ) : (
+                        <p>No availability added.</p>
+                      )}
                     </div>
 
                     <div className="availability-summary-actions">
@@ -225,13 +213,25 @@ const VolunteerHomepage = () => {
           })}
         </div>
 
+        {loadError && (
+          <div className="homepage-history-error" role="alert">
+            <span>{loadError}</span>
+            <button
+              type="button"
+              onClick={() => getVolunteerPastExperience(authUser?._id)}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         <div className="volunteer-homepage-main-grid">
           <section className="profile-panel recommended-opportunities-panel">
             <div className="section-heading">
               <div>
                 <h2>Recommended Opportunities</h2>
                 <p>
-                  Opportunities that match your availability will appear here.
+                  Upcoming opportunities that match your availability appear here.
                 </p>
               </div>
 
@@ -245,7 +245,10 @@ const VolunteerHomepage = () => {
             </div>
 
             {opportunitiesError ? (
-              <p className="homepage-state-message">{opportunitiesError}</p>
+              <div className="homepage-state-message" role="alert">
+                <p>{opportunitiesError}</p>
+                <button type="button" onClick={getAllOpportunities}>Retry</button>
+              </div>
             ) : isOpportunitiesLoading ? (
               <p className="homepage-state-message">Loading opportunities...</p>
             ) : displayAvailability.length === 0 ? (
@@ -254,7 +257,7 @@ const VolunteerHomepage = () => {
               </p>
             ) : recommendedOpportunities.length === 0 ? (
               <p className="homepage-state-message">
-                No opportunities fully match your availability yet.
+                No upcoming opportunities match your availability yet.
               </p>
             ) : (
               <div className="homepage-opportunity-list">
@@ -318,63 +321,6 @@ const VolunteerHomepage = () => {
             )}
           </section>
 
-          <aside className="homepage-side-column">
-            <section className="homepage-side-card">
-              <div className="homepage-side-icon">
-                <CalendarClock size={23} />
-              </div>
-              <div className="homepage-side-content">
-                <h3>Next Volunteer Shift</h3>
-                <strong>{nextShift?.opportunityTitle || "No shift scheduled"}</strong>
-                <p>
-                  {nextShift?.startAt
-                    ? formatOpportunityDate(nextShift.startAt)
-                    : "Date to be confirmed"}
-                </p>
-                <p>
-                  {formatOpportunityTimeRange(
-                    nextShift?.startAt,
-                    nextShift?.endAt,
-                    "Time to be confirmed",
-                  )}
-                </p>
-                {nextShift?.location && (
-                  <p className="homepage-location">
-                    <MapPin size={14} />
-                    {nextShift.location}
-                  </p>
-                )}
-              </div>
-              <button type="button" onClick={handleSeeMore}>View Details</button>
-            </section>
-
-            <section className="homepage-side-card homepage-status-card">
-              <div className="homepage-side-icon">
-                <CalendarCheck size={23} />
-              </div>
-              <div className="homepage-side-content">
-                <h3>Application Status</h3>
-                {volunteerApplicationsError ? (
-                  <p>{volunteerApplicationsError}</p>
-                ) : isVolunteerApplicationsLoading ? (
-                  <p>Loading applications...</p>
-                ) : applicationStatuses.length > 0 ? (
-                  <div className="homepage-application-list">
-                    {applicationStatuses.map((application) => (
-                      <p key={application._id}>
-                        {application.opportunityTitle}
-                        <span className={`application-pill ${application.status}`}>
-                          {application.status}
-                        </span>
-                      </p>
-                    ))}
-                  </div>
-                ) : (
-                  <p>No applications yet.</p>
-                )}
-              </div>
-            </section>
-          </aside>
         </div>
       </div>
 
