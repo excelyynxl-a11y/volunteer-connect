@@ -1,5 +1,42 @@
 import { Organisation } from "../models/user.model.js";
 import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
+import mongoose from "mongoose";
+
+export const getOrgProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    const organisation = await Organisation.findOne({
+      _id: id,
+      approvalStatus: "approved",
+    }).select("name avatar biodata");
+
+    if (!organisation) {
+      return res.status(404).json({
+        success: false,
+        message: "Organisation not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: organisation,
+    });
+  } catch (error) {
+    console.log("Error in getOrgProfile controller: ", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 export const updateOrgProfile = async (req, res) => {
   try {
