@@ -62,22 +62,6 @@ const uploadAvatarToCloudinary = async (fileBuffer) => {
   return result.secure_url;
 };
 
-// Get all volunteers (Admin only)
-export const getVolunteers = async (req, res) => {
-  try {
-    const volunteers = await Volunteer.find().select("-password");
-
-    res.status(200).json({
-      success: true,
-      count: volunteers.length,
-      data: volunteers,
-    });
-  } catch (err) {
-    console.log("Error in getVolunteers controller: ", err.message);
-    res.status(500).json({ message: err.message });
-  }
-};
-
 // Get volunteer profile
 export const getVolunteerProfile = async (req, res) => {
   try {
