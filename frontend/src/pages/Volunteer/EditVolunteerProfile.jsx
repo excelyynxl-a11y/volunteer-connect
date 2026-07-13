@@ -17,7 +17,11 @@ import {
   volunteerAvailabilityTimes,
   volunteerSkillOptions,
 } from '../../lib/data'
-import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
+import {
+  getNewAvailabilitySlotError,
+  sortAvailabilitySlots,
+} from '../../lib/availability'
+import { formatApprovalStatus, getInitials } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 
@@ -28,11 +32,6 @@ const initialEditableProfile = {
   ageGroup: '',
   biodata: '',
 }
-
-const isSameAvailabilitySlot = (leftSlot, rightSlot) =>
-  leftSlot.dayOfWeek === rightSlot.dayOfWeek &&
-  leftSlot.startTime === rightSlot.startTime &&
-  leftSlot.endTime === rightSlot.endTime
 
 // Volunteer edit profile page
 const EditVolunteerProfile = () => {
@@ -146,20 +145,16 @@ const EditVolunteerProfile = () => {
       ...currentAvailability,
       [name]: value,
     }))
+    setErrors((currentErrors) => {
+      if (!currentErrors.availability) return currentErrors
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.availability
+      return nextErrors
+    })
   }
 
   const addAvailability = () => {
     const { dayOfWeek, startTime, endTime, preference } = availability
-
-    if (!dayOfWeek || !startTime || !endTime) {
-      setErrors((prev) => ({ ...prev, availability: 'Please fill in all availability fields.' }))
-      return
-    }
-
-    if (startTime >= endTime) {
-      setErrors((prev) => ({ ...prev, availability: 'End time must be later than start time.' }))
-      return
-    }
 
     const newSlot = {
       dayOfWeek,
@@ -168,8 +163,13 @@ const EditVolunteerProfile = () => {
       preference,
     }
 
-    if (availabilitySlots.some((slot) => isSameAvailabilitySlot(slot, newSlot))) {
-      setErrors((prev) => ({ ...prev, availability: 'This availability time range has already been added.' }))
+    const availabilityError = getNewAvailabilitySlotError(
+      newSlot,
+      availabilitySlots,
+    )
+
+    if (availabilityError) {
+      setErrors((prev) => ({ ...prev, availability: availabilityError }))
       return
     }
 

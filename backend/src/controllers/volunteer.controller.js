@@ -2,27 +2,13 @@ import { Volunteer } from "../models/user.model.js";
 import Application from "../models/application.model.js";
 import mongoose from "mongoose";
 import cloudinary from "../lib/cloudinary.js";
+import {
+  getAvailabilityValidationError,
+  normalizeAvailability,
+  sortAvailability,
+} from "../lib/availability.js";
 
 const validAgeGroups = ["21-30", "31-40", "41-50", "51-60", "60+"];
-
-const validDays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
-const validAvailabilityPreferences = ["available", "preferred"];
-
-const time24HourRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const getMinutesFromTime = (timeValue) => {
-  const [hours, minutes] = timeValue.split(":").map(Number);
-  return hours * 60 + minutes;
-};
 
 const normalizeSkills = (skills) => {
   return [
@@ -32,36 +18,6 @@ const normalizeSkills = (skills) => {
         .filter(Boolean),
     ),
   ];
-};
-
-const normalizeAvailability = (availability) => {
-  return availability.map((slot) => ({
-    dayOfWeek: slot.dayOfWeek,
-    startTime: String(slot.startTime).trim(),
-    endTime: String(slot.endTime).trim(),
-    preference: slot.preference || "available",
-  }));
-};
-
-const isValidAvailabilitySlot = (slot) => {
-  if (
-    !(
-      slot &&
-      validDays.includes(slot.dayOfWeek) &&
-      typeof slot.startTime === "string" &&
-      typeof slot.endTime === "string" &&
-      time24HourRegex.test(slot.startTime.trim()) &&
-      time24HourRegex.test(slot.endTime.trim()) &&
-      validAvailabilityPreferences.includes(slot.preference || "available")
-    )
-  ) {
-    return false;
-  }
-
-  return (
-    getMinutesFromTime(slot.startTime.trim()) <
-    getMinutesFromTime(slot.endTime.trim())
-  );
 };
 
 const parseArrayField = (fieldValue) => {
@@ -255,15 +211,15 @@ export const updateVolunteerProfile = async (req, res) => {
       parsedAvailability !== undefined
         ? normalizeAvailability(parsedAvailability)
         : undefined;
+    const availabilityValidationError =
+      normalizedAvailability !== undefined
+        ? getAvailabilityValidationError(normalizedAvailability)
+        : "";
 
-    if (
-      normalizedAvailability !== undefined &&
-      !normalizedAvailability.every(isValidAvailabilitySlot)
-    ) {
+    if (availabilityValidationError) {
       return res.status(400).json({
         success: false,
-        message:
-          "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference",
+        message: availabilityValidationError,
       });
     }
 
@@ -293,7 +249,7 @@ export const updateVolunteerProfile = async (req, res) => {
     }
 
     if (normalizedAvailability !== undefined) {
-      volunteer.availability = normalizedAvailability;
+      volunteer.availability = sortAvailability(normalizedAvailability);
     }
 
     if (req.file) {

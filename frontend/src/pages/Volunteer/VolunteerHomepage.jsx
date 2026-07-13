@@ -14,12 +14,14 @@ import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import {
+  isOpportunityInsideAvailability,
+  sortAvailabilitySlots,
+} from "../../lib/availability";
+import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getOpportunityImage,
-  isOpportunityInsideAvailability,
   shortDay,
-  sortAvailabilitySlots,
 } from "../../lib/utils";
 import "./Volunteer.css";
 
