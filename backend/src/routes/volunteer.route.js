@@ -10,7 +10,7 @@ import { uploadAvatar } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 // Get volunteer profile
-router.get("/profile/:id", getVolunteerProfile);
+router.get("/profile/:id", protectRoute, getVolunteerProfile);
 
 // Update volunteer profile
 router.put(
@@ -22,7 +22,11 @@ router.put(
 );
 
 // Get volunteer past experience
-router.get("/profile/:id/past-experience", getVolunteerPastExperience);
+router.get(
+  "/profile/:id/past-experience",
+  protectRoute,
+  getVolunteerPastExperience,
+);
 
 
 export default router;
