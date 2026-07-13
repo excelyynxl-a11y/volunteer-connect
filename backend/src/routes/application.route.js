@@ -6,7 +6,7 @@ import {
   getAllApplications,
   getApplicationById,
   getMyApplications,
-  getOpportunityApplications,
+  getMyOrganisationApplications,
   rejectApplication,
   withdrawApplication,
 } from "../controllers/application.controller.js";
@@ -27,9 +27,9 @@ router.get(
   getMyApplications,
 );
 router.get(
-  "/opportunity/:opportunityId",
-  allowRoles("organisation", "admin"),
-  getOpportunityApplications,
+  "/organisation/me",
+  allowRoles("organisation"),
+  getMyOrganisationApplications,
 );
 router.post(
   "/create",
@@ -40,12 +40,12 @@ router.get("/:id", getApplicationById);
 router.delete("/:id", adminOnly, deleteApplication);
 router.patch(
   "/:id/approve",
-  allowRoles("organisation", "admin"),
+  allowRoles("organisation"),
   approveApplication,
 );
 router.patch(
   "/:id/reject",
-  allowRoles("organisation", "admin"),
+  allowRoles("organisation"),
   rejectApplication,
 );
 router.patch(

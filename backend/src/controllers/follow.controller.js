@@ -9,6 +9,8 @@ const sendNotImplemented = (res, feature) =>
  * Params: { organisationId: string }
  * Body: none
  * Success: { success, message, data: follow }
+ * Rules: allow only volunteers; the organisation must be approved; an existing
+ * follow relationship must not create a duplicate record.
  */
 export const followOrganisation = (req, res) => {
   return sendNotImplemented(res, "Following an organisation");
@@ -19,6 +21,8 @@ export const followOrganisation = (req, res) => {
  * Params: { organisationId: string }
  * Body: none
  * Success: { success, message }
+ * Rules: allow only volunteers and treat an already-unfollowed organisation as
+ * a successful final state.
  */
 export const unfollowOrganisation = (req, res) => {
   return sendNotImplemented(res, "Unfollowing an organisation");

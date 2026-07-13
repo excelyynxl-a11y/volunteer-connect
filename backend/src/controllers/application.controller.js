@@ -11,8 +11,9 @@ const sendNotImplemented = (res, feature) =>
  * TODO(application): Submit an application for the authenticated volunteer.
  * Body: { opportunityId: string }
  * Success: { success, message, data: application }
- * Rules: derive volunteerId from req.user; reject duplicates, closed/full
- * opportunities, and submissions after the application deadline.
+ * Rules: derive volunteerId from req.user; reject any existing application for
+ * the same volunteer/opportunity pair, non-active or full opportunities, and
+ * submissions after the application deadline.
  */
 export const createApplication = (req, res) => {
   return sendNotImplemented(res, "Application submission");
@@ -29,14 +30,17 @@ export const getMyApplications = (req, res) => {
 };
 
 /**
- * TODO(application): List applications for one opportunity.
- * Params: { opportunityId: string }
- * Query: { status?: "pending" | "approved" | "rejected" | "withdrawn" }
+ * TODO(application): List applications received by the authenticated organisation.
+ * Query: {
+ *   status?: "pending" | "approved" | "rejected" | "withdrawn",
+ *   opportunityId?: string
+ * }
  * Success: { success, count, data: application[] }
- * Rules: allow only the opportunity-owning organisation or an admin.
+ * Rules: return applications only for opportunities owned by req.user. When
+ * opportunityId is omitted, return applications across all owned opportunities.
  */
-export const getOpportunityApplications = (req, res) => {
-  return sendNotImplemented(res, "Opportunity application listing");
+export const getMyOrganisationApplications = (req, res) => {
+  return sendNotImplemented(res, "Organisation application listing");
 };
 
 /**
@@ -44,7 +48,9 @@ export const getOpportunityApplications = (req, res) => {
  * Params: { id: string }
  * Body: { withdrawalReason: string }
  * Success: { success, message, data: application }
- * Rules: release capacity when withdrawing an approved application.
+ * Rules: allow only the applicant; pending and approved applications can be
+ * withdrawn; release capacity atomically when withdrawing an approved
+ * application; rejected and withdrawn applications are terminal.
  */
 export const withdrawApplication = (req, res) => {
   return sendNotImplemented(res, "Application withdrawal");
@@ -121,8 +127,9 @@ export const approveApplication = async (req, res) => {
       });
     }
 
-    // TODO(application): verify opportunity ownership and update capacity
-    // atomically before this workflow is considered complete.
+    // TODO(application): allow only the opportunity-owning organisation,
+    // require pending status, reserve capacity atomically, and prevent approval
+    // when the opportunity is full. Admins cannot approve applications.
     application.status = "approved";
     await application.save();
 
@@ -164,7 +171,9 @@ export const rejectApplication = async (req, res) => {
       });
     }
 
-    // TODO(application): verify that the requester owns the linked opportunity.
+    // TODO(application): allow only the opportunity-owning organisation and
+    // require pending status. Rejected applications are terminal and cannot be
+    // changed back to approved. Admins cannot reject applications.
     application.status = "rejected";
     await application.save();
 
