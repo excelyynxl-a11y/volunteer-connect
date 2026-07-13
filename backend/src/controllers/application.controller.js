@@ -1,14 +1,53 @@
 import mongoose from "mongoose";
 import Application from "../models/application.model.js";
 
-// TODO: implement createApplication() after confirming with client what is required in an Application model
+const sendNotImplemented = (res, feature) =>
+  res.status(501).json({
+    success: false,
+    message: `${feature} is not implemented yet`,
+  });
+
+/**
+ * TODO(application): Submit an application for the authenticated volunteer.
+ * Body: { opportunityId: string }
+ * Success: { success, message, data: application }
+ * Rules: derive volunteerId from req.user; reject duplicates, closed/full
+ * opportunities, and submissions after the application deadline.
+ */
 export const createApplication = (req, res) => {
-  try {
-    // TODO
-  } catch (err) {
-    console.log("Error in createApplication controller: ", err.message);
-    res.status(500).json({ message: err.message });
-  }
+  return sendNotImplemented(res, "Application submission");
+};
+
+/**
+ * TODO(application): List applications belonging to the authenticated volunteer.
+ * Query: { status?: "pending" | "approved" | "rejected" | "withdrawn" }
+ * Success: { success, count, data: application[] }
+ * When status is omitted, return all of the volunteer's applications.
+ */
+export const getMyApplications = (req, res) => {
+  return sendNotImplemented(res, "Volunteer application listing");
+};
+
+/**
+ * TODO(application): List applications for one opportunity.
+ * Params: { opportunityId: string }
+ * Query: { status?: "pending" | "approved" | "rejected" | "withdrawn" }
+ * Success: { success, count, data: application[] }
+ * Rules: allow only the opportunity-owning organisation or an admin.
+ */
+export const getOpportunityApplications = (req, res) => {
+  return sendNotImplemented(res, "Opportunity application listing");
+};
+
+/**
+ * TODO(application): Withdraw an application owned by the authenticated volunteer.
+ * Params: { id: string }
+ * Body: { withdrawalReason: string }
+ * Success: { success, message, data: application }
+ * Rules: release capacity when withdrawing an approved application.
+ */
+export const withdrawApplication = (req, res) => {
+  return sendNotImplemented(res, "Application withdrawal");
 };
 
 export const getAllApplications = async (req, res) => {
@@ -39,6 +78,8 @@ export const getApplicationById = async (req, res) => {
       });
     }
 
+    // TODO(application): authorise the applicant, opportunity owner, or admin
+    // before returning application details.
     const application = await Application.findById(id)
       .populate("volunteerId", "-password")
       .populate("opportunityId");
@@ -80,6 +121,8 @@ export const approveApplication = async (req, res) => {
       });
     }
 
+    // TODO(application): verify opportunity ownership and update capacity
+    // atomically before this workflow is considered complete.
     application.status = "approved";
     await application.save();
 
@@ -121,6 +164,7 @@ export const rejectApplication = async (req, res) => {
       });
     }
 
+    // TODO(application): verify that the requester owns the linked opportunity.
     application.status = "rejected";
     await application.save();
 

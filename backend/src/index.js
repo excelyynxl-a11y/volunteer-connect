@@ -21,6 +21,7 @@ import cloudinary from "./lib/cloudinary.js";
 import adminRoutes from "./routes/admin.route.js";
 import applicationRoutes from "./routes/application.route.js";
 import authRoutes from "./routes/auth.route.js";
+import followRoutes from "./routes/follow.route.js";
 import messageRoutes from "./routes/message.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import opportunityRoutes from "./routes/opportunity.route.js";
@@ -48,6 +49,7 @@ app.use(cors({
 app.use("/api/admin", adminRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/follow", followRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/opportunities", opportunityRoutes)
