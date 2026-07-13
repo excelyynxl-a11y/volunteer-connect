@@ -16,11 +16,13 @@ export const updateOrgProfile = async (req, res) => {
 
     if (
       name !== undefined &&
-      (typeof name !== "string" || name.trim() === "")
+      (typeof name !== "string" ||
+        name.trim() === "" ||
+        name.trim().length > 120)
     ) {
       return res.status(400).json({
         success: false,
-        message: "Name must be a non-empty string",
+        message: "Name must be a non-empty string with at most 120 characters",
       });
     }
 
@@ -77,7 +79,9 @@ export const updateOrgProfile = async (req, res) => {
 
     await organisation.save();
 
-    const updatedOrg = await Organisation.findById(userId).select("-password");
+    const updatedOrg = await Organisation.findById(userId).select(
+      "-password -__v",
+    );
 
     res.status(200).json({
       success: true,
@@ -86,8 +90,9 @@ export const updateOrgProfile = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in updateOrgProfile controller: ", error.message);
-    res.status(500).json({ 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

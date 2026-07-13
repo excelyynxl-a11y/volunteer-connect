@@ -9,7 +9,7 @@ const resumeFileFilter = (req, file, cb) => {
     }
 }
 
-// avatar only accepts png, jped, jpg
+// avatar only accepts png, jpeg, jpg
 const avatarFileFilter = (req, file, cb) => {
     const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (allowedMimeTypes.includes(file.mimetype)) {
@@ -26,7 +26,31 @@ const resumeUpload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit  
 });
  
-export const uploadResume = resumeUpload.single('resume');
+const handleUpload = (upload, fieldName, sizeErrorMessage) =>
+    (req, res, next) => {
+        upload.single(fieldName)(req, res, (error) => {
+            if (!error) {
+                next();
+                return;
+            }
+
+            const message =
+                error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE'
+                    ? sizeErrorMessage
+                    : error.message || 'Invalid file upload.';
+
+            res.status(400).json({
+                success: false,
+                message,
+            });
+        });
+    };
+
+export const uploadResume = handleUpload(
+    resumeUpload,
+    'resume',
+    'Resume must be 5MB or smaller.',
+);
 
 
 // method to upload avatar
@@ -36,4 +60,8 @@ const avatarUpload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
 
-export const uploadAvatar = avatarUpload.single('profilePic');
+export const uploadAvatar = handleUpload(
+    avatarUpload,
+    'profilePic',
+    'Avatar must be 5MB or smaller.',
+);

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, Info, Save } from "lucide-react";
+import { ArrowLeft, Building2, Camera, Info, Save } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore.js";
 import { useOrganisationStore } from "../../store/useOrganisationStore.js";
 import { getInitials } from "../../lib/utils.js";
@@ -18,6 +18,20 @@ const EditOrganisationProfile = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
+  const avatarPreviewUrl = useMemo(
+    () =>
+      selectedAvatarFile ? URL.createObjectURL(selectedAvatarFile) : "",
+    [selectedAvatarFile],
+  );
+  const avatarSrc = avatarPreviewUrl || authUser?.avatar || "";
+
+  useEffect(
+    () => () => {
+      if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+    },
+    [avatarPreviewUrl],
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +40,37 @@ const EditOrganisationProfile = () => {
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({ ...prev, [name]: null }));
     }
+  };
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+    if (file && !allowedTypes.includes(file.type)) {
+      setFieldErrors((currentErrors) => ({
+        ...currentErrors,
+        avatar: "Please select a PNG, JPG, or JPEG image.",
+      }));
+      event.target.value = "";
+      return;
+    }
+
+    if (file && file.size > 5 * 1024 * 1024) {
+      setFieldErrors((currentErrors) => ({
+        ...currentErrors,
+        avatar: "Avatar must be 5MB or smaller.",
+      }));
+      event.target.value = "";
+      return;
+    }
+
+    setSelectedAvatarFile(file);
+    setFieldErrors((currentErrors) => {
+      if (!currentErrors.avatar) return currentErrors;
+      const nextErrors = { ...currentErrors };
+      delete nextErrors.avatar;
+      return nextErrors;
+    });
   };
 
   const renderError = (field) => {
@@ -42,9 +87,13 @@ const EditOrganisationProfile = () => {
     const newErrors = {};
     if (!formData.name.trim()) {
       newErrors.name = "Organisation name is required.";
+    } else if (formData.name.trim().length > 120) {
+      newErrors.name = "Organisation name must be at most 120 characters.";
     }
     if (!formData.biodata.trim()) {
       newErrors.biodata = "About Us / Biodata is required.";
+    } else if (formData.biodata.trim().length > 1000) {
+      newErrors.biodata = "Biodata must be at most 1000 characters.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -56,6 +105,7 @@ const EditOrganisationProfile = () => {
     const result = await updateOrganisationProfile({
       name: formData.name,
       biodata: formData.biodata,
+      avatar: selectedAvatarFile,
     });
 
     if (result.success) {
@@ -106,7 +156,11 @@ const EditOrganisationProfile = () => {
         <section className="org-profile-section org-profile-edit-section">
           <div className="org-profile-card org-profile-header-card org-profile-edit-summary-card">
             <div className="org-profile-avatar">
-              {getInitials(formData.name || authUser?.name || "Organisation")}
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="Organisation avatar preview" />
+              ) : (
+                getInitials(formData.name || authUser?.name || "Organisation")
+              )}
             </div>
             <div>
               <span className="org-profile-eyebrow">
@@ -114,6 +168,21 @@ const EditOrganisationProfile = () => {
               </span>
               <h2>{formData.name || "Organisation name"}</h2>
               <p>{formData.biodata || "No description provided yet."}</p>
+              <input
+                id="organisation-avatar-upload"
+                className="org-profile-avatar-input"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                onChange={handleAvatarChange}
+              />
+              <label
+                className="org-profile-avatar-button"
+                htmlFor="organisation-avatar-upload"
+              >
+                <Camera size={16} />
+                {selectedAvatarFile ? "Change photo" : "Upload photo"}
+              </label>
+              {renderError("avatar")}
             </div>
           </div>
 
@@ -151,6 +220,7 @@ const EditOrganisationProfile = () => {
                   onChange={handleChange}
                   placeholder="Enter organisation name"
                   required
+                  maxLength="120"
                 />
                 {renderError("name")}
               </div>
@@ -167,7 +237,11 @@ const EditOrganisationProfile = () => {
                   onChange={handleChange}
                   placeholder="Describe your mission..."
                   rows="7"
+                  maxLength="1000"
                 />
+                <small className="org-profile-character-count">
+                  {formData.biodata.length}/1000
+                </small>
                 {renderError("biodata")}
               </div>
             </form>

@@ -53,7 +53,20 @@ export const useOrganisationStore = create((set, get) => ({
   updateOrganisationProfile: async (profileData) => {
     set({ isUpdatingOrganisationProfile: true });
     try {
-      const res = await axiosInstance.put("/organisation/profile", profileData);
+      const hasAvatarFile =
+        typeof File !== "undefined" && profileData?.avatar instanceof File;
+      const requestPayload = hasAvatarFile ? new FormData() : profileData;
+
+      if (hasAvatarFile) {
+        requestPayload.append("name", profileData.name ?? "");
+        requestPayload.append("biodata", profileData.biodata ?? "");
+        requestPayload.append("profilePic", profileData.avatar);
+      }
+
+      const res = await axiosInstance.put(
+        "/organisation/profile",
+        requestPayload,
+      );
       const updatedUser = res.data?.data ?? res.data;
 
       useAuthStore.getState().setAuthUser(updatedUser);
