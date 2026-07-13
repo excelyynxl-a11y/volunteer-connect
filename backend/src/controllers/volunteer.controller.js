@@ -1,7 +1,7 @@
 import { Volunteer } from "../models/user.model.js";
 import Application from "../models/application.model.js";
 import mongoose from "mongoose";
-import cloudinary from "../lib/cloudinary.js";
+import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
 import {
   getAvailabilityValidationError,
   normalizeAvailability,
@@ -12,28 +12,6 @@ import {
   parseArrayField,
   validAgeGroups,
 } from "../lib/volunteer.js";
-
-const uploadAvatarToCloudinary = async (fileBuffer) => {
-  const result = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "avatars",
-        resource_type: "image",
-        public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      },
-    );
-    stream.end(fileBuffer);
-  });
-
-  return result.secure_url;
-};
 
 // Get volunteer profile
 export const getVolunteerProfile = async (req, res) => {

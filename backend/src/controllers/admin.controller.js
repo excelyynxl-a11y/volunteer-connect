@@ -1,6 +1,6 @@
-import cloudinary from "../lib/cloudinary.js";
 import { Admin, User } from "../models/user.model.js";
 import mongoose from "mongoose";
+import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
 
 const REVIEWABLE_ROLES = ["volunteer", "organisation"];
 
@@ -120,24 +120,7 @@ export const updateAdminProfile = async (req, res) => {
 
     // upload avatar to Cloudinary if a file was provided
     if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "avatars",
-            resource_type: "image",
-            public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
-          },
-          (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          },
-        );
-        stream.end(req.file.buffer);
-      });
-      admin.avatar = result.secure_url;
+      admin.avatar = await uploadAvatarToCloudinary(req.file.buffer);
     }
 
     await admin.save();
