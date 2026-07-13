@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-// each AdminStatsCard navigate the path same as AdminSidebar
 const keyToPath = {
   volunteers: "/admin-dashboard/manage-volunteer",
   volunteerswaitingapproval: "/admin-dashboard/manage-volunteer",
@@ -25,10 +24,11 @@ const AdminStatsCard = ({
   };
 
   return (
-    <div
+    <button
+      type="button"
       className="admin-stat-card"
       onClick={handleClick}
-      style={{ cursor: "pointer" }}
+      aria-label={`${label}: ${value}`}
     >
       <div className="stat-icon">
         {React.createElement(Icon, { size: 22 })}
@@ -39,7 +39,7 @@ const AdminStatsCard = ({
       <p className="stat-label">
         {label}
       </p>
-    </div>
+    </button>
   );
 };
 

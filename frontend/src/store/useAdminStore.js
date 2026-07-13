@@ -10,7 +10,8 @@ export const useAdminStore = create((set, get) => ({
   isUsersLoading: false,
   isOpportunitiesLoading: false,
   opportunitiesError: "",
-  adminStats: [],
+  isStatsLoading: false,
+  statsError: "",
   organisations: [],
   volunteers: [],
   opportunities: [],
@@ -20,9 +21,7 @@ export const useAdminStore = create((set, get) => ({
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   getStats: async () => {
-
-    // AdminHomepage has 6 AdminStatsCard of:
-    // [activeVolunteers, activeOrg, activeOpp, openReport, pendingVol, pendingOrg]
+    set({ isStatsLoading: true, statsError: "" });
     try {
       const [volRes, orgRes, oppRes, repRes] = await Promise.all([
         axiosInstance.get("/user/volunteers"),
@@ -31,52 +30,42 @@ export const useAdminStore = create((set, get) => ({
         axiosInstance.get("/report/"),
       ]);
 
-      const volunteers = volRes.data.volunteers || [];
-      const organisations = orgRes.data.organisations || [];
-      const opportunities = oppRes.data.data || [];
-      const reports = repRes.data.reports || [];
+      const volunteers = Array.isArray(volRes.data?.volunteers)
+        ? volRes.data.volunteers
+        : [];
+      const organisations = Array.isArray(orgRes.data?.organisations)
+        ? orgRes.data.organisations
+        : [];
+      const opportunities = Array.isArray(oppRes.data?.data)
+        ? oppRes.data.data
+        : [];
+      const reports = Array.isArray(repRes.data?.reports)
+        ? repRes.data.reports
+        : [];
 
       set({
         volunteers,
         organisations,
         opportunities,
         reports,
-        adminStats: [
-          {
-            key: "volunteers",
-            value: String(volunteers.filter((v) => v.approvalStatus === "approved").length),
-            label: "Active Volunteers",
-          },
-          {
-            key: "organisations",
-            value: String(organisations.filter((o) => o.approvalStatus === "approved").length),
-            label: "Active Organisations",
-          },
-          {
-            key: "opportunities",
-            value: String(opportunities.filter((o) => o.status === "active").length),
-            label: "Active Opportunities",
-          },
-          {
-            key: "reports",
-            value: String(reports.filter((r) => r.status === "Pending").length),
-            label: "Open Reports",
-          },
-          {
-            key: "volunteerswaitingapproval",
-            value: String(volunteers.filter((v) => v.approvalStatus === "pending").length),
-            label: "Volunteer Waiting Approval",
-          },
-          {
-            key: "organisationswaitingapproval",
-            value: String(organisations.filter((o) => o.approvalStatus === "pending").length),
-            label: "Organisations Waiting Approval",
-          },
-        ],
       });
-      
+      return { success: true };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load stats");
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load dashboard overview";
+
+      set({
+        volunteers: [],
+        organisations: [],
+        opportunities: [],
+        reports: [],
+        statsError: message,
+      });
+      return { success: false, error: message };
+    } finally {
+      set({ isStatsLoading: false });
     }
   },
 
