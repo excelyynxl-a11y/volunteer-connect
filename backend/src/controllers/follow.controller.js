@@ -47,8 +47,14 @@ export const getFollowStatus = (req, res) => {
  * TODO(follow): List followers of an organisation.
  * Params: { organisationId: string }
  * Query: { limit?: number, cursor?: string }
- * Success: { success, count, data: volunteer[], meta?: { nextCursor } }
- * Rules: allow only the organisation owner or an admin.
+ * Success: {
+ *   success,
+ *   count,
+ *   data: Array<{ _id, name, avatar }>,
+ *   meta?: { nextCursor }
+ * }
+ * Rules: allow only the organisation owner or an admin and expose only the
+ * volunteer fields required by the follower list.
  */
 export const getOrganisationFollowers = (req, res) => {
   return sendNotImplemented(res, "Organisation follower listing");

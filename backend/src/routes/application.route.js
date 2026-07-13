@@ -1,7 +1,6 @@
 import express from "express";
 import {
   approveApplication,
-  completeApplication,
   createApplication,
   deleteApplication,
   getAllApplications,
@@ -54,7 +53,4 @@ router.patch(
   allowRoles("volunteer"),
   withdrawApplication,
 );
-router.patch("/:id/complete", completeApplication);
-
-
 export default router;
