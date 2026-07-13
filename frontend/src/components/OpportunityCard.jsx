@@ -56,8 +56,8 @@ const OpportunityCard = ({
         {opportunity?.category && opportunity.category.length > 0 && (
           <div className="header-right">
             <div className="categories-container">
-              {opportunity.category.map((cat, index) => (
-                <div key={index} className="event-category-tag">{cat}</div>
+              {opportunity.category.map((cat) => (
+                <div key={cat} className="event-category-tag">{cat}</div>
               ))}
             </div>
           </div>
@@ -119,8 +119,11 @@ const OpportunityCard = ({
               key={action} 
               type="button" 
               onClick={() => onAction && onAction(action, opportunity?._id || opportunity)}
+              aria-label={`${action === 'view' ? 'View' : 'Edit'} ${
+                displayTitle || 'opportunity'
+              }`}
             >
-              {action}
+              {action === 'view' ? 'View' : 'Edit'}
             </button>
           ))}
         </div>

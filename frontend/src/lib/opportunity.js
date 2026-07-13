@@ -105,3 +105,20 @@ export const getOpportunitySortTimestamp = (opportunity) => {
   )
   return date?.getTime() ?? 0
 }
+
+export const getOpportunityPublishedTimestamp = (opportunity) => {
+  const date = getValidDate(opportunity?.publishedAt || opportunity?.createdAt)
+  return date?.getTime() ?? 0
+}
+
+export const splitOpportunitiesByStatus = (opportunities = []) => ({
+  activeOpportunities: opportunities.filter(
+    (opportunity) => opportunity.status?.toLowerCase() === 'active',
+  ),
+  closedOpportunities: opportunities.filter((opportunity) =>
+    ['closed', 'completed'].includes(opportunity.status?.toLowerCase()),
+  ),
+  cancelledOpportunities: opportunities.filter(
+    (opportunity) => opportunity.status?.toLowerCase() === 'cancelled',
+  ),
+})

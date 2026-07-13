@@ -2,26 +2,15 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
+import { splitOpportunitiesByStatus } from "../lib/opportunity";
 
 const getOpportunitiesFromResponse = (responseData) => {
-  return Array.isArray(responseData)
+  const opportunities = Array.isArray(responseData)
     ? responseData
-    : responseData?.opportunities || responseData?.data || [];
-};
+    : responseData?.opportunities || responseData?.data;
 
-const splitOpportunitiesByStatus = (opportunities) => ({
-  activeOpportunities: opportunities.filter((opp) => {
-    const status = (opp.status || "").toLowerCase();
-    return !["closed", "completed", "cancelled"].includes(status);
-  }),
-  closedOpportunities: opportunities.filter((opp) => {
-    const status = (opp.status || "").toLowerCase();
-    return status === "closed" || status === "completed";
-  }),
-  cancelledOpportunities: opportunities.filter(
-    (opp) => (opp.status || "").toLowerCase() === "cancelled"
-  ),
-});
+  return Array.isArray(opportunities) ? opportunities : [];
+};
 
 export const useOrganisationStore = create((set, get) => ({
   // --- UI State ---
@@ -210,19 +199,19 @@ export const useOrganisationStore = create((set, get) => ({
   },
 
   getActiveOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getClosedOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getCancelledOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getAllMyOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
 }));
