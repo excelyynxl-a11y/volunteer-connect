@@ -7,38 +7,11 @@ import {
   normalizeAvailability,
   sortAvailability,
 } from "../lib/availability.js";
-
-const validAgeGroups = ["21-30", "31-40", "41-50", "51-60", "60+"];
-
-const normalizeSkills = (skills) => {
-  return [
-    ...new Set(
-      skills
-        .map((skill) => String(skill).trim())
-        .filter(Boolean),
-    ),
-  ];
-};
-
-const parseArrayField = (fieldValue) => {
-  if (fieldValue === undefined) {
-    return undefined;
-  }
-
-  if (Array.isArray(fieldValue)) {
-    return fieldValue;
-  }
-
-  if (typeof fieldValue === "string") {
-    try {
-      return JSON.parse(fieldValue);
-    } catch {
-      return fieldValue;
-    }
-  }
-
-  return fieldValue;
-};
+import {
+  normalizeSkills,
+  parseArrayField,
+  validAgeGroups,
+} from "../lib/volunteer.js";
 
 const uploadAvatarToCloudinary = async (fileBuffer) => {
   const result = await new Promise((resolve, reject) => {
@@ -112,10 +85,10 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    if (req.user.role !== "volunteer" || String(req.user._id) !== id) {
+    if (String(req.user._id) !== id) {
       return res.status(403).json({
         success: false,
-        message: "Only volunteers can update their own profile",
+        message: "You can only update your own profile",
       });
     }
 
