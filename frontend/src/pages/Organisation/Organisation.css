@@ -2479,6 +2479,7 @@
 }
 
 .org-home-opportunity-row {
+  width: 100%;
   display: grid;
   grid-template-columns: 60px 1fr auto;
   align-items: center;
@@ -2487,6 +2488,10 @@
   background: #fdf9f5;
   border: 1px solid #eee8e0;
   border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   transition: background 0.15s, box-shadow 0.2s;
 }
 
@@ -2583,10 +2588,50 @@
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
-.org-home-opportunity-action:hover {
+.org-home-opportunity-row:hover .org-home-opportunity-action,
+.org-home-opportunity-row:focus-visible .org-home-opportunity-action {
   border-color: #d9aa55;
   color: #d9aa55;
   background: rgba(217, 170, 85, 0.06);
+}
+
+.org-home-opportunity-row:focus-visible {
+  outline: 3px solid rgba(217, 170, 85, 0.4);
+  outline-offset: 2px;
+}
+
+.org-home-state {
+  min-height: 280px;
+  margin-bottom: 25px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #6b7280;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e8ddd0;
+  border-radius: 14px;
+}
+
+.org-home-state h2,
+.org-home-state p {
+  margin: 0;
+}
+
+.org-home-state-error h2 {
+  color: #2c614f;
+  font-size: 20px;
+}
+
+.org-home-state-spinner {
+  animation: org-home-spin 1s linear infinite;
+}
+
+@keyframes org-home-spin {
+  to { transform: rotate(360deg); }
 }
 
 .org-home-pill {

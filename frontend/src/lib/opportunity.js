@@ -111,6 +111,25 @@ export const getOpportunityPublishedTimestamp = (opportunity) => {
   return date?.getTime() ?? 0
 }
 
+export const getUpcomingOpportunities = (
+  opportunities = [],
+  now = Date.now(),
+) =>
+  opportunities
+    .filter((opportunity) => getOpportunitySortTimestamp(opportunity) >= now)
+    .sort(
+      (first, second) =>
+        getOpportunitySortTimestamp(first) -
+        getOpportunitySortTimestamp(second),
+    )
+
+export const sortOpportunitiesByMostRecent = (opportunities = []) =>
+  [...opportunities].sort(
+    (first, second) =>
+      getOpportunitySortTimestamp(second) -
+      getOpportunitySortTimestamp(first),
+  )
+
 export const splitOpportunitiesByStatus = (opportunities = []) => ({
   activeOpportunities: opportunities.filter(
     (opportunity) => opportunity.status?.toLowerCase() === 'active',
