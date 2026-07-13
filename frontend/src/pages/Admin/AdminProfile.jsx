@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useAdminStore } from "../../store/useAdminStore";
 import { Mail, Pencil, Shield, User } from "lucide-react";
 
 const AdminProfile = () => {
-  const { authUser, checkAuth } = useAuthStore();
+  const { authUser } = useAuthStore();
   const { updateAdminProfile, isUpdating } = useAdminStore();
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -17,7 +17,6 @@ const AdminProfile = () => {
       avatar: selectedFile,
     });
     if (result.success) {
-      await checkAuth();
       setIsEditMode(false);
       setSelectedFile(null);
     }
@@ -29,9 +28,21 @@ const AdminProfile = () => {
     setSelectedFile(null);
   };
 
-  const avatarSrc = selectedFile
-    ? URL.createObjectURL(selectedFile)
-    : authUser?.avatar;
+  const avatarPreviewUrl = useMemo(
+    () => (selectedFile ? URL.createObjectURL(selectedFile) : ""),
+    [selectedFile],
+  );
+
+  useEffect(
+    () => () => {
+      if (avatarPreviewUrl) {
+        URL.revokeObjectURL(avatarPreviewUrl);
+      }
+    },
+    [avatarPreviewUrl],
+  );
+
+  const avatarSrc = avatarPreviewUrl || authUser?.avatar;
   const headerNameSource = isEditMode ? newName : authUser?.name || "";
   const headerName = headerNameSource.trim() ? headerNameSource : "Not set";
   const isHeaderNameEmpty = headerName === "Not set";
@@ -69,7 +80,7 @@ const AdminProfile = () => {
                 <>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/jpg"
                     onChange={(e) => setSelectedFile(e.target.files[0] || null)}
                     className="admin-profile-avatar-input"
                     id="admin-avatar-upload"

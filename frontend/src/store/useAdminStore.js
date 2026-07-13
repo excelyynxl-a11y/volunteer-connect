@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from 'react-hot-toast';
+import { useAuthStore } from "./useAuthStore";
 
 export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",
@@ -166,15 +167,20 @@ export const useAdminStore = create((set, get) => ({
       set({ isUpdating: true });
 
       const formData = new FormData();
-      formData.append("name", name);
+      if (name !== undefined) {
+        formData.append("name", name);
+      }
       if (avatar) {
         formData.append("profilePic", avatar);
       }
 
       const res = await axiosInstance.put("/admin/profile", formData);
+      const updatedAdmin = res.data?.data;
+
+      useAuthStore.getState().setAuthUser(updatedAdmin);
 
       toast.success("Admin profile updated successfully.");
-      return { success: true, data: res.data.data };
+      return { success: true, data: updatedAdmin };
 
     } catch (error) {
       const message =
