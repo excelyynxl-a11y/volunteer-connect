@@ -32,11 +32,6 @@ export const useOrganisationStore = create((set, get) => ({
   closedOpportunities: [],
   cancelledOpportunities: [],
   allMyOpportunities: [],
-  
-  pendingApplications: [],
-  approvedApplications: [],
-  rejectedApplications: [],
-  completedApplications: [],
 
   // --- Organisation Profile Actions ---
   updateOrganisationProfile: async (profileData) => {
