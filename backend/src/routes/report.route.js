@@ -4,10 +4,12 @@ import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", protectRoute, adminOnly, getAllReports);
-router.get("/:id", protectRoute, adminOnly, getReportById);
-router.delete("/:id", protectRoute, adminOnly, deleteReport);
-router.post("/", protectRoute, createReport); // TODO
-router.patch("/:id", protectRoute, adminOnly, updateReportStatus); // TODO
+router.use(protectRoute);
+
+router.get("/", adminOnly, getAllReports);
+router.get("/:id", adminOnly, getReportById);
+router.delete("/:id", adminOnly, deleteReport);
+router.post("/", createReport); // TODO
+router.patch("/:id", adminOnly, updateReportStatus); // TODO
 
 export default router;

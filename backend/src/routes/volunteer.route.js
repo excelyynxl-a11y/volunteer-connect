@@ -9,13 +9,14 @@ import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
+router.use(protectRoute);
+
 // Get volunteer profile
-router.get("/profile/:id", protectRoute, getVolunteerProfile);
+router.get("/profile/:id", getVolunteerProfile);
 
 // Update volunteer profile
 router.put(
   "/profile/:id",
-  protectRoute,
   allowRoles("volunteer"),
   uploadAvatar,
   updateVolunteerProfile,
@@ -24,7 +25,6 @@ router.put(
 // Get volunteer past experience
 router.get(
   "/profile/:id/past-experience",
-  protectRoute,
   getVolunteerPastExperience,
 );
 

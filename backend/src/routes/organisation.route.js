@@ -8,11 +8,12 @@ import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
-router.get("/profile/:id", protectRoute, getOrgProfile);
+router.use(protectRoute);
+
+router.get("/profile/:id", getOrgProfile);
 
 router.put(
   "/profile",
-  protectRoute,
   allowRoles("organisation"),
   uploadAvatar,
   updateOrgProfile,

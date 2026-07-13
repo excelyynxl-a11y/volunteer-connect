@@ -19,46 +19,42 @@ import {
 
 const router = express.Router();
 
-router.get("/", protectRoute, adminOnly, getAllApplications);
+router.use(protectRoute);
+
+router.get("/", adminOnly, getAllApplications);
 router.get(
   "/me",
-  protectRoute,
   allowRoles("volunteer"),
   getMyApplications,
 );
 router.get(
   "/opportunity/:opportunityId",
-  protectRoute,
   allowRoles("organisation", "admin"),
   getOpportunityApplications,
 );
 router.post(
   "/create",
-  protectRoute,
   allowRoles("volunteer"),
   createApplication,
 );
-router.get("/:id", protectRoute, getApplicationById);
-router.delete("/:id", protectRoute, adminOnly, deleteApplication);
+router.get("/:id", getApplicationById);
+router.delete("/:id", adminOnly, deleteApplication);
 router.patch(
   "/:id/approve",
-  protectRoute,
   allowRoles("organisation", "admin"),
   approveApplication,
 );
 router.patch(
   "/:id/reject",
-  protectRoute,
   allowRoles("organisation", "admin"),
   rejectApplication,
 );
 router.patch(
   "/:id/withdraw",
-  protectRoute,
   allowRoles("volunteer"),
   withdrawApplication,
 );
-router.patch("/:id/complete", protectRoute, completeApplication);
+router.patch("/:id/complete", completeApplication);
 
 
 export default router;
