@@ -107,7 +107,7 @@ export const useAdminStore = create((set, get) => ({
 
   rejectUserAccount: async (userId, onClose) => {
     try {
-      await axiosInstance.patch(`/admin/users/${userId}/reject`);
+      const response = await axiosInstance.patch(`/admin/users/${userId}/reject`);
       toast.success('User account rejected!');
       await Promise.all(
         [
@@ -116,14 +116,17 @@ export const useAdminStore = create((set, get) => ({
         ]
       );
       onClose?.();
+      return { success: true, user: response.data?.user };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+      return { success: false, error: message };
     }
   },
 
   approveUserAccount: async (userId, onClose) => {
     try {
-      await axiosInstance.patch(`/admin/users/${userId}/approve`);
+      const response = await axiosInstance.patch(`/admin/users/${userId}/approve`);
       toast.success('User account approved!');
       await Promise.all(
         [
@@ -132,8 +135,11 @@ export const useAdminStore = create((set, get) => ({
         ]
       );
       onClose?.();
+      return { success: true, user: response.data?.user };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+      return { success: false, error: message };
     }
   },
 
