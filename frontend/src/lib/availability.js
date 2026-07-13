@@ -33,6 +33,8 @@ export const sortAvailabilitySlots = (availabilitySlots = []) =>
 export const formatAvailabilitySlot = (slot) =>
   `${slot.dayOfWeek}, ${slot.startTime} - ${slot.endTime}`
 
+export const shortDay = (day) => (day ? day.slice(0, 3) : 'Day')
+
 export const availabilitySlotsOverlap = (firstSlot, secondSlot) => {
   if (firstSlot.dayOfWeek !== secondSlot.dayOfWeek) {
     return false

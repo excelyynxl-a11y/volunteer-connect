@@ -4,6 +4,10 @@ import ManageOpportunityCard from "../../components/ManageOpportunityCard";
 import PreviewOpportunity from "../../components/PreviewOpportunity";
 import { useAdminStore } from "../../store/useAdminStore";
 import { useEffect } from "react";
+import {
+  getOpportunitySortTimestamp,
+  opportunityMatchesSearch,
+} from "../../lib/opportunity";
 
 const STATUS_OPTIONS = ["All", "active", "completed", "closed", "cancelled"];
 const CATEGORY_OPTIONS = [
@@ -35,7 +39,12 @@ const ManageOpportunity = () => {
   const [sortDirection, setSortDirection] = useState("descending");
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
-  const { getAllOpportunities, isOpportunitiesLoading, opportunities } = useAdminStore();
+  const {
+    getAllOpportunities,
+    isOpportunitiesLoading,
+    opportunities,
+    opportunitiesError,
+  } = useAdminStore();
   
   useEffect(() => {
       getAllOpportunities()
@@ -44,19 +53,11 @@ const ManageOpportunity = () => {
   // filter functions
   const filteredOpportunities = useMemo(() => {
     let result = opportunities;
-    console.log(opportunities);
-    
-    console.log(result);
 
     if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter((opportunity) => {
-        return (
-          opportunity.title?.toLowerCase().includes(term) ||
-          opportunity.location?.toLowerCase().includes(term) ||
-          opportunity.organisationId?.name?.toLowerCase().includes(term)
-        );
-      });
+      result = result.filter((opportunity) =>
+        opportunityMatchesSearch(opportunity, searchTerm),
+      );
     }
 
     if (categoryFilter !== "All") {
@@ -90,8 +91,8 @@ const ManageOpportunity = () => {
     }
 
     result = [...result].sort((a, b) => {
-      const dateA = new Date(a.startAt || a.publishedAt || a.createdAt);
-      const dateB = new Date(b.startAt || b.publishedAt || b.createdAt);
+      const dateA = getOpportunitySortTimestamp(a);
+      const dateB = getOpportunitySortTimestamp(b);
       return sortDirection === "descending" ? dateB - dateA : dateA - dateB;
     });
 
@@ -214,6 +215,19 @@ const ManageOpportunity = () => {
           <div className="admin-empty">
             <Loader2 className="admin-empty-icon" />
             <h3>Loading opportunities</h3>
+          </div>
+        ) : opportunitiesError ? (
+          <div className="admin-empty" role="alert">
+            <AlertCircle className="admin-empty-icon" />
+            <h3>Unable to load opportunities</h3>
+            <p>{opportunitiesError}</p>
+            <button
+              type="button"
+              className="admin-table-clear-btn"
+              onClick={getAllOpportunities}
+            >
+              Try Again
+            </button>
           </div>
         ) : filteredOpportunities.length > 0 ? (
           <div className="admin-volunteer-card-list admin-opportunity-card-list">

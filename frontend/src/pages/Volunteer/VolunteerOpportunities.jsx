@@ -9,7 +9,7 @@ import {
   isOpportunityInsideAvailability,
   sortAvailabilitySlots,
 } from "../../lib/availability";
-import { opportunityMatchesSearch } from "../../lib/utils";
+import { opportunityMatchesSearch } from "../../lib/opportunity";
 import {
   opportunityCategories,
   volunteerAvailabilityDays,

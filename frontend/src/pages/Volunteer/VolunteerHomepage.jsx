@@ -15,14 +15,14 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import {
   isOpportunityInsideAvailability,
+  shortDay,
   sortAvailabilitySlots,
 } from "../../lib/availability";
 import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getOpportunityImage,
-  shortDay,
-} from "../../lib/utils";
+} from "../../lib/opportunity";
 import "./Volunteer.css";
 
 const VolunteerHomepage = () => {

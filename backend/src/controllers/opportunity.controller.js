@@ -235,8 +235,9 @@ export const getAllOpportunities = async (req, res) => {
     });
   } catch (err) {
     console.log("Error in getAllOpportunities controller: ", err.message);
-    res.status(500).json({ 
-      message: err.message 
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

@@ -9,6 +9,7 @@ export const useAdminStore = create((set, get) => ({
   isUpdating: false,
   isUsersLoading: false,
   isOpportunitiesLoading: false,
+  opportunitiesError: "",
   adminStats: [],
   organisations: [],
   volunteers: [],
@@ -145,13 +146,19 @@ export const useAdminStore = create((set, get) => ({
   },
 
   getAllOpportunities: async () => {
-    set({ isOpportunitiesLoading: true });
+    set({ isOpportunitiesLoading: true, opportunitiesError: "" });
     
     try {
         const res = await axiosInstance.get('/opportunities');
-        set({ opportunities: res.data.data });
+        const opportunities = Array.isArray(res.data?.data) ? res.data.data : [];
+        set({ opportunities });
+        return { success: true, opportunities };
     } catch (error) {
-        toast.error(error.response.data.message);
+        const message =
+          error.response?.data?.message || "Failed to load opportunities.";
+        set({ opportunities: [], opportunitiesError: message });
+        toast.error(message);
+        return { success: false, error: message };
     } finally {
         set({ isOpportunitiesLoading: false });
     }

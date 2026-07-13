@@ -1,41 +1,42 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
-
-const formatDateTime = (value) => {
-  if (!value) return "—";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return date.toLocaleString("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const getStatusClass = (status) => {
-  if (status === "active") return "active";
-  if (status === "completed") return "completed";
-  if (status === "cancelled") return "cancelled";
-  if (status === "closed") return "closed";
-  return "pending";
-};
+import {
+  formatOpportunityDateTime,
+  getOpportunityStatusClass,
+  getOrganisationName,
+} from "../lib/opportunity";
 
 const PreviewOpportunity = ({ opportunity, onClose }) => {
-  const statusClass = getStatusClass(opportunity.status);
+  const statusClass = getOpportunityStatusClass(opportunity.status);
   const categories = opportunity.category?.length
     ? opportunity.category
     : ["Other"];
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="admin-modal-overlay" onClick={onClose}>
+    <div
+      className="admin-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-opportunity-preview-title"
+      onClick={onClose}
+    >
       <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="admin-modal-header">
-          <h2>{opportunity.title}</h2>
-          <button className="admin-modal-close" onClick={onClose}>
+          <h2 id="admin-opportunity-preview-title">{opportunity.title}</h2>
+          <button
+            className="admin-modal-close"
+            aria-label="Close opportunity preview"
+            onClick={onClose}
+          >
             <X size={18} />
           </button>
         </div>
@@ -57,13 +58,7 @@ const PreviewOpportunity = ({ opportunity, onClose }) => {
           {/* Organised by */}
           <div className="admin-profile-field">
             <label>Organised by</label>
-            {opportunity.organisationId?.name ? (
-              <span>
-                {opportunity.organisationId?.name}
-              </span>
-            ) : (
-              <span>{opportunity.organisationId}</span>
-            )}
+            <span>{getOrganisationName(opportunity)}</span>
           </div>
 
           {/* Category */}
@@ -87,19 +82,19 @@ const PreviewOpportunity = ({ opportunity, onClose }) => {
           {/* Start date */}
           <div className="admin-profile-field">
             <label>Start</label>
-            <span>{formatDateTime(opportunity.startAt)}</span>
+            <span>{formatOpportunityDateTime(opportunity.startAt, "—")}</span>
           </div>
 
           {/* End date */}
           <div className="admin-profile-field">
             <label>End</label>
-            <span>{formatDateTime(opportunity.endAt)}</span>
+            <span>{formatOpportunityDateTime(opportunity.endAt, "—")}</span>
           </div>
 
           {/* Application deadline */}
           <div className="admin-profile-field">
             <label>Application Deadline</label>
-            <span>{formatDateTime(opportunity.applicationDeadline)}</span>
+            <span>{formatOpportunityDateTime(opportunity.applicationDeadline, "—")}</span>
           </div>
 
           {/* Max volunteer */}

@@ -1,30 +1,12 @@
 import React from 'react';
 import { CalendarDays, Clock, MapPin, Users } from 'lucide-react';
+import {
+  formatOpportunityDate,
+  formatOpportunityTimeRange,
+  getOpportunityStatusClass,
+  getSpotsRemaining,
+} from '../lib/opportunity';
 import './OpportunityCard.css';
-
-const getStatusClass = (status) => status.toLowerCase().replace(/\s+/g, '-');
-
-const formatDate = (dateValue) => {
-  if (!dateValue) return '';
-
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(dateValue));
-};
-
-const formatTime = (dateValue) => {
-  if (!dateValue) return '';
-
-  return new Intl.DateTimeFormat('en-MY', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-    .format(new Date(dateValue))
-    .toLowerCase();
-};
 
 const OpportunityCard = ({
   opportunity,
@@ -41,23 +23,23 @@ const OpportunityCard = ({
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
-  const statusClass = getStatusClass(displayStatus);
+  const statusClass = getOpportunityStatusClass(displayStatus);
   const displayTitle = opportunity?.title || title;
   const displayDetails = opportunity?.details || detail;
   const displayLocation = opportunity?.location;
   
   const displayDate = opportunity?.startAt 
-    ? formatDate(opportunity.startAt) 
+    ? formatOpportunityDate(opportunity.startAt)
     : fixedDate;
     
   const displayTime = opportunity?.startAt && opportunity?.endAt
-    ? `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`
+    ? formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt)
     : timeFrame;
 
   const displayOrganisationName = opportunity?.organisationId?.name;
   
   const spotsRemaining = isModelOpportunity
-    ? Math.max((opportunity.maxVolunteers || 0) - (opportunity.approvedVolunteersCount || 0), 0)
+    ? getSpotsRemaining(opportunity)
     : null;
     
   const displayActions = actions || (showActionButtons ? ['view', 'edit'] : []);
@@ -120,7 +102,7 @@ const OpportunityCard = ({
             {opportunity?.applicationDeadline && (
               <span>
                 <CalendarDays size={16} /> 
-                Apply before {formatDate(opportunity.applicationDeadline)}
+                Apply before {formatOpportunityDate(opportunity.applicationDeadline)}
               </span>
             )}
           </>

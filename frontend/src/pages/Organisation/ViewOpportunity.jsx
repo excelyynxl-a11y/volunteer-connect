@@ -12,11 +12,11 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import {
-  formatDate,
+  formatOpportunityDate,
   formatOpportunityTimeRange,
   getRequirementItems,
   getSpotsRemaining,
-} from "../../lib/utils";
+} from "../../lib/opportunity";
 import "../../components/OpportunityCard.css";
 
 const getStatusClass = (status = "active") =>
@@ -186,7 +186,7 @@ const ViewOpportunity = () => {
               <DetailItem
                 icon={CalendarDays}
                 label="Start Date"
-                value={formatDate(opportunity.startAt)}
+                value={formatOpportunityDate(opportunity.startAt)}
               />
               <DetailItem
                 icon={Clock3}
@@ -196,7 +196,7 @@ const ViewOpportunity = () => {
               <DetailItem
                 icon={CalendarDays}
                 label="Application Deadline"
-                value={formatDate(opportunity.applicationDeadline)}
+                value={formatOpportunityDate(opportunity.applicationDeadline)}
               />
               <DetailItem
                 icon={Users}
