@@ -1,6 +1,6 @@
 # 🌱 FIT3170 Team 4: VolunteerConnect
 
-## 🚨 Instrcution for README as Handover Docs
+## 🚨 Instruction for README as Handover Docs
 The handover documentation is essentially:
 What software/hardware is needed to run the project
 Instructions on how to get the project up and running 
@@ -16,16 +16,62 @@ The system serves three primary roles. Firstly, volunteers who seek a frictionle
 
 ## 🏗️ Repository Structure (to-be-updated from time to time)
 This repository is organised into folders and files, primarily the backend and frontend folder to maintain separation of concerns and codes between frontend and backend development.
+
+```
 PROJECT
-|_ frontend
-    |_
-|_ backend
-    |_
+|_ frontend/
+    |_ public/                 # static assets (images, icons)
+    |_ src/
+    |   |_ components/         # reusable UI components
+    |   |_ lib/                # API client, helpers,and shared utilities
+    |   |_ pages/              # page-level views, grouped by role
+    |   |   |_ Admin/
+    |   |   |_ Auth/
+    |   |   |_ LandingPage/
+    |   |   |_ LoadingPage/
+    |   |   |_ Organisation/
+    |   |   |_ Volunteer/
+    |   |_ store/              # Zustand state stores
+    |   |_ App.css             # root app styles
+    |   |_ App.jsx             # root React component (defines routes)
+    |   |_ index.css           # global styles
+    |   |_ main.jsx            # Vite entry point
+    |   |_ style.css
+    |_ .gitignore
+    |_ Dockerfile
+    |_ eslint.config.js        # ESLint flat config
+    |_ index.html              # Vite HTML template
+    |_ package.json
+    |_ package-lock.json
+    |_ vite.config.js
+|_ backend/
+    |_ public/
+    |   |_ resumes/            # uploaded resume files (gitignored at runtime)
+    |_ src/
+    |   |_ controllers/        # request handlers per resource
+    |   |_ lib/                # shared utilities (db, cloudinary, socket, utils)
+    |   |_ middlewares/        # auth + multer (file upload) middlewares
+    |   |_ models/             # Mongoose schemas
+    |   |_ routes/             # Express route definitions
+    |   |_ seeds/              # DB seeding scripts (dev data)
+    |   |_ services/           # business-logic services
+    |   |_ index.js            # Express app entry point
+    |_ .dockerignore
+    |_ .env                    # environment variables (gitignored — see §Software/Hardware)
+    |_ Dockerfile
+    |_ MODEL.md                # backend data model documentation
+    |_ package.json
+    |_ package-lock.json
+|_ instructions/
+    |_ images/                 # screenshots referenced by the instruction docs
+    |_ DOCKER.md
+    |_ INSTRUCTION.md
 |_ .gitignore
-|_ CONTRIBUTORS.md
-|_ docker-compose.yaml
-|_ NOTICE
-|_ README.md (😆 you are currently reading this file!)
+|_ CONTRIBUTORS.md             # list of team members name and student id
+|_ docker-compose.yaml         # orchestrates backend + frontend + mongodb
+|_ NOTICE                      # MIT licensing information
+|_ README.md                   (😆 you are currently reading this file!)
+```
 
 ## 🔨 Software / Hardware to Run This Project
 
