@@ -1,5 +1,42 @@
 import { Organisation } from "../models/user.model.js";
-import cloudinary from "../lib/cloudinary.js";
+import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
+import mongoose from "mongoose";
+
+export const getOrgProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    const organisation = await Organisation.findOne({
+      _id: id,
+      approvalStatus: "approved",
+    }).select("name avatar biodata");
+
+    if (!organisation) {
+      return res.status(404).json({
+        success: false,
+        message: "Organisation not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: organisation,
+    });
+  } catch (error) {
+    console.log("Error in getOrgProfile controller: ", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 export const updateOrgProfile = async (req, res) => {
   try {
@@ -14,30 +51,27 @@ export const updateOrgProfile = async (req, res) => {
       });
     }
 
-    // name cannot be empty
-    if (name !== undefined && name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Name cannot be empty",
-      });
-    }
-
-    // biodata cannot be empty
-    if (biodata !== undefined && biodata.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Biodata cannot be empty",
-      });
-    }
-
-    // biodata cannot be too long (TODO: check how long client wants a orgainsation biodata to be)
     if (
-      biodata !== undefined &&
-      (typeof biodata !== "string" || biodata.trim().length > 1000)
+      name !== undefined &&
+      (typeof name !== "string" ||
+        name.trim() === "" ||
+        name.trim().length > 120)
     ) {
       return res.status(400).json({
         success: false,
-        message: "Biodata must be a string with at most 1000 characters",
+        message: "Name must be a non-empty string with at most 120 characters",
+      });
+    }
+
+    if (
+      biodata !== undefined &&
+      (typeof biodata !== "string" ||
+        biodata.trim() === "" ||
+        biodata.trim().length > 1000)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Biodata must be a non-empty string with at most 1000 characters",
       });
     }
 
@@ -47,13 +81,6 @@ export const updateOrgProfile = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Organisation not found",
-      });
-    }
-
-    if (organisation.role !== "organisation") {
-      return res.status(403).json({
-        success: false,
-        message: "Only organisations can update their profile",
       });
     }
 
@@ -67,29 +94,14 @@ export const updateOrgProfile = async (req, res) => {
 
     // upload avatar to Cloudinary if a file was provided
     if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "avatars",
-            resource_type: "image",
-            public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
-          },
-          (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          },
-        );
-        stream.end(req.file.buffer);
-      });
-      organisation.avatar = result.secure_url;
+      organisation.avatar = await uploadAvatarToCloudinary(req.file.buffer);
     }
 
     await organisation.save();
 
-    const updatedOrg = await Organisation.findById(userId).select("-password");
+    const updatedOrg = await Organisation.findById(userId).select(
+      "-password -__v",
+    );
 
     res.status(200).json({
       success: true,
@@ -98,8 +110,9 @@ export const updateOrgProfile = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in updateOrgProfile controller: ", error.message);
-    res.status(500).json({ 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
     });
   }
 };

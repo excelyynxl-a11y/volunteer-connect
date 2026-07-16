@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Auth.css";
 import {
   AlertCircle,
@@ -32,8 +32,6 @@ const Login = () => {
   const [redirectConfig, setRedirectConfig] = useState(null);
 
   const { login, isLoggingIn } = useAuthStore();
-  const navigate = useNavigate();
-
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

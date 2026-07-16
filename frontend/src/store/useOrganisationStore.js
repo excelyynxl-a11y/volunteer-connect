@@ -2,33 +2,15 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
-
-const normaliseOpportunity = (opportunity) => ({
-  ...opportunity,
-  detail: opportunity.detail ?? opportunity.details ?? "",
-});
+import { splitOpportunitiesByStatus } from "../lib/opportunity";
 
 const getOpportunitiesFromResponse = (responseData) => {
   const opportunities = Array.isArray(responseData)
     ? responseData
-    : responseData?.opportunities || responseData?.data || [];
+    : responseData?.opportunities || responseData?.data;
 
-  return opportunities.map(normaliseOpportunity);
+  return Array.isArray(opportunities) ? opportunities : [];
 };
-
-const splitOpportunitiesByStatus = (opportunities) => ({
-  activeOpportunities: opportunities.filter((opp) => {
-    const status = (opp.status || "").toLowerCase();
-    return !["closed", "completed", "cancelled"].includes(status);
-  }),
-  closedOpportunities: opportunities.filter((opp) => {
-    const status = (opp.status || "").toLowerCase();
-    return status === "closed" || status === "completed";
-  }),
-  cancelledOpportunities: opportunities.filter(
-    (opp) => (opp.status || "").toLowerCase() === "cancelled"
-  ),
-});
 
 export const useOrganisationStore = create((set, get) => ({
   // --- UI State ---
@@ -39,7 +21,8 @@ export const useOrganisationStore = create((set, get) => ({
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   // --- Loading States ---
-  isLoading: false,
+  isOpportunitiesLoading: false,
+  opportunitiesError: "",
   isUpdatingOrganisationProfile: false,
   isUpdatingOpportunity: false,
   isCreatingOpportunity: false,
@@ -49,17 +32,25 @@ export const useOrganisationStore = create((set, get) => ({
   closedOpportunities: [],
   cancelledOpportunities: [],
   allMyOpportunities: [],
-  
-  pendingApplications: [],
-  approvedApplications: [],
-  rejectedApplications: [],
-  completedApplications: [],
 
   // --- Organisation Profile Actions ---
   updateOrganisationProfile: async (profileData) => {
     set({ isUpdatingOrganisationProfile: true });
     try {
-      const res = await axiosInstance.put("/organisation/profile", profileData);
+      const hasAvatarFile =
+        typeof File !== "undefined" && profileData?.avatar instanceof File;
+      const requestPayload = hasAvatarFile ? new FormData() : profileData;
+
+      if (hasAvatarFile) {
+        requestPayload.append("name", profileData.name ?? "");
+        requestPayload.append("biodata", profileData.biodata ?? "");
+        requestPayload.append("profilePic", profileData.avatar);
+      }
+
+      const res = await axiosInstance.put(
+        "/organisation/profile",
+        requestPayload,
+      );
       const updatedUser = res.data?.data ?? res.data;
 
       useAuthStore.getState().setAuthUser(updatedUser);
@@ -90,7 +81,7 @@ export const useOrganisationStore = create((set, get) => ({
     try {
       const res = await axiosInstance.put(`/opportunities/${opportunityId}`, opportunityData);
       
-      const updatedOpp = normaliseOpportunity(res.data?.data ?? res.data ?? opportunityData);
+      const updatedOpp = res.data?.data ?? res.data ?? opportunityData;
       toast.success("Opportunity updated successfully.");
 
       set((state) => {
@@ -151,7 +142,7 @@ export const useOrganisationStore = create((set, get) => ({
     set({ isCreatingOpportunity: true });
     try {
       const res = await axiosInstance.post("/opportunities/create", opportunityData);
-      const newOpp = normaliseOpportunity(res.data?.data ?? res.data);
+      const newOpp = res.data?.data ?? res.data;
       
       // Add the newly created opportunity to the top of the active list
       set((state) => ({
@@ -174,6 +165,7 @@ export const useOrganisationStore = create((set, get) => ({
   },
 
   getMyOpportunities: async () => {
+    set({ isOpportunitiesLoading: true, opportunitiesError: "" });
     try {
       const response = await axiosInstance.get("/opportunities/my-opportunities");
       const opportunities = getOpportunitiesFromResponse(response.data);
@@ -181,31 +173,40 @@ export const useOrganisationStore = create((set, get) => ({
         allMyOpportunities: opportunities,
         ...splitOpportunitiesByStatus(opportunities),
       });
+      return { success: true, data: opportunities };
     } catch (error) {
-      console.error("Error fetching organisation opportunities:", error);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load opportunities";
+
       set({
         activeOpportunities: [],
         closedOpportunities: [],
         cancelledOpportunities: [],
         allMyOpportunities: [],
+        opportunitiesError: message,
       });
+      return { success: false, error: message };
+    } finally {
+      set({ isOpportunitiesLoading: false });
     }
   },
 
   getActiveOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getClosedOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getCancelledOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
   getAllMyOpportunities: async () => {
-    await get().getMyOpportunities();
+    return get().getMyOpportunities();
   },
 
 }));

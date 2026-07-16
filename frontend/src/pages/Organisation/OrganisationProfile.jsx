@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Plus } from 'lucide-react'
+import { AlertCircle, Loader2, Plus, Search } from 'lucide-react'
 import { getInitials } from '../../lib/utils.js';
+import { opportunityMatchesSearch } from '../../lib/opportunity.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useOrganisationStore } from '../../store/useOrganisationStore.js';
 import OpportunityCard from '../../components/OpportunityCard.jsx';
@@ -13,14 +14,32 @@ const OrganisationProfile = () => {
     activeOpportunities,
     cancelledOpportunities,
     getMyOpportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
   } = useOrganisationStore();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (authUser?._id) {
       getMyOpportunities();
     }
   }, [authUser?._id, getMyOpportunities]);
+
+  const filteredActiveOpportunities = useMemo(
+    () =>
+      activeOpportunities.filter((opportunity) =>
+        opportunityMatchesSearch(opportunity, searchQuery),
+      ),
+    [activeOpportunities, searchQuery],
+  );
+  const filteredHistoricalOpportunities = useMemo(
+    () =>
+      [...closedOpportunities, ...cancelledOpportunities].filter(
+        (opportunity) => opportunityMatchesSearch(opportunity, searchQuery),
+      ),
+    [cancelledOpportunities, closedOpportunities, searchQuery],
+  );
 
   return (
     <div className="org-profile-page">
@@ -30,13 +49,12 @@ const OrganisationProfile = () => {
         <header className="org-profile-header">
           <div className="org-profile-search">
             <Search size={18} />
-            <input type="text" placeholder="Search your postings..." />
-          </div>
-          <div className="org-profile-header-actions">
-            <div className="org-profile-notification">
-              <Bell size={20} />
-              <span className="org-profile-bell-dot"></span>
-            </div>
+            <input
+              type="search"
+              placeholder="Search your postings..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
           </div>
         </header>
         
@@ -69,7 +87,14 @@ const OrganisationProfile = () => {
             <div className="org-profile-header-inner">
               <div className="org-profile-title-row">
                 <div className="org-profile-avatar">
-                  {getInitials(authUser?.name)}
+                  {authUser?.avatar ? (
+                    <img
+                      src={authUser.avatar}
+                      alt={`${authUser?.name || 'Organisation'} avatar`}
+                    />
+                  ) : (
+                    getInitials(authUser?.name)
+                  )}
                 </div>
                 <div>
                   <span className="org-profile-eyebrow">
@@ -109,28 +134,28 @@ const OrganisationProfile = () => {
             <div className="org-profile-card-accent" />
             <h4><b>Previous Events</b></h4>
             <div className="org-profile-events-list">
-              {closedOpportunities && closedOpportunities.length > 0 ? (
-                closedOpportunities.map((opp) => (
+              {isOpportunitiesLoading ? (
+                <p className="org-profile-empty-text">
+                  <Loader2 size={18} /> Loading historical postings...
+                </p>
+              ) : opportunitiesError ? (
+                <p className="org-profile-empty-text">
+                  Historical postings are currently unavailable.
+                </p>
+              ) : filteredHistoricalOpportunities.length > 0 ? (
+                filteredHistoricalOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id} 
                     opportunity={opp}
                     showActionButtons={false}
                   />
                 ))
-              ) : null}
-
-              {cancelledOpportunities && cancelledOpportunities.length > 0 ? (
-                cancelledOpportunities.map((opp) => (
-                  <OpportunityCard 
-                    key={opp._id} 
-                    opportunity={opp}
-                    showActionButtons={false}
-                  />
-                ))
-              ) : null}
-
-              {(!closedOpportunities?.length && !cancelledOpportunities?.length) && (
-                <p className="org-profile-empty-text">No previous or historical events found in the database.</p>
+              ) : (
+                <p className="org-profile-empty-text">
+                  {searchQuery.trim()
+                    ? 'No historical postings match your search.'
+                    : 'No previous or historical events found in the database.'}
+                </p>
               )}
             </div>
           </div>
@@ -147,8 +172,23 @@ const OrganisationProfile = () => {
           </div>
 
           <div className="org-profile-opportunity-list">
-            {activeOpportunities && activeOpportunities.length > 0 ? (
-              activeOpportunities.map((opp) => (
+            {isOpportunitiesLoading ? (
+              <p className="org-profile-empty-text">
+                <Loader2 size={18} /> Loading postings...
+              </p>
+            ) : opportunitiesError ? (
+              <div className="org-profile-load-error" role="alert">
+                <AlertCircle size={20} />
+                <div>
+                  <strong>Unable to load postings</strong>
+                  <p>{opportunitiesError}</p>
+                </div>
+                <button type="button" onClick={getMyOpportunities}>
+                  Try Again
+                </button>
+              </div>
+            ) : filteredActiveOpportunities.length > 0 ? (
+              filteredActiveOpportunities.map((opp) => (
                 <OpportunityCard
                   key={opp._id}
                   opportunity={opp}
@@ -165,11 +205,15 @@ const OrganisationProfile = () => {
                 />
               ))
             ) : (
-              <p className="org-profile-empty-text">No active postings found. Click 'Create New Posting' above to publish one.</p>
+              <p className="org-profile-empty-text">
+                {searchQuery.trim()
+                  ? 'No active postings match your search.'
+                  : "No active postings found. Click 'Create New Posting' above to publish one."}
+              </p>
             )}
           </div>
 
-          <button className="org-profile-view-all-link" onClick={() => navigate("/organisation-dashboard")}>
+          <button className="org-profile-view-all-link" onClick={() => navigate("/organisation-dashboard/opportunities")}>
         Manage all postings
         </button>
         </div>

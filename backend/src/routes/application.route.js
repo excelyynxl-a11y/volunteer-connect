@@ -1,16 +1,56 @@
 import express from "express";
-import { approveApplication, completeApplication, createApplication, deleteApplication, getAllApplications, getApplicationById, rejectApplication } from "../controllers/application.controller.js";
-import { adminOnly, protectRoute } from "../middlewares/auth.middleware.js";
+import {
+  approveApplication,
+  createApplication,
+  deleteApplication,
+  getAllApplications,
+  getApplicationById,
+  getMyApplications,
+  getMyOrganisationApplications,
+  rejectApplication,
+  withdrawApplication,
+} from "../controllers/application.controller.js";
+import {
+  adminOnly,
+  allowRoles,
+  protectRoute,
+} from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllApplications);
-router.get("/:id", getApplicationById); 
-router.delete("/:id", protectRoute, adminOnly, deleteApplication);
-router.post("/create", protectRoute, createApplication);
-router.patch("/:id/approve", protectRoute, approveApplication);
-router.patch("/:id/reject", protectRoute, rejectApplication);
-router.patch("/:id/complete", protectRoute, completeApplication);
+router.use(protectRoute);
 
-
+router.get("/", adminOnly, getAllApplications);
+router.get(
+  "/me",
+  allowRoles("volunteer"),
+  getMyApplications,
+);
+router.get(
+  "/organisation/me",
+  allowRoles("organisation"),
+  getMyOrganisationApplications,
+);
+router.post(
+  "/create",
+  allowRoles("volunteer"),
+  createApplication,
+);
+router.get("/:id", getApplicationById);
+router.delete("/:id", adminOnly, deleteApplication);
+router.patch(
+  "/:id/approve",
+  allowRoles("organisation"),
+  approveApplication,
+);
+router.patch(
+  "/:id/reject",
+  allowRoles("organisation"),
+  rejectApplication,
+);
+router.patch(
+  "/:id/withdraw",
+  allowRoles("volunteer"),
+  withdrawApplication,
+);
 export default router;

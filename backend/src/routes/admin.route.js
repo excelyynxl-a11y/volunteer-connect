@@ -9,11 +9,13 @@ import { uploadAvatar } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
+router.use(protectRoute, adminOnly);
+
 // User management
-router.patch("/users/:id/approve", protectRoute, adminOnly, approveUserAccount);
-router.patch("/users/:id/reject", protectRoute, adminOnly, rejectUserAccount);
+router.patch("/users/:id/approve", approveUserAccount);
+router.patch("/users/:id/reject", rejectUserAccount);
 
 // Admin management 
-router.put("/profile", protectRoute, adminOnly, uploadAvatar, updateAdminProfile);
+router.put("/profile", uploadAvatar, updateAdminProfile);
 
 export default router;

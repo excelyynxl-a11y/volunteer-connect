@@ -1,16 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
-import { malaysiaStateCities } from "../lib/data";
 import toast from 'react-hot-toast';
-
-const locationFrom = (state, city) => {
-  const stateCities = malaysiaStateCities[state] || [];
-  const resolvedCity = stateCities.includes(city)
-    ? city
-    : stateCities[0] || city;
-
-  return `${state}, ${resolvedCity}`;
-};
+import { useAuthStore } from "./useAuthStore";
 
 export const useAdminStore = create((set, get) => ({
   currentTab: "homepage",
@@ -18,7 +9,9 @@ export const useAdminStore = create((set, get) => ({
   isUpdating: false,
   isUsersLoading: false,
   isOpportunitiesLoading: false,
-  adminStats: [],
+  opportunitiesError: "",
+  isStatsLoading: false,
+  statsError: "",
   organisations: [],
   volunteers: [],
   opportunities: [],
@@ -28,9 +21,7 @@ export const useAdminStore = create((set, get) => ({
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
   getStats: async () => {
-
-    // AdminHomepage has 6 AdminStatsCard of:
-    // [activeVolunteers, activeOrg, activeOpp, openReport, pendingVol, pendingOrg]
+    set({ isStatsLoading: true, statsError: "" });
     try {
       const [volRes, orgRes, oppRes, repRes] = await Promise.all([
         axiosInstance.get("/user/volunteers"),
@@ -39,52 +30,42 @@ export const useAdminStore = create((set, get) => ({
         axiosInstance.get("/report/"),
       ]);
 
-      const volunteers = volRes.data.volunteers || [];
-      const organisations = orgRes.data.organisations || [];
-      const opportunities = oppRes.data.data || [];
-      const reports = repRes.data.reports || [];
+      const volunteers = Array.isArray(volRes.data?.volunteers)
+        ? volRes.data.volunteers
+        : [];
+      const organisations = Array.isArray(orgRes.data?.organisations)
+        ? orgRes.data.organisations
+        : [];
+      const opportunities = Array.isArray(oppRes.data?.data)
+        ? oppRes.data.data
+        : [];
+      const reports = Array.isArray(repRes.data?.reports)
+        ? repRes.data.reports
+        : [];
 
       set({
         volunteers,
         organisations,
         opportunities,
         reports,
-        adminStats: [
-          {
-            key: "volunteers",
-            value: String(volunteers.filter((v) => v.approvalStatus === "approved").length),
-            label: "Active Volunteers",
-          },
-          {
-            key: "organisations",
-            value: String(organisations.filter((o) => o.approvalStatus === "approved").length),
-            label: "Active Organisations",
-          },
-          {
-            key: "opportunities",
-            value: String(opportunities.filter((o) => o.status === "active").length),
-            label: "Active Opportunities",
-          },
-          {
-            key: "reports",
-            value: String(reports.filter((r) => r.status === "Pending").length),
-            label: "Open Reports",
-          },
-          {
-            key: "volunteerswaitingapproval",
-            value: String(volunteers.filter((v) => v.approvalStatus === "pending").length),
-            label: "Volunteer Waiting Approval",
-          },
-          {
-            key: "organisationswaitingapproval",
-            value: String(organisations.filter((o) => o.approvalStatus === "pending").length),
-            label: "Organisations Waiting Approval",
-          },
-        ],
       });
-      
+      return { success: true };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load stats");
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load dashboard overview";
+
+      set({
+        volunteers: [],
+        organisations: [],
+        opportunities: [],
+        reports: [],
+        statsError: message,
+      });
+      return { success: false, error: message };
+    } finally {
+      set({ isStatsLoading: false });
     }
   },
 
@@ -92,12 +73,22 @@ export const useAdminStore = create((set, get) => ({
     set({ isUsersLoading: true });
     
     try {
-        const res = await axiosInstance.get('/user/organisations');
-        set({ organisations: res.data.organisations });
+      const res = await axiosInstance.get('/user/organisations');
+      const organisations = Array.isArray(res.data?.organisations)
+        ? res.data.organisations
+        : [];
+      set({ organisations });
+      return { success: true, organisations };
     } catch (error) {
-        toast.error(error.response.data.message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load organisations";
+      set({ organisations: [] });
+      toast.error(message);
+      return { success: false, error: message };
     } finally {
-        set({ isUsersLoading: false });
+      set({ isUsersLoading: false });
     }
 
   },
@@ -106,18 +97,28 @@ export const useAdminStore = create((set, get) => ({
     set({ isUsersLoading: true });
     
     try {
-        const res = await axiosInstance.get('/user/volunteers');
-        set({ volunteers: res.data.volunteers });
+      const res = await axiosInstance.get('/user/volunteers');
+      const volunteers = Array.isArray(res.data?.volunteers)
+        ? res.data.volunteers
+        : [];
+      set({ volunteers });
+      return { success: true, volunteers };
     } catch (error) {
-        toast.error(error.response.data.message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load volunteers";
+      set({ volunteers: [] });
+      toast.error(message);
+      return { success: false, error: message };
     } finally {
-        set({ isUsersLoading: false });
+      set({ isUsersLoading: false });
     }
   },
 
   rejectUserAccount: async (userId, onClose) => {
     try {
-      await axiosInstance.patch(`/admin/users/${userId}/reject`);
+      const response = await axiosInstance.patch(`/admin/users/${userId}/reject`);
       toast.success('User account rejected!');
       await Promise.all(
         [
@@ -126,14 +127,17 @@ export const useAdminStore = create((set, get) => ({
         ]
       );
       onClose?.();
+      return { success: true, user: response.data?.user };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+      return { success: false, error: message };
     }
   },
 
   approveUserAccount: async (userId, onClose) => {
     try {
-      await axiosInstance.patch(`/admin/users/${userId}/approve`);
+      const response = await axiosInstance.patch(`/admin/users/${userId}/approve`);
       toast.success('User account approved!');
       await Promise.all(
         [
@@ -142,19 +146,28 @@ export const useAdminStore = create((set, get) => ({
         ]
       );
       onClose?.();
+      return { success: true, user: response.data?.user };
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+      return { success: false, error: message };
     }
   },
 
   getAllOpportunities: async () => {
-    set({ isOpportunitiesLoading: true });
+    set({ isOpportunitiesLoading: true, opportunitiesError: "" });
     
     try {
         const res = await axiosInstance.get('/opportunities');
-        set({ opportunities: res.data.data });
+        const opportunities = Array.isArray(res.data?.data) ? res.data.data : [];
+        set({ opportunities });
+        return { success: true, opportunities };
     } catch (error) {
-        toast.error(error.response.data.message);
+        const message =
+          error.response?.data?.message || "Failed to load opportunities.";
+        set({ opportunities: [], opportunitiesError: message });
+        toast.error(message);
+        return { success: false, error: message };
     } finally {
         set({ isOpportunitiesLoading: false });
     }
@@ -170,15 +183,20 @@ export const useAdminStore = create((set, get) => ({
       set({ isUpdating: true });
 
       const formData = new FormData();
-      formData.append("name", name);
+      if (name !== undefined) {
+        formData.append("name", name);
+      }
       if (avatar) {
         formData.append("profilePic", avatar);
       }
 
       const res = await axiosInstance.put("/admin/profile", formData);
+      const updatedAdmin = res.data?.data;
+
+      useAuthStore.getState().setAuthUser(updatedAdmin);
 
       toast.success("Admin profile updated successfully.");
-      return { success: true, data: res.data.data };
+      return { success: true, data: updatedAdmin };
 
     } catch (error) {
       const message =

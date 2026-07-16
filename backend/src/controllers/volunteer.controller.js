@@ -1,126 +1,17 @@
 import { Volunteer } from "../models/user.model.js";
 import Application from "../models/application.model.js";
 import mongoose from "mongoose";
-import cloudinary from "../lib/cloudinary.js";
-
-const validAgeGroups = ["21-30", "31-40", "41-50", "51-60", "60+"];
-
-const validDays = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
-const validAvailabilityPreferences = ["available", "preferred"];
-
-const time24HourRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const getMinutesFromTime = (timeValue) => {
-  const [hours, minutes] = timeValue.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-const normalizeSkills = (skills) => {
-  return [
-    ...new Set(
-      skills
-        .map((skill) => String(skill).trim())
-        .filter(Boolean),
-    ),
-  ];
-};
-
-const normalizeAvailability = (availability) => {
-  return availability.map((slot) => ({
-    dayOfWeek: slot.dayOfWeek,
-    startTime: String(slot.startTime).trim(),
-    endTime: String(slot.endTime).trim(),
-    preference: slot.preference || "available",
-  }));
-};
-
-const isValidAvailabilitySlot = (slot) => {
-  if (
-    !(
-      slot &&
-      validDays.includes(slot.dayOfWeek) &&
-      typeof slot.startTime === "string" &&
-      typeof slot.endTime === "string" &&
-      time24HourRegex.test(slot.startTime.trim()) &&
-      time24HourRegex.test(slot.endTime.trim()) &&
-      validAvailabilityPreferences.includes(slot.preference || "available")
-    )
-  ) {
-    return false;
-  }
-
-  return (
-    getMinutesFromTime(slot.startTime.trim()) <
-    getMinutesFromTime(slot.endTime.trim())
-  );
-};
-
-const parseArrayField = (fieldValue) => {
-  if (fieldValue === undefined) {
-    return undefined;
-  }
-
-  if (Array.isArray(fieldValue)) {
-    return fieldValue;
-  }
-
-  if (typeof fieldValue === "string") {
-    try {
-      return JSON.parse(fieldValue);
-    } catch {
-      return fieldValue;
-    }
-  }
-
-  return fieldValue;
-};
-
-const uploadAvatarToCloudinary = async (fileBuffer) => {
-  const result = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "avatars",
-        resource_type: "image",
-        public_id: `avatar-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      },
-    );
-    stream.end(fileBuffer);
-  });
-
-  return result.secure_url;
-};
-
-// Get all volunteers (Admin only)
-export const getVolunteers = async (req, res) => {
-  try {
-    const volunteers = await Volunteer.find().select("-password");
-
-    res.status(200).json({
-      success: true,
-      count: volunteers.length,
-      data: volunteers,
-    });
-  } catch (err) {
-    console.log("Error in getVolunteers controller: ", err.message);
-    res.status(500).json({ message: err.message });
-  }
-};
+import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
+import {
+  getAvailabilityValidationError,
+  normalizeAvailability,
+  sortAvailability,
+} from "../lib/availability.js";
+import {
+  normalizeSkills,
+  parseArrayField,
+  validAgeGroups,
+} from "../lib/volunteer.js";
 
 // Get volunteer profile
 export const getVolunteerProfile = async (req, res) => {
@@ -172,10 +63,10 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    if (req.user.role !== "volunteer" || String(req.user._id) !== id) {
+    if (String(req.user._id) !== id) {
       return res.status(403).json({
         success: false,
-        message: "Only volunteers can update their own profile",
+        message: "You can only update your own profile",
       });
     }
 
@@ -255,15 +146,15 @@ export const updateVolunteerProfile = async (req, res) => {
       parsedAvailability !== undefined
         ? normalizeAvailability(parsedAvailability)
         : undefined;
+    const availabilityValidationError =
+      normalizedAvailability !== undefined
+        ? getAvailabilityValidationError(normalizedAvailability)
+        : "";
 
-    if (
-      normalizedAvailability !== undefined &&
-      !normalizedAvailability.every(isValidAvailabilitySlot)
-    ) {
+    if (availabilityValidationError) {
       return res.status(400).json({
         success: false,
-        message:
-          "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference",
+        message: availabilityValidationError,
       });
     }
 
@@ -293,7 +184,7 @@ export const updateVolunteerProfile = async (req, res) => {
     }
 
     if (normalizedAvailability !== undefined) {
-      volunteer.availability = normalizedAvailability;
+      volunteer.availability = sortAvailability(normalizedAvailability);
     }
 
     if (req.file) {

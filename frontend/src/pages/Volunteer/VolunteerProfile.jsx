@@ -10,7 +10,8 @@ import {
 } from 'lucide-react'
 import VolunteerHoursCard from '../../components/VolunteerHoursCard'
 import VolunteerTopbar from '../../components/VolunteerTopbar'
-import { formatApprovalStatus, getInitials, sortAvailabilitySlots } from '../../lib/utils'
+import { sortAvailabilitySlots } from '../../lib/availability'
+import { formatApprovalStatus, getInitials } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useVolunteerStore } from '../../store/useVolunteerStore'
 

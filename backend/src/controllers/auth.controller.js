@@ -6,7 +6,32 @@ import cloudinary from "../lib/cloudinary.js";
 export const signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const userExist = await User.findOne({ email });
+    const normalizedName = typeof name === "string" ? name.trim() : "";
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const allowedRoles = ["volunteer", "organisation", "admin"];
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!normalizedName) {
+      return res.status(400).json({ message: "Name is required." });
+    }
+
+    if (!emailPattern.test(normalizedEmail)) {
+      return res.status(400).json({ message: "A valid email address is required." });
+    }
+
+    if (typeof password !== "string" || !passwordPattern.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
+      });
+    }
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ message: "Invalid user role." });
+    }
+
+    const userExist = await User.findOne({ email: normalizedEmail });
 
     if (userExist) {
       return res.status(400).json({
@@ -58,8 +83,8 @@ export const signup = async (req, res) => {
 
       // create volunteer User (newUser)
       newUser = new Volunteer({
-        name,
-        email,
+        name: normalizedName,
+        email: normalizedEmail,
         password: hashedPassword,
         ageGroup,
         resume: resumeUrl,
@@ -70,7 +95,7 @@ export const signup = async (req, res) => {
       // check if organisation provided biodata
       const { biodata } = req.body;
 
-      if (!biodata) {
+      if (typeof biodata !== "string" || !biodata.trim()) {
         return res.status(400).json({
           message: "Biodata is required for organisations.",
         });
@@ -78,26 +103,29 @@ export const signup = async (req, res) => {
 
       // create organisation User (newUser)
       newUser = new Organisation({
-        name,
-        email,
+        name: normalizedName,
+        email: normalizedEmail,
         password: hashedPassword,
-        biodata,
+        biodata: biodata.trim(),
       });
     }
 
     if (role === "admin") {
       // create admin User (newUser)
       newUser = new Admin({
-        name,
-        email,
+        name: normalizedName,
+        email: normalizedEmail,
         password: hashedPassword,
         approvalStatus: "approved",
       });
     }
 
     if (newUser) {
-      generateToken(newUser._id, res);
       await newUser.save();
+
+      if (newUser.approvalStatus === "approved") {
+        generateToken(newUser._id, res);
+      }
 
       res.status(201).json({
         _id: newUser._id,
@@ -121,8 +149,9 @@ export const signup = async (req, res) => {
     }
   } catch (err) {
     console.log("Error in signup controller: ", err.message);
-    res.status(500).json({
-      message: err.message,
+    const status = err.name === "ValidationError" || err.code === 11000 ? 400 : 500;
+    res.status(status).json({
+      message: status === 400 ? err.message : "Internal Server Error",
     });
   }
 };
@@ -130,18 +159,19 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
-      return res.status(400).json({ message: "User does not exist. " });
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
     // compare the password inserted by user with the hashed password stored in DB
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid password." });
+      return res.status(401).json({ message: "Invalid email or password." });
     }
 
     if (user.approvalStatus !== "approved") {
@@ -179,9 +209,12 @@ export const getMe = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    // clear the jwt token
-    res.cookie("jwt", "", { maxAge: 0 });
-    res.status(200).json({ message: "Logout succesfully" });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV !== "development",
+    });
+    res.status(200).json({ message: "Logged out successfully." });
   } catch (err) {
     console.log("Error in logout controller: ", err.message);
     res.status(500).json({ message: "Internal Server Error" });

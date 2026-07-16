@@ -1,8 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowUpDown, X, Inbox } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowUpDown,
+  Inbox,
+  Loader2,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import OpportunityCard from "../../components/OpportunityCard";
+import {
+  getOpportunityPublishedTimestamp,
+  getOpportunitySortTimestamp,
+  opportunityMatchesSearch,
+} from "../../lib/opportunity";
 import "./Organisation.css";
 import "../../components/OpportunityCard.css";
 
@@ -16,7 +29,12 @@ const TIME_OPTIONS = [
 
 const OrganisationOpportunity = () => {
   const navigate = useNavigate();
-  const { allMyOpportunities, getAllMyOpportunities } = useOrganisationStore();
+  const {
+    allMyOpportunities,
+    getAllMyOpportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
+  } = useOrganisationStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -27,33 +45,23 @@ const OrganisationOpportunity = () => {
     getAllMyOpportunities();
   }, [getAllMyOpportunities]);
 
-  const opportunities = useMemo(() => {
-    const raw = allMyOpportunities?.data ?? allMyOpportunities;
-    return Array.isArray(raw) ? raw : [];
-  }, [allMyOpportunities]);
+  const opportunities = useMemo(
+    () => (Array.isArray(allMyOpportunities) ? allMyOpportunities : []),
+    [allMyOpportunities],
+  );
 
-  const hasActiveFilters = searchQuery || statusFilter || timeFilter !== "all";
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() || statusFilter || timeFilter !== "all",
+  );
 
   const filtered = useMemo(() => {
     let result = [...opportunities];
 
     // Search filter
     if (searchQuery.trim()) {
-      const terms = searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      result = result.filter((opp) => {
-        const text = [
-          opp.title,
-          opp.detail,
-          opp.details,
-          opp.location,
-          opp.requirements,
-          ...(Array.isArray(opp.category) ? opp.category : []),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return terms.every((term) => text.includes(term));
-      });
+      result = result.filter((opportunity) =>
+        opportunityMatchesSearch(opportunity, searchQuery),
+      );
     }
 
     // Status filter
@@ -82,16 +90,16 @@ const OrganisationOpportunity = () => {
       }
       if (cutoff) {
         result = result.filter((opp) => {
-          const date = new Date(opp.createdAt || opp.startAt);
-          return date >= cutoff;
+          const publishedAt = getOpportunityPublishedTimestamp(opp);
+          return publishedAt >= cutoff.getTime();
         });
       }
     }
 
     // Sort by date
     result.sort((a, b) => {
-      const dateA = new Date(a.startAt || a.createdAt || 0);
-      const dateB = new Date(b.startAt || b.createdAt || 0);
+      const dateA = getOpportunitySortTimestamp(a);
+      const dateB = getOpportunitySortTimestamp(b);
       return sortAsc ? dateA - dateB : dateB - dateA;
     });
 
@@ -102,6 +110,7 @@ const OrganisationOpportunity = () => {
     setSearchQuery("");
     setStatusFilter("");
     setTimeFilter("all");
+    setSortAsc(false);
   };
 
   return (
@@ -116,11 +125,12 @@ const OrganisationOpportunity = () => {
           <div className="organisation-table-search-wrapper">
             <Search size={16} className="organisation-table-search-icon" />
             <input
-              type="text"
+              type="search"
               className="organisation-table-search"
               placeholder="Search opportunities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search organisation opportunities"
             />
           </div>
 
@@ -128,6 +138,7 @@ const OrganisationOpportunity = () => {
             className="organisation-table-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="Filter opportunities by status"
           >
             <option value="">All statuses</option>
             {STATUS_OPTIONS.map((s) => (
@@ -141,6 +152,7 @@ const OrganisationOpportunity = () => {
             className="organisation-table-select"
             value={timeFilter}
             onChange={(e) => setTimeFilter(e.target.value)}
+            aria-label="Filter opportunities by publish time"
           >
             {TIME_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -153,23 +165,45 @@ const OrganisationOpportunity = () => {
             type="button"
             className="organisation-table-sort-btn"
             onClick={() => setSortAsc((prev) => !prev)}
+            aria-label={`Sort opportunities by event date: ${
+              sortAsc ? "oldest first" : "newest first"
+            }`}
           >
             <ArrowUpDown size={14} />
             {sortAsc ? "Oldest first" : "Newest first"}
           </button>
 
-          <button
+          {hasActiveFilters || sortAsc ? (
+            <button
               type="button"
               className="organisation-table-clear-btn"
               onClick={clearAllFilters}
             >
               <X size={14} />
               Clear all
-          </button>
+            </button>
+          ) : null}
         </div>
 
         <div className="org-opp-list">
-          {filtered.length > 0 ? (
+          {isOpportunitiesLoading ? (
+            <div className="organisation-empty">
+              <Loader2 size={40} className="organisation-empty-icon" />
+              <h3>Loading opportunities</h3>
+              <p>Please wait while your postings are loaded.</p>
+            </div>
+          ) : opportunitiesError ? (
+            <div className="organisation-empty" role="alert">
+              <AlertCircle size={40} className="organisation-empty-icon" />
+              <h3>Unable to load opportunities</h3>
+              <p>{opportunitiesError}</p>
+              <div className="organisation-empty-actions">
+                <button type="button" onClick={getAllMyOpportunities}>
+                  Try again
+                </button>
+              </div>
+            </div>
+          ) : filtered.length > 0 ? (
             filtered.map((opp) => (
               <OpportunityCard
                 key={opp._id}
@@ -196,6 +230,18 @@ const OrganisationOpportunity = () => {
                   ? "Try adjusting your search or filters"
                   : "You haven't posted any opportunities yet"}
               </p>
+              {!hasActiveFilters && (
+                <div className="organisation-empty-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate("/organisation-dashboard/create-opportunity")
+                    }
+                  >
+                    <Plus size={16} /> Create opportunity
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

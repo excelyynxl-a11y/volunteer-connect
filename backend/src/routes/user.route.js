@@ -4,11 +4,13 @@ import { deleteUser, getAllAdmins, getAllOrganisations, getAllUsers, getAllVolun
 
 const router = express.Router();
 
+router.use(protectRoute, adminOnly);
+
 router.get("/", getAllUsers);   
 router.get("/volunteers", getAllVolunteers);               
 router.get("/organisations", getAllOrganisations);         
 router.get("/admins", getAllAdmins); 
-router.get('/:id', protectRoute, getUserById);
-router.delete('/:id', protectRoute, adminOnly, deleteUser); 
+router.get('/:id', getUserById);
+router.delete('/:id', deleteUser); 
 
 export default router;

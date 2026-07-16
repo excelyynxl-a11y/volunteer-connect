@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import SignUp from "./pages/Auth/SignUp";
 import VolunteerDashboard from "./pages/Volunteer/VolunteerDashboard";
@@ -8,10 +8,13 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import LoggingOut from "./pages/Auth/LoggingOut";
 import Pending from "./pages/Auth/Pending";
-import { Toaster } from "react-hot-toast";  
-import LoadingPage from "./pages/LoadingPage/LoadingPage";
+import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/useAuthStore";
-import CreateOpportunityPage from "./pages/Organisation/CreateOpportunityPage";
+import {
+  GuestRoute,
+  ProtectedRoute,
+  RoleRoute,
+} from "./components/AuthRoutes";
 
 const App = () => {
   const { checkAuth } = useAuthStore();
@@ -28,19 +31,29 @@ const App = () => {
         <Route path='/' element={<LandingPage />} />
 
         {/* authentication and account creation route */}
-        <Route path='/sign-up' element={<SignUp />} />
-        <Route path='/login' element={<Login />} />
+        <Route element={<GuestRoute />}>
+          <Route path='/sign-up' element={<SignUp />} />
+          <Route path='/login' element={<Login />} />
+        </Route>
         <Route path='/logging-out' element={<LoggingOut />} />
         <Route path="/pending-approval" element={<Pending />} />
 
-        {/* volunteer route */}
-        <Route path='/volunteer-dashboard/*' element={<VolunteerDashboard />} />
+        <Route element={<ProtectedRoute />}>
+          {/* volunteer route */}
+          <Route element={<RoleRoute allowedRoles={["volunteer"]} />}>
+            <Route path='/volunteer-dashboard/*' element={<VolunteerDashboard />} />
+          </Route>
 
-        {/* organisation route */}
-        <Route path='/organisation-dashboard/*' element={<OrganisationDashboard />} />
+          {/* organisation route */}
+          <Route element={<RoleRoute allowedRoles={["organisation"]} />}>
+            <Route path='/organisation-dashboard/*' element={<OrganisationDashboard />} />
+          </Route>
 
-        {/* admin route */}
-        <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+          {/* admin route */}
+          <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+          </Route>
+        </Route>
 
         {/* catch-all route */}
         <Route path="*" element={<Navigate to="/" replace />} />

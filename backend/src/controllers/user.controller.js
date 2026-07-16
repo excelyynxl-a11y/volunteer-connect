@@ -1,8 +1,10 @@
 import { Admin, Organisation, User, Volunteer } from "../models/user.model.js";
 
+const ADMIN_USER_PROJECTION = "-password -__v";
+
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password');
+        const users = await User.find().select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: users.length,
@@ -19,7 +21,7 @@ export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const user = await User.findById(id).select('-password');
+        const user = await User.findById(id).select(ADMIN_USER_PROJECTION);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
@@ -57,7 +59,7 @@ export const deleteUser = async (req, res) => {
 
 export const getAllVolunteers = async (req, res) => {
     try {
-        const volunteers = await Volunteer.find().select('-password');
+        const volunteers = await Volunteer.find().select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: volunteers.length,
@@ -72,7 +74,7 @@ export const getAllVolunteers = async (req, res) => {
 
 export const getAllOrganisations = async (req, res) => {
     try {
-        const organisations = await Organisation.find().select('-password');
+        const organisations = await Organisation.find().select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: organisations.length,
@@ -87,7 +89,7 @@ export const getAllOrganisations = async (req, res) => {
 
 export const getAllAdmins = async (req, res) => {
     try {
-        const admins = await Admin.find().select('-password');
+        const admins = await Admin.find().select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: admins.length,

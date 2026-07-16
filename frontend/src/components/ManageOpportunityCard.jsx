@@ -1,35 +1,20 @@
 import React from "react";
 import { Eye } from "lucide-react";
-
-const formatDate = (value) => {
-  if (!value) return "—";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return date.toLocaleDateString("en-MY", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-};
-
-const getStatusClass = (status) => {
-  if (status === "active") return "active";
-  if (status === "completed") return "completed";
-  if (status === "cancelled") return "cancelled";
-  if (status === "closed") return "closed";
-  return "pending";
-};
+import {
+  formatOpportunityDate,
+  getOpportunityStatusClass,
+  getOrganisationName,
+} from "../lib/opportunity";
 
 const ManageOpportunityCard = ({ opportunity, onPreview }) => {
   const categoryText = opportunity.category?.length
     ? opportunity.category.join(", ")
     : "Other";
-  const displayDate = formatDate(
+  const displayDate = formatOpportunityDate(
     opportunity.startAt || opportunity.publishedAt || opportunity.createdAt,
+    "—",
   );
-  const statusClass = getStatusClass(opportunity.status);
+  const statusClass = getOpportunityStatusClass(opportunity.status);
 
   return (
     <div className="admin-volunteer-card admin-opportunity-card">
@@ -38,7 +23,7 @@ const ManageOpportunityCard = ({ opportunity, onPreview }) => {
         <h3 className="admin-opportunity-card-title">
           {opportunity.title}{" "}
           <span className="admin-opportunity-card-org">
-            by {opportunity.organisationId?.name || opportunity.organisationId}
+            by {getOrganisationName(opportunity)}
           </span>
         </h3>
       </div>

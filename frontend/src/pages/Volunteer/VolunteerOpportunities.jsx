@@ -4,12 +4,12 @@ import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
 import {
+  formatAvailabilitySlot,
   getMinutesFromTime,
   isOpportunityInsideAvailability,
-  formatAvailabilitySlot,
-  opportunityMatchesSearch,
   sortAvailabilitySlots,
-} from "../../lib/utils";
+} from "../../lib/availability";
+import { opportunityMatchesSearch } from "../../lib/opportunity";
 import {
   opportunityCategories,
   volunteerAvailabilityDays,

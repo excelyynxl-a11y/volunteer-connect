@@ -2,10 +2,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 
-const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
-
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create((set) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
@@ -17,7 +14,9 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
     } catch (error) {
-      console.error("Error in checkAuth: ", error);
+      if (error.response?.status !== 401) {
+        console.error("Error in checkAuth: ", error);
+      }
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -28,7 +27,9 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
-      set({ authUser: res.data });
+      set({
+        authUser: res.data.approvalStatus === "approved" ? res.data : null,
+      });
       toast.success("Account created successfully.");
       return {
         success: true,

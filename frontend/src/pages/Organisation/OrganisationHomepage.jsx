@@ -14,7 +14,11 @@ import {
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
-import { formatDate, formatTime } from "../../lib/utils"; 
+import { formatDate, formatTime } from "../../lib/utils";
+import {
+  getUpcomingOpportunities,
+  sortOpportunitiesByMostRecent,
+} from "../../lib/opportunity";
 import "./Organisation.css";
 import "../../components/OpportunityCard.css";
 
@@ -37,11 +41,12 @@ const OpportunityRow = ({
   const iconSize = isCancelled ? 12 : 14;
 
   return (
-    <article 
+    <button
+      type="button"
       className={`org-home-opportunity-row org-home-tone-${currentStatus}`}
-      onClick={() => onClick && onClick(id)}
+      onClick={() => onClick?.(id)}
+      aria-label={`View ${opportunity.title}`}
       style={{ 
-        cursor: onClick ? 'pointer' : 'default',
         ...(isCancelled && { padding: "12px 16px", borderRadius: 14 })
       }}
     >
@@ -95,10 +100,10 @@ const OpportunityRow = ({
         </div>
       </div>
       
-      <button type="button" className="org-home-opportunity-action">
+      <span className="org-home-opportunity-action" aria-hidden="true">
         <ChevronRight size={isCancelled ? 16 : 18} />
-      </button>
-    </article>
+      </span>
+    </button>
   );
 };
 
@@ -123,7 +128,10 @@ const OrganisationHomepage = () => {
     activeOpportunities,
     closedOpportunities,
     cancelledOpportunities,
+    allMyOpportunities,
     getMyOpportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
   } = useOrganisationStore();
 
   useEffect(() => {
@@ -135,11 +143,23 @@ const OrganisationHomepage = () => {
   const orgName = authUser?.name || "Organisation";
   
   const nextOpportunity = useMemo(() => {
-    if (!activeOpportunities?.length) return null;
-    return [...activeOpportunities].sort(
-      (a, b) => new Date(a.fixedDate || a.startAt) - new Date(b.fixedDate || b.startAt)
-    )[0];
+    return getUpcomingOpportunities(activeOpportunities)[0] || null;
   }, [activeOpportunities]);
+
+  const recentActiveOpportunities = useMemo(
+    () => sortOpportunitiesByMostRecent(activeOpportunities),
+    [activeOpportunities],
+  );
+
+  const recentClosedOpportunities = useMemo(
+    () => sortOpportunitiesByMostRecent(closedOpportunities),
+    [closedOpportunities],
+  );
+
+  const recentCancelledOpportunities = useMemo(
+    () => sortOpportunitiesByMostRecent(cancelledOpportunities),
+    [cancelledOpportunities],
+  );
 
   const totals = useMemo(() => ({
     active: activeOpportunities?.length || 0,
@@ -148,9 +168,9 @@ const OrganisationHomepage = () => {
   }), [activeOpportunities, closedOpportunities, cancelledOpportunities]);
 
   const completionRate = useMemo(() => {
-    const total = totals.active + totals.closed + totals.cancelled;
-    if (!total) return 0;
-    return Math.round((totals.closed / total) * 100);
+    const resolvedTotal = totals.closed + totals.cancelled;
+    if (!resolvedTotal) return 0;
+    return Math.round((totals.closed / resolvedTotal) * 100);
   }, [totals]);
 
   const nextDate = nextOpportunity ? nextOpportunity.fixedDate || nextOpportunity.startAt : null;
@@ -165,7 +185,7 @@ const OrganisationHomepage = () => {
             <span className="organisation-section-label">ORGANISATION OVERVIEW</span>
             <h1>Welcome back, <span className="org-home-hero-name">{orgName}</span></h1>
             <p className="org-home-hero-description">
-              A real-time pulse of every opportunity, applicant and engagement you've created. Keep your community moving beautifully.
+              A clear overview of the opportunities your organisation has created.
             </p>
             <div className="org-home-hero-actions">
               <button
@@ -217,9 +237,25 @@ const OrganisationHomepage = () => {
           </div>
         </section>
 
+        {isOpportunitiesLoading && !allMyOpportunities.length ? (
+          <section className="org-home-state" aria-live="polite">
+            <Activity className="org-home-state-spinner" size={28} />
+            <p>Loading your opportunity overview...</p>
+          </section>
+        ) : opportunitiesError ? (
+          <section className="org-home-state org-home-state-error" role="alert">
+            <Inbox size={30} />
+            <h2>We couldn't load your opportunities</h2>
+            <p>{opportunitiesError}</p>
+            <button type="button" className="organisation-create-btn" onClick={getMyOpportunities}>
+              Try Again
+            </button>
+          </section>
+        ) : (
+        <>
         <section className="org-home-stats-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-          <StatCard icon={Activity} label="Active" value={totals.active} accent="emerald" hint="Currently open" />
-          <StatCard icon={CheckCircle2} label="Completed" value={totals.closed} accent="gold" hint="Successfully delivered" />
+          <StatCard icon={Activity} label="Active" value={totals.active} accent="emerald" hint="Marked as active" />
+          <StatCard icon={CheckCircle2} label="Finished" value={totals.closed} accent="gold" hint="Closed or completed" />
           <StatCard icon={XCircle} label="Cancelled" value={totals.cancelled} accent="rose" hint="No longer running" />
         </section>
           
@@ -229,7 +265,7 @@ const OrganisationHomepage = () => {
               <header className="org-home-panel-head">
                 <div>
                   <span className="organisation-section-label"><Activity size={12} /> ACTIVE OPPORTUNITIES</span>
-                  <h2>Live right now</h2>
+                  <h2>Currently active</h2>
                 </div>
                 <button 
                   type="button" 
@@ -241,8 +277,8 @@ const OrganisationHomepage = () => {
               </header>
 
               <div className="org-home-opportunity-list">
-                {activeOpportunities?.length ? (
-                  activeOpportunities.slice(0, 4).map((opp) => (
+                {recentActiveOpportunities.length ? (
+                  recentActiveOpportunities.slice(0, 4).map((opp) => (
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
@@ -258,7 +294,7 @@ const OrganisationHomepage = () => {
               </div>
             </div>
 
-            {cancelledOpportunities?.length > 0 && (
+            {recentCancelledOpportunities.length > 0 && (
               <div className="org-home-panel">
                 <header className="org-home-panel-head" style={{ marginBottom: 14 }}>
                   <div>
@@ -267,7 +303,7 @@ const OrganisationHomepage = () => {
                   </div>
                 </header>
                 <div className="org-home-opportunity-list" style={{ gap: 8 }}>
-                  {cancelledOpportunities.slice(0, 3).map((opp) => (
+                  {recentCancelledOpportunities.slice(0, 3).map((opp) => (
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp}
@@ -284,7 +320,7 @@ const OrganisationHomepage = () => {
               <header className="org-home-panel-head">
                 <div>
                   <span className="organisation-section-label"><TrendingUp size={12} /> COMPLETION</span>
-                  <h3>Delivery rate</h3>
+                  <h3>Resolved successfully</h3>
                 </div>
               </header>
               <div className="org-home-ring">
@@ -303,12 +339,12 @@ const OrganisationHomepage = () => {
                 </svg>
                 <div className="org-home-ring-center">
                   <strong>{completionRate}%</strong>
-                  <span>completed</span>
+                  <span>finished</span>
                 </div>
               </div>
               <div className="org-home-ring-legend">
                 <span><em className="org-home-dot org-home-dot-emerald" /> Active {totals.active}</span>
-                <span><em className="org-home-dot org-home-dot-gold"    /> Closed {totals.closed}</span>
+                <span><em className="org-home-dot org-home-dot-gold"    /> Finished {totals.closed}</span>
                 <span><em className="org-home-dot org-home-dot-rose"    /> Cancelled {totals.cancelled}</span>
               </div>
             </div>
@@ -321,8 +357,8 @@ const OrganisationHomepage = () => {
                 </div>
               </header>
               <div className="org-home-opportunity-list compact">
-                {closedOpportunities?.length ? (
-                  closedOpportunities.slice(0, 2).map((opp) => (
+                {recentClosedOpportunities.length ? (
+                  recentClosedOpportunities.slice(0, 2).map((opp) => (
                     <OpportunityRow 
                       key={opp._id} 
                       opportunity={opp} 
@@ -338,6 +374,8 @@ const OrganisationHomepage = () => {
             </div>
           </aside>
         </section>
+        </>
+        )}
     </div>
   );
 };

@@ -1,9 +1,13 @@
-import React from 'react'
+import FeatureComingSoon from "../../components/FeatureComingSoon";
 
-const OrganisationApplication = () => {
-  return (
-    <div>OrganisationApplication</div>
-  )
-}
+const OrganisationApplication = () => (
+  <div className="org-profile-page">
+    <FeatureComingSoon
+      eyebrow="Applications"
+      title="Application management"
+      description="Review and manage volunteer applications for your opportunities."
+    />
+  </div>
+);
 
-export default OrganisationApplication
+export default OrganisationApplication;
