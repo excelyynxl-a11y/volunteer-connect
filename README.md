@@ -1,34 +1,37 @@
-# FIT3170 Team 4 Project
+# 🌱 FIT3170 Team 4: VolunteerConnect
 
-## Project Overview
-This repository contains the  documentation, and deliverables for FIT3170 Team 4's semester project. Our team follows Agile SAFe practices for planning and development throughout the semester. 
+## 🚨 Instrcution for README as Handover Docs
+The handover documentation is essentially:
+What software/hardware is needed to run the project
+Instructions on how to get the project up and running 
+Any additional notes or common issues that future developers might benefit from knowing
+This is usually done as a README.md file located in your github repository, however we expect you to export it as a pdf before uploading it to us.
 
-| Name | Email | 
-| :--- | :----: | 
-|  Xu Yiming| yxuu0272@student.monash.edu| 
-| Jijendran | jije0001@student.monash.edu| 
-|  Esha Veena Veerayya| evee0001@student.monash.edu | 
-| Muhammad Saud | muha0017@student.monash.edu | 
-|  Lim Excelyynx| elim0079@student.monash.edu | 
-| Dhakshini Subramanian | dsub0009@student.monash.edu | 
-|  Chan Long Hei| lcha0121@student.monash.edu | 
-| Brandon Shu Chun Hong | bshu0007@student.monash.edu | 
-|  Ti Jia Don| jtii0004@student.monash.edu | 
-| Ooi Hui Yi | hooi0004@student.monash.edu| 
-|  Sheikh Fardin Sadman| fsad0006@student.monash.edu| 
 
-## Project Documents
-The main project documents include:
-- Domain Analysis Specification
-- FIT3170 FY-2026 Team 4 Team Info
-- FIT3170_Group4_PI_Planning
-- Milestone 1 Marking Guide
-- Milestone 1 Specification
-- PM Documentation
-- RTE Documentation
-- SA Documentation
+## 💡 Project Overview
+VolunteerConnect is a centralised web-based website designed to bridge the gap between volunteers, community and non-profits organisations. Unlike fragmented social media groups or simply any spreadsheets to record the volunteers, our platform provides a streamlined workflow from search and filtering for opportunities to manual hours logging.
 
-## Repository Structure
-- `README.md` – project overview and team information
-- `docs/` – documentation and milestone reports
+The system serves three primary roles. Firstly, volunteers who seek a frictionless way to follow organisations and track a maximum of two years participation history. On top of that, organisations which require manual approval tools for fixed schedule opportunities as those applications will go through to the organisation’s application list. Lastly, admins who act as the primary gatekeepers by skimming the applications before they reach the organisations. VolunteerConnect differentiates itself by offering a dual-layered approval process and in-platform messaging system that supports attachments, ensuring clear communication throughout the volunteer lifecycle.
+
+
+## 🏗️ Repository Structure (to-be-updated from time to time)
+This repository is organised into folders and files, primarily the backend and frontend folder to maintain separation of concerns and codes between frontend and backend development.
+PROJECT
+|_ frontend
+    |_
+|_ backend
+    |_
+|_ .gitignore
+|_ CONTRIBUTORS.md
+|_ docker-compose.yaml
+|_ NOTICE
+|_ README.md (😆 you are currently reading this file!)
+
+## 🔨 Software / Hardware to Run This Project
+
+## 🗒️ Additonal Notes: For Future Developers
+
+
+
+
 
