@@ -1,0 +1,117 @@
+image: node:22-alpine
+
+variables:
+  NODE_VERSION: "22.17.0"
+
+default:
+  tags:
+    # Temporary: replace when an authorised FIT3170 runner is available.
+    - fit2107
+  interruptible: true
+  before_script:
+    - . .gitlab/ci/setup-node.sh
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+      - .node/
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - quality
+  - test
+  - build
+  - deploy
+
+backend_lint:
+  stage: quality
+  script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run lint
+
+frontend_lint:
+  stage: quality
+  script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run lint
+
+backend_unit_test:
+  stage: test
+  script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run test:unit
+  needs:
+    - backend_lint
+
+backend_integration_test:
+  stage: test
+  script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run test:integration
+  needs:
+    - backend_lint
+
+frontend_build:
+  stage: build
+  script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run build
+  needs:
+    - frontend_lint
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 7 days
+
+.railway_staging:
+  stage: deploy
+  variables:
+    RAILWAY_CLI_VERSION: "5.26.3"
+    RAILWAY_ENVIRONMENT: "staging"
+    RAILWAY_SERVICE: "volunteerconnect-app"
+    RAILWAY_REGION: "southeast-asia"
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^release\/.+$/'
+      when: manual
+    - when: never
+  allow_failure: true
+  resource_group: staging
+  needs:
+    - backend_unit_test
+    - backend_integration_test
+    - frontend_build
+
+deploy_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    on_stop: stop_staging
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --message "GitLab $CI_COMMIT_SHORT_SHA"
+
+start_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    action: start
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=1" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
+
+stop_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    action: stop
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=0" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
