@@ -82,7 +82,7 @@ frontend_build:
     RAILWAY_SERVICE: "volunteerconnect-app"
     RAILWAY_REGION: "southeast-asia"
   rules:
-    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^release\/.+$/'
       when: manual
     - when: never
   allow_failure: true
