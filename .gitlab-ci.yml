@@ -51,6 +51,15 @@ backend_unit_test:
   needs:
     - backend_lint
 
+backend_integration_test:
+  stage: test
+  script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run test:integration
+  needs:
+    - backend_lint
+
 frontend_build:
   stage: build
   script:
