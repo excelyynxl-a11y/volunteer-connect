@@ -1,14 +1,20 @@
 image: node:22-alpine
 
+variables:
+  NODE_VERSION: "22.17.0"
+
 default:
   tags:
     # Temporary: replace when an authorised FIT3170 runner is available.
     - fit2107
   interruptible: true
+  before_script:
+    - . .gitlab/ci/setup-node.sh
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
+      - .node/
 
 workflow:
   rules:
@@ -24,36 +30,32 @@ stages:
 
 backend_lint:
   stage: quality
-  before_script:
+  script:
     - cd backend
     - npm ci --cache ../.npm --prefer-offline
-  script:
     - npm run lint
 
 frontend_lint:
   stage: quality
-  before_script:
+  script:
     - cd frontend
     - npm ci --cache ../.npm --prefer-offline
-  script:
     - npm run lint
 
 backend_unit_test:
   stage: test
-  before_script:
+  script:
     - cd backend
     - npm ci --cache ../.npm --prefer-offline
-  script:
     - npm run test:unit
   needs:
     - backend_lint
 
 frontend_build:
   stage: build
-  before_script:
+  script:
     - cd frontend
     - npm ci --cache ../.npm --prefer-offline
-  script:
     - npm run build
   needs:
     - frontend_lint
