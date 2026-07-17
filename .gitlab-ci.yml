@@ -27,6 +27,7 @@ stages:
   - quality
   - test
   - build
+  - deploy
 
 backend_lint:
   stage: quality
@@ -72,3 +73,45 @@ frontend_build:
     paths:
       - frontend/dist/
     expire_in: 7 days
+
+.railway_staging:
+  stage: deploy
+  variables:
+    RAILWAY_CLI_VERSION: "5.26.3"
+    RAILWAY_ENVIRONMENT: "staging"
+    RAILWAY_SERVICE: "volunteerconnect-app"
+    RAILWAY_REGION: "southeast-asia"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: manual
+    - when: never
+  allow_failure: true
+  resource_group: staging
+  needs:
+    - backend_unit_test
+    - backend_integration_test
+    - frontend_build
+
+deploy_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    on_stop: stop_staging
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --message "GitLab $CI_COMMIT_SHORT_SHA"
+
+start_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    action: start
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=1" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
+
+stop_staging:
+  extends: .railway_staging
+  environment:
+    name: staging
+    action: stop
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=0" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
