@@ -1,0 +1,63 @@
+image: node:22-alpine
+
+default:
+  tags:
+    # Temporary: replace when an authorised FIT3170 runner is available.
+    - fit2107
+  interruptible: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - quality
+  - test
+  - build
+
+backend_lint:
+  stage: quality
+  before_script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+  script:
+    - npm run lint
+
+frontend_lint:
+  stage: quality
+  before_script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+  script:
+    - npm run lint
+
+backend_unit_test:
+  stage: test
+  before_script:
+    - cd backend
+    - npm ci --cache ../.npm --prefer-offline
+  script:
+    - npm run test:unit
+  needs:
+    - backend_lint
+
+frontend_build:
+  stage: build
+  before_script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+  script:
+    - npm run build
+  needs:
+    - frontend_lint
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 7 days
