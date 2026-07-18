@@ -80,7 +80,6 @@ frontend_build:
     RAILWAY_CLI_VERSION: "5.26.3"
     RAILWAY_ENVIRONMENT: "staging"
     RAILWAY_SERVICE: "volunteerconnect-app"
-    RAILWAY_REGION: "southeast-asia"
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /^release\/.+$/'
       when: manual
@@ -106,7 +105,7 @@ start_staging:
     name: staging
     action: start
   script:
-    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=1" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --message "GitLab $CI_COMMIT_SHORT_SHA (start staging)"
 
 stop_staging:
   extends: .railway_staging
@@ -114,4 +113,4 @@ stop_staging:
     name: staging
     action: stop
   script:
-    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" scale "$RAILWAY_REGION=0" --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --json
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" down --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --yes
