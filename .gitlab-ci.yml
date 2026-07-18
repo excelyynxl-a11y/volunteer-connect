@@ -114,3 +114,44 @@ stop_staging:
     action: stop
   script:
     - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" down --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --yes
+
+.railway_production:
+  stage: deploy
+  variables:
+    RAILWAY_CLI_VERSION: "5.26.3"
+    RAILWAY_ENVIRONMENT: "production"
+    RAILWAY_SERVICE: "volunteerconnect-app"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+    - when: never
+  allow_failure: true
+  resource_group: production
+  needs:
+    - backend_unit_test
+    - backend_integration_test
+    - frontend_build
+
+deploy_production:
+  extends: .railway_production
+  environment:
+    name: production
+    on_stop: stop_production
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --message "GitLab $CI_COMMIT_SHORT_SHA"
+
+start_production:
+  extends: .railway_production
+  environment:
+    name: production
+    action: start
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --message "GitLab $CI_COMMIT_SHORT_SHA (start production)"
+
+stop_production:
+  extends: .railway_production
+  environment:
+    name: production
+    action: stop
+  script:
+    - npx --yes --cache .npm "@railway/cli@$RAILWAY_CLI_VERSION" down --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT" --yes
