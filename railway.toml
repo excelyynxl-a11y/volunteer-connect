@@ -6,3 +6,6 @@ restartPolicyMaxRetries = 10
 
 [environments.staging.deploy.multiRegionConfig."asia-southeast1-eqsg3a"]
 numReplicas = 1
+
+[environments.production.deploy.multiRegionConfig."asia-southeast1-eqsg3a"]
+numReplicas = 1
