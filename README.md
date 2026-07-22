@@ -1,6 +1,6 @@
 # 🌱 FIT3170 Team 4: VolunteerConnect
 
-## 🚨 Instruction for README as Handover Docs
+## 🚨 Instruction for README as Handover Docs (From Milestone 3 Specs)
 The handover documentation is essentially:
 What software/hardware is needed to run the project
 Instructions on how to get the project up and running 
@@ -188,7 +188,49 @@ The frontend talks to the backend at `http://localhost:5001` by default (injecte
 
 ## 🗒️ Additonal Notes: For Future Developers
 
+> The notes below are derived from the current state of the codebase and the `instructions/` docs. They are meant to save you from tripping over the same things we did.
 
+### A. Features still in progress (read the `TODO` comments)
+Several backend controllers and frontend stores are scaffolded but not fully wired up. Before assuming a workflow is "done", check for `TODO(...)` markers — the main ones at the time of writing:
 
+| Feature | Backend | Frontend | Note |
+| --- | --- | --- | --- |
+| **Follow** | `follow.controller.js` is fully TODO stubs; `follow.model.js` is a TODO placeholder | `useFollowStore.js` returns **mock responses** | The follow/unfollow UI may appear to work but is hitting mock data, not the API. |
+| **Messaging** | `message.controller.js` is entirely TODO stubs | chat store exists | No persistence yet — messages won't survive a refresh. |
+| **Application** | `application.controller.js` has working submit/list/withdraw, but approval/authorisation paths still have `TODO(application)` markers | `useApplicationStore.js` uses **mock responses** for some flows | Verify which endpoints are real vs mocked before building on top. |
+| **Report** | `report.route.js` and `report.controller.js` have `// TODO` markers | `useAdminStore.js` has a `// TODO: call getAllReports` | Reporting pipeline is partially scaffolded. |
+| **Admin Analytics** | — | `AdminAnalytics.jsx` has `// TODO: analytics in Milestone 3` | Dashboard charts are placeholders. |
 
+When you pick up one of these, search the whole repo for the matching `TODO(feature-name)` tag so you catch both the backend and frontend side.
 
+### B. Authentication & authorisation flow
+- New **volunteer** and **organisation** accounts are **not** immediately usable. After sign-up they sit in `approvalStatus: "pending"` and cannot log in until an **admin** approves them (`backend/src/middlewares/auth.middleware.js` returns `403` with `approvalStatus` in the body).
+- The **admin** account is a default/seeded account — there is no public sign-up route for admins.
+- Users **cannot change their email** after registration (enforced in the user model). Other profile fields (resume, avatar, bio, description) are editable.
+- The JWT is stored in an **http-only cookie** named `jwt` (set by the backend, read by `protectRoute`). The frontend never touches the token directly — that's why every axios call uses `withCredentials: true`.
+- Middleware order matters: `protectRoute` **must** run before `adminOnly` / `allowRoles(...)`, because the role checks read `req.user` which `protectRoute` populates. Putting `adminOnly` on a route without `protectRoute` ahead of it will crash with `Cannot read properties of undefined`.
+
+### C. API & CORS configuration
+- **CORS is hardcoded** to `http://localhost:5173` in `backend/src/index.js`. If you ever change the frontend dev port (e.g. via `vite.config.js`), you **must** update the `origin` in the `cors()` call or the browser will block every request.
+- The frontend API base URL is chosen by **Vite's `MODE`**, not by `VITE_API_URI`: `frontend/src/lib/axios.js` uses `http://localhost:5001/api` in development and `/api` in production builds. Note that `docker-compose.yaml` does inject a `VITE_API_URI` env var, but the axios client does **not** currently read it — so changing that env var alone won't re-point the frontend. If you need a different backend URL, edit `axios.js` directly (or refactor it to read `VITE_API_URI`).
+
+### D. Cloudinary connection check
+There is a `testCloudinary()` helper at the bottom of `backend/src/index.js` that is **commented out by default**. If you need to verify Cloudinary credentials are working (e.g. after rotating keys), temporarily uncomment it, restart the backend, and look for the `Cloudinary connected:` log line. Re-comment it afterwards — it pings the Cloudinary API on every boot.
+
+### E. Request body size limit
+The backend sets `express.json({ limit: "10mb" })` and `express.urlencoded({ limit: "10mb" })` to accommodate base64 file uploads (resume/avatar via Multer). If you start uploading larger files and getting `413 Payload Too Large`, bump this limit in `index.js`.
+
+### F. Running with Docker — things that catch people out
+- **Docker account email**: when creating a Docker Hub / Docker Desktop account, use a **personal email**. Using a Monash student email triggers an account-creation error (documented in `instructions/DOCKER.md`).
+- **First build is slow**: `docker compose up --build` takes 2–3 minutes the first time as it pulls `node:22-alpine` and `mongo:latest`. Subsequent starts are fast.
+- **Once Docker is running, don't also run `npm run dev`** in the frontend/backend folders — you'll end up with two dev servers fighting for the same ports (`5001` / `5173`). Pick one workflow (Docker *or* local `npm run dev`) and stick with it.
+- **MongoDB volume**: the `mongo-data` named volume persists between runs. If the DB seems "stuck" with old data after you've changed a seed, run `docker compose down -v` to wipe the volume (this deletes all stored data — use with care).
+- **Hot reload**: the compose file mounts `./backend` and `./frontend` into the containers, so edits on your host are reflected live. The backend uses nodemon with the `-L` (legacy watch) flag for Docker volume compatibility.
+
+### G. Where to get `.env` values
+The `backend/.env` file is gitignored and not committed. As documented in `instructions/INSTRUCTION.md`, the actual key values are shared in the **FIT3170 Team 4 WhatsApp group** — ask a current team member to resend them if you can't find the message. Do **not** paste real secrets into this README, into commits, or into any chat that's outside the team.
+
+### H. Branching & workflow conventions
+- The default branch is `main`. Feature work happens on branches off `develop` (e.g. `feature/...`, `fix/...`, `chore/...`) and is merged back via merge requests on the GitLab instance at `git.infotech.monash.edu`.
+- Keep the frontend and backend folders' `package-lock.json` files committed — the backend Dockerfile runs `npm ci`, which fails without a lockfile.
+- When adding a new API resource, follow the existing pattern: create `controllers/<resource>.controller.js`, `routes/<resource>.route.js`, `models/<resource>.model.js`, then mount the router in `backend/src/index.js` under `/api/<resource>`.
