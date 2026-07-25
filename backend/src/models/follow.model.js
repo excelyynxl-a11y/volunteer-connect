@@ -1,3 +1,22 @@
-// TODO(follow): implement the persistence model before enabling follow APIs.
-// Required fields: volunteerId, organisationId, and timestamps.
-// Add a unique compound index on { volunteerId, organisationId }.
+import mongoose from "mongoose";
+
+const followSchema = new mongoose.Schema({
+  volunteerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  organisationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+});
+
+followSchema.index(
+  { volunteerId: 1, organisationId: 1 },
+  { unique: true },
+);
+
+const Follow = mongoose.model("Follow", followSchema);
+export default Follow;
