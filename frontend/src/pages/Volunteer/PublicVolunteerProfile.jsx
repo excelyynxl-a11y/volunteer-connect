@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   BriefcaseBusiness,
+  CheckCircle2,
   FileText,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -12,15 +13,24 @@ import "./PublicVolunteerProfile.css";
 const PublicVolunteerProfile = () => {
   const { volunteerId } = useParams();
   const {
+    getPublicVolunteerPastExperience,
     getPublicVolunteerProfile,
+    isPublicVolunteerParticipationLoading,
     isPublicVolunteerProfileLoading,
     publicVolunteerProfile,
     publicVolunteerProfileError,
+    publicVolunteerParticipation,
+    publicVolunteerParticipationError,
   } = useOrganisationStore();
 
   useEffect(() => {
     getPublicVolunteerProfile(volunteerId);
-  }, [getPublicVolunteerProfile, volunteerId]);
+    getPublicVolunteerPastExperience(volunteerId);
+  }, [
+    getPublicVolunteerPastExperience,
+    getPublicVolunteerProfile,
+    volunteerId,
+  ]);
 
   if (isPublicVolunteerProfileLoading) {
     return (
@@ -101,11 +111,51 @@ const PublicVolunteerProfile = () => {
                 <h2>Recent Participation</h2>
                 <p>Recently completed volunteering activities.</p>
               </div>
+              {publicVolunteerParticipation.length > 0 && (
+                <span className="public-volunteer-profile-count">
+                  {publicVolunteerParticipation.length} recent
+                </span>
+              )}
             </div>
 
-            <p className="public-volunteer-profile-empty">
-              No recent participation is available.
-            </p>
+            {publicVolunteerParticipationError ? (
+              <p className="public-volunteer-profile-empty error" role="alert">
+                {publicVolunteerParticipationError}
+              </p>
+            ) : isPublicVolunteerParticipationLoading ? (
+              <p className="public-volunteer-profile-empty" role="status">
+                Loading recent participation...
+              </p>
+            ) : publicVolunteerParticipation.length > 0 ? (
+              <div className="public-volunteer-profile-participation-list">
+                {publicVolunteerParticipation.map((participation) => (
+                  <article
+                    className="public-volunteer-profile-participation"
+                    key={participation.id}
+                  >
+                    <span
+                      className="public-volunteer-profile-participation-icon"
+                      aria-hidden="true"
+                    >
+                      <CheckCircle2 size={20} />
+                    </span>
+                    <div>
+                      <strong>{participation.title}</strong>
+                      <p>
+                        {participation.organisation} · {participation.date}
+                      </p>
+                    </div>
+                    <span className="public-volunteer-profile-status">
+                      {participation.status}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="public-volunteer-profile-empty">
+                No recent participation is available.
+              </p>
+            )}
           </section>
         </main>
 

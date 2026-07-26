@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { useAuthStore } from "./useAuthStore";
 import { splitOpportunitiesByStatus } from "../lib/opportunity";
+import { formatDate } from "../lib/utils";
 
 const getOpportunitiesFromResponse = (responseData) => {
   const opportunities = Array.isArray(responseData)
@@ -11,6 +12,32 @@ const getOpportunitiesFromResponse = (responseData) => {
 
   return Array.isArray(opportunities) ? opportunities : [];
 };
+
+const mapPublicVolunteerParticipation = (experienceData = []) =>
+  [...experienceData]
+    .filter((application) => application.opportunityId)
+    .sort((first, second) => {
+      const firstEndAt = new Date(first.opportunityId.endAt).getTime() || 0;
+      const secondEndAt = new Date(second.opportunityId.endAt).getTime() || 0;
+
+      return secondEndAt - firstEndAt;
+    })
+    .slice(0, 3)
+    .map((application, index) => {
+      const opportunity = application.opportunityId;
+
+      return {
+        id: application._id,
+        title: opportunity.title || `Past Opportunity ${index + 1}`,
+        organisation:
+          opportunity.organisationId?.name ||
+          "Organisation details unavailable",
+        date: formatDate(
+          opportunity.endAt || application.updatedAt || application.createdAt,
+        ),
+        status: "Completed",
+      };
+    });
 
 export const useOrganisationStore = create((set, get) => ({
   // --- UI State ---
@@ -25,6 +52,8 @@ export const useOrganisationStore = create((set, get) => ({
   opportunitiesError: "",
   isPublicVolunteerProfileLoading: false,
   publicVolunteerProfileError: "",
+  isPublicVolunteerParticipationLoading: false,
+  publicVolunteerParticipationError: "",
   isUpdatingOrganisationProfile: false,
   isUpdatingOpportunity: false,
   isCreatingOpportunity: false,
@@ -35,6 +64,7 @@ export const useOrganisationStore = create((set, get) => ({
   cancelledOpportunities: [],
   allMyOpportunities: [],
   publicVolunteerProfile: null,
+  publicVolunteerParticipation: [],
 
   // --- Public Volunteer Profile Actions ---
   getPublicVolunteerProfile: async (volunteerId) => {
@@ -82,6 +112,55 @@ export const useOrganisationStore = create((set, get) => ({
         publicVolunteerProfile: null,
         isPublicVolunteerProfileLoading: false,
         publicVolunteerProfileError: message,
+      });
+
+      return { success: false, error: message };
+    }
+  },
+
+  getPublicVolunteerPastExperience: async (volunteerId) => {
+    set({
+      publicVolunteerParticipation: [],
+      isPublicVolunteerParticipationLoading: true,
+      publicVolunteerParticipationError: "",
+    });
+
+    if (!volunteerId) {
+      const message =
+        "Unable to load recent participation because no volunteer ID is available.";
+
+      set({
+        isPublicVolunteerParticipationLoading: false,
+        publicVolunteerParticipationError: message,
+      });
+
+      return { success: false, error: message };
+    }
+
+    try {
+      const response = await axiosInstance.get(
+        `/volunteer/profile/${volunteerId}/past-experience`,
+      );
+      const experienceData = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
+      const participation = mapPublicVolunteerParticipation(experienceData);
+
+      set({
+        publicVolunteerParticipation: participation,
+        isPublicVolunteerParticipationLoading: false,
+      });
+
+      return { success: true, participation };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "Failed to load recent participation.";
+
+      set({
+        publicVolunteerParticipation: [],
+        isPublicVolunteerParticipationLoading: false,
+        publicVolunteerParticipationError: message,
       });
 
       return { success: false, error: message };
