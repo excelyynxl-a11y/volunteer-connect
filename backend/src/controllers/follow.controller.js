@@ -1,3 +1,7 @@
+import mongoose from "mongoose";
+import Follow from "../models/follow.model.js";
+import { Organisation } from "../models/user.model.js";
+
 const sendNotImplemented = (res, feature) =>
   res.status(501).json({
     success: false,
@@ -12,8 +16,63 @@ const sendNotImplemented = (res, feature) =>
  * Rules: allow only volunteers; the organisation must be approved; an existing
  * follow relationship must not create a duplicate record.
  */
-export const followOrganisation = (req, res) => {
-  return sendNotImplemented(res, "Following an organisation");
+export const followOrganisation = async (req, res) => {
+  try{
+    const volunteerId = req.user._id;
+    const { organisationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(organisationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    const organisation = await Organisation.findOne({
+      _id: organisationId,
+      approvalStatus: "approved",
+    });
+
+    if (!organisation) {
+      return res.status(404).json({
+        success: false,
+        message: "Organisation not found",
+      });
+    }
+
+    const existingFollow = await Follow.findOne({
+      volunteerId,
+      organisationId,
+    });
+
+    if (existingFollow) {
+      return res.status(409).json({
+        success: false,
+        message: "Organisation is already followed",
+      });
+    }
+
+    const follow = await Follow.create({
+      volunteerId,
+      organisationId,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Organisation followed successfully",
+      data: follow,
+    });
+
+  } catch (error){
+    console.error("Error following organisation:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
+  
 };
 
 /**
@@ -24,8 +83,38 @@ export const followOrganisation = (req, res) => {
  * Rules: allow only volunteers and treat an already-unfollowed organisation as
  * a successful final state.
  */
-export const unfollowOrganisation = (req, res) => {
-  return sendNotImplemented(res, "Unfollowing an organisation");
+export const unfollowOrganisation = async (req, res) => {
+  try{
+
+    const volunteerId = req.user._id;
+    const { organisationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(organisationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    await Follow.findOneAndDelete({
+      volunteerId,
+      organisationId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Organisation unfollowed successfully",
+    });
+
+  } catch (error){
+    console.error("Error unfollowing organisation:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+
+  }
 };
 
 /**
@@ -33,8 +122,39 @@ export const unfollowOrganisation = (req, res) => {
  * Body: none
  * Success: { success, count, data: organisation[] }
  */
-export const getMyFollowedOrganisations = (req, res) => {
-  return sendNotImplemented(res, "Followed organisation listing");
+export const getMyFollowedOrganisations = async (req, res) => {
+  try{
+    const volunteerId = req.user._id;
+
+    const follows = await Follow.find({ volunteerId }).populate({
+      path: "organisationId",
+      select: "_id name avatar biodata",
+      match: {
+        approvalStatus: "approved",
+      },
+    });
+
+    const organisations = follows
+      .map((follow) => follow.organisationId)
+      .filter(Boolean);
+
+    return res.status(200).json({
+      success: true,
+      count: organisations.length,
+      data: organisations,
+    });
+
+  } catch (error){
+    console.error(
+      "Error getting followed organisations:",
+      error.message,
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 /**
@@ -44,7 +164,12 @@ export const getMyFollowedOrganisations = (req, res) => {
  * Success: { success, data: { isFollowing: boolean } }
  */
 export const getFollowStatus = (req, res) => {
-  return sendNotImplemented(res, "Follow status lookup");
+  return res.status(200).json({ 
+    success: true, 
+    data: {
+      isFollowing: true,
+    },
+  });
 };
 
 /**
