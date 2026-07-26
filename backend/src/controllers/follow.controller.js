@@ -163,7 +163,7 @@ export const getMyFollowedOrganisations = async (req, res) => {
  * Body: none
  * Success: { success, data: { isFollowing: boolean } }
  */
-export const getFollowStatus = (req, res) => {
+export const getFollowStatus = async (req, res) => {
   try{
     const volunteerId = req.user._id;
     const { organisationId } = req.params;
