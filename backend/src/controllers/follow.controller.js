@@ -9,7 +9,7 @@ const sendNotImplemented = (res, feature) =>
   });
 
 /**
- * TODO(follow): Follow an approved organisation as the authenticated volunteer.
+ *Follow an approved organisation as the authenticated volunteer.
  * Params: { organisationId: string }
  * Body: none
  * Success: { success, message, data: follow }
@@ -76,7 +76,7 @@ export const followOrganisation = async (req, res) => {
 };
 
 /**
- * TODO(follow): Stop following an organisation.
+ * Stop following an organisation.
  * Params: { organisationId: string }
  * Body: none
  * Success: { success, message }
@@ -118,7 +118,7 @@ export const unfollowOrganisation = async (req, res) => {
 };
 
 /**
- * TODO(follow): List organisations followed by the authenticated volunteer.
+ * List organisations followed by the authenticated volunteer.
  * Body: none
  * Success: { success, count, data: organisation[] }
  */
@@ -158,18 +158,43 @@ export const getMyFollowedOrganisations = async (req, res) => {
 };
 
 /**
- * TODO(follow): Check whether the authenticated volunteer follows an organisation.
+ * Check whether the authenticated volunteer follows an organisation.
  * Params: { organisationId: string }
  * Body: none
  * Success: { success, data: { isFollowing: boolean } }
  */
 export const getFollowStatus = (req, res) => {
-  return res.status(200).json({ 
-    success: true, 
-    data: {
-      isFollowing: true,
-    },
-  });
+  try{
+    const volunteerId = req.user._id;
+    const { organisationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(organisationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    const follow = await Follow.findOne({
+      volunteerId,
+      organisationId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        isFollowing: Boolean(follow),
+      },
+    });
+
+  } catch (error){
+    console.error("Error getting follow status:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 /**
