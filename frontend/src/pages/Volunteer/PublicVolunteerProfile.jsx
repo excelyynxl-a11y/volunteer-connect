@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 
+import BackButton from "../../components/BackButton";
 import { getInitials } from "../../lib/utils";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import "./PublicVolunteerProfile.css";
@@ -32,12 +33,19 @@ const PublicVolunteerProfile = () => {
     volunteerId,
   ]);
 
+  const backControl = (
+    <BackButton fallbackPath="/organisation-dashboard/applications" />
+  );
+
   if (isPublicVolunteerProfileLoading) {
     return (
       <div className="public-volunteer-profile-page">
-        <p className="public-volunteer-profile-feedback" role="status">
-          Loading volunteer profile...
-        </p>
+        <div className="public-volunteer-profile-state">
+          {backControl}
+          <p className="public-volunteer-profile-feedback" role="status">
+            Loading volunteer profile...
+          </p>
+        </div>
       </div>
     );
   }
@@ -45,9 +53,12 @@ const PublicVolunteerProfile = () => {
   if (publicVolunteerProfileError || !publicVolunteerProfile) {
     return (
       <div className="public-volunteer-profile-page">
-        <p className="public-volunteer-profile-feedback error" role="alert">
-          {publicVolunteerProfileError || "Volunteer profile is unavailable."}
-        </p>
+        <div className="public-volunteer-profile-state">
+          {backControl}
+          <p className="public-volunteer-profile-feedback error" role="alert">
+            {publicVolunteerProfileError || "Volunteer profile is unavailable."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -64,6 +75,10 @@ const PublicVolunteerProfile = () => {
   return (
     <div className="public-volunteer-profile-page">
       <section className="public-volunteer-profile-hero">
+        <div className="public-volunteer-profile-back">
+          {backControl}
+        </div>
+
         <div className="public-volunteer-profile-avatar">
           {avatar ? (
             <img src={avatar} alt={`${name || "Volunteer"} avatar`} />

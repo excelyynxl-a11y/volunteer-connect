@@ -21,10 +21,19 @@
 }
 
 .public-volunteer-profile-hero {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 1.5rem;
   padding: 1.75rem 2rem;
+}
+
+.public-volunteer-profile-back {
+  position: absolute;
+  top: 1.25rem;
+  left: 0;
+  z-index: 1;
+  transform: translateX(-50%);
 }
 
 .public-volunteer-profile-avatar {
@@ -234,14 +243,22 @@
 }
 
 .public-volunteer-profile-feedback {
-  max-width: 42rem;
-  margin: 4rem auto;
+  width: 100%;
+  margin: 0;
   padding: 1.25rem;
   border: 1px solid var(--public-profile-border);
   border-radius: 1rem;
   background: #ffffff;
   color: var(--public-profile-muted);
   text-align: center;
+}
+
+.public-volunteer-profile-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 46rem;
+  margin: 4rem auto;
 }
 
 .public-volunteer-profile-feedback.error {
@@ -282,6 +299,11 @@
   .public-volunteer-profile-hero {
     align-items: flex-start;
     padding: 1.25rem;
+  }
+
+  .public-volunteer-profile-state {
+    flex-direction: column;
+    margin-top: 2rem;
   }
 
   .public-volunteer-profile-avatar {
