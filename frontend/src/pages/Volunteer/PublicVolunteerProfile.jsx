@@ -1,25 +1,73 @@
+import { useEffect } from "react";
 import {
   BriefcaseBusiness,
   FileText,
-  UserRound,
 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
+import { getInitials } from "../../lib/utils";
+import { useOrganisationStore } from "../../store/useOrganisationStore";
 import "./PublicVolunteerProfile.css";
 
 const PublicVolunteerProfile = () => {
+  const { volunteerId } = useParams();
+  const {
+    getPublicVolunteerProfile,
+    isPublicVolunteerProfileLoading,
+    publicVolunteerProfile,
+    publicVolunteerProfileError,
+  } = useOrganisationStore();
+
+  useEffect(() => {
+    getPublicVolunteerProfile(volunteerId);
+  }, [getPublicVolunteerProfile, volunteerId]);
+
+  if (isPublicVolunteerProfileLoading) {
+    return (
+      <div className="public-volunteer-profile-page">
+        <p className="public-volunteer-profile-feedback" role="status">
+          Loading volunteer profile...
+        </p>
+      </div>
+    );
+  }
+
+  if (publicVolunteerProfileError || !publicVolunteerProfile) {
+    return (
+      <div className="public-volunteer-profile-page">
+        <p className="public-volunteer-profile-feedback error" role="alert">
+          {publicVolunteerProfileError || "Volunteer profile is unavailable."}
+        </p>
+      </div>
+    );
+  }
+
+  const {
+    ageGroup,
+    avatar,
+    biodata,
+    name,
+    resume,
+    skills = [],
+  } = publicVolunteerProfile;
+
   return (
     <div className="public-volunteer-profile-page">
       <section className="public-volunteer-profile-hero">
-        <div className="public-volunteer-profile-avatar" aria-hidden="true">
-          <UserRound size={42} />
+        <div className="public-volunteer-profile-avatar">
+          {avatar ? (
+            <img src={avatar} alt={`${name || "Volunteer"} avatar`} />
+          ) : (
+            <span aria-hidden="true">{getInitials(name)}</span>
+          )}
         </div>
 
         <div className="public-volunteer-profile-introduction">
           <p className="public-volunteer-profile-eyebrow">
             Public Volunteer Profile
           </p>
-          <h1>Volunteer Profile</h1>
-          <p>Volunteer information will appear here.</p>
+          <h1>{name || "Volunteer Profile"}</h1>
+          <p>{biodata || "No profile summary has been provided."}</p>
         </div>
       </section>
 
@@ -34,9 +82,17 @@ const PublicVolunteerProfile = () => {
               <BriefcaseBusiness size={22} aria-hidden="true" />
             </div>
 
-            <p className="public-volunteer-profile-empty">
-              No skills are available.
-            </p>
+            {Array.isArray(skills) && skills.length > 0 ? (
+              <div className="public-volunteer-profile-skills">
+                {skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+            ) : (
+              <p className="public-volunteer-profile-empty">
+                No skills are available.
+              </p>
+            )}
           </section>
 
           <section className="public-volunteer-profile-card">
@@ -61,7 +117,7 @@ const PublicVolunteerProfile = () => {
 
             <div className="public-volunteer-profile-summary-item">
               <span>Age Group</span>
-              <strong>Not provided</strong>
+              <strong>{ageGroup || "Not provided"}</strong>
             </div>
           </section>
 
@@ -76,9 +132,23 @@ const PublicVolunteerProfile = () => {
               <FileText size={22} aria-hidden="true" />
             </div>
 
-            <p className="public-volunteer-profile-empty">
-              No resume has been provided.
-            </p>
+            {resume ? (
+              <div className="public-volunteer-profile-resume">
+                <span>Volunteer resume</span>
+                <div className="public-volunteer-profile-resume-actions">
+                  <a href={resume} target="_blank" rel="noreferrer">
+                    View
+                  </a>
+                  <a href={resume} download>
+                    Download
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <p className="public-volunteer-profile-empty">
+                No resume has been provided.
+              </p>
+            )}
           </section>
         </aside>
       </div>

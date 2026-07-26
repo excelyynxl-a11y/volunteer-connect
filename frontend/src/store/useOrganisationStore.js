@@ -23,6 +23,8 @@ export const useOrganisationStore = create((set, get) => ({
   // --- Loading States ---
   isOpportunitiesLoading: false,
   opportunitiesError: "",
+  isPublicVolunteerProfileLoading: false,
+  publicVolunteerProfileError: "",
   isUpdatingOrganisationProfile: false,
   isUpdatingOpportunity: false,
   isCreatingOpportunity: false,
@@ -32,6 +34,59 @@ export const useOrganisationStore = create((set, get) => ({
   closedOpportunities: [],
   cancelledOpportunities: [],
   allMyOpportunities: [],
+  publicVolunteerProfile: null,
+
+  // --- Public Volunteer Profile Actions ---
+  getPublicVolunteerProfile: async (volunteerId) => {
+    set({
+      publicVolunteerProfile: null,
+      isPublicVolunteerProfileLoading: true,
+      publicVolunteerProfileError: "",
+    });
+
+    if (!volunteerId) {
+      const message =
+        "Unable to load the volunteer profile because no volunteer ID is available.";
+
+      set({
+        isPublicVolunteerProfileLoading: false,
+        publicVolunteerProfileError: message,
+      });
+
+      return { success: false, error: message };
+    }
+
+    try {
+      const response = await axiosInstance.get(
+        `/volunteer/profile/${volunteerId}`,
+      );
+      const profile = response.data?.data;
+
+      if (!profile) {
+        throw new Error("Volunteer profile data is unavailable.");
+      }
+
+      set({
+        publicVolunteerProfile: profile,
+        isPublicVolunteerProfileLoading: false,
+      });
+
+      return { success: true, profile };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load the volunteer profile.";
+
+      set({
+        publicVolunteerProfile: null,
+        isPublicVolunteerProfileLoading: false,
+        publicVolunteerProfileError: message,
+      });
+
+      return { success: false, error: message };
+    }
+  },
 
   // --- Organisation Profile Actions ---
   updateOrganisationProfile: async (profileData) => {

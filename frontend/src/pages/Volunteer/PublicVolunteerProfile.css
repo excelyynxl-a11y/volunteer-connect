@@ -39,6 +39,18 @@
   color: #ffffff;
 }
 
+.public-volunteer-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.public-volunteer-profile-avatar span {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
 .public-volunteer-profile-introduction {
   min-width: 0;
 }
@@ -111,6 +123,73 @@
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.public-volunteer-profile-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.public-volunteer-profile-skills span {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 999px;
+  background: #fcfaf7;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.public-volunteer-profile-resume {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-left: 4px solid var(--public-profile-gold);
+  border-radius: 0.75rem;
+  background: #fcfaf7;
+}
+
+.public-volunteer-profile-resume > span {
+  font-weight: 700;
+}
+
+.public-volunteer-profile-resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.public-volunteer-profile-resume-actions a {
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--public-profile-green);
+  border-radius: 0.7rem;
+  color: var(--public-profile-green);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.public-volunteer-profile-resume-actions a:first-child {
+  background: var(--public-profile-green);
+  color: #ffffff;
+}
+
+.public-volunteer-profile-feedback {
+  max-width: 42rem;
+  margin: 4rem auto;
+  padding: 1.25rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 1rem;
+  background: #ffffff;
+  color: var(--public-profile-muted);
+  text-align: center;
+}
+
+.public-volunteer-profile-feedback.error {
+  border-color: #d77a72;
+  color: #8f2f2a;
 }
 
 .public-volunteer-profile-empty {
