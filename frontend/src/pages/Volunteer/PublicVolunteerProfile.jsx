@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
   CheckCircle2,
@@ -7,12 +7,14 @@ import {
 import { useParams } from "react-router-dom";
 
 import BackButton from "../../components/BackButton";
+import ResumePreviewModal from "../../components/ResumePreviewModal";
 import { getInitials } from "../../lib/utils";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import "./PublicVolunteerProfile.css";
 
 const PublicVolunteerProfile = () => {
   const { volunteerId } = useParams();
+  const [isResumePreviewOpen, setIsResumePreviewOpen] = useState(false);
   const {
     getPublicVolunteerPastExperience,
     getPublicVolunteerProfile,
@@ -201,9 +203,12 @@ const PublicVolunteerProfile = () => {
               <div className="public-volunteer-profile-resume">
                 <span>Volunteer resume</span>
                 <div className="public-volunteer-profile-resume-actions">
-                  <a href={resume} target="_blank" rel="noreferrer">
+                  <button
+                    type="button"
+                    onClick={() => setIsResumePreviewOpen(true)}
+                  >
                     View
-                  </a>
+                  </button>
                   <a href={resume} download>
                     Download
                   </a>
@@ -217,6 +222,12 @@ const PublicVolunteerProfile = () => {
           </section>
         </aside>
       </div>
+
+      <ResumePreviewModal
+        isOpen={isResumePreviewOpen}
+        onClose={() => setIsResumePreviewOpen(false)}
+        resumeUrl={resume}
+      />
     </div>
   );
 };
