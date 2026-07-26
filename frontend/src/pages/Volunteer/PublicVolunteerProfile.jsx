@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 
 import BackButton from "../../components/BackButton";
 import ResumePreviewModal from "../../components/ResumePreviewModal";
+import { getResumeDownloadUrl } from "../../lib/resume";
 import { getInitials } from "../../lib/utils";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import "./PublicVolunteerProfile.css";
@@ -73,6 +74,7 @@ const PublicVolunteerProfile = () => {
     resume,
     skills = [],
   } = publicVolunteerProfile;
+  const resumeDownloadUrl = getResumeDownloadUrl(resume);
 
   return (
     <div className="public-volunteer-profile-page">
@@ -209,7 +211,7 @@ const PublicVolunteerProfile = () => {
                   >
                     View
                   </button>
-                  <a href={resume} download>
+                  <a href={resumeDownloadUrl}>
                     Download
                   </a>
                 </div>
