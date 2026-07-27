@@ -127,22 +127,35 @@ const FollowedOrganisations = () => {
           ) : filtered.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {filtered.map((org) => (
-                <div key={org._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, border: '1px solid #efe7de', borderRadius: 12, background: '#fff' }}>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div key={org._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', padding: 12, border: '1px solid #efe7de', borderRadius: 12, background: '#fff' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: '1 1 360px', minWidth: 0 }}>
                     <OrganisationAvatar name={org.name} avatar={org.avatar} />
-                    <div style={{ maxWidth: 720 }}>
+                    <div style={{ flex: 1, minWidth: 0, maxWidth: 720 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <strong>{org.name}</strong>
+                        <strong style={{ overflowWrap: 'anywhere' }}>{org.name}</strong>
                       </div>
-                      <div style={{ color: '#64748b', fontSize: 14, marginTop: 6 }}>{org.biodata}</div>
+                      <div
+                        style={{
+                          color: '#64748b',
+                          fontSize: 14,
+                          marginTop: 6,
+                          overflow: 'hidden',
+                          overflowWrap: 'anywhere',
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 2,
+                        }}
+                      >
+                        {org.biodata}
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <button onClick={() => navigate(`/organisation/${org._id}`)} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e6e2dc', background: '#fff', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0, marginLeft: 'auto' }}>
+                    <button onClick={() => navigate(`/organisation/${org._id}`)} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e6e2dc', background: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                       View Profile
                     </button>
-                    <button onClick={async () => { await unfollowOrganisation(org._id); }} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #f1c6c3', background: '#fff', color: '#b31212', cursor: 'pointer' }}>
+                    <button onClick={async () => { await unfollowOrganisation(org._id); }} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #f1c6c3', background: '#fff', color: '#b31212', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                       Unfollow
                     </button>
                   </div>
