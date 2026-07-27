@@ -53,7 +53,7 @@ export const useFollowStore = create((set, get) => ({
           : [];
         set({ followedOrganisations: organisations });
         return response.data;
-      } catch (err) {
+      } catch {
         // fallback to mock data when backend is unavailable
         const response = { data: createListResponse(mockOrganisations) };
         set({ followedOrganisations: response.data.data });
@@ -74,7 +74,7 @@ export const useFollowStore = create((set, get) => ({
         );
         set({ isFollowing: res.data?.data?.isFollowing });
         return res.data;
-      } catch (err) {
+      } catch {
         const isFollowing = get().followedOrganisations.some(
           (organisation) => organisation._id === organisationId,
         );
@@ -100,7 +100,7 @@ export const useFollowStore = create((set, get) => ({
         // on success, refresh list
         await get().getMyFollowedOrganisations();
         return res.data;
-      } catch (err) {
+      } catch {
         // fallback: update local mock list
         const organisation = mockOrganisations.find(
           (item) => item._id === organisationId,
@@ -131,7 +131,7 @@ export const useFollowStore = create((set, get) => ({
         // refresh list
         await get().getMyFollowedOrganisations();
         return res.data;
-      } catch (err) {
+      } catch {
         // fallback to local update
         set((state) => ({
           followedOrganisations: state.followedOrganisations.filter(
