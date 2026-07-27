@@ -75,7 +75,6 @@ const FollowedOrganisations = () => {
                   </div>
 
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <div style={{ color: '#64748b', fontSize: 14 }}>{org.opportunitiesCount ?? "1"} active opportunities</div>
                     <button onClick={() => navigate(`/organisation/${org._id}`)} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #e6e2dc', background: '#fff', cursor: 'pointer' }}>
                       View Profile
                     </button>
