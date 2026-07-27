@@ -8,14 +8,6 @@ const sendNotImplemented = (res, feature) =>
     message: `${feature} is not implemented yet`,
   });
 
-/**
- *Follow an approved organisation as the authenticated volunteer.
- * Params: { organisationId: string }
- * Body: none
- * Success: { success, message, data: follow }
- * Rules: allow only volunteers; the organisation must be approved; an existing
- * follow relationship must not create a duplicate record.
- */
 export const followOrganisation = async (req, res) => {
   try{
     const volunteerId = req.user._id;
@@ -75,14 +67,6 @@ export const followOrganisation = async (req, res) => {
   
 };
 
-/**
- * Stop following an organisation.
- * Params: { organisationId: string }
- * Body: none
- * Success: { success, message }
- * Rules: allow only volunteers and treat an already-unfollowed organisation as
- * a successful final state.
- */
 export const unfollowOrganisation = async (req, res) => {
   try{
 
@@ -117,11 +101,6 @@ export const unfollowOrganisation = async (req, res) => {
   }
 };
 
-/**
- * List organisations followed by the authenticated volunteer.
- * Body: none
- * Success: { success, count, data: organisation[] }
- */
 export const getMyFollowedOrganisations = async (req, res) => {
   try{
     const volunteerId = req.user._id;
@@ -157,12 +136,6 @@ export const getMyFollowedOrganisations = async (req, res) => {
   }
 };
 
-/**
- * Check whether the authenticated volunteer follows an organisation.
- * Params: { organisationId: string }
- * Body: none
- * Success: { success, data: { isFollowing: boolean } }
- */
 export const getFollowStatus = async (req, res) => {
   try{
     const volunteerId = req.user._id;
