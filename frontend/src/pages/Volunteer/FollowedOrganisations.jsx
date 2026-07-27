@@ -13,6 +13,48 @@ const initials = (name) =>
       .toUpperCase()
     : "?";
 
+const avatarStyle = {
+  width: 56,
+  height: 56,
+  borderRadius: 999,
+  flexShrink: 0,
+};
+
+const OrganisationAvatar = ({ name, avatar }) => {
+  const [failedAvatar, setFailedAvatar] = useState("");
+
+  if (avatar && avatar !== failedAvatar) {
+    return (
+      <img
+        src={avatar}
+        alt={`${name} avatar`}
+        onError={() => setFailedAvatar(avatar)}
+        style={{
+          ...avatarStyle,
+          objectFit: "cover",
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        ...avatarStyle,
+        background: "#d9aa55",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#fff",
+        fontWeight: 800,
+      }}
+    >
+      {initials(name)}
+    </div>
+  );
+};
+
 const FollowedOrganisations = () => {
   const navigate = useNavigate();
   const { followedOrganisations, getMyFollowedOrganisations, unfollowOrganisation, isFollowLoading } = useFollowStore();
@@ -65,7 +107,7 @@ const FollowedOrganisations = () => {
               {filtered.map((org) => (
                 <div key={org._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, border: '1px solid #efe7de', borderRadius: 12, background: '#fff' }}>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <div style={{ width: 56, height: 56, borderRadius: 999, background: '#d9aa55', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800 }}>{initials(org.name)}</div>
+                    <OrganisationAvatar name={org.name} avatar={org.avatar} />
                     <div style={{ maxWidth: 720 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <strong>{org.name}</strong>
