@@ -57,7 +57,13 @@ const OrganisationAvatar = ({ name, avatar }) => {
 
 const FollowedOrganisations = () => {
   const navigate = useNavigate();
-  const { followedOrganisations, getMyFollowedOrganisations, unfollowOrganisation, isFollowLoading } = useFollowStore();
+  const {
+    followedOrganisations,
+    getMyFollowedOrganisations,
+    unfollowOrganisation,
+    isFollowLoading,
+    followError,
+  } = useFollowStore();
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -98,11 +104,27 @@ const FollowedOrganisations = () => {
         </div>
 
         <div>
+          {followError && (
+            <p
+              role="alert"
+              style={{
+                marginBottom: 16,
+                padding: "12px 14px",
+                border: "1px solid #f1c6c3",
+                borderRadius: 10,
+                background: "#fff5f5",
+                color: "#b31212",
+              }}
+            >
+              {followError}
+            </p>
+          )}
+
           {isFollowLoading ? (
             <p>Loading...</p>
-          ) : filtered.length === 0 ? (
+          ) : filtered.length === 0 && !followError ? (
             <p>No followed organisations.</p>
-          ) : (
+          ) : filtered.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {filtered.map((org) => (
                 <div key={org._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, border: '1px solid #efe7de', borderRadius: 12, background: '#fff' }}>
@@ -127,7 +149,7 @@ const FollowedOrganisations = () => {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
