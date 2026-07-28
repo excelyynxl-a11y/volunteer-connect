@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 import { User } from "../models/user.model.js";
 
 const sendNotImplemented = (res, feature) =>
@@ -87,15 +88,66 @@ export const getConversationMessages = (req, res) => {
   return sendNotImplemented(res, "Conversation message history");
 };
 
-/**
- * TODO(message): Persist a message in a conversation.
- * Params: { conversationId: string }
- * Body: { content: string }
- * Success: { success, message, data: message }
- * Rules: derive senderId from req.user and validate conversation membership.
- */
-export const sendMessage = (req, res) => {
-  return sendNotImplemented(res, "Message sending");
+export const sendMessage = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { content } = req.body ?? {};
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    if (typeof content !== "string" || !content.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Message content is required",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const message = await Message.create({
+      conversationId: conversation._id,
+      senderId: req.user._id,
+      content: content.trim(),
+    });
+
+    conversation.lastMessageAt = message.createdAt;
+    await conversation.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Message sent successfully",
+      data: message,
+    });
+  } catch (err) {
+    console.log("Error in sendMessage controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 /**
