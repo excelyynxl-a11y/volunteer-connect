@@ -3,12 +3,6 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { User } from "../models/user.model.js";
 
-const sendNotImplemented = (res, feature) =>
-  res.status(501).json({
-    success: false,
-    message: `${feature} is not implemented yet`,
-  });
-
 export const getMyConversations = async (req, res) => {
   try {
     const conversations = await Conversation.find({
@@ -234,12 +228,60 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-/**
- * TODO(message): Mark unread messages from the other participant as read.
- * Params: { conversationId: string }
- * Body: none
- * Success: { success, message, data: { updatedCount: number } }
- */
-export const markConversationAsRead = (req, res) => {
-  return sendNotImplemented(res, "Conversation read status update");
+export const markConversationAsRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const result = await Message.updateMany(
+      {
+        conversationId: conversation._id,
+        senderId: { $ne: req.user._id },
+        isRead: false,
+      },
+      {
+        $set: { isRead: true },
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Conversation marked as read",
+      data: {
+        updatedCount: result.modifiedCount,
+      },
+    });
+  } catch (err) {
+    console.log("Error in markConversationAsRead controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
