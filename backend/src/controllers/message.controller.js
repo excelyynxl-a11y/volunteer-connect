@@ -9,13 +9,57 @@ const sendNotImplemented = (res, feature) =>
     message: `${feature} is not implemented yet`,
   });
 
-/**
- * TODO(message): List conversations for the authenticated user.
- * Query: { limit?: number, cursor?: string }
- * Success: { success, data: conversation[], meta?: { nextCursor } }
- */
-export const getMyConversations = (req, res) => {
-  return sendNotImplemented(res, "Conversation listing");
+export const getMyConversations = async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      participants: req.user._id,
+    })
+      .populate("participants", "name role avatar")
+      .sort({ lastMessageAt: -1, createdAt: -1 });
+
+    const conversationSummaries = await Promise.all(
+      conversations.map(async (conversation) => {
+        const [lastMessage, unreadCount] = await Promise.all([
+          Message.findOne({ conversationId: conversation._id }).sort({
+            createdAt: -1,
+          }),
+          Message.countDocuments({
+            conversationId: conversation._id,
+            senderId: { $ne: req.user._id },
+            isRead: false,
+          }),
+        ]);
+
+        const participant =
+          conversation.participants.find(
+            (conversationParticipant) =>
+              conversationParticipant &&
+              !conversationParticipant._id.equals(req.user._id),
+          ) ?? null;
+
+        return {
+          _id: conversation._id,
+          participant,
+          lastMessage,
+          unreadCount,
+          lastMessageAt: conversation.lastMessageAt,
+          createdAt: conversation.createdAt,
+          updatedAt: conversation.updatedAt,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: conversationSummaries,
+    });
+  } catch (err) {
+    console.log("Error in getMyConversations controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 export const createOrGetConversation = async (req, res) => {
