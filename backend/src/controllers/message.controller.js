@@ -77,15 +77,55 @@ export const createOrGetConversation = async (req, res) => {
   }
 };
 
-/**
- * TODO(message): Load message history for a conversation.
- * Params: { conversationId: string }
- * Query: { limit?: number, cursor?: string }
- * Success: { success, data: message[], meta?: { nextCursor } }
- * Rules: the authenticated user must be a conversation participant.
- */
-export const getConversationMessages = (req, res) => {
-  return sendNotImplemented(res, "Conversation message history");
+export const getConversationMessages = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const messages = await Message.find({
+      conversationId: conversation._id,
+    }).sort({ createdAt: 1 });
+
+    return res.status(200).json({
+      success: true,
+      data: messages,
+    });
+  } catch (err) {
+    console.log(
+      "Error in getConversationMessages controller: ",
+      err.message,
+    );
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 export const sendMessage = async (req, res) => {
