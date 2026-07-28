@@ -1,3 +1,7 @@
+import mongoose from "mongoose";
+import Conversation from "../models/conversation.model.js";
+import { User } from "../models/user.model.js";
+
 const sendNotImplemented = (res, feature) =>
   res.status(501).json({
     success: false,
@@ -13,14 +17,63 @@ export const getMyConversations = (req, res) => {
   return sendNotImplemented(res, "Conversation listing");
 };
 
-/**
- * TODO(message): Return an existing one-to-one conversation or create one.
- * Body: { participantId: string }
- * Success: { success, data: conversation }
- * Rules: confirm which volunteer/organisation pairs are allowed to message.
- */
-export const createOrGetConversation = (req, res) => {
-  return sendNotImplemented(res, "Conversation creation");
+export const createOrGetConversation = async (req, res) => {
+  try {
+    const { participantId } = req.body ?? {};
+
+    if (!participantId || !mongoose.Types.ObjectId.isValid(participantId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid participant ID",
+      });
+    }
+
+    if (req.user._id.equals(participantId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot start a conversation with yourself",
+      });
+    }
+
+    const participant = await User.findById(participantId).select("_id");
+
+    if (!participant) {
+      return res.status(404).json({
+        success: false,
+        message: "Participant not found",
+      });
+    }
+
+    const participantIds = [req.user._id, participant._id];
+    const existingConversation = await Conversation.findOne({
+      participants: {
+        $all: participantIds,
+        $size: 2,
+      },
+    });
+
+    if (existingConversation) {
+      return res.status(200).json({
+        success: true,
+        data: existingConversation,
+      });
+    }
+
+    const conversation = await Conversation.create({
+      participants: participantIds,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: conversation,
+    });
+  } catch (err) {
+    console.log("Error in createOrGetConversation controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
 /**
