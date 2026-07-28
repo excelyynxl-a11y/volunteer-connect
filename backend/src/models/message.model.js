@@ -9,12 +9,12 @@ const attachmentSchema = new mongoose.Schema({
 
 const messageSchema = new mongoose.Schema(
   {
-    senderId: {
+    conversationId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Conversation",
       required: true,
     },
-    receiverId: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
