@@ -1,56 +1,287 @@
-const sendNotImplemented = (res, feature) =>
-  res.status(501).json({
-    success: false,
-    message: `${feature} is not implemented yet`,
-  });
+import mongoose from "mongoose";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
+import { User } from "../models/user.model.js";
 
-/**
- * TODO(message): List conversations for the authenticated user.
- * Query: { limit?: number, cursor?: string }
- * Success: { success, data: conversation[], meta?: { nextCursor } }
- */
-export const getMyConversations = (req, res) => {
-  return sendNotImplemented(res, "Conversation listing");
+export const getMyConversations = async (req, res) => {
+  try {
+    const conversations = await Conversation.find({
+      participants: req.user._id,
+    })
+      .populate("participants", "name role avatar")
+      .sort({ lastMessageAt: -1, createdAt: -1 });
+
+    const conversationSummaries = await Promise.all(
+      conversations.map(async (conversation) => {
+        const [lastMessage, unreadCount] = await Promise.all([
+          Message.findOne({ conversationId: conversation._id }).sort({
+            createdAt: -1,
+          }),
+          Message.countDocuments({
+            conversationId: conversation._id,
+            senderId: { $ne: req.user._id },
+            isRead: false,
+          }),
+        ]);
+
+        const participant =
+          conversation.participants.find(
+            (conversationParticipant) =>
+              conversationParticipant &&
+              !conversationParticipant._id.equals(req.user._id),
+          ) ?? null;
+
+        return {
+          _id: conversation._id,
+          participant,
+          lastMessage,
+          unreadCount,
+          lastMessageAt: conversation.lastMessageAt,
+          createdAt: conversation.createdAt,
+          updatedAt: conversation.updatedAt,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: conversationSummaries,
+    });
+  } catch (err) {
+    console.log("Error in getMyConversations controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
-/**
- * TODO(message): Return an existing one-to-one conversation or create one.
- * Body: { participantId: string }
- * Success: { success, data: conversation }
- * Rules: confirm which volunteer/organisation pairs are allowed to message.
- */
-export const createOrGetConversation = (req, res) => {
-  return sendNotImplemented(res, "Conversation creation");
+export const createOrGetConversation = async (req, res) => {
+  try {
+    const { participantId } = req.body ?? {};
+
+    if (!participantId || !mongoose.Types.ObjectId.isValid(participantId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid participant ID",
+      });
+    }
+
+    if (req.user._id.equals(participantId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot start a conversation with yourself",
+      });
+    }
+
+    const participant = await User.findById(participantId).select("_id");
+
+    if (!participant) {
+      return res.status(404).json({
+        success: false,
+        message: "Participant not found",
+      });
+    }
+
+    const participantIds = [req.user._id, participant._id];
+    const existingConversation = await Conversation.findOne({
+      participants: {
+        $all: participantIds,
+        $size: 2,
+      },
+    });
+
+    if (existingConversation) {
+      return res.status(200).json({
+        success: true,
+        data: existingConversation,
+      });
+    }
+
+    const conversation = await Conversation.create({
+      participants: participantIds,
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: conversation,
+    });
+  } catch (err) {
+    console.log("Error in createOrGetConversation controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
-/**
- * TODO(message): Load message history for a conversation.
- * Params: { conversationId: string }
- * Query: { limit?: number, cursor?: string }
- * Success: { success, data: message[], meta?: { nextCursor } }
- * Rules: the authenticated user must be a conversation participant.
- */
-export const getConversationMessages = (req, res) => {
-  return sendNotImplemented(res, "Conversation message history");
+export const getConversationMessages = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const messages = await Message.find({
+      conversationId: conversation._id,
+    }).sort({ createdAt: 1 });
+
+    return res.status(200).json({
+      success: true,
+      data: messages,
+    });
+  } catch (err) {
+    console.log(
+      "Error in getConversationMessages controller: ",
+      err.message,
+    );
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
-/**
- * TODO(message): Persist a message in a conversation.
- * Params: { conversationId: string }
- * Body: { content: string }
- * Success: { success, message, data: message }
- * Rules: derive senderId from req.user and validate conversation membership.
- */
-export const sendMessage = (req, res) => {
-  return sendNotImplemented(res, "Message sending");
+export const sendMessage = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { content } = req.body ?? {};
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    if (typeof content !== "string" || !content.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Message content is required",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const message = await Message.create({
+      conversationId: conversation._id,
+      senderId: req.user._id,
+      content: content.trim(),
+    });
+
+    conversation.lastMessageAt = message.createdAt;
+    await conversation.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Message sent successfully",
+      data: message,
+    });
+  } catch (err) {
+    console.log("Error in sendMessage controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
 
-/**
- * TODO(message): Mark unread messages from the other participant as read.
- * Params: { conversationId: string }
- * Body: none
- * Success: { success, message, data: { updatedCount: number } }
- */
-export const markConversationAsRead = (req, res) => {
-  return sendNotImplemented(res, "Conversation read status update");
+export const markConversationAsRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid conversation ID",
+      });
+    }
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const isParticipant = conversation.participants.some((participantId) =>
+      participantId.equals(req.user._id),
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a participant in this conversation",
+      });
+    }
+
+    const result = await Message.updateMany(
+      {
+        conversationId: conversation._id,
+        senderId: { $ne: req.user._id },
+        isRead: false,
+      },
+      {
+        $set: { isRead: true },
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Conversation marked as read",
+      data: {
+        updatedCount: result.modifiedCount,
+      },
+    });
+  } catch (err) {
+    console.log("Error in markConversationAsRead controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
