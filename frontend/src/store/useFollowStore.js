@@ -35,7 +35,10 @@ const createListResponse = (items) => ({
   data: items,
 });
 
-export const useFollowStore = create((set) => ({
+const getFollowErrorMessage = (error, fallbackMessage) =>
+  error.response?.data?.message || fallbackMessage;
+
+export const useFollowStore = create((set, get) => ({
   followedOrganisations: [],
   followers: [],
   isFollowing: false,
@@ -46,12 +49,22 @@ export const useFollowStore = create((set) => ({
     set({ isFollowLoading: true, followError: "" });
 
     try {
-      const response = { data: createListResponse(mockOrganisations) };
-      // TODO(follow-api): replace the mock response with:
-      // const response = await axiosInstance.get("/follow/me");
-
-      set({ followedOrganisations: response.data.data });
+      const response = await axiosInstance.get("/follow/me");
+      const organisations = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
+      set({ followedOrganisations: organisations });
       return response.data;
+    } catch (error) {
+      const message = getFollowErrorMessage(
+        error,
+        "Failed to load followed organisations.",
+      );
+      set({
+        followedOrganisations: [],
+        followError: message,
+      });
+      return { success: false, error: message };
     } finally {
       set({ isFollowLoading: false });
     }
@@ -64,15 +77,18 @@ export const useFollowStore = create((set) => ({
       const response = await axiosInstance.get(
         `/follow/organisations/${organisationId}/status`,
       );
-
       set({ isFollowing: Boolean(response.data?.data?.isFollowing) });
       return response.data;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to load follow status.";
-
-      set({ isFollowing: false, followError: message });
-      return { success: false, message };
+      const message = getFollowErrorMessage(
+        error,
+        "Failed to check follow status.",
+      );
+      set({
+        isFollowing: false,
+        followError: message,
+      });
+      return { success: false, error: message };
     } finally {
       set({ isFollowLoading: false });
     }
@@ -85,15 +101,20 @@ export const useFollowStore = create((set) => ({
       const response = await axiosInstance.post(
         `/follow/organisations/${organisationId}`,
       );
+      const refreshResult = await get().getMyFollowedOrganisations();
 
-      set({ isFollowing: true });
+      if (refreshResult?.success === false) {
+        return refreshResult;
+      }
+
       return response.data;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to follow organisation.";
-
+      const message = getFollowErrorMessage(
+        error,
+        "Failed to follow organisation.",
+      );
       set({ followError: message });
-      return { success: false, message };
+      return { success: false, error: message };
     } finally {
       set({ isFollowLoading: false });
     }
@@ -106,20 +127,20 @@ export const useFollowStore = create((set) => ({
       const response = await axiosInstance.delete(
         `/follow/organisations/${organisationId}`,
       );
+      const refreshResult = await get().getMyFollowedOrganisations();
 
-      set((state) => ({
-        followedOrganisations: state.followedOrganisations.filter(
-          (organisation) => organisation._id !== organisationId,
-        ),
-        isFollowing: false,
-      }));
+      if (refreshResult?.success === false) {
+        return refreshResult;
+      }
+
       return response.data;
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Failed to unfollow organisation.";
-
+      const message = getFollowErrorMessage(
+        error,
+        "Failed to unfollow organisation.",
+      );
       set({ followError: message });
-      return { success: false, message };
+      return { success: false, error: message };
     } finally {
       set({ isFollowLoading: false });
     }

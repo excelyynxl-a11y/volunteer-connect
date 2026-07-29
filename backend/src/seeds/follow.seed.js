@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import Application from "../models/application.model.js";
+import Follow from "../models/follow.model.js";
 import Opportunity from "../models/opportunity.model.js";
 import { Organisation, Volunteer } from "../models/user.model.js";
 
@@ -484,6 +485,19 @@ const applicationTemplates = [
   ["vol5", 19, "pending"],
 ];
 
+const followTemplates = [
+  ["vol1", "org1"],
+  ["vol1", "org2"],
+  ["vol1", "org3"],
+  ["vol2", "org2"],
+  ["vol2", "org4"],
+  ["vol3", "org1"],
+  ["vol3", "org5"],
+  ["vol4", "org3"],
+  ["vol5", "org4"],
+  ["vol5", "org5"],
+];
+
 const upsertSeedUsers = async () => {
   const password = await bcrypt.hash(SEED_PASSWORD, 10);
   const organisationDocs = [];
@@ -620,11 +634,36 @@ const createSeedApplications = async (volunteerByKey, opportunityDocs) => {
   return applicationDocs;
 };
 
-const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applicationDocs }) => {
+const createSeedFollows = async (volunteerByKey, organisationByKey) => {
+  const seedVolunteerIds = Object.values(volunteerByKey).map(
+    (volunteer) => volunteer._id,
+  );
+
+  await Follow.deleteMany({
+    volunteerId: { $in: seedVolunteerIds },
+  });
+
+  return Follow.insertMany(
+    followTemplates.map(([volunteerKey, organisationKey]) => ({
+      volunteerId: volunteerByKey[volunteerKey]._id,
+      organisationId: organisationByKey[organisationKey]._id,
+    })),
+  );
+};
+
+const printSummary = ({
+  organisationByKey,
+  organisationDocs,
+  volunteerDocs,
+  opportunityDocs,
+  applicationDocs,
+  followDocs,
+}) => {
   console.log("\nSeed completed.");
   console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`);
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
+  console.log(`Follows: ${followDocs.length}`);
   console.log(`Password for all seed accounts: ${SEED_PASSWORD}`);
 
   console.log("\nOrganisation accounts:");
@@ -636,6 +675,14 @@ const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applic
   volunteerDocs.forEach((volunteer) => {
     console.log(`- ${volunteer.email} (${volunteer.name})`);
   });
+
+  console.log("\nPrimary follow-page test account:");
+  console.log(`- ${volunteers[0].email} (${volunteers[0].name}) follows:`);
+  followTemplates
+    .filter(([volunteerKey]) => volunteerKey === volunteers[0].key)
+    .forEach(([, organisationKey]) => {
+      console.log(`  - ${organisationByKey[organisationKey].name}`);
+    });
 };
 
 const seed = async () => {
@@ -667,12 +714,18 @@ const seed = async () => {
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
     const applicationDocs = await createSeedApplications(volunteerByKey, opportunityDocs);
+    const followDocs = await createSeedFollows(
+      volunteerByKey,
+      organisationByKey,
+    );
 
     printSummary({
+      organisationByKey,
       organisationDocs,
       volunteerDocs,
       opportunityDocs,
       applicationDocs,
+      followDocs,
     });
   } catch (error) {
     console.error("Seed failed:", error);
