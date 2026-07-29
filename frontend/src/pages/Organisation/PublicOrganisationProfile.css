@@ -6,6 +6,7 @@
 }
 
 .public-org-hero {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -13,6 +14,14 @@
   background: #ffffff;
   border: 2px solid #dfa93f;
   border-radius: 20px;
+}
+
+.public-org-back {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  z-index: 1;
+  transform: translateX(-50%);
 }
 
 .public-org-avatar {
@@ -94,13 +103,27 @@
   opacity: 0.65;
 }
 
+.public-org-follow-error {
+  margin: 24px 40px;
+}
+
 .public-org-follow-error,
 .public-org-profile-state {
-  margin: 24px 40px;
   padding: 16px 20px;
   border-radius: 12px;
   background: #ffffff;
   color: #667085;
+}
+
+.public-org-profile-state {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+
+.public-org-profile-state p {
+  margin: 0;
 }
 
 .public-org-follow-error,

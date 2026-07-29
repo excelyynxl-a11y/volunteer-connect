@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useParams } from "react-router-dom";
 
+import BackButton from "../../components/BackButton";
 import { getInitials } from "../../lib/utils";
 import { useFollowStore } from "../../store/useFollowStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
@@ -38,19 +39,31 @@ const PublicOrganisationProfile = () => {
     await followOrganisation(organisationId);
   };
 
+  const backControl = (
+    <BackButton fallbackPath="/volunteer-dashboard/organisations" />
+  );
+
   if (isPublicOrganisationProfileLoading) {
     return (
-      <div className="public-org-profile-state" role="status">
-        Loading organisation profile...
+      <div className="public-org-profile">
+        <div className="public-org-profile-state">
+          {backControl}
+          <p role="status">Loading organisation profile...</p>
+        </div>
       </div>
     );
   }
 
   if (publicOrganisationProfileError || !publicOrganisationProfile) {
     return (
-      <div className="public-org-profile-state error" role="alert">
-        {publicOrganisationProfileError ||
-          "Organisation profile is unavailable."}
+      <div className="public-org-profile">
+        <div className="public-org-profile-state error">
+          {backControl}
+          <p role="alert">
+            {publicOrganisationProfileError ||
+              "Organisation profile is unavailable."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -60,6 +73,8 @@ const PublicOrganisationProfile = () => {
   return (
     <div className="public-org-profile">
       <section className="public-org-hero">
+        <div className="public-org-back">{backControl}</div>
+
         <div className="public-org-avatar">
           {avatar ? (
             <img src={avatar} alt={`${name || "Organisation"} avatar`} />
