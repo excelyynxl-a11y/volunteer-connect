@@ -115,7 +115,11 @@ const FollowedOrganisations = () => {
                   <div className="followed-organisations-actions">
                     <button
                       className="followed-organisations-action followed-organisations-view"
-                      onClick={() => navigate(`/organisation/${org._id}`)}
+                      onClick={() =>
+                        navigate(
+                          `/volunteer-dashboard/organisations/${org._id}`,
+                        )
+                      }
                     >
                       View Profile
                     </button>
