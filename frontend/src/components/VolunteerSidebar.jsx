@@ -34,9 +34,17 @@ const VolunteerSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = location.pathname.startsWith("/volunteer-dashboard/edit-profile")
+  const matchingNavItem = navItems.find(
+    (item) =>
+      item.path === location.pathname ||
+      (item.path !== "/volunteer-dashboard" &&
+        location.pathname.startsWith(`${item.path}/`)),
+  );
+  const activeKey = location.pathname.startsWith(
+    "/volunteer-dashboard/edit-profile",
+  )
     ? "profile"
-    : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+    : matchingNavItem?.key || "homepage";
 
   return (
     <aside className={`volunteer-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
