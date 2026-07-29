@@ -101,6 +101,8 @@ export const useFollowStore = create((set, get) => ({
       const response = await axiosInstance.post(
         `/follow/organisations/${organisationId}`,
       );
+      set({ isFollowing: true });
+
       const refreshResult = await get().getMyFollowedOrganisations();
 
       if (refreshResult?.success === false) {
@@ -127,6 +129,8 @@ export const useFollowStore = create((set, get) => ({
       const response = await axiosInstance.delete(
         `/follow/organisations/${organisationId}`,
       );
+      set({ isFollowing: false });
+
       const refreshResult = await get().getMyFollowedOrganisations();
 
       if (refreshResult?.success === false) {
