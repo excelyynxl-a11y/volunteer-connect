@@ -2,19 +2,12 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { ArrowBigLeft } from "lucide-react";
 import { useReportStore } from "../../store/useReportStore";
 import { formatDate } from "../../lib/utils";
-import { useVolunteerStore } from "../../store/useVolunteerStore";
-import { useEffect } from "react";
 
 const ReportMadePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { reportId } = useParams();
   const { previousReports } = useReportStore();
-  const { setCurrentTab } = useVolunteerStore();
-
-  useEffect(() => {
-    setCurrentTab("report")
-  }, [setCurrentTab]);
 
   const report =
     location.state?.report ||
