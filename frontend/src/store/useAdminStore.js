@@ -178,6 +178,10 @@ export const useAdminStore = create((set, get) => ({
     // TODO: call getAllReports
   },
 
+  updateReportStatus: () => {
+    // TODO: implement report status changing between ["Pending", "Investigating", "Resolved", "Dismissed"]
+  },
+
   updateAdminProfile: async ({ name, avatar }) => {
     try {
       set({ isUpdating: true });
