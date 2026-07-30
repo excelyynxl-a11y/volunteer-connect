@@ -1,4 +1,5 @@
 import { AlertCircle, FileText, Send, Clock } from "lucide-react";
+import ReportMadeCard from "../../components/ReportMadeCard";
 
 const VolunteerReport = () => {
   return (
@@ -24,7 +25,28 @@ const VolunteerReport = () => {
             </div>
         </div>
 
-        <div className="volunteer-report-body">
+      <div>
+        Report Violation Selection (required)
+      </div>
+
+      <div>
+        Report Title Input Textfield (required)
+      </div>
+
+      <div>
+        Report Content Input Textfield (required)
+      </div>
+
+      <div>
+        Send Button (upon click, clear the current form, no backend integration yet)
+      </div>
+
+      <div>
+        Previous report history and status (render and map out ReportMadeCard component)
+        <ReportMadeCard />
+      </div> 
+
+        {/* <div className="volunteer-report-body">
           <div className="volunteer-report-coming-soon">
             <div className="volunteer-report-coming-soon-icon">
               <Clock size={32} />
@@ -60,7 +82,7 @@ const VolunteerReport = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </section>
     </div>
   );
