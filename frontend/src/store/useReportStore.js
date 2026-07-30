@@ -34,6 +34,38 @@ const mockPreviousReports = [
   },
 ];
 
+// TODO: remove after backend integration
+// mock previous reports for organisation (UserViolation)
+const mockOrganisationReports = [
+  {
+    _id: "org-mock-1",
+    userViolationType: "Last Minute Ghosting",
+    title: "Volunteer no-show without prior notice",
+    details:
+      "The volunteer confirmed attendance for the food bank distribution on 20 July but did not show up and could not be reached. This left us short-staffed during a critical distribution window.",
+    status: "Pending",
+    createdAt: "2025-07-20T08:00:00Z",
+  },
+  {
+    _id: "org-mock-2",
+    userViolationType: "Poor Work Ethics",
+    title: "Volunteer refused to follow assigned tasks",
+    details:
+      "During the charity drive, the volunteer repeatedly ignored task assignments and spent time on their phone. When asked to help with packing, they became argumentative with other team members.",
+    status: "Investigating",
+    createdAt: "2025-07-08T13:30:00Z",
+  },
+  {
+    _id: "org-mock-3",
+    userViolationType: "Property Damage",
+    title: "Equipment damaged and not reported",
+    details:
+      "The volunteer returned a projector with a cracked lens and did not report the damage. The equipment was discovered faulty by the next team using it. We are requesting an investigation into the incident.",
+    status: "Resolved",
+    createdAt: "2025-06-15T16:45:00Z",
+  },
+];
+
 export const useReportStore = create((set, get) => ({
     previousReports: [],
     isPreviousReportsLoading: false,
@@ -41,7 +73,7 @@ export const useReportStore = create((set, get) => ({
     previousReportsError: "",
     userId: "",
 
-    getPreviousReports: async (userId) => {
+    getPreviousReports: async (userId, reportType = "OpportunityViolation") => {
 
         // TODO: integrate backend to get all previous report made by this user
         set({ 
@@ -50,11 +82,17 @@ export const useReportStore = create((set, get) => ({
         });
 
         try {
-            set({ previousReports: mockPreviousReports });
+            // TODO: replace mock with actual API call after backend integration
+            const mockData =
+                reportType === "UserViolation"
+                    ? mockOrganisationReports
+                    : mockPreviousReports;
+
+            set({ previousReports: mockData });
 
             return {
                 success: true,
-                data: mockPreviousReports,
+                data: mockData,
             };
         } catch (error) {
 
