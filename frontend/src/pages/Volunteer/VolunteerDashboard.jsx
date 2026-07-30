@@ -7,6 +7,7 @@ import VolunteerProfile from "./VolunteerProfile";
 import EditVolunteerProfile from "./EditVolunteerProfile";
 import VolunteerOpportunities from "./VolunteerOpportunities";
 import VolunteerReport from "./VolunteerReport";
+import ReportMadePage from "../Report/ReportMadePage";
 
 import "./Volunteer.css";
 import VolunteerApplication from "./VolunteerApplication";
@@ -32,6 +33,7 @@ const VolunteerDashboard = () => {
           <Route path="opportunities" element={<VolunteerOpportunities />} />
           <Route path="applications" element={<VolunteerApplication />} />
           <Route path="report" element={<VolunteerReport />} />
+          <Route path="report/:reportId" element={<ReportMadePage />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="edit-profile" element={<EditVolunteerProfile />} />
           <Route path="*" element={<Navigate to="/volunteer-dashboard" replace />} />
