@@ -36,7 +36,11 @@ const VolunteerSidebar = () => {
 
   const activeKey = location.pathname.startsWith("/volunteer-dashboard/edit-profile")
     ? "profile"
-    : navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+    : navItems.find((item) =>
+        item.path === "/volunteer-dashboard"
+          ? location.pathname === item.path
+          : location.pathname.startsWith(item.path),
+      )?.key || "homepage";
 
   return (
     <aside className={`volunteer-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
