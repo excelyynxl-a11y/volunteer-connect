@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader2, Send } from "lucide-react";
+import toast from "react-hot-toast";
 import ReportMadeCard from "../../components/ReportMadeCard";
 import { opportunityViolationCategory } from "../../lib/report";
 import { useReportStore } from "../../store/useReportStore";
-
+import { useApplicationStore } from "../../store/useApplicationStore";
 
 const VolunteerReport = () => {
- 
   const {
     createReport,
     getPreviousReports,
@@ -14,11 +14,26 @@ const VolunteerReport = () => {
     isPreviousReportsLoading,
   } = useReportStore();
 
+  const { applications, getMyApplications } = useApplicationStore();
+
   useEffect(() => {
     getPreviousReports();
-  }, [getPreviousReports]);
+    getMyApplications();
+  }, [getPreviousReports, getMyApplications]);
+
+  // TODO: integrate with useApplicationStore.js to get all opportunity that volunteer has applied to 
+  const reportedOpportunities = applications
+    .filter((app) => app.opportunityId?._id)
+    .reduce((acc, app) => {
+      const opp = app.opportunityId;
+      if (!acc.find((o) => o._id === opp._id)) {
+        acc.push(opp);
+      }
+      return acc;
+    }, []);
 
   const [formData, setFormData] = useState({
+    reportedOpportunityId: "",
     opportunityViolationType: "",
     title: "",
     details: "",
@@ -39,6 +54,10 @@ const VolunteerReport = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!formData.reportedOpportunityId) {
+      newErrors.reportedOpportunityId =
+        "Please select the opportunity you are reporting";
+    }
     if (!formData.opportunityViolationType) {
       newErrors.opportunityViolationType = "Please select a violation type";
     }
@@ -53,7 +72,7 @@ const VolunteerReport = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -61,24 +80,20 @@ const VolunteerReport = () => {
     setLoading(true);
 
     const submissionData = {
-      opportunityViolationType: formData.opportunityViolationType.trim(),
+      reportType: "OpportunityViolation",
+      reportedOpportunityId: formData.reportedOpportunityId,
+      opportunityViolationType: formData.opportunityViolationType,
       title: formData.title.trim(),
       details: formData.details.trim(),
     };
 
-    // TODO: backend integration for createReport in useReportStore.js
     try {
-      await createReport(submissionData); 
-
-    } catch(error) {
-      console.error(
-        "Unexpected report submission error:",
-        err
-      );
-
-      toast.error(
-        "Something went wrong while submitting report."
-      );
+      await createReport(submissionData);
+    } catch (error) {
+      console.error("Unexpected report submission error:", error);
+      toast.error("Something went wrong while submitting report.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,8 +105,7 @@ const VolunteerReport = () => {
           <p>REPORT</p>
           <h1>Submit a report</h1>
           <span>
-            Report any issues or concerns you encounter while using the
-            platform.
+            Report an opportunity that you've attended to admin.
           </span>
         </div>
       </section>
@@ -106,6 +120,39 @@ const VolunteerReport = () => {
         </div>
 
         <form className="volunteer-report-form" onSubmit={handleSubmit}>
+          {/* reported opportunity selection */}
+          <div className="volunteer-report-field">
+            <label className="volunteer-report-field-label">
+              Reported Opportunity
+            </label>
+            <select
+              name="reportedOpportunityId"
+              value={formData.reportedOpportunityId}
+              onChange={handleInputChange}
+              className={
+                errors.reportedOpportunityId
+                  ? "volunteer-report-input volunteer-report-select error"
+                  : "volunteer-report-input volunteer-report-select"
+              }
+            >
+              <option value="" disabled>
+                Select the opportunity to report
+              </option>
+              {reportedOpportunities.map((opp) => (
+                <option key={opp._id} value={opp._id}>
+                  {opp.title}
+                </option>
+              ))}
+            </select>
+
+            {errors.reportedOpportunityId && (
+              <p className="volunteer-report-field-error">
+                <AlertCircle className="volunteer-report-error-icon" />
+                {errors.reportedOpportunityId}
+              </p>
+            )}
+          </div>
+
           {/* violation type selection */}
           <div className="volunteer-report-field">
             <label className="volunteer-report-field-label">

@@ -2704,6 +2704,15 @@
   text-overflow: ellipsis;
 }
 
+.report-made-card-target {
+  color: var(--profile-muted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .report-made-card-meta {
   display: flex;
   align-items: center;
