@@ -8,9 +8,11 @@ const ReportMadeCard = ({ report }) => {
   const status = report?.status?.toLowerCase() || "pending";
 
   // ReportMadeCard is a shared component across all 3 users: Admin, Volunteer, Organisation
-  const basePath = location.pathname.startsWith("/organisation-dashboard")
-    ? "/organisation-dashboard"
-    : "/volunteer-dashboard";
+  const basePath = location.pathname.startsWith("/admin-dashboard")
+    ? "/admin-dashboard"
+    : location.pathname.startsWith("/organisation-dashboard")
+      ? "/organisation-dashboard"
+      : "/volunteer-dashboard";
 
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
@@ -23,7 +25,10 @@ const ReportMadeCard = ({ report }) => {
     report?.reportedUserId?.name || report?.reportedOpportunityId?.title;
 
   const handleClick = () => {
-    navigate(`${basePath}/report/${report?._id}`, {
+    const reportPath = location.pathname.startsWith("/admin-dashboard")
+      ? `${basePath}/manage-report/${report?._id}`
+      : `${basePath}/report/${report?._id}`;
+    navigate(reportPath, {
       state: { report },
     });
   };

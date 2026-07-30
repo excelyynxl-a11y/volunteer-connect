@@ -1,6 +1,7 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { ArrowBigLeft } from "lucide-react";
 import { useReportStore } from "../../store/useReportStore";
+import { useAdminStore } from "../../store/useAdminStore";
 import { formatDate } from "../../lib/utils";
 
 const ReportMadePage = () => {
@@ -8,18 +9,25 @@ const ReportMadePage = () => {
   const location = useLocation();
   const { reportId } = useParams();
   const { previousReports } = useReportStore();
+  const { reports } = useAdminStore();
 
   // read report from navigation state, fall back to store lookup by id
   const report =
     location.state?.report ||
-    previousReports.find((r) => r._id === reportId);
+    previousReports.find((r) => r._id === reportId) ||
+    reports.find((r) => r._id === reportId);
 
-  const basePath = location.pathname.startsWith("/organisation-dashboard")
-    ? "/organisation-dashboard"
-    : "/volunteer-dashboard";
+  const basePath = location.pathname.startsWith("/admin-dashboard")
+    ? "/admin-dashboard"
+    : location.pathname.startsWith("/organisation-dashboard")
+      ? "/organisation-dashboard"
+      : "/volunteer-dashboard";
 
   const handleBack = () => {
-    navigate(`${basePath}/report`);
+    const backPath = location.pathname.startsWith("/admin-dashboard")
+      ? `${basePath}/manage-report`
+      : `${basePath}/report`;
+    navigate(backPath);
   };
 
   const status = report?.status?.toLowerCase() || "pending";
