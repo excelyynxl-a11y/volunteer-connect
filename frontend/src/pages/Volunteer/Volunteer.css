@@ -2759,6 +2759,131 @@
   }
 }
 
+/* ── ReportMadePage ── */
+
+.report-made-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.report-made-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8a8f94;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  align-self: flex-start;
+}
+
+.report-made-back:hover {
+  color: var(--profile-green);
+}
+
+.report-made-back svg {
+  width: 20px;
+  height: 20px;
+}
+
+.report-made-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.report-made-page-header h2 {
+  margin: 6px 0 0;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--profile-green-dark);
+}
+
+.report-made-page-header .report-card-status {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+.report-made-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid #eee8e0;
+  border-radius: 12px;
+  background: #faf8f4;
+  margin-bottom: 24px;
+}
+
+.report-made-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.report-made-detail-label {
+  color: var(--profile-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.report-made-detail-value {
+  color: var(--profile-green-dark);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.report-made-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-made-content-text {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid #eee8e0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1d2a32;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 760px) {
+  .report-made-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .report-made-page-header h2 {
+    font-size: 24px;
+  }
+
+  .report-made-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .report-made-detail-value {
+    text-align: left;
+  }
+}
+
 /* Volunteer Application */
 .volunteer-application-page {
   min-height: 100vh;
