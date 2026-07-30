@@ -96,6 +96,51 @@ export const createReport = async (req, res) => {
       reportedOpportunityId
     } = req.body;
 
+    if (!REPORT_TYPES.includes(reportType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid report type."
+      });
+    }
+
+    if (typeof title !== "string" || !title.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Report title is required."
+      });
+    }
+
+    if (typeof details !== "string" || !details.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Report details are required."
+      });
+    }
+
+    if (
+      req.user.role === "volunteer" &&
+      reportType !== "OpportunityViolation"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Volunteers can only submit opportunity violation reports."
+      });
+    }
+
+    if (req.user.role === "organisation" && reportType !== "UserViolation") {
+      return res.status(403).json({
+        success: false,
+        message: "Organisations can only submit user violation reports."
+      });
+    }
+
+    if (req.user.role !== "volunteer" && req.user.role !== "organisation") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account cannot submit reports."
+      });
+    }
+
     const reportData = {
       submittedBy: req.user._id,
       reportType,
