@@ -27,6 +27,14 @@ const ReportMadePage = () => {
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
 
+  // reported target: opportunity (for volunteer reports) or volunteer (for organisation reports)
+  const isUserViolation = report?.reportType === "UserViolation";
+  const targetLabel = isUserViolation
+    ? "Reported Volunteer"
+    : "Reported Opportunity";
+  const targetName =
+    report?.reportedUserId?.name || report?.reportedOpportunityId?.title;
+
   if (!report) {
     return (
       <div className="report-made-page">
@@ -61,8 +69,16 @@ const ReportMadePage = () => {
           </span>
         </div>
 
-        {/* report date submitted and status */}
+        {/* report details */}
         <div className="report-made-detail">
+          <div className="report-made-detail-row">
+            <span className="report-made-detail-label">
+              {targetLabel}
+            </span>
+            <span className="report-made-detail-value">
+              {targetName || "N/A"}
+            </span>
+          </div>
           <div className="report-made-detail-row">
             <span className="report-made-detail-label">
               Date Submitted
@@ -83,9 +99,7 @@ const ReportMadePage = () => {
 
         {/* report content */}
         <div className="report-made-content">
-          <label className="volunteer-report-field-label">
-            Report Details
-          </label>
+          <label className="volunteer-report-field-label">Report Details</label>
           <p className="report-made-content-text">
             {report.details || "No details provided."}
           </p>

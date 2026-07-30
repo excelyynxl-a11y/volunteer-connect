@@ -15,6 +15,13 @@ const ReportMadeCard = ({ report }) => {
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
 
+  // reported target: opportunity (for volunteer reports) or volunteer (for organisation reports)
+  const targetLabel = report?.reportType === "UserViolation"
+    ? "Reported Volunteer"
+    : "Reported Opportunity";
+  const targetName =
+    report?.reportedUserId?.name || report?.reportedOpportunityId?.title;
+
   const handleClick = () => {
     navigate(`${basePath}/report/${report?._id}`, {
       state: { report },
@@ -30,6 +37,11 @@ const ReportMadeCard = ({ report }) => {
         <h3 className="report-made-card-title">
           {report?.title || "Untitled report"}
         </h3>
+        {targetName && (
+          <span className="report-made-card-target">
+            {targetLabel}: {targetName}
+          </span>
+        )}
         <div className="report-made-card-meta">
           <span className="report-made-card-date">
             {formatDate(report?.createdAt)}
