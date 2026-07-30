@@ -31,7 +31,7 @@ const AdminSidebar = () => {
   
   const { authUser, logout } = useAuthStore();
 
-  const { sidebarCollapsed, toggleSidebar, setCurrentTab } = useAdminStore();
+  const { sidebarCollapsed, toggleSidebar, setCurrentTab, currentTab } = useAdminStore();
 
   const navigate = useNavigate();
   
@@ -42,7 +42,13 @@ const AdminSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+  // const activeKey = navItems.find((item) => item.path === location.pathname)?.key || "homepage";
+
+  const activeKey = navItems.find((item) =>
+        item.path === "/admin-dashboard"
+          ? location.pathname === item.path
+          : location.pathname.startsWith(item.path),
+      )?.key || currentTab;
 
   return (
     <aside className={`admin-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
