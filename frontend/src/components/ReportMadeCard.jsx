@@ -1,13 +1,22 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { formatDate } from "../lib/utils";
 
 const ReportMadeCard = ({ report }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const status = report?.status?.toLowerCase() || "pending";
 
+  // ReportMadeCard is a shared component across all 3 users: Admin, Volunteer, Organisation
+  const basePath = location.pathname.startsWith("/organisation-dashboard")
+    ? "/organisation-dashboard"
+    : "/volunteer-dashboard";
+
+  const violationType =
+    report?.userViolationType || report?.opportunityViolationType;
+
   const handleClick = () => {
-    navigate(`/volunteer-dashboard/report/${report?._id}`, {
+    navigate(`${basePath}/report/${report?._id}`, {
       state: { report },
     });
   };
@@ -16,7 +25,7 @@ const ReportMadeCard = ({ report }) => {
     <div className="report-made-card" onClick={handleClick}>
       <div className="report-made-card-main">
         <span className="report-made-card-category">
-          {report?.opportunityViolationType || "Uncategorised"}
+          {violationType || "Uncategorised"}
         </span>
         <h3 className="report-made-card-title">
           {report?.title || "Untitled report"}

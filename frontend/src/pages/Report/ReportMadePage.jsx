@@ -9,15 +9,23 @@ const ReportMadePage = () => {
   const { reportId } = useParams();
   const { previousReports } = useReportStore();
 
+  // read report from navigation state, fall back to store lookup by id
   const report =
     location.state?.report ||
     previousReports.find((r) => r._id === reportId);
 
+  const basePath = location.pathname.startsWith("/organisation-dashboard")
+    ? "/organisation-dashboard"
+    : "/volunteer-dashboard";
+
   const handleBack = () => {
-    navigate("/volunteer-dashboard/report");
+    navigate(`${basePath}/report`);
   };
 
   const status = report?.status?.toLowerCase() || "pending";
+
+  const violationType =
+    report?.userViolationType || report?.opportunityViolationType;
 
   if (!report) {
     return (
@@ -44,7 +52,7 @@ const ReportMadePage = () => {
         <div className="report-made-page-header">
           <div>
             <span className="report-made-card-category">
-              {report.opportunityViolationType || "Uncategorised"}
+              {violationType || "Uncategorised"}
             </span>
             <h2>{report.title || "Untitled report"}</h2>
           </div>
@@ -75,7 +83,9 @@ const ReportMadePage = () => {
 
         {/* report content */}
         <div className="report-made-content">
-          <label className="volunteer-report-field-label">Report Details</label>
+          <label className="volunteer-report-field-label">
+            Report Details
+          </label>
           <p className="report-made-content-text">
             {report.details || "No details provided."}
           </p>
