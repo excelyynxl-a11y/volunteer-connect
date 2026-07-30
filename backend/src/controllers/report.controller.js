@@ -83,10 +83,49 @@ export const deleteReport = async (req, res) => {
 
 export const updateReportStatus = async (req, res) => {
   try {
-    // TODO
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid report ID."
+      });
+    }
+
+    const validStatuses = ["Pending", "Investigating", "Resolved", "Dismissed"];
+    if (typeof status !== "string" || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Status must be one of: ${validStatuses.join(", ")}.`
+      });
+    }
+
+    const report = await Report.findById(id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found."
+      });
+    }
+
+    report.status = status;
+    await report.save();
+
+    const updatedReport = await populateReport(Report.findById(id));
+
+    res.status(200).json({
+      success: true,
+      message: "Report status updated successfully.",
+      data: updatedReport
+    });
   } catch (err) {
     console.log("Error in updateReportStatus controller: ", err.message);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
   }
 };
 
