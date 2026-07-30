@@ -41,11 +41,6 @@ const VolunteerReport = () => {
         Send Button (upon click, clear the current form, no backend integration yet)
       </div>
 
-      <div>
-        Previous report history and status (render and map out ReportMadeCard component)
-        <ReportMadeCard />
-      </div> 
-
         {/* <div className="volunteer-report-body">
           <div className="volunteer-report-coming-soon">
             <div className="volunteer-report-coming-soon-icon">
@@ -83,6 +78,22 @@ const VolunteerReport = () => {
             </div>
           </div>
         </div> */}
+      </section>
+
+
+      <section className="">
+        {/* previous report header */}
+        <div className="">
+            <div>
+                <h2>Previous Report</h2>
+                <p>View your submitted reports.</p>
+            </div>
+        </div>
+
+        <div>
+          Previous report history and status (render and map out ReportMadeCard component)
+          <ReportMadeCard />
+        </div> 
       </section>
     </div>
   );
