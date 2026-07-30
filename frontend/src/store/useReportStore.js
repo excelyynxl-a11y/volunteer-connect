@@ -1,4 +1,32 @@
+import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
+import { create } from "zustand";
+
+// TODO: remove after backend integration
+// mock previous reports (no backend integration yet)
+const mockPreviousReports = [
+  {
+    _id: "mock-1",
+    opportunityViolationType: "Harassment and Discrimination",
+    title: "Unacceptable behaviour from event coordinator",
+    status: "Pending",
+    createdAt: "2025-07-22T10:30:00Z",
+  },
+  {
+    _id: "mock-2",
+    opportunityViolationType: "Disorganized Schedules",
+    title: "Event started two hours late with no notice",
+    status: "Investigating",
+    createdAt: "2025-07-10T14:15:00Z",
+  },
+  {
+    _id: "mock-3",
+    opportunityViolationType: "Hazardous Environment",
+    title: "Missing safety equipment at construction site",
+    status: "Resolved",
+    createdAt: "2025-06-28T09:00:00Z",
+  },
+];
 
 export const useReportStore = create((set, get) => ({
     previousReports: [],
@@ -9,15 +37,19 @@ export const useReportStore = create((set, get) => ({
 
     getPreviousReports: async (userId) => {
 
-        // TODO: get all previous report made by this user
-
+        // TODO: integrate backend to get all previous report made by this user
         set({ 
             isPreviousReportsLoading: true, 
             previousReportsError: "" 
         });
 
         try {
-        
+            set({ previousReports: mockPreviousReports });
+
+            return {
+                success: true,
+                data: mockPreviousReports,
+            };
         } catch (error) {
 
             const message =
@@ -27,7 +59,7 @@ export const useReportStore = create((set, get) => ({
 
             set({
                 previousReports: [],
-                statsError: message,
+                previousReportsError: message,
             });
 
             return { 
@@ -46,6 +78,7 @@ export const useReportStore = create((set, get) => ({
             isCreatingReport: true 
         });
 
+        // TODO: integrate with backend to create new reports
         try {
             const res = await axiosInstance.post("/report/create", reportData);
             const newReport = res.data?.data ?? res.data;
