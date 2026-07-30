@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader2, Send } from "lucide-react";
+import toast from "react-hot-toast";
 import ReportMadeCard from "../../components/ReportMadeCard";
 import { volunteerViolationCategory } from "../../lib/report";
 import { useReportStore } from "../../store/useReportStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
 
 const OrganisationReport = () => {
   const {
@@ -12,11 +14,26 @@ const OrganisationReport = () => {
     isPreviousReportsLoading,
   } = useReportStore();
 
+  const { applications, getMyOrganisationApplications } = useApplicationStore();
+
   useEffect(() => {
     getPreviousReports(undefined, "UserViolation");
-  }, [getPreviousReports]);
+    getMyOrganisationApplications();
+  }, [getPreviousReports, getMyOrganisationApplications]);
+
+  // TODO: integrate with useApplicationStore.js to get all volunteer who submitted application to organisation
+  const reportedVolunteers = applications
+    .filter((app) => app.volunteerId?._id)
+    .reduce((acc, app) => {
+      const vol = app.volunteerId;
+      if (!acc.find((v) => v._id === vol._id)) {
+        acc.push(vol);
+      }
+      return acc;
+    }, []);
 
   const [formData, setFormData] = useState({
+    reportedUserId: "",
     userViolationType: "",
     title: "",
     details: "",
@@ -37,6 +54,10 @@ const OrganisationReport = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!formData.reportedUserId) {
+      newErrors.reportedUserId =
+        "Please select the volunteer you are reporting";
+    }
     if (!formData.userViolationType) {
       newErrors.userViolationType = "Please select a violation type";
     }
@@ -59,12 +80,13 @@ const OrganisationReport = () => {
     setLoading(true);
 
     const submissionData = {
-      userViolationType: formData.userViolationType.trim(),
+      reportType: "UserViolation",
+      reportedUserId: formData.reportedUserId,
+      userViolationType: formData.userViolationType,
       title: formData.title.trim(),
       details: formData.details.trim(),
     };
 
-    // TODO: backend integration for createReport in useReportStore.js
     try {
       await createReport(submissionData);
     } catch (error) {
@@ -83,8 +105,7 @@ const OrganisationReport = () => {
           <p>REPORT</p>
           <h1>Submit a report</h1>
           <span>
-            Report any issues or concerns you encounter with volunteers on the
-            platform.
+            Report a volunteer to admin.
           </span>
         </div>
       </section>
@@ -103,6 +124,39 @@ const OrganisationReport = () => {
         </div>
 
         <form className="organisation-report-form" onSubmit={handleSubmit}>
+          {/* reported volunteer selection */}
+          <div className="organisation-report-field">
+            <label className="organisation-report-field-label">
+              Reported Volunteer
+            </label>
+            <select
+              name="reportedUserId"
+              value={formData.reportedUserId}
+              onChange={handleInputChange}
+              className={
+                errors.reportedUserId
+                  ? "organisation-report-input organisation-report-select error"
+                  : "organisation-report-input organisation-report-select"
+              }
+            >
+              <option value="" disabled>
+                Select the volunteer to report
+              </option>
+              {reportedVolunteers.map((vol) => (
+                <option key={vol._id} value={vol._id}>
+                  {vol.name}
+                </option>
+              ))}
+            </select>
+
+            {errors.reportedUserId && (
+              <p className="organisation-report-field-error">
+                <AlertCircle className="organisation-report-error-icon" />
+                {errors.reportedUserId}
+              </p>
+            )}
+          </div>
+
           {/* violation type selection */}
           <div className="organisation-report-field">
             <label className="organisation-report-field-label">
