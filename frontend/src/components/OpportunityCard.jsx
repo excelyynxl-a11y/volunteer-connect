@@ -120,40 +120,42 @@ const OpportunityCard = ({
         )}
       </div>
 
-      {(displayActions.length > 0 || effectiveStatusKey) && (
+      {(displayActions.length > 0 || variant === 'volunteer') && (
         <div className="item-actions">
+          {/* 1. Render Organization/Standard Actions (View, Edit, Close) */}
           {displayActions.map((action) => (
             <button 
               className={`action-btn ${action}`} 
               key={action} 
               type="button" 
               onClick={() => onAction && onAction(action, opportunity?._id || opportunity)}
-              aria-label={`${action === 'view' ? 'View' : 'Edit'} ${
-                displayTitle || 'opportunity'
-              }`}
+              aria-label={`${action} ${displayTitle || 'opportunity'}`}
             >
-              {action === 'view' ? 'View' : 'Edit'}
+              {action.charAt(0).toUpperCase() + action.slice(1)}
             </button>
           ))}
 
-          {isModelOpportunity && effectiveStatusKey ? (
-            <button
-              type="button"
-              className={`action-btn status-btn status-btn-${effectiveStatusKey}`}
-              disabled={isApplicationLocked}
-              aria-label={`${APPLICATION_STATUS_LABELS[effectiveStatusKey]} for ${displayTitle || 'opportunity'}`}
-            >
-              {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="action-btn apply-btn"
-              onClick={() => onAction && onAction('apply', opportunity?._id || opportunity)}
-              aria-label={`Apply for ${displayTitle || 'opportunity'}`}
-            >
-              Apply
-            </button>
+          {/* 2. Render Volunteer-Specific Actions (Apply, Status Badges) */}
+          {variant === 'volunteer' && (
+            isModelOpportunity && effectiveStatusKey ? (
+              <button
+                type="button"
+                className={`action-btn status-btn status-btn-${effectiveStatusKey}`}
+                disabled={isApplicationLocked}
+                aria-label={`${APPLICATION_STATUS_LABELS[effectiveStatusKey]} for ${displayTitle || 'opportunity'}`}
+              >
+                {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="action-btn apply-btn"
+                onClick={() => onAction && onAction('apply', opportunity?._id || opportunity)}
+                aria-label={`Apply for ${displayTitle || 'opportunity'}`}
+              >
+                Apply
+              </button>
+            )
           )}
         </div>
       )}
