@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 import {
+  emitConversationCreated,
+  emitConversationDeleted,
+  emitMessageCreated,
+} from "../events/message.events.js";
+import {
   getMessagePayloadError,
   getNextResponseDeadline,
   isResponseDeadlineExpired,
@@ -18,6 +23,10 @@ import {
   deleteExpiredConversations,
   isConversationParticipant,
 } from "../services/conversation.service.js";
+import {
+  cancelConversationExpiry,
+  scheduleConversationExpiry,
+} from "../services/conversationExpiry.service.js";
 
 const toClientAttachment = (attachment) =>
   attachment
@@ -72,11 +81,21 @@ const getAccessibleConversation = async (conversationId, user) => {
   }
 
   if (isResponseDeadlineExpired(result.conversation.responseDeadline)) {
-    await deleteConversationPermanently(
+    const deletion = await deleteConversationPermanently(
       result.conversation._id,
       "volunteer_reply_timeout",
+      {
+        expectedResponseDeadline: result.conversation.responseDeadline,
+      },
     );
-    return { error: "Conversation has ended", status: 410 };
+
+    if (deletion) {
+      cancelConversationExpiry(result.conversation._id);
+      emitConversationDeleted(deletion);
+      return { error: "Conversation has ended", status: 410 };
+    }
+
+    return getConversationById(conversationId);
   }
 
   return result;
@@ -90,7 +109,10 @@ const sendError = (res, result) =>
 
 export const getMyConversations = async (req, res) => {
   try {
-    await deleteExpiredConversations();
+    const expiredDeletions = await deleteExpiredConversations();
+    expiredDeletions.forEach((deletion) => {
+      emitConversationDeleted(deletion);
+    });
 
     const participantFilter =
       req.user.role === "volunteer"
@@ -239,13 +261,20 @@ export const initiateConversation = async (req, res) => {
 
     createdConversation.lastMessageAt = message.createdAt;
     await createdConversation.save();
+    const clientMessage = toClientMessage(message);
+
+    emitConversationCreated({
+      conversation: createdConversation,
+      message: clientMessage,
+      responseDeadline: null,
+    });
 
     return res.status(201).json({
       success: true,
       message: "Conversation started successfully",
       data: {
         conversation: createdConversation,
-        message: toClientMessage(message),
+        message: clientMessage,
       },
     });
   } catch (error) {
@@ -353,12 +382,28 @@ export const sendMessage = async (req, res) => {
       createdMessage.createdAt,
     );
     await result.conversation.save();
+    const clientMessage = toClientMessage(createdMessage);
+
+    if (result.conversation.responseDeadline) {
+      scheduleConversationExpiry(
+        result.conversation._id,
+        result.conversation.responseDeadline,
+      );
+    } else {
+      cancelConversationExpiry(result.conversation._id);
+    }
+
+    emitMessageCreated({
+      conversation: result.conversation,
+      message: clientMessage,
+      responseDeadline: result.conversation.responseDeadline,
+    });
 
     return res.status(201).json({
       success: true,
       message: "Message sent successfully",
       data: {
-        message: toClientMessage(createdMessage),
+        message: clientMessage,
         responseDeadline: result.conversation.responseDeadline,
       },
     });
@@ -486,10 +531,12 @@ export const endConversation = async (req, res) => {
       });
     }
 
-    await deleteConversationPermanently(
+    const deletion = await deleteConversationPermanently(
       result.conversation._id,
       "ended_by_organisation",
     );
+    cancelConversationExpiry(result.conversation._id);
+    emitConversationDeleted(deletion);
 
     return res.status(200).json({
       success: true,
