@@ -1,18 +1,43 @@
 import mongoose from "mongoose";
 
 import {
-  getMessageContentError,
+  getMessagePayloadError,
   getNextResponseDeadline,
   isResponseDeadlineExpired,
 } from "../lib/messageLifecycle.js";
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { Organisation } from "../models/user.model.js";
+import { cleanupUploadedAttachment } from "../services/attachmentCleanup.service.js";
+import {
+  getMessageAttachmentDownloadUrl,
+  uploadMessageAttachmentToCloudinary,
+} from "../services/cloudinary.service.js";
 import {
   deleteConversationPermanently,
   deleteExpiredConversations,
   isConversationParticipant,
 } from "../services/conversation.service.js";
+
+const toClientAttachment = (attachment) =>
+  attachment
+    ? {
+        fileName: attachment.fileName,
+        mimeType: attachment.mimeType,
+        size: attachment.size,
+      }
+    : null;
+
+const toClientMessage = (message) => ({
+  _id: message._id,
+  conversationId: message.conversationId,
+  senderId: message.senderId,
+  content: message.content,
+  attachment: toClientAttachment(message.attachment),
+  isRead: message.isRead,
+  createdAt: message.createdAt,
+  updatedAt: message.updatedAt,
+});
 
 const getConversationById = async (conversationId) => {
   if (!mongoose.Types.ObjectId.isValid(conversationId)) {
@@ -100,7 +125,7 @@ export const getMyConversations = async (req, res) => {
         return {
           _id: conversation._id,
           participant,
-          lastMessage,
+          lastMessage: lastMessage ? toClientMessage(lastMessage) : null,
           unreadCount,
           lastMessageAt: conversation.lastMessageAt,
           responseDeadline: conversation.responseDeadline,
@@ -125,6 +150,7 @@ export const getMyConversations = async (req, res) => {
 
 export const initiateConversation = async (req, res) => {
   let createdConversation = null;
+  let uploadedAttachment = null;
 
   try {
     if (req.user.role !== "volunteer") {
@@ -134,8 +160,8 @@ export const initiateConversation = async (req, res) => {
       });
     }
 
-    const { organisationId, content } = req.body ?? {};
-    const contentError = getMessageContentError(content);
+    const { organisationId, content = "" } = req.body ?? {};
+    const payloadError = getMessagePayloadError(content, Boolean(req.file));
 
     if (!organisationId || !mongoose.Types.ObjectId.isValid(organisationId)) {
       return res.status(400).json({
@@ -144,10 +170,10 @@ export const initiateConversation = async (req, res) => {
       });
     }
 
-    if (contentError) {
+    if (payloadError) {
       return res.status(400).json({
         success: false,
-        message: contentError,
+        message: payloadError,
       });
     }
 
@@ -199,10 +225,16 @@ export const initiateConversation = async (req, res) => {
       throw error;
     }
 
+    if (req.file) {
+      uploadedAttachment =
+        await uploadMessageAttachmentToCloudinary(req.file);
+    }
+
     const message = await Message.create({
       conversationId: createdConversation._id,
       senderId: req.user._id,
       content: content.trim(),
+      attachment: uploadedAttachment,
     });
 
     createdConversation.lastMessageAt = message.createdAt;
@@ -213,14 +245,26 @@ export const initiateConversation = async (req, res) => {
       message: "Conversation started successfully",
       data: {
         conversation: createdConversation,
-        message,
+        message: toClientMessage(message),
       },
     });
   } catch (error) {
+    const rollbackTasks = [];
+
     if (createdConversation?._id) {
-      await Message.deleteMany({ conversationId: createdConversation._id });
-      await Conversation.deleteOne({ _id: createdConversation._id });
+      rollbackTasks.push(
+        deleteConversationPermanently(
+          createdConversation._id,
+          "initialisation_failed",
+        ),
+      );
     }
+
+    if (uploadedAttachment) {
+      rollbackTasks.push(cleanupUploadedAttachment(uploadedAttachment));
+    }
+
+    await Promise.allSettled(rollbackTasks);
 
     console.log("Error in initiateConversation controller: ", error.message);
     return res.status(500).json({
@@ -252,7 +296,7 @@ export const getConversationMessages = async (req, res) => {
           _id: result.conversation._id,
           responseDeadline: result.conversation.responseDeadline,
         },
-        messages,
+        messages: messages.map(toClientMessage),
       },
     });
   } catch (error) {
@@ -268,14 +312,17 @@ export const getConversationMessages = async (req, res) => {
 };
 
 export const sendMessage = async (req, res) => {
-  try {
-    const { content } = req.body ?? {};
-    const contentError = getMessageContentError(content);
+  let createdMessage = null;
+  let uploadedAttachment = null;
 
-    if (contentError) {
+  try {
+    const { content = "" } = req.body ?? {};
+    const payloadError = getMessagePayloadError(content, Boolean(req.file));
+
+    if (payloadError) {
       return res.status(400).json({
         success: false,
-        message: contentError,
+        message: payloadError,
       });
     }
 
@@ -288,16 +335,22 @@ export const sendMessage = async (req, res) => {
       return sendError(res, result);
     }
 
-    const message = await Message.create({
+    if (req.file) {
+      uploadedAttachment =
+        await uploadMessageAttachmentToCloudinary(req.file);
+    }
+
+    createdMessage = await Message.create({
       conversationId: result.conversation._id,
       senderId: req.user._id,
       content: content.trim(),
+      attachment: uploadedAttachment,
     });
 
-    result.conversation.lastMessageAt = message.createdAt;
+    result.conversation.lastMessageAt = createdMessage.createdAt;
     result.conversation.responseDeadline = getNextResponseDeadline(
       req.user.role,
-      message.createdAt,
+      createdMessage.createdAt,
     );
     await result.conversation.save();
 
@@ -305,12 +358,67 @@ export const sendMessage = async (req, res) => {
       success: true,
       message: "Message sent successfully",
       data: {
-        message,
+        message: toClientMessage(createdMessage),
         responseDeadline: result.conversation.responseDeadline,
       },
     });
   } catch (error) {
+    const rollbackTasks = [];
+
+    if (createdMessage?._id) {
+      rollbackTasks.push(Message.deleteOne({ _id: createdMessage._id }));
+    }
+
+    if (uploadedAttachment) {
+      rollbackTasks.push(cleanupUploadedAttachment(uploadedAttachment));
+    }
+
+    await Promise.allSettled(rollbackTasks);
+
     console.log("Error in sendMessage controller: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const downloadMessageAttachment = async (req, res) => {
+  try {
+    const { conversationId, messageId } = req.params;
+    const result = await getAccessibleConversation(conversationId, req.user);
+
+    if (!result.conversation) {
+      return sendError(res, result);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid message ID",
+      });
+    }
+
+    const message = await Message.findOne({
+      _id: messageId,
+      conversationId: result.conversation._id,
+    });
+
+    if (!message?.attachment) {
+      return res.status(404).json({
+        success: false,
+        message: "Message attachment not found",
+      });
+    }
+
+    const downloadUrl = getMessageAttachmentDownloadUrl(message.attachment);
+    res.set("Cache-Control", "no-store");
+    return res.redirect(302, downloadUrl);
+  } catch (error) {
+    console.log(
+      "Error in downloadMessageAttachment controller: ",
+      error.message,
+    );
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

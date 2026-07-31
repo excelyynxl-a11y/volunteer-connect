@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   getMessageContentError,
+  getMessagePayloadError,
   getNextResponseDeadline,
   isResponseDeadlineExpired,
   MESSAGE_RESPONSE_WINDOW_MS,
@@ -12,12 +13,21 @@ import Message from "../../src/models/message.model.js";
 
 describe("messaging lifecycle rules", () => {
   it("requires a non-empty message of at most 2,000 characters", () => {
-    expect(getMessageContentError("")).toBe("Message content is required");
-    expect(getMessageContentError("   ")).toBe("Message content is required");
+    expect(getMessageContentError("")).toBe(
+      "Message text or an attachment is required",
+    );
+    expect(getMessageContentError("   ")).toBe(
+      "Message text or an attachment is required",
+    );
     expect(getMessageContentError("a".repeat(2000))).toBe("");
     expect(getMessageContentError("a".repeat(2001))).toBe(
       "Message content must be 2000 characters or fewer",
     );
+  });
+
+  it("allows an attachment without message text", () => {
+    expect(getMessagePayloadError("", true)).toBe("");
+    expect(getMessagePayloadError(undefined, true)).toBe("");
   });
 
   it("starts a three-hour deadline only after an organisation message", () => {
@@ -70,5 +80,30 @@ describe("messaging model contracts", () => {
     const validationError = message.validateSync();
 
     expect(validationError.errors.content).toBeDefined();
+  });
+
+  it("accepts an attachment-only message", () => {
+    const message = new Message({
+      conversationId: new mongoose.Types.ObjectId(),
+      senderId: new mongoose.Types.ObjectId(),
+      attachment: {
+        fileName: "activity-guide.pdf",
+        publicId: "message-attachments/activity-guide.pdf",
+        resourceType: "raw",
+        mimeType: "application/pdf",
+        size: 1024,
+      },
+    });
+
+    expect(message.validateSync()).toBeUndefined();
+  });
+
+  it("rejects a message without text or an attachment", () => {
+    const message = new Message({
+      conversationId: new mongoose.Types.ObjectId(),
+      senderId: new mongoose.Types.ObjectId(),
+    });
+
+    expect(message.validateSync().errors.content).toBeDefined();
   });
 });

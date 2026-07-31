@@ -13,7 +13,9 @@ vi.mock("../../src/models/conversation.model.js", () => ({
 vi.mock("../../src/models/message.model.js", () => ({
   default: {
     create: vi.fn(),
+    deleteOne: vi.fn(),
     deleteMany: vi.fn(),
+    findOne: vi.fn(),
   },
 }));
 
@@ -29,6 +31,15 @@ vi.mock("../../src/services/conversation.service.js", () => ({
   isConversationParticipant: vi.fn(),
 }));
 
+vi.mock("../../src/services/attachmentCleanup.service.js", () => ({
+  cleanupUploadedAttachment: vi.fn(),
+}));
+
+vi.mock("../../src/services/cloudinary.service.js", () => ({
+  getMessageAttachmentDownloadUrl: vi.fn(),
+  uploadMessageAttachmentToCloudinary: vi.fn(),
+}));
+
 import {
   endConversation,
   initiateConversation,
@@ -37,6 +48,7 @@ import {
 import Conversation from "../../src/models/conversation.model.js";
 import Message from "../../src/models/message.model.js";
 import { Organisation } from "../../src/models/user.model.js";
+import { uploadMessageAttachmentToCloudinary } from "../../src/services/cloudinary.service.js";
 import {
   deleteConversationPermanently,
   isConversationParticipant,
@@ -127,11 +139,63 @@ describe("message controller lifecycle", () => {
       organisationId,
     });
     expect(Message.create).toHaveBeenCalledWith({
+      attachment: null,
       conversationId,
       senderId: volunteer._id,
       content: "Hello",
     });
     expect(conversation.lastMessageAt).toEqual(createdAt);
+    expect(response.statusCode).toBe(201);
+  });
+
+  it("accepts an attachment-only message and applies organisation timing", async () => {
+    const organisation = createUser("organisation");
+    const sentAt = new Date("2026-07-31T01:00:00.000Z");
+    const attachment = {
+      fileName: "event-guide.pdf",
+      publicId: "message-attachments/event-guide.pdf",
+      resourceType: "raw",
+      mimeType: "application/pdf",
+      size: 2048,
+    };
+    const conversation = {
+      _id: new mongoose.Types.ObjectId(),
+      deletionStartedAt: null,
+      organisationId: organisation._id,
+      responseDeadline: null,
+      save: vi.fn().mockResolvedValue(),
+    };
+    Conversation.findById.mockResolvedValue(conversation);
+    uploadMessageAttachmentToCloudinary.mockResolvedValue(attachment);
+    Message.create.mockResolvedValue({
+      _id: new mongoose.Types.ObjectId(),
+      attachment,
+      content: "",
+      createdAt: sentAt,
+    });
+    const response = createResponse();
+
+    await sendMessage(
+      {
+        body: {},
+        file: {
+          originalname: "event-guide.pdf",
+        },
+        params: { conversationId: String(conversation._id) },
+        user: organisation,
+      },
+      response,
+    );
+
+    expect(Message.create).toHaveBeenCalledWith({
+      attachment,
+      content: "",
+      conversationId: conversation._id,
+      senderId: organisation._id,
+    });
+    expect(conversation.responseDeadline.toISOString()).toBe(
+      "2026-07-31T04:00:00.000Z",
+    );
     expect(response.statusCode).toBe(201);
   });
 
