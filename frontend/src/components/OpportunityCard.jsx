@@ -136,7 +136,7 @@ const OpportunityCard = ({
             </button>
           ))}
 
-          {isModelOpportunity && effectiveStatusKey && (
+          {isModelOpportunity && effectiveStatusKey ? (
             <button
               type="button"
               className={`action-btn status-btn status-btn-${effectiveStatusKey}`}
@@ -144,6 +144,15 @@ const OpportunityCard = ({
               aria-label={`${APPLICATION_STATUS_LABELS[effectiveStatusKey]} for ${displayTitle || 'opportunity'}`}
             >
               {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="action-btn apply-btn"
+              onClick={() => onAction && onAction('apply', opportunity?._id || opportunity)}
+              aria-label={`Apply for ${displayTitle || 'opportunity'}`}
+            >
+              Apply
             </button>
           )}
         </div>
