@@ -17,6 +17,7 @@ import {
 } from "../../lib/data";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
 
 const initialCustomAvailability = {
   dayOfWeek: "",
@@ -32,6 +33,7 @@ const VolunteerOpportunities = () => {
     opportunitiesError,
     getAllOpportunities,
   } = useVolunteerStore();
+  const { applications, getMyApplications } = useApplicationStore();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -67,6 +69,10 @@ const VolunteerOpportunities = () => {
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
+
+  useEffect(() => {
+    getMyApplications();
+  }, [getMyApplications]);
 
   const shouldFilterByAvailability =
     hasVolunteerAvailability && matchesAvailabilityOnly;
@@ -122,6 +128,14 @@ const VolunteerOpportunities = () => {
       matchesAvailability
     );
   });
+
+  const applicationStatusByOpportunity = applications.reduce((statusMap, application) => {
+      const opportunityId = application.opportunityId?._id;
+      if (opportunityId) {
+        statusMap[opportunityId] = application.status;
+      }
+      return statusMap;
+    }, {});
 
   const toggleCategory = (category) => {
     setSelectedCategories((currentCategories) =>
@@ -371,6 +385,7 @@ const VolunteerOpportunities = () => {
                     variant="volunteer"
                     actions={["view"]}
                     showStatus={false}
+                    applicationStatus={applicationStatusByOpportunity[opportunity._id]}
                     onAction={(action, selectedCardOpportunity) => {
                       if (action === "view") {
                         const opportunityToView = activeOpportunities.find(

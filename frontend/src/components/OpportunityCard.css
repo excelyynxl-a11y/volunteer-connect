@@ -30,16 +30,18 @@
     margin-bottom: 10px;
 }
 
-.header-right {
+.header-left {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .categories-container {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 
 .event-tag {
@@ -183,4 +185,57 @@
     background: #1a3c34;
     box-shadow: 0 4px 12px rgba(44, 97, 79, 0.2);
     transform: translateY(-1px);
+}
+
+.action-btn.status-btn-pending,
+.action-btn.status-btn-approved,
+.action-btn.status-btn-rejected,
+.action-btn.status-btn-withdrawn,
+.action-btn.status-btn-full {
+    background: #e4e3e3;
+    border-color: #989898;
+    color: #908f8f;
+}
+
+.application-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.application-status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.application-status-badge.status-pending {
+    background: #fbe6cd;
+    color: #c36c02;
+}
+
+.application-status-badge.status-approved {
+    background: #dcefd1;
+    color: #2c614f;
+}
+
+.application-status-badge.status-rejected {
+    background: #f9d8d4;
+    color: #9f3f32;
+}
+
+.application-status-badge.status-withdrawn,
+.application-status-badge.status-full {
+    background: #e5edf3;
+    color: #3f5f72;
 }
