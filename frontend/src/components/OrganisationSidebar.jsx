@@ -5,6 +5,7 @@ import {
   File,
   Home,
   LogOut,
+  MessageCircle,
   Search,
   User,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const navItems = [
   { key: "homepage", path: "/organisation-dashboard", label: "Homepage", Icon: Home },
   { key: "opportunity", path: "/organisation-dashboard/opportunities", label: "Opportunity", Icon: Search },
   { key: "application", path: "/organisation-dashboard/applications", label: "Application", Icon: File },
+  { key: "messages", path: "/organisation-dashboard/messages", label: "Messages", Icon: MessageCircle },
   { key: "report", path: "/organisation-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/organisation-dashboard/profile", label: "Profile", Icon: User },
 
