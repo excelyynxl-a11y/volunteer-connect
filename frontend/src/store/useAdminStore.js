@@ -261,7 +261,6 @@ export const useAdminStore = create((set, get) => ({
     }
   },
 
-  // TODO: integrate with backend to get all report made by volunteer / organisation
   getAllReports: async () => {
     set({
       isReportsLoading: true,
@@ -269,15 +268,14 @@ export const useAdminStore = create((set, get) => ({
     });
 
     try {
-      // TODO: replace mockAllReports with actual API call
-      // const res = await axiosInstance.get('/report/');
-      // const reports = Array.isArray(res.data?.reports) ? res.data.reports : [];
+      const res = await axiosInstance.get("/report/");
+      const reports = Array.isArray(res.data?.reports) ? res.data.reports : [];
 
-      set({ reports: mockAllReports });
+      set({ reports });
 
       return {
         success: true,
-        data: mockAllReports
+        data: reports
       };
     } catch (error) {
       const message =
