@@ -26,7 +26,11 @@ const conversationSchema = new mongoose.Schema(
     },
     deletionReason: {
       type: String,
-      enum: ["volunteer_reply_timeout", "ended_by_organisation"],
+      enum: [
+        "volunteer_reply_timeout",
+        "ended_by_organisation",
+        "initialisation_failed",
+      ],
       default: null,
     },
   },

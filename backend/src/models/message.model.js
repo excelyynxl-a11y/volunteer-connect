@@ -1,11 +1,36 @@
 import mongoose from "mongoose";
 
-// Sub-document schema for Attachments
-const attachmentSchema = new mongoose.Schema({
-  fileName: { type: String, required: true },
-  fileUrl: { type: String, required: true },
-  fileType: { type: String }, // e.g., 'application/pdf', 'image/png'
-});
+const attachmentSchema = new mongoose.Schema(
+  {
+    fileName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 255,
+    },
+    publicId: {
+      type: String,
+      required: true,
+    },
+    resourceType: {
+      type: String,
+      enum: ["image", "raw"],
+      required: true,
+    },
+    mimeType: {
+      type: String,
+      enum: ["application/pdf", "image/jpeg", "image/jpg", "image/png"],
+      required: true,
+    },
+    size: {
+      type: Number,
+      min: 1,
+      max: 5 * 1024 * 1024,
+      required: true,
+    },
+  },
+  { _id: false },
+);
 
 const messageSchema = new mongoose.Schema(
   {
@@ -21,14 +46,20 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
       maxlength: 2000,
+      validate: {
+        validator(content) {
+          return Boolean(content?.trim() || this.attachment);
+        },
+        message: "Message text or an attachment is required",
+      },
     },
-
-    // Embed the attachments directly in the message
-    attachments: [attachmentSchema],
-
+    attachment: {
+      type: attachmentSchema,
+      default: null,
+    },
     isRead: {
       type: Boolean,
       default: false,

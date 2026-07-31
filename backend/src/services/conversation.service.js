@@ -1,5 +1,9 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import {
+  processAttachmentCleanupJobs,
+  queueAttachmentCleanup,
+} from "./attachmentCleanup.service.js";
 
 export const getConversationParticipantIds = (conversation) => ({
   volunteerId: conversation.volunteerId?._id ?? conversation.volunteerId,
@@ -53,9 +57,21 @@ export const deleteConversationPermanently = async (
   }
 
   const participantIds = getConversationParticipantIds(conversation);
+  const messagesWithAttachments = await Message.find({
+    conversationId,
+    "attachment.publicId": { $exists: true },
+  }).select("attachment");
+  const attachments = messagesWithAttachments
+    .map((message) => message.attachment)
+    .filter(Boolean);
 
+  await queueAttachmentCleanup(attachments);
   await Message.deleteMany({ conversationId });
   await Conversation.deleteOne({ _id: conversationId });
+
+  void processAttachmentCleanupJobs().catch((error) => {
+    console.log("Error processing attachment cleanup jobs: ", error.message);
+  });
 
   return {
     conversationId: String(conversationId),
