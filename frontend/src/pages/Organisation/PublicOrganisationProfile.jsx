@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { Heart } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { Heart, MessageCircle } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import BackButton from "../../components/BackButton";
 import { getInitials } from "../../lib/utils";
@@ -10,6 +10,7 @@ import "./PublicOrganisationProfile.css";
 
 const PublicOrganisationProfile = () => {
   const { organisationId } = useParams();
+  const navigate = useNavigate();
   const {
     getPublicOrganisationProfile,
     isPublicOrganisationProfileLoading,
@@ -70,6 +71,14 @@ const PublicOrganisationProfile = () => {
 
   const { avatar, biodata, name } = publicOrganisationProfile;
 
+  const handleMessageClick = () => {
+    const searchParams = new URLSearchParams({
+      organisationId,
+      organisationName: name || "Organisation",
+    });
+    navigate(`/volunteer-dashboard/messages?${searchParams.toString()}`);
+  };
+
   return (
     <div className="public-org-profile">
       <section className="public-org-hero">
@@ -96,6 +105,14 @@ const PublicOrganisationProfile = () => {
         </div>
 
         <div className="public-org-actions">
+          <button
+            type="button"
+            className="public-org-message-button"
+            onClick={handleMessageClick}
+          >
+            <MessageCircle size={18} />
+            Send Message
+          </button>
           <button
             type="button"
             className={`public-org-follow-button${isFollowing ? " following" : ""}`}

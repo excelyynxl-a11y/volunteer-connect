@@ -92,6 +92,16 @@
   color: #073f35;
 }
 
+.public-org-message-button {
+  border: 1px solid #286955;
+  background: #286955;
+  color: #ffffff;
+}
+
+.public-org-message-button:hover {
+  background: #1f5746;
+}
+
 .public-org-follow-button.following {
   border-color: #286955;
   background: #286955;
