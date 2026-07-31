@@ -105,7 +105,7 @@ export const APPLICATION_STATUS_LABELS = {
   approved: 'Application Approved',
   rejected: 'Application Rejected',
   withdrawn: 'Application Withdrawn',
-  full: 'Full',
+  full: 'Opportunity Full',
 }
 
 export const getApplicationDisplayStatus = (applicationStatus, spotsRemaining) => {
