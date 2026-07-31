@@ -1,4 +1,9 @@
 import multer from 'multer';
+import {
+    hasValidMessageAttachmentSignature,
+    isAllowedMessageAttachment,
+    MESSAGE_ATTACHMENT_MAX_BYTES,
+} from '../lib/messageAttachment.js';
 
 // resume only accepts pdf
 const resumeFileFilter = (req, file, cb) => {
@@ -65,3 +70,39 @@ export const uploadAvatar = handleUpload(
     'profilePic',
     'Avatar must be 5MB or smaller.',
 );
+
+const messageAttachmentUpload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter: (_req, file, cb) => {
+        if (isAllowedMessageAttachment(file.originalname, file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(
+                new Error('Only PDF, JPEG, JPG, and PNG message attachments are allowed.'),
+                false,
+            );
+        }
+    },
+    limits: {
+        fileSize: MESSAGE_ATTACHMENT_MAX_BYTES,
+        files: 1,
+    },
+});
+
+export const uploadMessageAttachment = handleUpload(
+    messageAttachmentUpload,
+    'attachment',
+    'Message attachment must be 5MB or smaller.',
+);
+
+export const validateMessageAttachmentSignature = (req, res, next) => {
+    if (!req.file || hasValidMessageAttachmentSignature(req.file)) {
+        next();
+        return;
+    }
+
+    res.status(400).json({
+        success: false,
+        message: 'Message attachment content does not match its file type.',
+    });
+};

@@ -5,6 +5,7 @@ import {
   File,
   Home,
   LogOut,
+  MessageCircle,
   Search,
   User,
   Building2,
@@ -20,6 +21,7 @@ const navItems = [
   { key: "opportunities", path: "/volunteer-dashboard/opportunities", label: "Opportunities", Icon: Search },
   { key: "applications", path: "/volunteer-dashboard/applications", label: "Applications", Icon: File },
   { key: "organisations", path: "/volunteer-dashboard/organisations", label: "Organisations", Icon: Building2 },
+  { key: "messages", path: "/volunteer-dashboard/messages", label: "Messages", Icon: MessageCircle },
   { key: "report", path: "/volunteer-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/volunteer-dashboard/profile", label: "Profile", Icon: User },
 ];

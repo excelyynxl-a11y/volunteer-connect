@@ -14,6 +14,7 @@ import OrganisationApplication from "./OrganisationApplication";
 import OrganisationReport from "./OrganisationReport";
 import ViewOpportunity from "./ViewOpportunity";
 import PublicVolunteerProfile from "../Volunteer/PublicVolunteerProfile";
+import VolunteerMessages from "../Volunteer/VolunteerMessages";
 
 
 
@@ -39,6 +40,7 @@ const OrganisationDashboard = () => {
           <Route path="opportunities" element={<OrganisationOpportunity />} />
           <Route path="applications" element={<OrganisationApplication />} />
           <Route path="applications/volunteers/:volunteerId" element={<PublicVolunteerProfile />} />
+          <Route path="messages" element={<VolunteerMessages />} />
           <Route path="report" element={<OrganisationReport />} />
           <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
           <Route path="view-opportunity/:id" element={<ViewOpportunity />} />
