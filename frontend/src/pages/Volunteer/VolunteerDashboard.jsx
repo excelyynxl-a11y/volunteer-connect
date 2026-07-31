@@ -6,7 +6,9 @@ import VolunteerHomepage from "./VolunteerHomepage";
 import VolunteerProfile from "./VolunteerProfile";
 import EditVolunteerProfile from "./EditVolunteerProfile";
 import VolunteerOpportunities from "./VolunteerOpportunities";
+import FollowedOrganisations from "./FollowedOrganisations";
 import VolunteerReport from "./VolunteerReport";
+import PublicOrganisationProfile from "../Organisation/PublicOrganisationProfile";
 import VolunteerMessages from "./VolunteerMessages";
 
 import "./Volunteer.css";
@@ -31,11 +33,16 @@ const VolunteerDashboard = () => {
         <Routes>
           <Route path="/" element={<VolunteerHomepage />} />
           <Route path="opportunities" element={<VolunteerOpportunities />} />
+          <Route path="organisations" element={<FollowedOrganisations />} />
           <Route path="applications" element={<VolunteerApplication />} />
           <Route path="messages" element={<VolunteerMessages />} />
           <Route path="report" element={<VolunteerReport />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="edit-profile" element={<EditVolunteerProfile />} />
+          <Route
+            path="organisations/:organisationId"
+            element={<PublicOrganisationProfile />}
+          />
           <Route path="*" element={<Navigate to="/volunteer-dashboard" replace />} />
         </Routes>
       </main>

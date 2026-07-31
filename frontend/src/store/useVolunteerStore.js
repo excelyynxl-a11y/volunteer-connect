@@ -52,9 +52,62 @@ export const useVolunteerStore = create((set) => ({
   opportunities: [],
   isOpportunitiesLoading: false,
   opportunitiesError: "",
+  publicOrganisationProfile: null,
+  isPublicOrganisationProfileLoading: false,
+  publicOrganisationProfileError: "",
 
   setCurrentTab: (tab) => set({ currentTab: tab }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+  getPublicOrganisationProfile: async (organisationId) => {
+    set({
+      publicOrganisationProfile: null,
+      isPublicOrganisationProfileLoading: true,
+      publicOrganisationProfileError: "",
+    });
+
+    if (!organisationId) {
+      const message = "Organisation ID is unavailable.";
+
+      set({
+        isPublicOrganisationProfileLoading: false,
+        publicOrganisationProfileError: message,
+      });
+
+      return { success: false, error: message };
+    }
+
+    try {
+      const response = await axiosInstance.get(
+        `/organisation/profile/${organisationId}`,
+      );
+      const profile = response.data?.data;
+
+      if (!profile) {
+        throw new Error("Organisation profile data is unavailable.");
+      }
+
+      set({
+        publicOrganisationProfile: profile,
+        isPublicOrganisationProfileLoading: false,
+      });
+
+      return { success: true, profile };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load organisation profile.";
+
+      set({
+        publicOrganisationProfile: null,
+        isPublicOrganisationProfileLoading: false,
+        publicOrganisationProfileError: message,
+      });
+
+      return { success: false, error: message };
+    }
+  },
 
   getVolunteerPastExperience: async (volunteerId) => {
     set({

@@ -35,7 +35,17 @@ const OrganisationSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || currentTab;
+  const activeItem = navItems.find((item) => {
+    if (item.path === "/organisation-dashboard") {
+      return location.pathname === item.path;
+    }
+
+    return (
+      location.pathname === item.path ||
+      location.pathname.startsWith(`${item.path}/`)
+    );
+  });
+  const activeKey = activeItem?.key || currentTab;
 
   return (
     <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
