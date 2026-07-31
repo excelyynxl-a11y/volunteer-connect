@@ -392,6 +392,9 @@ const VolunteerOpportunities = () => {
                           (opportunity) => opportunity._id === selectedCardOpportunity,
                         );
                         setSelectedOpportunity(opportunityToView || null);
+                      } else if (action === "apply") {
+                        // TODO(application-api): call createApplication(selectedCardOpportunity) from useApplicationStore
+                        console.log("Apply clicked for", selectedCardOpportunity);
                       }
                     }}
                   />

@@ -165,6 +165,17 @@
     text-transform: capitalize;
 }
 
+.action-btn.apply-btn {
+    background: #2c614f;
+    color: #ffffff;
+}
+
+.action-btn.apply-btn:hover {
+    background: #1a3c34;
+    box-shadow: 0 4px 12px rgba(44, 97, 79, 0.2);
+    transform: translateY(-1px);
+}
+
 .action-btn.view {
     background: #ffffff;
     border-color: #e9c48b;
