@@ -40,11 +40,27 @@ vi.mock("../../src/services/cloudinary.service.js", () => ({
   uploadMessageAttachmentToCloudinary: vi.fn(),
 }));
 
+vi.mock("../../src/events/message.events.js", () => ({
+  emitConversationCreated: vi.fn(),
+  emitConversationDeleted: vi.fn(),
+  emitMessageCreated: vi.fn(),
+}));
+
+vi.mock("../../src/services/conversationExpiry.service.js", () => ({
+  cancelConversationExpiry: vi.fn(),
+  scheduleConversationExpiry: vi.fn(),
+}));
+
 import {
   endConversation,
   initiateConversation,
   sendMessage,
 } from "../../src/controllers/message.controller.js";
+import {
+  emitConversationCreated,
+  emitConversationDeleted,
+  emitMessageCreated,
+} from "../../src/events/message.events.js";
 import Conversation from "../../src/models/conversation.model.js";
 import Message from "../../src/models/message.model.js";
 import { Organisation } from "../../src/models/user.model.js";
@@ -53,6 +69,10 @@ import {
   deleteConversationPermanently,
   isConversationParticipant,
 } from "../../src/services/conversation.service.js";
+import {
+  cancelConversationExpiry,
+  scheduleConversationExpiry,
+} from "../../src/services/conversationExpiry.service.js";
 
 const createResponse = () => {
   const response = {
@@ -145,6 +165,14 @@ describe("message controller lifecycle", () => {
       content: "Hello",
     });
     expect(conversation.lastMessageAt).toEqual(createdAt);
+    expect(emitConversationCreated).toHaveBeenCalledWith({
+      conversation,
+      message: expect.objectContaining({
+        _id: message._id,
+        content: "Hello",
+      }),
+      responseDeadline: null,
+    });
     expect(response.statusCode).toBe(201);
   });
 
@@ -196,6 +224,11 @@ describe("message controller lifecycle", () => {
     expect(conversation.responseDeadline.toISOString()).toBe(
       "2026-07-31T04:00:00.000Z",
     );
+    expect(scheduleConversationExpiry).toHaveBeenCalledWith(
+      conversation._id,
+      conversation.responseDeadline,
+    );
+    expect(emitMessageCreated).toHaveBeenCalled();
     expect(response.statusCode).toBe(201);
   });
 
@@ -257,6 +290,7 @@ describe("message controller lifecycle", () => {
     );
 
     expect(conversation.responseDeadline).toBeNull();
+    expect(cancelConversationExpiry).toHaveBeenCalledWith(conversation._id);
     expect(response.statusCode).toBe(201);
   });
 
@@ -283,6 +317,8 @@ describe("message controller lifecycle", () => {
       conversation._id,
       "ended_by_organisation",
     );
+    expect(cancelConversationExpiry).toHaveBeenCalledWith(conversation._id);
+    expect(emitConversationDeleted).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 });

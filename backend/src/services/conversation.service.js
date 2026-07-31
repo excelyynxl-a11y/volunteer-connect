@@ -29,6 +29,7 @@ export const isConversationParticipant = (conversation, user) => {
 export const deleteConversationPermanently = async (
   conversationId,
   deletionReason,
+  { expectedResponseDeadline } = {},
 ) => {
   let conversation = await Conversation.findById(conversationId);
 
@@ -37,11 +38,17 @@ export const deleteConversationPermanently = async (
   }
 
   if (!conversation.deletionStartedAt) {
+    const claimFilter = {
+      _id: conversationId,
+      deletionStartedAt: null,
+    };
+
+    if (expectedResponseDeadline) {
+      claimFilter.responseDeadline = expectedResponseDeadline;
+    }
+
     conversation = await Conversation.findOneAndUpdate(
-      {
-        _id: conversationId,
-        deletionStartedAt: null,
-      },
+      claimFilter,
       {
         $set: {
           deletionStartedAt: new Date(),
@@ -84,11 +91,29 @@ export const deleteExpiredConversations = async (now = new Date()) => {
   const expiredConversations = await Conversation.find({
     deletionStartedAt: null,
     responseDeadline: { $ne: null, $lte: now },
-  }).select("_id");
+  }).select("_id responseDeadline");
 
   const deletionResults = await Promise.allSettled(
-    expiredConversations.map(({ _id }) =>
-      deleteConversationPermanently(_id, "volunteer_reply_timeout"),
+    expiredConversations.map(({ _id, responseDeadline }) =>
+      deleteConversationPermanently(_id, "volunteer_reply_timeout", {
+        expectedResponseDeadline: responseDeadline,
+      }),
+    ),
+  );
+
+  return deletionResults
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value);
+};
+
+export const retryPendingConversationDeletions = async () => {
+  const pendingConversations = await Conversation.find({
+    deletionStartedAt: { $ne: null },
+  }).select("_id deletionReason");
+
+  const deletionResults = await Promise.allSettled(
+    pendingConversations.map(({ _id, deletionReason }) =>
+      deleteConversationPermanently(_id, deletionReason),
     ),
   );
 
