@@ -22,6 +22,8 @@ const messageSchema = new mongoose.Schema(
     content: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 2000,
     },
 
     // Embed the attachments directly in the message
@@ -34,6 +36,9 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+messageSchema.index({ conversationId: 1, createdAt: 1 });
+messageSchema.index({ conversationId: 1, senderId: 1, isRead: 1 });
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;
