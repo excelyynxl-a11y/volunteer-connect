@@ -144,21 +144,20 @@ export const useReportStore = create((set, get) => ({
     }
   },
 
-  // TODO: integrate with backend to create new reports
   createReport: async (reportData) => {
     set({
       isCreatingReport: true
     });
 
     try {
-      const res = await axiosInstance.post("/report/create", reportData);
+      const res = await axiosInstance.post("/report", reportData);
       const newReport = res.data?.data ?? res.data;
 
       set((state) => ({
         previousReports: [newReport, ...state.previousReports]
       }));
 
-      toast.success("Report succesfully submitted to admin!");
+      toast.success("Report successfully submitted to admin!");
 
       return {
         success: true,
