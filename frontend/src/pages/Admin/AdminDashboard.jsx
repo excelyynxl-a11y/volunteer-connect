@@ -7,6 +7,7 @@ import ManageVolunteer from "./ManageVolunteer";
 import ManageOrganisation from "./ManageOrganisation";
 import ManageOpportunity from "./ManageOpportunity";
 import ManageReport from "./ManageReport";
+import ReportMadePage from "../Report/ReportMadePage";
 import AdminAnalytics from "./AdminAnalytics";
 import AdminProfile from "./AdminProfile";
 import "./Admin.css";
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
           <Route path="manage-organisation" element={<ManageOrganisation />} />
           <Route path="manage-opportunity" element={<ManageOpportunity />} />
           <Route path="manage-report" element={<ManageReport />} />
+          <Route path="manage-report/:reportId" element={<ReportMadePage />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />

@@ -103,16 +103,15 @@ export const useReportStore = create((set, get) => ({
     previousReportsError: "",
     userId: "",
 
+    // TODO: integrate backend to get all previous report made by this user
     getPreviousReports: async (userId, reportType = "OpportunityViolation") => {
 
-        // TODO: integrate backend to get all previous report made by this user
         set({ 
             isPreviousReportsLoading: true, 
             previousReportsError: "" 
         });
 
         try {
-            // TODO: replace mock with actual API call after backend integration
             const mockData =
                 reportType === "UserViolation"
                     ? mockOrganisationReports
@@ -147,12 +146,12 @@ export const useReportStore = create((set, get) => ({
         }
     },
 
+    // TODO: integrate with backend to create new reports
     createReport: async (reportData) => {
         set({ 
             isCreatingReport: true 
         });
 
-        // TODO: integrate with backend to create new reports
         try {
             const res = await axiosInstance.post("/report/create", reportData);
             const newReport = res.data?.data ?? res.data;
