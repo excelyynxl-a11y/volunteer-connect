@@ -626,8 +626,17 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
   const seedVolunteer = volunteerByKey.vol2;
   const seedOrg = organisationByKey.org1;
   const secondOrg = organisationByKey.org2;
+  const organisationIds = [seedOrg._id, secondOrg._id];
 
-  const oldConversations = await Conversation.find({ participants: seedVolunteer._id }).select("_id");
+  const oldConversations = await Conversation.find({
+    $or: [
+      {
+        volunteerId: seedVolunteer._id,
+        organisationId: { $in: organisationIds },
+      },
+      { participants: seedVolunteer._id },
+    ],
+  }).select("_id");
   const oldConversationIds = oldConversations.map((conversation) => conversation._id);
 
   await Message.deleteMany({ conversationId: { $in: oldConversationIds } });
@@ -638,7 +647,8 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
 
   const conversations = [
     {
-      participants: [seedVolunteer._id, seedOrg._id],
+      volunteerId: seedVolunteer._id,
+      organisationId: seedOrg._id,
       messages: [
         {
           senderId: seedVolunteer._id,
@@ -667,7 +677,8 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
       ],
     },
     {
-      participants: [seedVolunteer._id, secondOrg._id],
+      volunteerId: seedVolunteer._id,
+      organisationId: secondOrg._id,
       messages: [
         {
           senderId: seedVolunteer._id,
@@ -687,8 +698,12 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
 
   const insertedConversations = await Conversation.insertMany(
     conversations.map((conv) => ({
-      participants: conv.participants,
+      volunteerId: conv.volunteerId,
+      organisationId: conv.organisationId,
       lastMessageAt: conv.messages[conv.messages.length - 1].createdAt,
+      responseDeadline: new Date(
+        conv.messages[conv.messages.length - 1].createdAt.getTime() + 3 * 60 * 60 * 1000,
+      ),
     })),
   );
 
@@ -701,7 +716,6 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
         senderId: message.senderId,
         content: message.content,
         isRead: message.isRead,
-        attachments: message.attachments || [],
         createdAt: message.createdAt,
       });
     });

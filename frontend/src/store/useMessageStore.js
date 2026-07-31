@@ -1,96 +1,29 @@
 import { create } from "zustand";
+
 import { axiosInstance } from "../lib/axios";
+import { messageSocket } from "../lib/messageSocket";
 
-const mockConversations = [
-  {
-    _id: "conversation-mock-001",
-    participant: {
-      _id: "user-mock-001",
-      name: "Helping Hands Malaysia",
-      avatar: "",
-      role: "organisation",
-      subtitle: "Organisation · Event coordination",
-    },
-    lastMessage: {
-      content: "Please bring your ID and wear comfortable shoes.",
-      createdAt: new Date(Date.now() - 1200 * 1000).toISOString(),
-    },
-    unreadCount: 2,
-    lastMessageAt: new Date(Date.now() - 1200 * 1000).toISOString(),
-  },
-  {
-    _id: "conversation-mock-002",
-    participant: {
-      _id: "user-mock-002",
-      name: "Green Earth Society",
-      avatar: "",
-      role: "organisation",
-      subtitle: "Organisation · Cleanup coordination",
-    },
-    lastMessage: {
-      content: "Thanks for your interest. Please bring a reusable water bottle and a hat.",
-      createdAt: new Date(Date.now() - 3600 * 1000).toISOString(),
-    },
-    unreadCount: 1,
-    lastMessageAt: new Date(Date.now() - 3600 * 1000).toISOString(),
-  },
-];
+const getErrorMessage = (error, fallback) =>
+  error.response?.data?.message || error.message || fallback;
 
-const mockMessages = {
-  "conversation-mock-001": [
-    {
-      _id: "message-mock-001",
-      senderId: "user-mock-self",
-      content: "Hello, I would like to confirm my availability for the Saturday food drive.",
-      createdAt: new Date(Date.now() - 2400 * 1000).toISOString(),
-      isRead: true,
-    },
-    {
-      _id: "message-mock-002",
-      senderId: "user-mock-001",
-      content: "Hello Brandon, your shift is confirmed for Saturday 9am at the community hall.",
-      createdAt: new Date(Date.now() - 1200 * 1000).toISOString(),
-      isRead: false,
-    },
-    {
-      _id: "message-mock-003",
-      senderId: "user-mock-self",
-      content: "Thanks, I will be there.",
-      createdAt: new Date(Date.now() - 600 * 1000).toISOString(),
-      isRead: true,
-    },
-    {
-      _id: "message-mock-004",
-      senderId: "user-mock-001",
-      content: "Please bring your ID and wear comfortable shoes.",
-      createdAt: new Date(Date.now() - 300 * 1000).toISOString(),
-      isRead: false,
-      attachments: [
-        {
-          fileName: "Event_Checklist.pdf",
-          fileUrl: "https://example.com/Event_Checklist.pdf",
-          fileType: "application/pdf",
-        },
-      ],
-    },
-  ],
-  "conversation-mock-002": [
-    {
-      _id: "message-mock-005",
-      senderId: "user-mock-self",
-      content: "Hi, I would like to join the beach cleanup event next week.",
-      createdAt: new Date(Date.now() - 4200 * 1000).toISOString(),
-      isRead: true,
-    },
-    {
-      _id: "message-mock-006",
-      senderId: "user-mock-002",
-      content: "Thanks for your interest. Please bring a reusable water bottle and a hat.",
-      createdAt: new Date(Date.now() - 3600 * 1000).toISOString(),
-      isRead: false,
-    },
-  ],
+const getId = (value) => String(value?._id ?? value ?? "");
+
+const appendUniqueMessage = (messages, message) => {
+  if (!message || messages.some((item) => getId(item._id) === getId(message._id))) {
+    return messages;
+  }
+
+  return [...messages, message];
 };
+
+const updateConversation = (conversations, conversationId, updates) =>
+  conversations.map((conversation) =>
+    getId(conversation._id) === getId(conversationId)
+      ? { ...conversation, ...updates }
+      : conversation,
+  );
+
+let realtimeListenersBound = false;
 
 export const useMessageStore = create((set, get) => ({
   conversations: [],
@@ -98,81 +31,276 @@ export const useMessageStore = create((set, get) => ({
   selectedConversationId: null,
   isLoadingConversations: false,
   isLoadingMessages: false,
+  isSendingMessage: false,
+  isEndingConversation: false,
   messageError: "",
   draftMessage: "",
 
   setDraftMessage: (value) => set({ draftMessage: value }),
+  clearMessageError: () => set({ messageError: "" }),
 
-  getMyConversations: async () => {
-    set({ isLoadingConversations: true, messageError: "" });
+  getMyConversations: async ({ silent = false } = {}) => {
+    if (!silent) {
+      set({ isLoadingConversations: true, messageError: "" });
+    }
 
     try {
-      try {
-        const response = await axiosInstance.get("/message/conversations");
-        const conversations = Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
-        set({ conversations, isLoadingConversations: false });
-        return { success: true, conversations };
-      } catch {
-        set({ conversations: mockConversations, isLoadingConversations: false });
-        return { success: true, conversations: mockConversations };
-      }
+      const response = await axiosInstance.get("/message/conversations");
+      const conversations = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
+      const selectedConversationId = conversations.some(
+        (conversation) =>
+          getId(conversation._id) === getId(get().selectedConversationId),
+      )
+        ? get().selectedConversationId
+        : null;
+
+      set({
+        conversations,
+        selectedConversationId,
+        messages: selectedConversationId ? get().messages : [],
+        isLoadingConversations: false,
+      });
+      return { success: true, conversations };
     } catch (error) {
-      set({ messageError: "Unable to load conversations.", isLoadingConversations: false });
-      return { success: false, error: "Unable to load conversations." };
+      const message = getErrorMessage(error, "Unable to load conversations.");
+      set({
+        messageError: message,
+        isLoadingConversations: false,
+      });
+      return { success: false, error: message };
     }
   },
 
   getConversationMessages: async (conversationId) => {
-    set({ isLoadingMessages: true, messageError: "", selectedConversationId: conversationId });
+    set({
+      isLoadingMessages: true,
+      messageError: "",
+      selectedConversationId: conversationId,
+      messages: [],
+    });
 
     try {
-      try {
-        const response = await axiosInstance.get(
-          `/message/conversations/${conversationId}/messages`,
-        );
-        const messages = Array.isArray(response.data?.data) ? response.data.data : [];
-        set({ messages, isLoadingMessages: false });
-        return { success: true, messages };
-      } catch {
-        const messages = mockMessages[conversationId] ?? [];
-        set({ messages, isLoadingMessages: false });
-        return { success: true, messages };
-      }
+      const response = await axiosInstance.get(
+        `/message/conversations/${conversationId}/messages`,
+      );
+      const responseData = response.data?.data ?? {};
+      const messages = Array.isArray(responseData.messages)
+        ? responseData.messages
+        : [];
+      const responseDeadline = responseData.conversation?.responseDeadline ?? null;
+
+      set((state) => ({
+        messages,
+        conversations: updateConversation(state.conversations, conversationId, {
+          responseDeadline,
+          unreadCount: 0,
+        }),
+        isLoadingMessages: false,
+      }));
+
+      await get().markConversationAsRead(conversationId);
+      return { success: true, messages };
     } catch (error) {
-      set({ messageError: "Unable to load messages.", isLoadingMessages: false });
-      return { success: false, error: "Unable to load messages." };
+      const message = getErrorMessage(error, "Unable to load messages.");
+      set({ messageError: message, isLoadingMessages: false });
+
+      if ([404, 410].includes(error.response?.status)) {
+        set((state) => ({
+          conversations: state.conversations.filter(
+            (conversation) => getId(conversation._id) !== getId(conversationId),
+          ),
+          selectedConversationId: null,
+          messages: [],
+        }));
+      }
+
+      return { success: false, error: message };
     }
   },
 
-  sendMessage: async (conversationId, content) => {
-    if (!content || !content.trim()) {
-      return { success: false, error: "Message content is required." };
+  markConversationAsRead: async (conversationId) => {
+    try {
+      await axiosInstance.patch(`/message/conversations/${conversationId}/read`);
+      set((state) => ({
+        conversations: updateConversation(state.conversations, conversationId, {
+          unreadCount: 0,
+        }),
+      }));
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: getErrorMessage(error, "Unable to mark conversation as read."),
+      };
+    }
+  },
+
+  sendMessage: async (conversationId, { content = "", attachment = null }) => {
+    if (!content.trim() && !attachment) {
+      return { success: false, error: "Message text or an attachment is required." };
     }
 
+    set({ isSendingMessage: true, messageError: "" });
+
     try {
-      try {
-        const response = await axiosInstance.post(
-          `/message/conversations/${conversationId}/messages`,
-          { content: content.trim() },
-        );
-        await get().getConversationMessages(conversationId);
-        set({ draftMessage: "" });
-        return response.data;
-      } catch {
-        const currentMessages = get().messages ?? [];
-        const newMessage = {
-          _id: `message-mock-${Date.now()}`,
-          senderId: "user-mock-self",
-          content: content.trim(),
-          createdAt: new Date().toISOString(),
-        };
-        set({ messages: [...currentMessages, newMessage], draftMessage: "" });
-        return { success: true, data: newMessage };
-      }
+      const formData = new FormData();
+      formData.append("content", content.trim());
+      if (attachment) formData.append("attachment", attachment);
+
+      const response = await axiosInstance.post(
+        `/message/conversations/${conversationId}/messages`,
+        formData,
+      );
+      const message = response.data?.data?.message;
+      const responseDeadline = response.data?.data?.responseDeadline ?? null;
+
+      set((state) => ({
+        messages: appendUniqueMessage(state.messages, message),
+        conversations: updateConversation(state.conversations, conversationId, {
+          lastMessage: message,
+          lastMessageAt: message?.createdAt,
+          responseDeadline,
+        }),
+        draftMessage: "",
+        isSendingMessage: false,
+      }));
+      await get().getMyConversations({ silent: true });
+      return { success: true, data: response.data?.data };
     } catch (error) {
-      return { success: false, error: "Unable to send message." };
+      const message = getErrorMessage(error, "Unable to send message.");
+      set({ messageError: message, isSendingMessage: false });
+      return { success: false, error: message };
     }
+  },
+
+  initiateConversation: async (
+    organisationId,
+    { content = "", attachment = null },
+  ) => {
+    if (!content.trim() && !attachment) {
+      return { success: false, error: "Message text or an attachment is required." };
+    }
+
+    set({ isSendingMessage: true, messageError: "" });
+
+    try {
+      const formData = new FormData();
+      formData.append("organisationId", organisationId);
+      formData.append("content", content.trim());
+      if (attachment) formData.append("attachment", attachment);
+
+      const response = await axiosInstance.post("/message/conversations", formData);
+      const conversationId = response.data?.data?.conversation?._id;
+      set({ draftMessage: "", isSendingMessage: false });
+      await get().getMyConversations();
+      if (conversationId) await get().getConversationMessages(conversationId);
+      return { success: true, data: response.data?.data };
+    } catch (error) {
+      const existingConversationId = error.response?.data?.data?.conversationId;
+      if (error.response?.status === 409 && existingConversationId) {
+        set({ isSendingMessage: false });
+        await get().getMyConversations();
+        await get().getConversationMessages(existingConversationId);
+        return { success: true, existingConversationId };
+      }
+
+      const message = getErrorMessage(error, "Unable to start conversation.");
+      set({ messageError: message, isSendingMessage: false });
+      return { success: false, error: message };
+    }
+  },
+
+  endConversation: async (conversationId) => {
+    set({ isEndingConversation: true, messageError: "" });
+
+    try {
+      await axiosInstance.delete(`/message/conversations/${conversationId}`);
+      set((state) => ({
+        conversations: state.conversations.filter(
+          (conversation) => getId(conversation._id) !== getId(conversationId),
+        ),
+        selectedConversationId: null,
+        messages: [],
+        isEndingConversation: false,
+      }));
+      return { success: true };
+    } catch (error) {
+      const message = getErrorMessage(error, "Unable to end conversation.");
+      set({ messageError: message, isEndingConversation: false });
+      return { success: false, error: message };
+    }
+  },
+
+  downloadAttachment: (conversationId, messageId) => {
+    const baseUrl = String(axiosInstance.defaults.baseURL).replace(/\/$/, "");
+    const link = document.createElement("a");
+    link.href = `${baseUrl}/message/conversations/${conversationId}/messages/${messageId}/attachment`;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  connectRealtime: () => {
+    if (!realtimeListenersBound) {
+      messageSocket.on("conversation:created", () => {
+        void get().getMyConversations({ silent: true });
+      });
+
+      messageSocket.on(
+        "message:created",
+        ({ conversationId, message, responseDeadline }) => {
+          set((state) => ({
+            messages:
+              getId(state.selectedConversationId) === getId(conversationId)
+                ? appendUniqueMessage(state.messages, message)
+                : state.messages,
+            conversations: updateConversation(state.conversations, conversationId, {
+              lastMessage: message,
+              lastMessageAt: message?.createdAt,
+              responseDeadline: responseDeadline ?? null,
+            }),
+          }));
+          void get().getMyConversations({ silent: true });
+        },
+      );
+
+      messageSocket.on(
+        "conversation:deadline-changed",
+        ({ conversationId, responseDeadline }) => {
+          set((state) => ({
+            conversations: updateConversation(state.conversations, conversationId, {
+              responseDeadline: responseDeadline ?? null,
+            }),
+          }));
+        },
+      );
+
+      messageSocket.on("conversation:deleted", ({ conversationId }) => {
+        set((state) => {
+          const wasSelected =
+            getId(state.selectedConversationId) === getId(conversationId);
+          return {
+            conversations: state.conversations.filter(
+              (conversation) => getId(conversation._id) !== getId(conversationId),
+            ),
+            selectedConversationId: wasSelected
+              ? null
+              : state.selectedConversationId,
+            messages: wasSelected ? [] : state.messages,
+          };
+        });
+      });
+
+      realtimeListenersBound = true;
+    }
+
+    if (!messageSocket.connected) messageSocket.connect();
+  },
+
+  disconnectRealtime: () => {
+    messageSocket.disconnect();
   },
 }));
