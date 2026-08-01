@@ -744,6 +744,43 @@
   background: var(--profile-green-dark);
 }
 
+.opportunity-status-banner {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border: 1px solid #ded5ca;
+  border-radius: 13px;
+  background: #faf8f4;
+  color: #786f5f;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.status-banner-approved {
+  border-color: #b7dba5;
+  background: #eef8e9;
+  color: #2c614f;
+}
+
+.status-banner-rejected {
+  border-color: #f0b8b0;
+  background: #fdf1ef;
+  color: #9f3f32;
+}
+
+.apply-volunteer-button.status-btn-pending,
+.apply-volunteer-button.status-btn-approved,
+.apply-volunteer-button.status-btn-rejected,
+.apply-volunteer-button.status-btn-withdrawn,
+.apply-volunteer-button.status-btn-full,
+.apply-volunteer-button.status-btn-closed,
+.apply-volunteer-button.status-btn-past {
+  background: #ded5ca;
+  color: #786f5f;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .opportunity-detail-apply-wrapper {
   display: flex;
   flex-direction: column;
