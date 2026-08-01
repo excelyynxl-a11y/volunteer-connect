@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Loader2, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import ReportMadeCard from "../../components/ReportMadeCard";
@@ -11,7 +11,7 @@ const VolunteerReport = () => {
     createReport,
     getPreviousReports,
     previousReports,
-    isPreviousReportsLoading,
+    isPreviousReportsLoading
   } = useReportStore();
 
   const { applications, getMyApplications } = useApplicationStore();
@@ -21,22 +21,25 @@ const VolunteerReport = () => {
     getMyApplications();
   }, [getPreviousReports, getMyApplications]);
 
-  // TODO: integrate with useApplicationStore.js to get all opportunity that volunteer has applied to 
-  const reportedOpportunities = applications
-    .filter((app) => app.opportunityId?._id)
-    .reduce((acc, app) => {
-      const opp = app.opportunityId;
-      if (!acc.find((o) => o._id === opp._id)) {
-        acc.push(opp);
-      }
-      return acc;
-    }, []);
+  const reportedOpportunities = useMemo(() => {
+    return applications
+      .filter((app) => app.opportunityId?._id)
+      .reduce((acc, app) => {
+        const opp = app.opportunityId;
+
+        if (!acc.find((item) => item._id === opp._id)) {
+          acc.push(opp);
+        }
+
+        return acc;
+      }, []);
+  }, [applications]);
 
   const [formData, setFormData] = useState({
     reportedOpportunityId: "",
     opportunityViolationType: "",
     title: "",
-    details: "",
+    details: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -84,7 +87,7 @@ const VolunteerReport = () => {
       reportedOpportunityId: formData.reportedOpportunityId,
       opportunityViolationType: formData.opportunityViolationType,
       title: formData.title.trim(),
-      details: formData.details.trim(),
+      details: formData.details.trim()
     };
 
     try {
@@ -104,9 +107,7 @@ const VolunteerReport = () => {
         <div>
           <p>REPORT</p>
           <h1>Submit a report</h1>
-          <span>
-            Report an opportunity that you've attended to admin.
-          </span>
+          <span>Report an opportunity that you've attended to admin.</span>
         </div>
       </section>
 
@@ -261,12 +262,8 @@ const VolunteerReport = () => {
       <section className="volunteer-report-previous">
         <div className="volunteer-report-header">
           <div>
-            <h2>
-              Previous Reports
-            </h2>
-            <p>
-              View your submitted reports and their current status.
-            </p>
+            <h2>Previous Reports</h2>
+            <p>View your submitted reports and their current status.</p>
           </div>
         </div>
 
