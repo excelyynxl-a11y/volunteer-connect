@@ -6,9 +6,10 @@ import {
   getOrganisationName,
   getRequirementItems,
   getSpotsRemaining,
+  getApplyEligibility
 } from "../lib/opportunity";
 
-const OpportunityDetailModal = ({ opportunity, onClose }) => {
+const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [] }) => {
   const [selectedImage, setSelectedImage] = useState("");
   const opportunityImages = Array.isArray(opportunity?.images)
     ? opportunity.images.filter(Boolean)
@@ -20,6 +21,8 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
   const heroImage = opportunityImages.includes(selectedImage)
     ? selectedImage
     : opportunityImages[0];
+
+  const { canApply, reason } = getApplyEligibility(opportunity, volunteerAvailability);
 
   return (
     <div
@@ -54,9 +57,19 @@ const OpportunityDetailModal = ({ opportunity, onClose }) => {
             </div>
           </div>
 
-          <button className="apply-volunteer-button" type="button">
-            Apply As Volunteer
-          </button>
+          <div className="opportunity-detail-apply-wrapper">
+            <button
+              className="apply-volunteer-button"
+              type="button"
+              disabled={!canApply}
+              onClick={() => onAction && onAction("apply", opportunity._id)}
+            >
+              Apply As Volunteer
+            </button>
+            {!canApply && (
+              <p className="apply-disabled-reason">{reason}</p>
+            )}
+          </div>
         </div>
 
         {heroImage && (
