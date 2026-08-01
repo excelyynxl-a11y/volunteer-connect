@@ -664,6 +664,16 @@
   border-bottom: 1px solid #ded5ca;
 }
 
+.opportunity-detail-header .apply-disabled-reason {
+  margin: 0;
+  max-width: 220px;
+  color: var(--profile-orange-dark);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: right;
+}
+
 .opportunity-detail-eyebrow {
   display: inline-flex;
   margin-bottom: 12px;
@@ -732,6 +742,24 @@
 
 .apply-volunteer-button:hover {
   background: var(--profile-green-dark);
+}
+
+.opportunity-detail-apply-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.apply-volunteer-button:disabled {
+  background: #ded5ca;
+  color: #8a8f94;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.apply-volunteer-button:disabled:hover {
+  background: #ded5ca;
 }
 
 .opportunity-detail-media {
