@@ -91,7 +91,17 @@ const OrganisationReport = () => {
     };
 
     try {
-      await createReport(submissionData);
+      const result = await createReport(submissionData);
+
+      if (result?.success) {
+        setFormData({
+          reportedUserId: "",
+          userViolationType: "",
+          title: "",
+          details: ""
+        });
+        setErrors({});
+      }
     } catch (error) {
       console.error("Unexpected report submission error:", error);
       toast.error("Something went wrong while submitting report.");
