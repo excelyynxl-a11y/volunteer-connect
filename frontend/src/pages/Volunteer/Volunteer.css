@@ -687,8 +687,9 @@
 .opportunity-detail-header h2 {
   margin: 0 0 8px;
   font-family: "Urbanist", Arial, sans-serif;
-  font-size: 40px;
+  font-size: 37px;
   line-height: 1.08;
+  font-weight: 650;
 }
 
 .opportunity-detail-header p {
@@ -703,6 +704,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  margin-top: 15px;
+}
+
+.opportunity-organisation-row p {
+  font-size: 20px;
 }
 
 .view-organisation-button {
@@ -873,14 +879,15 @@
 .opportunity-detail-section h3 {
   margin: 0 0 10px;
   color: var(--profile-green-dark);
-  font-size: 20px;
+  font-size: 25px;
+  font-weight: 600;
 }
 
 .opportunity-detail-copy p,
 .opportunity-detail-muted {
   margin: 0;
-  color: #1d2a32;
-  font-size: 17px;
+  color: #444a4d;
+  font-size: 16px;
   line-height: 1.65;
 }
 
