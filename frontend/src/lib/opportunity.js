@@ -1,3 +1,5 @@
+import { isOpportunityInsideAvailability } from "./availability"
+
 const getValidDate = (dateValue) => {
   if (!dateValue) return null
 
