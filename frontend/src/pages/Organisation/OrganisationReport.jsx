@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Loader2, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import ReportMadeCard from "../../components/ReportMadeCard";
@@ -11,7 +11,7 @@ const OrganisationReport = () => {
     createReport,
     getPreviousReports,
     previousReports,
-    isPreviousReportsLoading,
+    isPreviousReportsLoading
   } = useReportStore();
 
   const { applications, getMyOrganisationApplications } = useApplicationStore();
@@ -21,22 +21,25 @@ const OrganisationReport = () => {
     getMyOrganisationApplications();
   }, [getPreviousReports, getMyOrganisationApplications]);
 
-  // TODO: integrate with useApplicationStore.js to get all volunteer who submitted application to organisation
-  const reportedVolunteers = applications
-    .filter((app) => app.volunteerId?._id)
-    .reduce((acc, app) => {
-      const vol = app.volunteerId;
-      if (!acc.find((v) => v._id === vol._id)) {
-        acc.push(vol);
-      }
-      return acc;
-    }, []);
+  const reportedVolunteers = useMemo(() => {
+    return applications
+      .filter((app) => app.volunteerId?._id)
+      .reduce((acc, app) => {
+        const vol = app.volunteerId;
+
+        if (!acc.find((item) => item._id === vol._id)) {
+          acc.push(vol);
+        }
+
+        return acc;
+      }, []);
+  }, [applications]);
 
   const [formData, setFormData] = useState({
     reportedUserId: "",
     userViolationType: "",
     title: "",
-    details: "",
+    details: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -84,11 +87,21 @@ const OrganisationReport = () => {
       reportedUserId: formData.reportedUserId,
       userViolationType: formData.userViolationType,
       title: formData.title.trim(),
-      details: formData.details.trim(),
+      details: formData.details.trim()
     };
 
     try {
-      await createReport(submissionData);
+      const result = await createReport(submissionData);
+
+      if (result?.success) {
+        setFormData({
+          reportedUserId: "",
+          userViolationType: "",
+          title: "",
+          details: ""
+        });
+        setErrors({});
+      }
     } catch (error) {
       console.error("Unexpected report submission error:", error);
       toast.error("Something went wrong while submitting report.");
@@ -104,9 +117,7 @@ const OrganisationReport = () => {
         <div>
           <p>REPORT</p>
           <h1>Submit a report</h1>
-          <span>
-            Report a volunteer to admin.
-          </span>
+          <span>Report a volunteer to admin.</span>
         </div>
       </section>
 
@@ -114,12 +125,8 @@ const OrganisationReport = () => {
       <section className="organisation-report-panel">
         <div className="organisation-report-header">
           <div>
-            <h2>
-              Report Form
-            </h2>
-            <p>
-              Fill out the details below to submit your report to admin.
-            </p>
+            <h2>Report Form</h2>
+            <p>Fill out the details below to submit your report to admin.</p>
           </div>
         </div>
 
