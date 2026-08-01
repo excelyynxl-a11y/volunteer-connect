@@ -14,6 +14,13 @@ const LOCKED_APPLICATION_STATUSES = new Set([
   'withdrawn',
 ])
 
+const CLOSED_OPPORTUNITY_STATUSES = new Set(['closed', 'cancelled', 'completed'])
+
+const isOpportunityPast = (opportunity) => {
+  const endDate = getValidDate(opportunity?.endAt)
+  return endDate ? endDate.getTime() < Date.now() : false
+}
+
 export const formatOpportunityDate = (dateValue, fallback = '') => {
   const date = getValidDate(dateValue)
   if (!date) return fallback
@@ -108,14 +115,42 @@ export const APPLICATION_STATUS_LABELS = {
   rejected: 'Application Rejected',
   withdrawn: 'Application Withdrawn',
   full: 'Opportunity Full',
+  closed: 'Opportunity Closed',
+  past: 'Opportunity Ended',
 }
 
-export const getApplicationDisplayStatus = (applicationStatus, spotsRemaining) => {
+export const APPLICATION_STATUS_BANNER_MESSAGES = {
+  pending: (organisationName) =>
+    `Your application is pending. ${organisationName || 'The organisation'} has not made a decision yet.`,
+  approved: (organisationName) =>
+    `Your application was approved by ${organisationName || 'the organisation'}. Please arrive on time and complete the full scheduled duration.`,
+  rejected: (organisationName) =>
+    `Your application was not approved by ${organisationName || 'the organisation'} for this opportunity.`,
+  withdrawn: () => 'You withdrew your application for this opportunity.',
+  full: () => 'This opportunity has reached its maximum number of approved volunteers.',
+  closed: () => 'This opportunity is no longer accepting applications.',
+  past: () => 'This opportunity has already taken place.',
+}
+
+
+export const getApplicationDisplayStatus = (applicationStatus, spotsRemaining, opportunityStatus, opportunity) => {
   const status = applicationStatus ? applicationStatus.toLowerCase() : null
   const isFull = spotsRemaining !== null && spotsRemaining <= 0
+  const isClosed = CLOSED_OPPORTUNITY_STATUSES.has(
+    (opportunityStatus || '').toLowerCase(),
+  )
+  const isPast = opportunity ? isOpportunityPast(opportunity) : false
 
   if (status && LOCKED_APPLICATION_STATUSES.has(status)) {
     return { key: status, isLocked: true }
+  }
+
+  if (isPast) {
+    return { key: 'past', isLocked: true }
+  }
+
+  if (isClosed) {
+    return { key: 'closed', isLocked: true }
   }
 
   if (isFull) {
