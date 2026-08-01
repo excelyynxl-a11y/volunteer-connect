@@ -417,6 +417,13 @@ const VolunteerOpportunities = () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+        onAction={(action, id) => {
+          if (action === "apply") {
+            // TODO(application-api): for createApplication id
+            console.log("Apply clicked for", id);
+          }
+        }}
+        volunteerAvailability={sortedVolunteerAvailability}
       />
 
       {showBackToTop && (
