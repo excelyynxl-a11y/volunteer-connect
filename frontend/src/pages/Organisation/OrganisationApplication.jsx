@@ -9,24 +9,19 @@ import {
   ClipboardList,
   Calendar,
 } from "lucide-react";
+import { useOrganisationStore } from "../../store/useOrganisationStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
+import { formatDate } from "../../lib/utils";
+import { getInitials } from "../../lib/utils";
+import { APPLICARION_TAB_STATUS_LABELS as STATUS_LABELS } from "../../lib/opportunity";
 
 const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
-
-const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 
 const countByStatus = (applications, status) =>
   status === "All"
     ? applications.length
     : applications.filter((a) => a.status === status).length;
 
-/* ------------------------------------------------------------------ */
-/* Opportunity list — "Application Management"                        */
-/* ------------------------------------------------------------------ */
 const OpportunityListView = ({ opportunities, onManage }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active opportunities");
