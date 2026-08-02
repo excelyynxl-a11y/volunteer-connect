@@ -342,6 +342,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onApprove, onReject }) => 
                         <button
                           type="button"
                           className="app-approve-btn"
+                          disabled={isSubmittingDecision}
                           onClick={() => handleApprove(app.id)}
                         >
                           <Check size={14} /> Approve
@@ -349,6 +350,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onApprove, onReject }) => 
                         <button
                           type="button"
                           className="app-reject-btn"
+                          disabled={isSubmittingDecision}
                           onClick={() => openReview({ ...app, __reject: true })}
                         >
                           <X size={14} /> Reject
@@ -460,18 +462,20 @@ const OpportunityDetailView = ({ opportunity, onBack, onApprove, onReject }) => 
                     <button
                       type="button"
                       className="organisation-modal-approve-btn"
+                      disabled={isSubmittingDecision}
                       onClick={() =>
                         handleApprove(reviewTarget.id)
                       }
                     >
-                      <Check size={16} /> Approve
+                      <Check size={16} /> {isSubmittingDecision ? "Approving..." : "Approve"}
                     </button>
                     <button
                       type="button"
                       className="organisation-modal-reject-btn"
-                      onClick={() => setRejectMode(true)}
+                      disabled={isSubmittingDecision}
+                      onClick={() => handleReject(reviewTarget.id, rejectionReason.trim())}
                     >
-                      <X size={16} /> Reject
+                      <X size={16} /> {isSubmittingDecision ? "Rejecting..." : "Confirm rejection"}
                     </button>
                   </>
                 ) : (
