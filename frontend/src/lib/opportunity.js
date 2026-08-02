@@ -110,6 +110,13 @@ export const APPLICATION_STATUS_LABELS = {
   full: 'Opportunity Full',
 }
 
+export const APPLICARION_TAB_STATUS_LABELS = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+}
+
 export const getApplicationDisplayStatus = (applicationStatus, spotsRemaining) => {
   const status = applicationStatus ? applicationStatus.toLowerCase() : null
   const isFull = spotsRemaining !== null && spotsRemaining <= 0
