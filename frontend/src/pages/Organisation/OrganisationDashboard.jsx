@@ -13,6 +13,8 @@ import OrganisationOpportunity from "./OrganisationOpportunity";
 import OrganisationApplication from "./OrganisationApplication";
 import OrganisationReport from "./OrganisationReport";
 import ViewOpportunity from "./ViewOpportunity";
+import PublicVolunteerProfile from "../Volunteer/PublicVolunteerProfile";
+import VolunteerMessages from "../Volunteer/VolunteerMessages";
 
 
 
@@ -22,7 +24,8 @@ const OrganisationDashboard = () => {
   const flushPages = [
     "/organisation-dashboard/profile",
     "/organisation-dashboard/edit-organisation-profile",
-    "/organisation-dashboard/edit-opportunity"
+    "/organisation-dashboard/edit-opportunity",
+    "/organisation-dashboard/applications/volunteers",
   ];
   const isFlushPage = flushPages.some(page => location.pathname.startsWith(page));
 
@@ -36,6 +39,8 @@ const OrganisationDashboard = () => {
           <Route path="/" element={<OrganisationHomepage />} />
           <Route path="opportunities" element={<OrganisationOpportunity />} />
           <Route path="applications" element={<OrganisationApplication />} />
+          <Route path="applications/volunteers/:volunteerId" element={<PublicVolunteerProfile />} />
+          <Route path="messages" element={<VolunteerMessages />} />
           <Route path="report" element={<OrganisationReport />} />
           <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
           <Route path="view-opportunity/:id" element={<ViewOpportunity />} />

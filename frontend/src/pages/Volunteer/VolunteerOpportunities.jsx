@@ -3,6 +3,7 @@ import { ArrowUp, ChevronDown, Search } from "lucide-react";
 import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
+import ConfirmApplicationModal from "../../components/ConfirmApplicationModal";
 import {
   formatAvailabilitySlot,
   getMinutesFromTime,
@@ -33,8 +34,14 @@ const VolunteerOpportunities = () => {
     opportunitiesError,
     getAllOpportunities,
   } = useVolunteerStore();
-  const { applications, getMyApplications } = useApplicationStore();
+  const {
+    applications,
+    getMyApplications,
+    createApplication,
+    isSubmittingApplication,
+  } = useApplicationStore();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [applyingOpportunity, setApplyingOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
@@ -158,6 +165,12 @@ const VolunteerOpportunities = () => {
     setMatchesAvailabilityOnly(false);
     setCustomAvailability(initialCustomAvailability);
     setIsCustomAvailabilityOpen(false);
+  };
+
+  const handleConfirmApply = async () => {
+    if (!applyingOpportunity) return;
+    await createApplication(applyingOpportunity._id);
+    setApplyingOpportunity(null);
   };
 
   return (
@@ -393,8 +406,7 @@ const VolunteerOpportunities = () => {
                         );
                         setSelectedOpportunity(opportunityToView || null);
                       } else if (action === "apply") {
-                        // TODO(application-api): call createApplication(selectedCardOpportunity) from useApplicationStore
-                        console.log("Apply clicked for", selectedCardOpportunity);
+                        setApplyingOpportunity(opportunity);
                       }
                     }}
                   />
@@ -417,6 +429,19 @@ const VolunteerOpportunities = () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+        onAction={(action) => {
+          if (action === "apply") {
+            setApplyingOpportunity(selectedOpportunity);
+          }
+        }}
+        volunteerAvailability={sortedVolunteerAvailability}
+      />
+
+      <ConfirmApplicationModal
+        opportunity={applyingOpportunity}
+        onCancel={() => setApplyingOpportunity(null)}
+        onConfirm={handleConfirmApply}
+        isSubmitting={isSubmittingApplication}
       />
 
       {showBackToTop && (

@@ -2923,3 +2923,332 @@
     grid-template-columns: 1fr;
   }
 }
+.organisation-status.approved {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+ 
+.organisation-status.rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+ 
+.organisation-status.withdrawn {
+  background: rgba(154, 130, 104, 0.12);
+  color: #9a8268;
+}
+ 
+/* Opportunity list — "pending" badge + "Manage Applications" button */
+.app-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(217, 170, 85, 0.15);
+  color: #b48a2e;
+  font-size: 12px;
+  font-weight: 700;
+}
+ 
+.app-manage-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2c614f;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+ 
+.app-manage-btn:hover {
+  background: #1f493b;
+  transform: translateY(-1px);
+}
+ 
+/* Opportunity detail — header row with eyebrow + title + back button */
+.app-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+ 
+.app-detail-eyebrow {
+  margin: 0 0 6px;
+  color: #9a8268;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+ 
+.app-detail-header h1 {
+  margin: 0 0 6px;
+  color: #2c614f;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+ 
+.app-detail-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+}
+ 
+.app-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #e8ddd0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #2c614f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s,
+    transform 0.15s;
+}
+ 
+.app-back-btn:hover {
+  border-color: #2c614f;
+  transform: translateY(-1px);
+}
+ 
+/* Opportunity detail — stat cards */
+.app-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 22px;
+}
+ 
+.app-detail-stat-card {
+  padding: 20px 22px;
+  border: 1px solid #e8ddd0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+ 
+.app-detail-stat-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #9a8268;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+ 
+.app-detail-stat-card strong {
+  display: block;
+  color: #2c614f;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+ 
+/* Opportunity detail — status tabs (segmented, matches screenshot) */
+.app-status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 20px 24px 16px;
+}
+ 
+.app-status-tab {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+ 
+.app-status-tab:hover {
+  color: #2c614f;
+}
+ 
+.app-status-tab.active {
+  background: #ffffff;
+  color: #2c614f;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+ 
+/* Volunteer cell (avatar + name) in applications table */
+.app-volunteer-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.app-volunteer-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #2c614f;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+ 
+/* Profile / actions column buttons */
+.app-view-details-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid #e8ddd0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2c614f;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+}
+ 
+.app-view-details-btn:hover {
+  border-color: #2c614f;
+}
+ 
+.app-row-actions {
+  display: flex;
+  gap: 8px;
+}
+ 
+.app-approve-btn,
+.app-reject-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+ 
+.app-approve-btn {
+  border: none;
+  background: #2c614f;
+  color: #ffffff;
+}
+ 
+.app-approve-btn:hover {
+  background: #1f493b;
+}
+ 
+.app-reject-btn {
+  border: 1px solid #fca5a5;
+  background: #ffffff;
+  color: #dc2626;
+}
+ 
+.app-reject-btn:hover {
+  background: #fef2f2;
+}
+ 
+.app-decision-recorded {
+  color: #bfc4c8;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-style: italic;
+}
+ 
+/* Review modal — label / helper text used inside the modal body */
+.app-modal-label {
+  margin: 0 0 8px;
+  color: #9a8268;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+ 
+.app-modal-empty {
+  color: #bfc4c8;
+  font-size: 13px;
+}
+ 
+.app-modal-reason {
+  margin-top: 10px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+}
+ 
+.app-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ded5ca;
+  border-radius: 10px;
+  background: #fdf9f5;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+}
+ 
+.app-modal-textarea:focus {
+  border-color: #d9aa55;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
+}
+ 
+@media (max-width: 1050px) {
+  .app-detail-stats {
+    grid-template-columns: 1fr;
+  }
+}
+ 
+@media (max-width: 760px) {
+  .app-detail-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+ 
+  .app-back-btn {
+    justify-content: center;
+  }
+ 
+  .app-row-actions {
+    flex-direction: column;
+  }
+}

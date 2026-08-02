@@ -1,16 +1,11 @@
+import { isOpportunityInsideAvailability } from "./availability"
+
 const getValidDate = (dateValue) => {
   if (!dateValue) return null
 
   const date = new Date(dateValue)
   return Number.isNaN(date.getTime()) ? null : date
 }
-
-const LOCKED_APPLICATION_STATUSES = new Set([
-  'pending',
-  'approved',
-  'rejected',
-  'withdrawn',
-])
 
 export const formatOpportunityDate = (dateValue, fallback = '') => {
   const date = getValidDate(dateValue)
@@ -100,27 +95,24 @@ export const getSpotsRemaining = (opportunity) =>
     0,
   )
 
-export const APPLICATION_STATUS_LABELS = {
-  pending: 'Application Pending',
-  approved: 'Application Approved',
-  rejected: 'Application Rejected',
-  withdrawn: 'Application Withdrawn',
-  full: 'Opportunity Full',
-}
-
-export const getApplicationDisplayStatus = (applicationStatus, spotsRemaining) => {
-  const status = applicationStatus ? applicationStatus.toLowerCase() : null
-  const isFull = spotsRemaining !== null && spotsRemaining <= 0
-
-  if (status && LOCKED_APPLICATION_STATUSES.has(status)) {
-    return { key: status, isLocked: true }
+export const getApplyEligibility = (opportunity, volunteerAvailability = []) => {
+  if (!volunteerAvailability || volunteerAvailability.length === 0) {
+    return {
+      canApply: false,
+      reason: 'Add your availability in your profile to apply for opportunities.',
+    }
   }
 
-  if (isFull) {
-    return { key: 'full', isLocked: true }
+  const isFullyCovered = isOpportunityInsideAvailability(opportunity, volunteerAvailability)
+
+  if (!isFullyCovered) {
+    return {
+      canApply: false,
+      reason: 'This opportunity falls outside your saved availability.',
+    }
   }
 
-  return { key: null, isLocked: false }
+  return { canApply: true, reason: '' }
 }
 
 export const getRequirementItems = (requirements = '') =>
