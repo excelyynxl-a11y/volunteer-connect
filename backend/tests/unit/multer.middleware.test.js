@@ -119,3 +119,96 @@ describe("uploadResume", () => {
   });
 });
 
+describe("uploadAvatar", () => {
+  it("accepts a PNG avatar", () => {
+    const file = {
+      fieldname: "profilePic",
+      originalname: "avatar.png",
+      mimetype: "image/png",
+      buffer: Buffer.from("PNG content"),
+      size: 1024,
+    };
+
+    const { req, res, next } = runMiddleware(uploadAvatar, file);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+    expect(req.file).toBeDefined();
+    expect(req.file.originalname).toBe("avatar.png");
+  });
+
+  it("accepts a JPEG avatar", () => {
+    const file = {
+      fieldname: "profilePic",
+      originalname: "avatar.jpeg",
+      mimetype: "image/jpeg",
+      buffer: Buffer.from("JPEG content"),
+      size: 1024,
+    };
+
+    const { req, res, next } = runMiddleware(uploadAvatar, file);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+    expect(req.file).toBeDefined();
+  });
+
+  it("accepts a JPG avatar", () => {
+    const file = {
+      fieldname: "profilePic",
+      originalname: "avatar.jpg",
+      mimetype: "image/jpg",
+      buffer: Buffer.from("JPG content"),
+      size: 1024,
+    };
+
+    const { req, res, next } = runMiddleware(uploadAvatar, file);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+    expect(req.file).toBeDefined();
+  });
+
+  it("rejects an unsupported avatar file type", () => {
+    const file = {
+      fieldname: "profilePic",
+      originalname: "avatar.gif",
+      mimetype: "image/gif",
+      buffer: Buffer.from("GIF content"),
+      size: 1024,
+    };
+
+    const { res, next } = runMiddleware(uploadAvatar, file);
+
+    expect(next).not.toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message:
+        "Only PNG, JPEG, and JPG files are allowed for avatar uploads.",
+    });
+  });
+
+  it("rejects an avatar larger than 5MB", () => {
+    const file = {
+      fieldname: "profilePic",
+      originalname: "large-avatar.png",
+      mimetype: "image/png",
+      buffer: Buffer.alloc(5 * 1024 * 1024 + 1),
+      size: 5 * 1024 * 1024 + 1,
+    };
+
+    const { res, next } = runMiddleware(uploadAvatar, file);
+
+    expect(next).not.toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Avatar must be 5MB or smaller.",
+    });
+  });
+});
+
+
