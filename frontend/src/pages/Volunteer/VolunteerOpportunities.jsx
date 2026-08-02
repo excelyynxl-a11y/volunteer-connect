@@ -10,7 +10,7 @@ import {
   isOpportunityInsideAvailability,
   sortAvailabilitySlots,
 } from "../../lib/availability";
-import { opportunityMatchesSearch } from "../../lib/opportunity";
+import { opportunityMatchesSearch, getApplyEligibility } from "../../lib/opportunity";
 import {
   opportunityCategories,
   volunteerAvailabilityDays,
@@ -166,6 +166,19 @@ const VolunteerOpportunities = () => {
     setCustomAvailability(initialCustomAvailability);
     setIsCustomAvailabilityOpen(false);
   };
+
+  const handleRequestApply = (opportunity) => {
+    if (!opportunity) return;
+
+    const { canApply, reason } = getApplyEligibility(opportunity, sortedVolunteerAvailability)
+    if (!canApply) {
+      // TODO: swap for toast
+      alert(reason);
+      return;
+    }
+
+    setApplyingOpportunity(opportunity);
+  }
 
   const handleConfirmApply = async () => {
     if (!applyingOpportunity) return;
