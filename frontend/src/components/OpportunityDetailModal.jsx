@@ -39,7 +39,7 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
 
   const { canApply, reason } = getApplyEligibility(opportunity, volunteerAvailability);
 
-  const bannerMessage = effectiveStatusKey ? APPLICATION_STATUS_BANNER_MESSAGES[effectiveStatusKey]?.(organisationName) : null;
+  const bannerMessage = effectiveStatusKey ? APPLICATION_STATUS_LABELS[effectiveStatusKey]?.(organisationName) : null;
   
   return (
     <div
