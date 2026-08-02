@@ -208,3 +208,162 @@ describe("getVolunteerProfile", () => {
   });
 });
 
+describe("updateVolunteerProfile", () => {
+  it("returns 400 when the volunteer ID is invalid", async () => {
+    isValidObjectIdMock.mockReturnValue(false);
+
+    const req = {
+      params: {
+        id: "invalid-id",
+      },
+      user: {
+        _id: "invalid-id",
+      },
+      body: {
+        fullName: "John Doe",
+      },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid volunteer ID",
+    });
+
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 when a user tries to update another volunteer's profile", async () => {
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+      user: {
+        _id: "507f1f77bcf86cd799439012",
+      },
+      body: {
+        fullName: "John Doe",
+      },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "You can only update your own profile",
+    });
+
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when no profile fields are provided", async () => {
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+      user: {
+        _id: "507f1f77bcf86cd799439011",
+      },
+      body: {},
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "At least one profile field must be provided",
+    });
+  });
+
+  it("returns 400 when the age group is invalid", async () => {
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+      user: {
+        _id: "507f1f77bcf86cd799439011",
+      },
+      body: {
+        ageGroup: "18-20",
+      },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid age group",
+    });
+  });
+
+  it("updates the volunteer profile successfully", async () => {
+    const volunteer = createVolunteer();
+
+    const updatedVolunteer = {
+      ...volunteer,
+      name: "Jane Doe",
+      ageGroup: "31-40",
+      biodata: "Updated biodata",
+      skills: ["JavaScript", "React"],
+    };
+
+    findVolunteerByIdMock
+      .mockReturnValueOnce(
+        Promise.resolve(volunteer),
+      )
+      .mockReturnValueOnce(
+        createFindByIdChain(updatedVolunteer),
+      );
+
+    parseArrayFieldMock.mockImplementation((value) => value);
+
+    normalizeSkillsMock.mockReturnValue([
+      "JavaScript",
+      "React",
+    ]);
+
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+      user: {
+        _id: "507f1f77bcf86cd799439011",
+      },
+      body: {
+        fullName: " Jane Doe ",
+        ageGroup: "31-40",
+        biodata: " Updated biodata ",
+        skills: ["JavaScript", "React"],
+      },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(volunteer.name).toBe("Jane Doe");
+    expect(volunteer.ageGroup).toBe("31-40");
+    expect(volunteer.biodata).toBe("Updated biodata");
+    expect(volunteer.skills).toEqual([
+      "JavaScript",
+      "React",
+    ]);
+
+    expect(volunteer.save).toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Volunteer profile updated successfully",
+      data: updatedVolunteer,
+    });
+  });
+});
