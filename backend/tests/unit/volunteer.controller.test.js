@@ -367,3 +367,132 @@ describe("updateVolunteerProfile", () => {
     });
   });
 });
+
+describe("getVolunteerPastExperience", () => {
+  it("returns 400 when the volunteer ID is invalid", async () => {
+    isValidObjectIdMock.mockReturnValue(false);
+
+    const req = {
+      params: {
+        id: "invalid-id",
+      },
+    };
+    const res = createResponse();
+
+    await getVolunteerPastExperience(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Invalid volunteer ID",
+    });
+
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when the volunteer does not exist", async () => {
+    findVolunteerByIdMock.mockReturnValue(
+      createFindByIdChain(null),
+    );
+
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+    };
+    const res = createResponse();
+
+    await getVolunteerPastExperience(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Volunteer not found",
+    });
+
+    expect(findApplicationsMock).not.toHaveBeenCalled();
+  });
+
+  it("returns approved past volunteer experiences successfully", async () => {
+    const volunteer = createVolunteer();
+
+    const pastApplication = {
+      _id: "application-1",
+      volunteerId: "507f1f77bcf86cd799439011",
+      status: "approved",
+      opportunityId: {
+        _id: "opportunity-1",
+        title: "Beach Cleanup",
+      },
+    };
+
+    const currentApplication = {
+      _id: "application-2",
+      volunteerId: "507f1f77bcf86cd799439011",
+      status: "approved",
+      opportunityId: null,
+    };
+
+    findVolunteerByIdMock.mockReturnValue(
+      createFindByIdChain(volunteer),
+    );
+
+    findApplicationsMock.mockReturnValue({
+      populate: vi.fn().mockResolvedValue([
+        pastApplication,
+        currentApplication,
+      ]),
+    });
+
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+    };
+    const res = createResponse();
+
+    await getVolunteerPastExperience(req, res);
+
+    expect(findApplicationsMock).toHaveBeenCalledWith({
+      volunteerId: "507f1f77bcf86cd799439011",
+      status: "approved",
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      volunteerId: "507f1f77bcf86cd799439011",
+      count: 1,
+      data: [pastApplication],
+    });
+  });
+
+  it("returns 500 when retrieving past experience fails", async () => {
+    findVolunteerByIdMock.mockReturnValue(
+      createFindByIdChain(
+        createVolunteer(),
+      ),
+    );
+
+    findApplicationsMock.mockReturnValue({
+      populate: vi
+        .fn()
+        .mockRejectedValue(new Error("Database error")),
+    });
+
+    const req = {
+      params: {
+        id: "507f1f77bcf86cd799439011",
+      },
+    };
+    const res = createResponse();
+
+    await getVolunteerPastExperience(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Database error",
+    });
+  });
+});
+
