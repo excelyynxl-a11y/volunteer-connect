@@ -54,7 +54,6 @@ const VolunteerApplications = () => {
     getMyApplications,
     withdrawApplication,
     isApplicationsLoading,
-    isUpdatingApplication,
     applicationsError,
   } = useApplicationStore();
 
@@ -362,9 +361,10 @@ const VolunteerApplications = () => {
               <button
                 type="button"
                 className="btn-withdraw-confirm"
+                disabled={isWithdrawing}
                 onClick={handleConfirmWithdraw}
               >
-                <X size={16} /> Withdraw Application
+                <X size={16} /> {isWithdrawing ? "Withdrawing..." : "Withdraw Application"}
               </button>
             </div>
           </div>
