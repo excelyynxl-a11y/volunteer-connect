@@ -13,9 +13,16 @@ import {
 } from "lucide-react";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import { formatOpportunityDate, formatOpportunityTimeRange, getOrganisationName } from "../../lib/opportunity";
+import { getInitials } from "../../lib/utils";
 
 const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
 
+const STATUS_LABELS = {
+  pending: "Pending",
+  approved: "Approved",
+  rejected: "Rejected",
+  withdrawn: "Withdrawn",
+};
 const STATUS_META = {
   Pending: { icon: Clock, className: "status-pending" },
   Approved: { icon: CheckCircle2, className: "status-approved" },
@@ -23,37 +30,62 @@ const STATUS_META = {
   Withdrawn: { icon: Undo2, className: "status-withdrawn" },
 };
 
-const VolunteerApplications = ({
-  applications: applicationsProp,
-  onWithdraw,
-}) => {
-  const [applications, setApplications] = useState(
-    applicationsProp ?? DEFAULT_APPLICATIONS
-  );
+const mapApplicationToViewModel = (application) => {
+  const opportunity = application.opportunityId || {};
+  const orgName = getOrganisationName(opportunity);
+
+  return {
+    id: application._id,
+    orgInitials: getInitials(orgName),
+    orgName,
+    title: opportunity.title || "Opportunity unavailable",
+    date: formatOpportunityDate(opportunity.startAt),
+    time: formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt),
+    submittedOn: application.createdAt,
+    status: STATUS_LABELS[application.status] || application.status,
+    rejectionMessage:
+      application.withdrawalReason || "No reason was provided.",
+  };
+};
+
+const VolunteerApplications = () => {
+  const {
+    applications,
+    getMyApplications,
+    withdrawApplication,
+    isApplicationsLoading,
+    isUpdatingApplication,
+    applicationsError,
+  } = useApplicationStore();
+
   const [activeTab, setActiveTab] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
-
-  useEffect(() => {
-    if (applicationsProp) {
-      setApplications(applicationsProp);
-    }
-  }, [applicationsProp]);
+  const [isWithdrawing, setIsWithdrawing] = useState(false); 
 
   const [detailsTarget, setDetailsTarget] = useState(null);
   const [withdrawTarget, setWithdrawTarget] = useState(null);
   const [reasonTarget, setReasonTarget] = useState(null);
 
+  useEffect(() => {
+    getMyApplications();
+  }, [getMyApplications]);
+
+  const viewModels = useMemo(
+    () => applications.map(mapApplicationToViewModel),
+    [applications]
+  );
+
   const tabCounts = useMemo(() => {
-    const counts = { All: applications.length };
+    const counts = { All: viewModels.length };
     TABS.slice(1).forEach((status) => {
-      counts[status] = applications.filter((a) => a.status === status).length;
+      counts[status] = viewModels.filter((a) => a.status === status).length;
     });
     return counts;
-  }, [applications]);
+  }, [viewModels]);
 
   const visibleApplications = useMemo(() => {
-    let list = [...applications];
+    let list = [...viewModels];
 
     if (activeTab !== "All") {
       list = list.filter((a) => a.status === activeTab);
@@ -74,17 +106,18 @@ const VolunteerApplications = ({
     });
 
     return list;
-  }, [applications, activeTab, searchTerm, sortOrder]);
+  }, [viewModels, activeTab, searchTerm, sortOrder]);
 
-  const handleConfirmWithdraw = () => {
+  const handleConfirmWithdraw = async () => {
     if (!withdrawTarget) return;
-    setApplications((prev) =>
-      prev.map((a) =>
-        a.id === withdrawTarget.id ? { ...a, status: "Withdrawn" } : a
-      )
-    );
-    onWithdraw?.(withdrawTarget.id);
-    setWithdrawTarget(null);
+
+    setIsWithdrawing(true);
+    try {
+      await withdrawApplication(withdrawTarget.id);
+      setWithdrawTarget(null);
+    } finally {
+      setIsWithdrawing(false);
+    }
   };
 
   return (
@@ -104,8 +137,7 @@ const VolunteerApplications = ({
           <div>
             <h2>Application History</h2>
             <p>
-              Track all your opportunity applications and their current
-              status.
+              Track all your opportunity applications and their current status.
             </p>
           </div>
         </div>
@@ -151,7 +183,15 @@ const VolunteerApplications = ({
         </div>
 
         {/* applications list */}
-        {visibleApplications.length === 0 ? (
+        {applicationsError ? (
+          <div className="homepage-state-message">
+            <p>{applicationsError}</p>
+          </div>
+        ) : isApplicationsLoading ? (
+          <div className="homepage-state-message">
+            <p>Loading applications...</p>
+          </div>
+        ) : visibleApplications.length === 0 ? (
           <div className="homepage-state-message">
             <p>No applications match this view yet.</p>
           </div>
