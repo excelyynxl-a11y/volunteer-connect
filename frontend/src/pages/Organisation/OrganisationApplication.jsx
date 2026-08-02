@@ -24,7 +24,7 @@ const mapApplicationToViewModel = (application) => ({
   volunteerName: application.volunteerId?.name || "Unknown volunteer",
   volunteerInitials: getInitials(application.volunteerId?.name),
   submittedOn: application.createdAt,
-  status: APPLICATION_TAB_STATUS_LABELS[application.status] || application.status,
+  status: APPLICARION_TAB_STATUS_LABELS[application.status] || application.status,
   rejectionMessage: application.withdrawalReason || "",
   skills: application.volunteerId?.skills || [],
   availability: application.volunteerId?.availability || [],
