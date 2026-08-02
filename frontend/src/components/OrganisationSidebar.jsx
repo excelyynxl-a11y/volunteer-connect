@@ -5,6 +5,7 @@ import {
   File,
   Home,
   LogOut,
+  MessageCircle,
   Search,
   User,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const navItems = [
   { key: "homepage", path: "/organisation-dashboard", label: "Homepage", Icon: Home },
   { key: "opportunity", path: "/organisation-dashboard/opportunities", label: "Opportunity", Icon: Search },
   { key: "application", path: "/organisation-dashboard/applications", label: "Application", Icon: File },
+  { key: "messages", path: "/organisation-dashboard/messages", label: "Messages", Icon: MessageCircle },
   { key: "report", path: "/organisation-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/organisation-dashboard/profile", label: "Profile", Icon: User },
 
@@ -33,7 +35,17 @@ const OrganisationSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = navItems.find((item) => item.path === location.pathname)?.key || currentTab;
+  const activeItem = navItems.find((item) => {
+    if (item.path === "/organisation-dashboard") {
+      return location.pathname === item.path;
+    }
+
+    return (
+      location.pathname === item.path ||
+      location.pathname.startsWith(`${item.path}/`)
+    );
+  });
+  const activeKey = activeItem?.key || currentTab;
 
   return (
     <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>

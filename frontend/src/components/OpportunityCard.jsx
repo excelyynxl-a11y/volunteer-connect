@@ -5,9 +5,8 @@ import {
   formatOpportunityTimeRange,
   getOpportunityStatusClass,
   getSpotsRemaining,
-  APPLICATION_STATUS_LABELS,
-  getApplicationDisplayStatus
 } from '../lib/opportunity';
+import { APPLICATION_STATUS_LABELS, getApplicationDisplayStatus } from '../lib/application';
 import './OpportunityCard.css';
 
 const OpportunityCard = ({

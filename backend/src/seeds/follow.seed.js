@@ -4,7 +4,10 @@ import bcrypt from "bcryptjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import Application from "../models/application.model.js";
+import Follow from "../models/follow.model.js";
 import Opportunity from "../models/opportunity.model.js";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 import { Organisation, Volunteer } from "../models/user.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -484,6 +487,19 @@ const applicationTemplates = [
   ["vol5", 19, "pending"],
 ];
 
+const followTemplates = [
+  ["vol1", "org1"],
+  ["vol1", "org2"],
+  ["vol1", "org3"],
+  ["vol2", "org2"],
+  ["vol2", "org4"],
+  ["vol3", "org1"],
+  ["vol3", "org5"],
+  ["vol4", "org3"],
+  ["vol5", "org4"],
+  ["vol5", "org5"],
+];
+
 const upsertSeedUsers = async () => {
   const password = await bcrypt.hash(SEED_PASSWORD, 10);
   const organisationDocs = [];
@@ -620,11 +636,142 @@ const createSeedApplications = async (volunteerByKey, opportunityDocs) => {
   return applicationDocs;
 };
 
-const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applicationDocs }) => {
+const createSeedFollows = async (volunteerByKey, organisationByKey) => {
+  const seedVolunteerIds = Object.values(volunteerByKey).map(
+    (volunteer) => volunteer._id,
+  );
+
+  await Follow.deleteMany({
+    volunteerId: { $in: seedVolunteerIds },
+  });
+
+  return Follow.insertMany(
+    followTemplates.map(([volunteerKey, organisationKey]) => ({
+      volunteerId: volunteerByKey[volunteerKey]._id,
+      organisationId: organisationByKey[organisationKey]._id,
+    })),
+  );
+};
+
+const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
+  const seedVolunteer = volunteerByKey.vol2;
+  const seedOrg = organisationByKey.org1;
+  const secondOrg = organisationByKey.org2;
+  const organisationIds = [seedOrg._id, secondOrg._id];
+
+  const oldConversations = await Conversation.find({
+    $or: [
+      {
+        volunteerId: seedVolunteer._id,
+        organisationId: { $in: organisationIds },
+      },
+      { participants: seedVolunteer._id },
+    ],
+  }).select("_id");
+  const oldConversationIds = oldConversations.map((conversation) => conversation._id);
+
+  await Message.deleteMany({ conversationId: { $in: oldConversationIds } });
+  await Conversation.deleteMany({ _id: { $in: oldConversationIds } });
+
+  const now = Date.now();
+  const minutesAgo = (mins) => new Date(now - mins * 60 * 1000);
+
+  const conversations = [
+    {
+      volunteerId: seedVolunteer._id,
+      organisationId: seedOrg._id,
+      messages: [
+        {
+          senderId: seedVolunteer._id,
+          content: "Hello, I would like to confirm my availability for the Saturday food drive.",
+          createdAt: minutesAgo(38),
+          isRead: true,
+        },
+        {
+          senderId: seedOrg._id,
+          content: "Hello Brandon, your shift is confirmed for Saturday 9am at the community hall.",
+          createdAt: minutesAgo(30),
+          isRead: false,
+        },
+        {
+          senderId: seedVolunteer._id,
+          content: "Thanks, I will be there.",
+          createdAt: minutesAgo(25),
+          isRead: true,
+        },
+        {
+          senderId: seedOrg._id,
+          content: "Please bring your ID and wear comfortable shoes.",
+          createdAt: minutesAgo(20),
+          isRead: false,
+        },
+      ],
+    },
+    {
+      volunteerId: seedVolunteer._id,
+      organisationId: secondOrg._id,
+      messages: [
+        {
+          senderId: seedVolunteer._id,
+          content: "Hi, I would like to join the beach cleanup event next week.",
+          createdAt: minutesAgo(110),
+          isRead: true,
+        },
+        {
+          senderId: secondOrg._id,
+          content: "Thanks for your interest. Please bring a reusable water bottle and a hat.",
+          createdAt: minutesAgo(95),
+          isRead: false,
+        },
+      ],
+    },
+  ];
+
+  const insertedConversations = await Conversation.insertMany(
+    conversations.map((conv) => ({
+      volunteerId: conv.volunteerId,
+      organisationId: conv.organisationId,
+      lastMessageAt: conv.messages[conv.messages.length - 1].createdAt,
+      responseDeadline: new Date(
+        conv.messages[conv.messages.length - 1].createdAt.getTime() + 3 * 60 * 60 * 1000,
+      ),
+    })),
+  );
+
+  const allMessages = [];
+
+  insertedConversations.forEach((conversation, index) => {
+    conversations[index].messages.forEach((message) => {
+      allMessages.push({
+        conversationId: conversation._id,
+        senderId: message.senderId,
+        content: message.content,
+        isRead: message.isRead,
+        createdAt: message.createdAt,
+      });
+    });
+  });
+
+  await Message.insertMany(allMessages);
+
+  return insertedConversations;
+};
+
+const printSummary = ({
+  organisationByKey,
+  organisationDocs,
+  volunteerDocs,
+  opportunityDocs,
+  applicationDocs,
+  followDocs,
+  seededConversations,
+}) => {
   console.log("\nSeed completed.");
   console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`);
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
+  console.log(`Follows: ${followDocs.length}`);
+  console.log(`Conversations: ${seededConversations.length}`);
   console.log(`Password for all seed accounts: ${SEED_PASSWORD}`);
 
   console.log("\nOrganisation accounts:");
@@ -636,6 +783,14 @@ const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applic
   volunteerDocs.forEach((volunteer) => {
     console.log(`- ${volunteer.email} (${volunteer.name})`);
   });
+
+  console.log("\nPrimary follow-page test account:");
+  console.log(`- ${volunteers[0].email} (${volunteers[0].name}) follows:`);
+  followTemplates
+    .filter(([volunteerKey]) => volunteerKey === volunteers[0].key)
+    .forEach(([, organisationKey]) => {
+      console.log(`  - ${organisationByKey[organisationKey].name}`);
+    });
 };
 
 const seed = async () => {
@@ -667,12 +822,20 @@ const seed = async () => {
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
     const applicationDocs = await createSeedApplications(volunteerByKey, opportunityDocs);
+    const followDocs = await createSeedFollows(
+      volunteerByKey,
+      organisationByKey,
+    );
+    const seededConversations = await recreateSeedConversations(volunteerByKey, organisationByKey);
 
     printSummary({
+      organisationByKey,
       organisationDocs,
       volunteerDocs,
       opportunityDocs,
       applicationDocs,
+      followDocs,
+      seededConversations,
     });
   } catch (error) {
     console.error("Seed failed:", error);
