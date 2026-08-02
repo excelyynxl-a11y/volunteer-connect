@@ -11,17 +11,41 @@ import {
 } from "lucide-react";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useApplicationStore } from "../../store/useApplicationStore";
-import { formatDate } from "../../lib/utils";
-import { getInitials } from "../../lib/utils";
-import { APPLICARION_TAB_STATUS_LABELS as STATUS_LABELS } from "../../lib/opportunity";
-
-const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
+import { formatDate, getInitials } from "../../lib/utils";
+import { APPLICARION_TAB_STATUS_LABELS, APPLICATION_TABS } from "../../lib/application";
 
 const countByStatus = (applications, status) =>
   status === "All"
     ? applications.length
     : applications.filter((a) => a.status === status).length;
 
+const mapApplicationToViewModel = (application) => ({
+  id: application._id,
+  volunteerName: application.volunteerId?.name || "Unknown volunteer",
+  volunteerInitials: getInitials(application.volunteerId?.name),
+  submittedOn: application.createdAt,
+  status: STATUS_LABELS[application.status] || application.status,
+  rejectionMessage: application.withdrawalReason || "",
+  skills: application.volunteerId?.skills || [],
+  availability: application.volunteerId?.availability || [],
+});
+
+const mapOpportunityToViewModel = (opportunity, applicationsForOpportunity) => ({
+  id: opportunity._id,
+  title: opportunity.title,
+  category: Array.isArray(opportunity.category)
+    ? opportunity.category.join(", ")
+    : opportunity.category,
+  location: opportunity.location,
+  status:
+    opportunity.status?.charAt(0).toUpperCase() + opportunity.status?.slice(1),
+  eventDate: opportunity.startAt,
+  deadline: opportunity.applicationDeadline,
+  capacity: opportunity.maxVolunteers || 0,
+  applications: applicationsForOpportunity.map(mapApplicationToViewModel),
+});
+
+// application management
 const OpportunityListView = ({ opportunities, onManage }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active opportunities");
@@ -159,22 +183,18 @@ const OpportunityListView = ({ opportunities, onManage }) => {
   );
 };
 
-/* Per-opportunity applications detail                                 */
-const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
-  const [applications, setApplications] = useState(opportunity.applications);
+const OpportunityDetailView = ({ opportunity, onBack, onApprove, onReject }) => {
   const [activeTab, setActiveTab] = useState("All");
   const [reviewTarget, setReviewTarget] = useState(null);
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
 
-  useEffect(() => {
-    setApplications(opportunity.applications);
-    setActiveTab("All");
-  }, [opportunity]);
+  const applications = opportunity.applications;
 
   const tabCounts = useMemo(() => {
     const counts = {};
-    TABS.forEach((tab) => {
+    APPLICATION_TABS.forEach((tab) => {
       counts[tab] = countByStatus(applications, tab);
     });
     return counts;
@@ -201,16 +221,24 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
     setRejectionReason("");
   };
 
-  const applyDecision = (id, status, reason) => {
-    setApplications((prev) =>
-      prev.map((a) =>
-        a.id === id
-          ? { ...a, status, rejectionMessage: reason || a.rejectionMessage }
-          : a
-      )
-    );
-    onDecision?.(opportunity.id, id, status, reason);
-    closeReview();
+  const handleApprove = async (applicationId) => {
+    setIsSubmittingDecision(true);
+    try {
+      await onApprove(applicationId);
+      closeReview();
+    } finally {
+      setIsSubmittingDecision(false);
+    }
+  };
+
+  const handleReject = async (applicationId, reason) => {
+    setIsSubmittingDecision(true);
+    try {
+      await onReject(applicationId, reason);
+      closeReview();
+    } finally {
+      setIsSubmittingDecision(false);
+    }
   };
 
   const isDecided = reviewTarget && reviewTarget.status !== "Pending";
@@ -250,7 +278,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
 
       <div className="organisation-table-wrapper">
         <div className="app-status-tabs">
-          {TABS.map((tab) => (
+          {APPLICATION_TABS.map((tab) => (
             <button
               key={tab}
               type="button"
@@ -314,7 +342,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
                         <button
                           type="button"
                           className="app-approve-btn"
-                          onClick={() => applyDecision(app.id, "Approved")}
+                          onClick={() => handleApprove(app.id)}
                         >
                           <Check size={14} /> Approve
                         </button>
@@ -433,7 +461,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
                       type="button"
                       className="organisation-modal-approve-btn"
                       onClick={() =>
-                        applyDecision(reviewTarget.id, "Approved")
+                        handleApprove(reviewTarget.id)
                       }
                     >
                       <Check size={16} /> Approve
@@ -464,11 +492,7 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
                       type="button"
                       className="organisation-modal-reject-btn"
                       onClick={() =>
-                        applyDecision(
-                          reviewTarget.id,
-                          "Rejected",
-                          rejectionReason.trim()
-                        )
+                        handleReject(reviewTarget.id, rejectionReason.trim())
                       }
                     >
                       <X size={16} /> Confirm rejection
@@ -484,60 +508,83 @@ const OpportunityDetailView = ({ opportunity, onBack, onDecision }) => {
   );
 };
 
-/* Top-level: switches between list view and detail view              */
+const OrganisationApplication = () => {
+  const {
+    allMyOpportunities,
+    isOpportunitiesLoading,
+    opportunitiesError,
+    getMyOpportunities,
+  } = useOrganisationStore();
+  const {
+    applications,
+    isApplicationsLoading,
+    applicationsError,
+    getMyOrganisationApplications,
+    approveApplication,
+    rejectApplication,
+  } = useApplicationStore();
 
-const OrganisationApplication = ({
-  opportunities: opportunitiesProp,
-  onDecision,
-}) => {
-  const [opportunities, setOpportunities] = useState(
-    opportunitiesProp ?? DEFAULT_OPPORTUNITIES
-  );
   const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
-    if (opportunitiesProp) {
-      setOpportunities(opportunitiesProp);
-    }
-  }, [opportunitiesProp]);
+    getMyOpportunities();
+    getMyOrganisationApplications();
+  }, [getMyOpportunities, getMyOrganisationApplications]);
 
-  const selectedOpportunity = opportunities.find((o) => o.id === selectedId);
+  const opportunityViewModels = useMemo(() => {
+    return allMyOpportunities.map((opportunity) => {
+      const applicationsForOpportunity = applications.filter(
+        (application) => application.opportunityId?._id === opportunity._id
+      );
+      return mapOpportunityToViewModel(opportunity, applicationsForOpportunity);
+    });
+  }, [allMyOpportunities, applications]);
 
-  const handleDecision = (opportunityId, applicationId, status, reason) => {
-    setOpportunities((prev) =>
-      prev.map((opp) =>
-        opp.id !== opportunityId
-          ? opp
-          : {
-              ...opp,
-              applications: opp.applications.map((a) =>
-                a.id === applicationId
-                  ? {
-                      ...a,
-                      status,
-                      rejectionMessage: reason || a.rejectionMessage,
-                    }
-                  : a
-              ),
-            }
-      )
-    );
-    onDecision?.(opportunityId, applicationId, status, reason);
+  const selectedOpportunity = opportunityViewModels.find(
+    (o) => o.id === selectedId
+  );
+
+  const handleApprove = async (applicationId) => {
+    await approveApplication(applicationId);
+    await getMyOrganisationApplications();
   };
+
+  const handleReject = async (applicationId, reason) => {
+    await rejectApplication(applicationId, reason);
+    await getMyOrganisationApplications();
+  };
+
+  if (opportunitiesError || applicationsError) {
+    return (
+      <div className="organisation-page">
+        <p>{opportunitiesError || applicationsError}</p>
+      </div>
+    );
+  }
+
+  if (isOpportunitiesLoading || isApplicationsLoading) {
+    return (
+      <div className="organisation-page">
+        <p>Loading opportunities...</p>
+      </div>
+    );
+  }
 
   if (selectedOpportunity) {
     return (
       <OpportunityDetailView
+        key={selectedOpportunity.id}
         opportunity={selectedOpportunity}
         onBack={() => setSelectedId(null)}
-        onDecision={handleDecision}
+        onApprove={handleApprove}
+        onReject={handleReject}
       />
     );
   }
 
   return (
     <OpportunityListView
-      opportunities={opportunities}
+      opportunities={opportunityViewModels}
       onManage={(id) => setSelectedId(id)}
     />
   );
