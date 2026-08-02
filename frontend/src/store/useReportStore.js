@@ -8,14 +8,15 @@ export const useReportStore = create((set, get) => ({
   isCreatingReport: false,
   previousReportsError: "",
 
-  getPreviousReports: async (userId, reportType = "OpportunityViolation") => {
+  getMyReports: async (reportType = "OpportunityViolation") => {
     set({
       isPreviousReportsLoading: true,
       previousReportsError: ""
     });
 
     try {
-      const res = await axiosInstance.get("/report/");
+      const res = await axiosInstance.get("/report/my-reports");
+
       const reports = Array.isArray(res.data?.reports) ? res.data.reports : [];
 
       const filteredReports = reports.filter(
@@ -32,7 +33,7 @@ export const useReportStore = create((set, get) => ({
       const message =
         error.response?.data?.message ||
         error.message ||
-        "Failed to load previous reports.";
+        "Failed to load your reports.";
 
       set({
         previousReports: [],
