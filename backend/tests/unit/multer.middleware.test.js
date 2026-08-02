@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { uploadResume, uploadAvatar } from "../../src/middlewares/multer.middleware.js";
-import multer from "multer";
 
 vi.mock("multer", () => {
   class MulterError extends Error {
