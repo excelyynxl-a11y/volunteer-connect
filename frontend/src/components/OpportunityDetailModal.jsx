@@ -7,10 +7,12 @@ import {
   getRequirementItems,
   getSpotsRemaining,
   getApplyEligibility,
+} from "../lib/opportunity";
+
+import { 
   getApplicationDisplayStatus,
   APPLICATION_STATUS_LABELS,
-  APPLICATION_STATUS_BANNER_MESSAGES,
-} from "../lib/opportunity";
+} from "../lib/application";
 
 const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [], applicationStatus }) => {
   const [selectedImage, setSelectedImage] = useState("");
