@@ -13,16 +13,9 @@ import {
 } from "lucide-react";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import { formatOpportunityDate, formatOpportunityTimeRange, getOrganisationName } from "../../lib/opportunity";
+import { APPLICARION_TAB_STATUS_LABELS, APPLICATION_TABS } from "../../lib/application";
 import { getInitials } from "../../lib/utils";
 
-const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
-
-const STATUS_LABELS = {
-  pending: "Pending",
-  approved: "Approved",
-  rejected: "Rejected",
-  withdrawn: "Withdrawn",
-};
 const STATUS_META = {
   Pending: { icon: Clock, className: "status-pending" },
   Approved: { icon: CheckCircle2, className: "status-approved" },
@@ -42,7 +35,7 @@ const mapApplicationToViewModel = (application) => {
     date: formatOpportunityDate(opportunity.startAt),
     time: formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt),
     submittedOn: application.createdAt,
-    status: STATUS_LABELS[application.status] || application.status,
+    status: APPLICARION_TAB_STATUS_LABELS[application.status] || application.status,
     rejectionMessage:
       application.withdrawalReason || "No reason was provided.",
   };
@@ -77,7 +70,7 @@ const VolunteerApplications = () => {
 
   const tabCounts = useMemo(() => {
     const counts = { All: viewModels.length };
-    TABS.slice(1).forEach((status) => {
+    APPLICATION_TABS.slice(1).forEach((status) => {
       counts[status] = viewModels.filter((a) => a.status === status).length;
     });
     return counts;
@@ -143,7 +136,7 @@ const VolunteerApplications = () => {
 
         {/* status tabs */}
         <div className="application-tabs">
-          {TABS.map((tab) => (
+          {APPLICATION_TABS.map((tab) => (
             <button
               key={tab}
               type="button"
