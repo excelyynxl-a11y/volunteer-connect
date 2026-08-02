@@ -11,6 +11,8 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
+import { useApplicationStore } from "../../store/useApplicationStore";
+import { formatOpportunityDate, formatOpportunityTimeRange, getOrganisationName } from "../../lib/opportunity";
 
 const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
 
