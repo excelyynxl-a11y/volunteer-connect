@@ -25,6 +25,23 @@ export const getAllReports = async (req, res) => {
   }
 };
 
+export const getMyReports = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const reports = await populateReport(
+      Report.find({ submittedBy: userId })
+    ).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: reports.length,
+      reports
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const getReportById = async (req, res) => {
   try {
     const { id } = req.params;

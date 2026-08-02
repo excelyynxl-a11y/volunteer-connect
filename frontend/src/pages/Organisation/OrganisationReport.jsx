@@ -9,7 +9,7 @@ import { useApplicationStore } from "../../store/useApplicationStore";
 const OrganisationReport = () => {
   const {
     createReport,
-    getPreviousReports,
+    getMyReports,
     previousReports,
     isPreviousReportsLoading
   } = useReportStore();
@@ -17,9 +17,12 @@ const OrganisationReport = () => {
   const { applications, getMyOrganisationApplications } = useApplicationStore();
 
   useEffect(() => {
-    getPreviousReports(undefined, "UserViolation");
+    console.log(
+      "[OrganisationReport] useEffect triggered, calling getMyReports"
+    );
+    getMyReports("UserViolation");
     getMyOrganisationApplications();
-  }, [getPreviousReports, getMyOrganisationApplications]);
+  }, [getMyReports, getMyOrganisationApplications]);
 
   const reportedVolunteers = useMemo(() => {
     return applications
