@@ -35,5 +35,49 @@ describe("volunteer helper functions", () => {
       expect(parseArrayField(true)).toBe(true);
     });
   });
+
+  describe("normalizeSkills", () => {
+    it("trims whitespace from skill names", () => {
+      expect(
+        normalizeSkills([" JavaScript ", " React "]),
+      ).toEqual(["JavaScript", "React"]);
+    });
+
+    it("removes empty skill values", () => {
+      expect(
+        normalizeSkills(["JavaScript", "", "   ", "React"]),
+      ).toEqual(["JavaScript", "React"]);
+    });
+
+    it("removes duplicate skills", () => {
+      expect(
+        normalizeSkills([
+          "JavaScript",
+          "React",
+          "JavaScript",
+          "React",
+        ]),
+      ).toEqual(["JavaScript", "React"]);
+    });
+
+    it("converts non-string skill values to strings", () => {
+      expect(
+        normalizeSkills(["JavaScript", 123, true]),
+      ).toEqual(["JavaScript", "123", "true"]);
+    });
+
+    it("trims, removes empty values, and removes duplicates together", () => {
+      expect(
+        normalizeSkills([
+          " JavaScript ",
+          "React",
+          " JavaScript",
+          "",
+          "   ",
+          "React ",
+        ]),
+      ).toEqual(["JavaScript", "React"]);
+    });
+  });
 });
 
