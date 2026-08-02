@@ -6,10 +6,15 @@ import {
   getOrganisationName,
   getRequirementItems,
   getSpotsRemaining,
-  getApplyEligibility
+  getApplyEligibility,
 } from "../lib/opportunity";
 
-const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [] }) => {
+import { 
+  getApplicationDisplayStatus,
+  APPLICATION_STATUS_LABELS,
+} from "../lib/application";
+
+const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [], applicationStatus }) => {
   const [selectedImage, setSelectedImage] = useState("");
   const opportunityImages = Array.isArray(opportunity?.images)
     ? opportunity.images.filter(Boolean)
@@ -22,8 +27,20 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
     ? selectedImage
     : opportunityImages[0];
 
+  const spotsRemaining = getSpotsRemaining(opportunity);
+  const organisationName = getOrganisationName(opportunity);
+
+  const { key: effectiveStatusKey, isLocked } = getApplicationDisplayStatus(
+    applicationStatus,
+    spotsRemaining,
+    opportunity.status,
+    opportunity
+  );
+
   const { canApply, reason } = getApplyEligibility(opportunity, volunteerAvailability);
 
+  const bannerMessage = effectiveStatusKey ? APPLICATION_STATUS_LABELS[effectiveStatusKey]?.(organisationName) : null;
+  
   return (
     <div
       className="opportunity-detail-overlay"
@@ -49,7 +66,7 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
             </span>
             <h2 id="opportunity-detail-title">{opportunity.title}</h2>
             <div className="opportunity-organisation-row">
-              <p>{getOrganisationName(opportunity)}</p>
+              <p>{organisationName}</p>
               <button type="button" className="view-organisation-button">
                 <Building2 size={16} />
                 View organisation profile
@@ -58,16 +75,28 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
           </div>
 
           <div className="opportunity-detail-apply-wrapper">
-            <button
-              className="apply-volunteer-button"
-              type="button"
-              disabled={!canApply}
-              onClick={() => onAction && onAction("apply", opportunity._id)}
-            >
-              Apply As Volunteer
-            </button>
-            {!canApply && (
-              <p className="apply-disabled-reason">{reason}</p>
+            {effectiveStatusKey ? (
+              <button
+                type="button"
+                className={`apply-volunteer-button status-btn-${effectiveStatusKey}`}
+                disabled={isLocked}
+              >
+                {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
+              </button>
+            ) : (
+              <>
+              <button
+                className="apply-volunteer-button"
+                type="button"
+                disabled={!canApply}
+                onClick={() => onAction && onAction("apply", opportunity._id)}
+              >
+                Apply As Volunteer
+              </button>
+              {!canApply && (
+                <p className="apply-disabled-reason">{reason}</p>
+              )}
+            </>
             )}
           </div>
         </div>
@@ -145,6 +174,11 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
             <p className="opportunity-detail-muted">No specific requirements listed.</p>
           )}
         </section>
+        {bannerMessage && (
+            <div className={`opportunity-status-banner status-banner-${effectiveStatusKey}`}>
+              {bannerMessage}
+            </div>
+          )}
         </div>
       </div>
     </div>

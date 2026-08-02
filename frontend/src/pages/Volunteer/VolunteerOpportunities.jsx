@@ -435,6 +435,7 @@ const VolunteerOpportunities = () => {
           }
         }}
         volunteerAvailability={sortedVolunteerAvailability}
+        applicationStatus={applicationStatusByOpportunity[selectedOpportunity?._id]}
       />
 
       <ConfirmApplicationModal
