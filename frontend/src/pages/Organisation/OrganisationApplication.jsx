@@ -11,15 +11,10 @@ import {
 } from "lucide-react";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useApplicationStore } from "../../store/useApplicationStore";
-import { formatDate, getInitials } from "../../lib/utils";
+import { getInitials } from "../../lib/utils";
 import { APPLICARION_TAB_STATUS_LABELS, APPLICATION_TABS } from "../../lib/application";
 import ApplicationOpportunityList from "../../components/ApplicationOpportunityList";
 import ApplicationOpportunityDetail from "../../components/ApplicationOpportunityDetail";
-
-const countByStatus = (applications, status) =>
-  status === "All"
-    ? applications.length
-    : applications.filter((a) => a.status === status).length;
 
 const mapApplicationToViewModel = (application) => ({
   id: application._id,

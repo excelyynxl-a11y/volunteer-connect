@@ -167,19 +167,6 @@ const VolunteerOpportunities = () => {
     setIsCustomAvailabilityOpen(false);
   };
 
-  const handleRequestApply = (opportunity) => {
-    if (!opportunity) return;
-
-    const { canApply, reason } = getApplyEligibility(opportunity, sortedVolunteerAvailability)
-    if (!canApply) {
-      // TODO: swap for toast
-      alert(reason);
-      return;
-    }
-
-    setApplyingOpportunity(opportunity);
-  }
-
   const handleConfirmApply = async () => {
     if (!applyingOpportunity) return;
     await createApplication(applyingOpportunity._id);
