@@ -12,56 +12,6 @@ import {
   MapPin,
 } from "lucide-react";
 
-/* ------------------------------------------------------------------ */
-/* Default/mock data — used only if no `applications` prop is passed. */
-/* Swap this out for real data by passing `applications` as a prop    */
-/* once your API layer is ready; nothing else in this file changes.  */
-/* ------------------------------------------------------------------ */
-const DEFAULT_APPLICATIONS = [
-  {
-    id: "app-1",
-    orgInitials: "HH",
-    orgName: "Helping Hands Malaysia",
-    title: "[Seed] Community Food Drive Helper",
-    date: "4 Jun 2026",
-    time: "9:00 am – 2:00 pm",
-    submittedOn: "2026-05-20",
-    status: "Approved",
-  },
-  {
-    id: "app-2",
-    orgInitials: "KF",
-    orgName: "Kids First Foundation",
-    title: "[Seed] Literacy Tutor Session",
-    date: "10 Jun 2026",
-    time: "2:00 pm – 4:00 pm",
-    submittedOn: "2026-05-28",
-    status: "Pending",
-  },
-  {
-    id: "app-3",
-    orgInitials: "GE",
-    orgName: "Green Earth Society",
-    title: "[Seed] Beach Cleanup Volunteer",
-    date: "15 Jun 2026",
-    time: "8:00 am – 11:00 am",
-    submittedOn: "2026-05-24",
-    status: "Rejected",
-    rejectionMessage:
-      "Thank you for your interest. We received more applications than available spaces and have filled this activity with volunteers whose availability most closely matched the full event schedule.",
-  },
-  {
-    id: "app-4",
-    orgInitials: "PA",
-    orgName: "Paws & Claws KL",
-    title: "[Seed] Animal Shelter Assistant",
-    date: "22 May 2026",
-    time: "10:00 am – 1:00 pm",
-    submittedOn: "2026-05-10",
-    status: "Withdrawn",
-  },
-];
-
 const TABS = ["All", "Pending", "Approved", "Rejected", "Withdrawn"];
 
 const STATUS_META = {
