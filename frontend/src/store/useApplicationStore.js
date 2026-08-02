@@ -154,6 +154,9 @@ export const useApplicationStore = create((set, get) => ({
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+
+      // TODO(application-api): remove once createApplication created
+      mockApplications.unshift(application);
       const response = {
         data: {
           success: true,
