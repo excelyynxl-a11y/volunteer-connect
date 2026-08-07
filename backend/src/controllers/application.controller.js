@@ -15,8 +15,90 @@ const sendNotImplemented = (res, feature) =>
  * the same volunteer/opportunity pair, non-active or full opportunities, and
  * submissions after the application deadline.
  */
-export const createApplication = (req, res) => {
-  return sendNotImplemented(res, "Application submission");
+export const createApplication = async (req, res) => {
+  try {
+    const { opportunityId } = req.body;
+    const volunteerId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(opportunityId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid opportunity ID",
+      });
+    }
+
+    // 1. Check if opportunity exists and validate status & deadline
+    const opportunity = await Opportunity.findById(opportunityId);
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    if (opportunity.status?.toLowerCase() !== "active") {
+      return res.status(400).json({
+        success: false,
+        message: "This opportunity is not currently active for applications",
+      });
+    }
+
+    if (opportunity.applicationDeadline && new Date() > new Date(opportunity.applicationDeadline)) {
+      return res.status(400).json({
+        success: false,
+        message: "Application deadline has passed",
+      });
+    }
+
+    if (
+      opportunity.maxVolunteers &&
+      opportunity.currentVolunteers >= opportunity.maxVolunteers
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Opportunity has reached full capacity",
+      });
+    }
+
+    // 2. Prevent duplicate applications
+    const existingApplication = await Application.findOne({
+      volunteerId,
+      opportunityId,
+    });
+
+    if (existingApplication) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already applied for this opportunity",
+      });
+    }
+
+    // 3. Create application
+    const application = await Application.create({
+      volunteerId,
+      opportunityId,
+      status: "pending",
+    });
+
+    // 4. Populate opportunity AND organisationId before returning
+    const populatedApplication = await Application.findById(application._id)
+      .populate("volunteerId", "-password")
+      .populate({
+        path: "opportunityId",
+        populate: {
+          path: "organisationId", // Nested populate gives the frontend organisation details
+        },
+      });
+
+    return res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+      data: populatedApplication,
+    });
+  } catch (err) {
+    console.log("Error in createApplication controller: ", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 /**
