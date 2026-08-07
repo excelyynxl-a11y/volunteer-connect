@@ -12,7 +12,10 @@ import {
 import { 
   getApplicationDisplayStatus,
   APPLICATION_STATUS_LABELS,
+  getApplicationBannerMessage,
 } from "../lib/application";
+
+
 
 const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [], applicationStatus }) => {
   const [selectedImage, setSelectedImage] = useState("");
@@ -39,7 +42,9 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
 
   const { canApply, reason } = getApplyEligibility(opportunity, volunteerAvailability);
 
-  const bannerMessage = effectiveStatusKey ? APPLICATION_STATUS_LABELS[effectiveStatusKey]?.(organisationName) : null;
+  const bannerMessage = effectiveStatusKey 
+  ? getApplicationBannerMessage(effectiveStatusKey, organisationName) 
+  : null;
   
   return (
     <div
