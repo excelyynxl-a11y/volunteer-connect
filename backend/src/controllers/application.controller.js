@@ -156,8 +156,66 @@ export const getMyOrganisationApplications = (req, res) => {
  * withdrawn; release capacity atomically when withdrawing an approved
  * application; rejected and withdrawn applications are terminal.
  */
-export const withdrawApplication = (req, res) => {
-  return sendNotImplemented(res, "Application withdrawal");
+export const withdrawApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { withdrawalReason } = req.body;
+    const volunteerId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    // Ensure only the applicant can withdraw
+    if (application.volunteerId.toString() !== volunteerId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorised to withdraw this application",
+      });
+    }
+
+    // Reject withdrawal for terminal states
+    if (["rejected", "withdrawn"].includes(application.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot withdraw an application that is already ${application.status}`,
+      });
+    }
+
+    application.status = "withdrawn";
+    if (withdrawalReason) {
+      application.withdrawalReason = withdrawalReason;
+    }
+
+    await application.save();
+
+    const populatedApplication = await Application.findById(id)
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Application withdrawn successfully",
+      data: populatedApplication,
+    });
+  } catch (err) {
+    console.log("Error in withdrawApplication controller: ", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 export const getAllApplications = async (req, res) => {
