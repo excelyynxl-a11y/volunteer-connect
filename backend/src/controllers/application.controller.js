@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Application from "../models/application.model.js";
+import Opportunity from "../models/opportunity.model.js";
 
 const sendNotImplemented = (res, feature) =>
   res.status(501).json({
@@ -107,8 +108,29 @@ export const createApplication = async (req, res) => {
  * Success: { success, count, data: application[] }
  * When status is omitted, return all of the volunteer's applications.
  */
-export const getMyApplications = (req, res) => {
-  return sendNotImplemented(res, "Volunteer application listing");
+export const getMyApplications = async (req, res) => {
+  try {
+    const volunteerId = req.user._id;
+    const { status } = req.query;
+    const query = { volunteerId };
+
+    if (status) query.status = status.toLowerCase();
+
+    const applications = await Application.find(query)
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: applications.length,
+      data: applications,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 /**

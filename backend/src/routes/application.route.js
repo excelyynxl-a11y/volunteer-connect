@@ -20,37 +20,59 @@ const router = express.Router();
 
 router.use(protectRoute);
 
-router.get("/", adminOnly, getAllApplications);
+// GET /api/application - Volunteer applications listing
 router.get(
-  "/me",
+  "/",
   allowRoles("volunteer"),
-  getMyApplications,
+  getMyApplications
 );
+
+// GET /api/application/all - Admin only view for all applications
 router.get(
-  "/organisation/me",
+  "/all",
+  adminOnly,
+  getAllApplications
+);
+
+// GET /api/application/organisation - Organisation applications listing
+router.get(
+  "/organisation",
   allowRoles("organisation"),
-  getMyOrganisationApplications,
+  getMyOrganisationApplications
 );
+
+// POST /api/application - Submit a volunteer application
 router.post(
-  "/create",
+  "/",
   allowRoles("volunteer"),
-  createApplication,
+  createApplication
 );
+
+// GET /api/application/:id - Single application detail
 router.get("/:id", getApplicationById);
+
+// DELETE /api/application/:id - Admin delete route
 router.delete("/:id", adminOnly, deleteApplication);
-router.patch(
+
+// PUT /api/application/:id/approve - Organisation approve
+router.put(
   "/:id/approve",
   allowRoles("organisation"),
-  approveApplication,
+  approveApplication
 );
-router.patch(
+
+// PUT /api/application/:id/reject - Organisation reject
+router.put(
   "/:id/reject",
   allowRoles("organisation"),
-  rejectApplication,
+  rejectApplication
 );
-router.patch(
+
+// PUT /api/application/:id/withdraw - Volunteer withdraw
+router.put(
   "/:id/withdraw",
   allowRoles("volunteer"),
-  withdrawApplication,
+  withdrawApplication
 );
+
 export default router;

@@ -167,11 +167,16 @@ const VolunteerOpportunities = () => {
     setIsCustomAvailabilityOpen(false);
   };
 
-  const handleConfirmApply = async () => {
-    if (!applyingOpportunity) return;
+const handleConfirmApply = async () => {
+  if (!applyingOpportunity) return;
+  try {
     await createApplication(applyingOpportunity._id);
+    await getMyApplications(); 
     setApplyingOpportunity(null);
-  };
+  } catch (error) {
+    console.error("Failed to submit application:", error);
+  }
+};
 
   return (
     <div className="volunteer-opportunities-page">
