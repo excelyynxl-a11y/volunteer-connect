@@ -175,7 +175,7 @@
   align-items: center;
   justify-content: space-between;
   flex: 0 0 auto;
-  padding: 16px 20px;
+  padding: 12px 16px;
   gap: 14px;
   background: var(--profile-cream, #f5f1eb);
 }
@@ -213,7 +213,7 @@
 
 .messages-thread-content {
   flex: 1 1 auto;
-  padding: 18px 20px;
+  padding: 12px 16px;
   background: var(--profile-cream, #f5f1eb);
   display: flex;
   flex-direction: column;
@@ -426,7 +426,7 @@
   align-items: center;
   flex: 0 0 auto;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 10px 14px;
   background: #ffffff;
 }
 
@@ -558,6 +558,6 @@
   }
 
   .messages-compose-row {
-    padding: 12px;
+    padding: 10px;
   }
 }
