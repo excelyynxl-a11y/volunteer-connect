@@ -152,15 +152,20 @@
   font-size: 12px;
 }
 
-.messages-unread-count {
+.messages-conversation-meta .messages-unread-count {
   display: inline-flex;
-  min-width: 24px;
-  padding: 4px 8px;
-  border-radius: 999px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  border-radius: 50%;
   background: var(--profile-orange);
-  color: var(--profile-green-dark);
-  font-size: 12px;
-  font-weight: 700;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .messages-panel-right {
