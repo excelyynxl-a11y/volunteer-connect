@@ -234,6 +234,24 @@ const VolunteerMessages = () => {
     }
   };
 
+  const onComposeKeyDown = (event) => {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (!canCompose || !hasMessagePayload || isSendingMessage) {
+      return;
+    }
+
+    void onSendMessage();
+  };
+
   const onEndConversation = async () => {
     if (!selectedConversationId) return;
     const confirmed = window.confirm(
@@ -251,6 +269,18 @@ const VolunteerMessages = () => {
   );
   const hasMessagePayload = Boolean(draftMessage.trim() || selectedFile);
   const headerParticipant = selectedConversation?.participant;
+  const emptyConversationMessage = isOrganisation
+    ? conversations.length === 0
+      ? "Volunteers will appear here when they start a conversation."
+      : "Select a volunteer conversation to view messages."
+    : "Select a conversation from the list to view the chat.";
+  const composerPlaceholder = canCompose
+    ? "Write a message..."
+    : isOrganisation
+      ? conversations.length === 0
+        ? "Waiting for a volunteer to start a conversation."
+        : "Select a volunteer conversation to reply."
+      : "Select a conversation to start messaging.";
 
   return (
     <div className="messages-page">
@@ -362,7 +392,7 @@ const VolunteerMessages = () => {
               </div>
             ) : (
               <div className="messages-no-selection">
-                Select a conversation to view the chat.
+                {emptyConversationMessage}
               </div>
             )}
           </div>
@@ -399,7 +429,7 @@ const VolunteerMessages = () => {
               </div>
             ) : (
               <div className="messages-empty-state">
-                <p>Select a conversation from the list to view the thread.</p>
+                <p>{emptyConversationMessage}</p>
               </div>
             )}
           </div>
@@ -443,11 +473,8 @@ const VolunteerMessages = () => {
               <textarea
                 value={draftMessage}
                 onChange={(event) => setDraftMessage(event.target.value)}
-                placeholder={
-                  canCompose
-                    ? "Write a message..."
-                    : "Select a conversation to start messaging."
-                }
+                onKeyDown={onComposeKeyDown}
+                placeholder={composerPlaceholder}
                 disabled={!canCompose || isSendingMessage}
                 maxLength={2000}
               />
