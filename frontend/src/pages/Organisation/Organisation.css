@@ -2923,3 +2923,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.organisation-content.organisation-content-messages {
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (max-width: 1160px) {
+  .organisation-content.organisation-content-messages {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+}

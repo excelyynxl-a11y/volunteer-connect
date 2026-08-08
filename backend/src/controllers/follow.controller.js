@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 import Follow from "../models/follow.model.js";
 import { Organisation } from "../models/user.model.js";
 
-const sendNotImplemented = (res, feature) =>
-  res.status(501).json({
-    success: false,
-    message: `${feature} is not implemented yet`,
-  });
-
 export const followOrganisation = async (req, res) => {
   try{
     const volunteerId = req.user._id;
@@ -44,10 +38,23 @@ export const followOrganisation = async (req, res) => {
       });
     }
 
-    const follow = await Follow.create({
-      volunteerId,
-      organisationId,
-    });
+    let follow;
+
+    try {
+      follow = await Follow.create({
+        volunteerId,
+        organisationId,
+      });
+    } catch (error) {
+      if (error?.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message: "Organisation is already followed",
+        });
+      }
+
+      throw error;
+    }
 
     return res.status(201).json({
       success: true,
@@ -170,19 +177,64 @@ export const getFollowStatus = async (req, res) => {
   }
 };
 
-/**
- * TODO(follow): List followers of an organisation.
- * Params: { organisationId: string }
- * Query: { limit?: number, cursor?: string }
- * Success: {
- *   success,
- *   count,
- *   data: Array<{ _id, name, avatar }>,
- *   meta?: { nextCursor }
- * }
- * Rules: allow only the organisation owner or an admin and expose only the
- * volunteer fields required by the follower list.
- */
-export const getOrganisationFollowers = (req, res) => {
-  return sendNotImplemented(res, "Organisation follower listing");
+export const getOrganisationFollowers = async (req, res) => {
+  try {
+    const { organisationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(organisationId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organisation ID",
+      });
+    }
+
+    const isAdmin = req.user.role === "admin";
+    const isOwner = String(req.user._id) === String(organisationId);
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own followers",
+      });
+    }
+
+    const organisation = await Organisation.findOne({
+      _id: organisationId,
+      approvalStatus: "approved",
+    }).select("_id");
+
+    if (!organisation) {
+      return res.status(404).json({
+        success: false,
+        message: "Organisation not found",
+      });
+    }
+
+    const follows = await Follow.find({ organisationId }).populate({
+      path: "volunteerId",
+      select: "_id name avatar",
+      match: {
+        role: "volunteer",
+        approvalStatus: "approved",
+      },
+    });
+
+    const volunteers = follows
+      .map((follow) => follow.volunteerId)
+      .filter(Boolean)
+      .map(({ _id, name, avatar }) => ({ _id, name, avatar }));
+
+    return res.status(200).json({
+      success: true,
+      count: volunteers.length,
+      data: volunteers,
+    });
+  } catch (error) {
+    console.error("Error getting organisation followers:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };

@@ -140,6 +140,7 @@ const VolunteerMessages = () => {
     messageError,
     setDraftMessage,
     clearMessageError,
+    clearSelectedConversation,
     getMyConversations,
     getConversationMessages,
     sendMessage,
@@ -170,17 +171,23 @@ const VolunteerMessages = () => {
     const existingConversation = conversations.find(
       (conversation) => getId(conversation.participant) === organisationId,
     );
-    if (
-      existingConversation &&
-      getId(existingConversation._id) !== getId(selectedConversationId)
-    ) {
+    if (!existingConversation) {
+      if (selectedConversationId || messages.length > 0) {
+        clearSelectedConversation();
+      }
+      return;
+    }
+
+    if (getId(existingConversation._id) !== getId(selectedConversationId)) {
       void getConversationMessages(existingConversation._id);
     }
   }, [
+    clearSelectedConversation,
     conversations,
     getConversationMessages,
     isLoadingConversations,
     isOrganisation,
+    messages.length,
     organisationId,
     selectedConversationId,
   ]);
@@ -211,8 +218,11 @@ const VolunteerMessages = () => {
   const onSendMessage = async () => {
     const payload = { content: draftMessage, attachment: selectedFile };
     let result;
+    const selectedConversationMatchesOrganisation =
+      !organisationId ||
+      getId(selectedConversation?.participant) === organisationId;
 
-    if (selectedConversationId) {
+    if (selectedConversationId && selectedConversationMatchesOrganisation) {
       result = await sendMessage(selectedConversationId, payload);
     } else if (organisationId && !isOrganisation) {
       result = await initiateConversation(organisationId, payload);
@@ -227,6 +237,24 @@ const VolunteerMessages = () => {
     }
   };
 
+  const onComposeKeyDown = (event) => {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (!canCompose || !hasMessagePayload || isSendingMessage) {
+      return;
+    }
+
+    void onSendMessage();
+  };
+
   const onEndConversation = async () => {
     if (!selectedConversationId) return;
     const confirmed = window.confirm(
@@ -235,11 +263,27 @@ const VolunteerMessages = () => {
     if (confirmed) await endConversation(selectedConversationId);
   };
 
+  const selectedConversationMatchesOrganisation =
+    !organisationId ||
+    getId(selectedConversation?.participant) === organisationId;
   const canCompose = Boolean(
-    selectedConversation || (organisationId && !isOrganisation),
+    (selectedConversation && selectedConversationMatchesOrganisation) ||
+      (organisationId && !isOrganisation),
   );
   const hasMessagePayload = Boolean(draftMessage.trim() || selectedFile);
   const headerParticipant = selectedConversation?.participant;
+  const emptyConversationMessage = isOrganisation
+    ? conversations.length === 0
+      ? "Volunteers will appear here when they start a conversation."
+      : "Select a volunteer conversation to view messages."
+    : "Select a conversation from the list to view the chat.";
+  const composerPlaceholder = canCompose
+    ? "Write a message..."
+    : isOrganisation
+      ? conversations.length === 0
+        ? "Waiting for a volunteer to start a conversation."
+        : "Select a volunteer conversation to reply."
+      : "Select a conversation to start messaging.";
 
   return (
     <div className="messages-page">
@@ -247,11 +291,6 @@ const VolunteerMessages = () => {
         <div className="messages-hero-copy">
           <div className="messages-hero-label">MESSAGES</div>
           <h1>Inbox</h1>
-          <p>
-            {isOrganisation
-              ? "Reply to volunteers and manage active conversations."
-              : "Continue conversations with organisations."}
-          </p>
         </div>
       </div>
 
@@ -349,11 +388,7 @@ const VolunteerMessages = () => {
                   <p>New conversation</p>
                 </div>
               </div>
-            ) : (
-              <div className="messages-no-selection">
-                Select a conversation to view the chat.
-              </div>
-            )}
+            ) : null}
           </div>
 
           <DeadlineNotice deadline={selectedConversation?.responseDeadline} />
@@ -388,7 +423,7 @@ const VolunteerMessages = () => {
               </div>
             ) : (
               <div className="messages-empty-state">
-                <p>Select a conversation from the list to view the thread.</p>
+                <p>{emptyConversationMessage}</p>
               </div>
             )}
           </div>
@@ -432,11 +467,8 @@ const VolunteerMessages = () => {
               <textarea
                 value={draftMessage}
                 onChange={(event) => setDraftMessage(event.target.value)}
-                placeholder={
-                  canCompose
-                    ? "Write a message..."
-                    : "Select a conversation to start messaging."
-                }
+                onKeyDown={onComposeKeyDown}
+                placeholder={composerPlaceholder}
                 disabled={!canCompose || isSendingMessage}
                 maxLength={2000}
               />

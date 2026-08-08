@@ -1,17 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getInitials } from "../../lib/utils";
 import { useFollowStore } from "../../store/useFollowStore";
 import "./Volunteer.css";
-
-const initials = (name) =>
-  name
-    ? name
-      .split(" ")
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase()
-    : "?";
 
 const OrganisationAvatar = ({ name, avatar }) => {
   const [failedAvatar, setFailedAvatar] = useState("");
@@ -32,7 +23,7 @@ const OrganisationAvatar = ({ name, avatar }) => {
       aria-hidden="true"
       className="followed-organisations-avatar followed-organisations-avatar-fallback"
     >
-      {initials(name)}
+      {getInitials(name)}
     </div>
   );
 };
@@ -43,7 +34,8 @@ const FollowedOrganisations = () => {
     followedOrganisations,
     getMyFollowedOrganisations,
     unfollowOrganisation,
-    isFollowLoading,
+    isFollowedOrganisationsLoading,
+    followMutationOrganisationId,
     followError,
   } = useFollowStore();
   const [query, setQuery] = useState("");
@@ -55,7 +47,9 @@ const FollowedOrganisations = () => {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return followedOrganisations;
-    return followedOrganisations.filter((o) => o.name.toLowerCase().includes(q));
+    return followedOrganisations.filter((o) =>
+      (o.name || "").toLowerCase().includes(q),
+    );
   }, [followedOrganisations, query]);
 
   return (
@@ -92,7 +86,7 @@ const FollowedOrganisations = () => {
             </p>
           )}
 
-          {isFollowLoading ? (
+          {isFollowedOrganisationsLoading && followedOrganisations.length === 0 ? (
             <p>Loading...</p>
           ) : filtered.length === 0 && !followError ? (
             <p>No followed organisations.</p>
@@ -125,9 +119,12 @@ const FollowedOrganisations = () => {
                     </button>
                     <button
                       className="followed-organisations-action followed-organisations-unfollow"
+                      disabled={followMutationOrganisationId === org._id}
                       onClick={async () => { await unfollowOrganisation(org._id); }}
                     >
-                      Unfollow
+                      {followMutationOrganisationId === org._id
+                        ? "Unfollowing..."
+                        : "Unfollow"}
                     </button>
                   </div>
                 </div>

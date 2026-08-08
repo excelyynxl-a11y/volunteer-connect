@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Heart, MessageCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import "./PublicOrganisationProfile.css";
 const PublicOrganisationProfile = () => {
   const { organisationId } = useParams();
   const navigate = useNavigate();
+  const [failedAvatar, setFailedAvatar] = useState("");
   const {
     getPublicOrganisationProfile,
     isPublicOrganisationProfileLoading,
@@ -85,8 +86,12 @@ const PublicOrganisationProfile = () => {
         <div className="public-org-back">{backControl}</div>
 
         <div className="public-org-avatar">
-          {avatar ? (
-            <img src={avatar} alt={`${name || "Organisation"} avatar`} />
+          {avatar && avatar !== failedAvatar ? (
+            <img
+              src={avatar}
+              alt={`${name || "Organisation"} avatar`}
+              onError={() => setFailedAvatar(avatar)}
+            />
           ) : (
             <span aria-hidden="true">{getInitials(name)}</span>
           )}

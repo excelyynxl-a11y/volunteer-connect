@@ -46,7 +46,8 @@
 }
 
 .public-org-introduction {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .public-org-eyebrow {
@@ -72,18 +73,24 @@
 
 .public-org-actions {
   display: flex;
+  flex: 0 0 276px;
   gap: 12px;
 }
 
 .public-org-actions button {
   display: inline-flex;
+  flex: 1 1 0;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 14px 20px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 10px;
   border-radius: 12px;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .public-org-follow-button {
@@ -149,6 +156,7 @@
 
   .public-org-actions {
     width: 100%;
+    flex-basis: auto;
   }
 
 }
