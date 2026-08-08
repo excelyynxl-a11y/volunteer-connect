@@ -24,6 +24,7 @@ const updateConversation = (conversations, conversationId, updates) =>
   );
 
 let realtimeListenersBound = false;
+let messageRequestSequence = 0;
 
 export const useMessageStore = create((set, get) => ({
   conversations: [],
@@ -60,6 +61,7 @@ export const useMessageStore = create((set, get) => ({
         conversations,
         selectedConversationId,
         messages: selectedConversationId ? get().messages : [],
+        draftMessage: selectedConversationId ? get().draftMessage : "",
         isLoadingConversations: false,
       });
       return { success: true, conversations };
@@ -74,11 +76,14 @@ export const useMessageStore = create((set, get) => ({
   },
 
   getConversationMessages: async (conversationId) => {
+    const requestId = ++messageRequestSequence;
+
     set({
       isLoadingMessages: true,
       messageError: "",
       selectedConversationId: conversationId,
       messages: [],
+      draftMessage: "",
     });
 
     try {
@@ -90,6 +95,13 @@ export const useMessageStore = create((set, get) => ({
         ? responseData.messages
         : [];
       const responseDeadline = responseData.conversation?.responseDeadline ?? null;
+
+      if (
+        requestId !== messageRequestSequence ||
+        getId(get().selectedConversationId) !== getId(conversationId)
+      ) {
+        return { success: false, stale: true };
+      }
 
       set((state) => ({
         messages,
@@ -103,6 +115,13 @@ export const useMessageStore = create((set, get) => ({
       await get().markConversationAsRead(conversationId);
       return { success: true, messages };
     } catch (error) {
+      if (
+        requestId !== messageRequestSequence ||
+        getId(get().selectedConversationId) !== getId(conversationId)
+      ) {
+        return { success: false, stale: true };
+      }
+
       const message = getErrorMessage(error, "Unable to load messages.");
       set({ messageError: message, isLoadingMessages: false });
 
@@ -119,6 +138,13 @@ export const useMessageStore = create((set, get) => ({
       return { success: false, error: message };
     }
   },
+
+  clearSelectedConversation: () =>
+    set({
+      selectedConversationId: null,
+      messages: [],
+      draftMessage: "",
+    }),
 
   markConversationAsRead: async (conversationId) => {
     try {
@@ -223,6 +249,7 @@ export const useMessageStore = create((set, get) => ({
         ),
         selectedConversationId: null,
         messages: [],
+        draftMessage: "",
         isEndingConversation: false,
       }));
       return { success: true };
@@ -290,6 +317,7 @@ export const useMessageStore = create((set, get) => ({
               ? null
               : state.selectedConversationId,
             messages: wasSelected ? [] : state.messages,
+            draftMessage: wasSelected ? "" : state.draftMessage,
           };
         });
       });

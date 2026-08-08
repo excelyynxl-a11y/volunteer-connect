@@ -140,6 +140,7 @@ const VolunteerMessages = () => {
     messageError,
     setDraftMessage,
     clearMessageError,
+    clearSelectedConversation,
     getMyConversations,
     getConversationMessages,
     sendMessage,
@@ -170,13 +171,16 @@ const VolunteerMessages = () => {
     const existingConversation = conversations.find(
       (conversation) => getId(conversation.participant) === organisationId,
     );
-    if (
-      existingConversation &&
-      getId(existingConversation._id) !== getId(selectedConversationId)
-    ) {
+    if (!existingConversation) {
+      clearSelectedConversation();
+      return;
+    }
+
+    if (getId(existingConversation._id) !== getId(selectedConversationId)) {
       void getConversationMessages(existingConversation._id);
     }
   }, [
+    clearSelectedConversation,
     conversations,
     getConversationMessages,
     isLoadingConversations,
@@ -211,8 +215,11 @@ const VolunteerMessages = () => {
   const onSendMessage = async () => {
     const payload = { content: draftMessage, attachment: selectedFile };
     let result;
+    const selectedConversationMatchesOrganisation =
+      !organisationId ||
+      getId(selectedConversation?.participant) === organisationId;
 
-    if (selectedConversationId) {
+    if (selectedConversationId && selectedConversationMatchesOrganisation) {
       result = await sendMessage(selectedConversationId, payload);
     } else if (organisationId && !isOrganisation) {
       result = await initiateConversation(organisationId, payload);
@@ -235,8 +242,12 @@ const VolunteerMessages = () => {
     if (confirmed) await endConversation(selectedConversationId);
   };
 
+  const selectedConversationMatchesOrganisation =
+    !organisationId ||
+    getId(selectedConversation?.participant) === organisationId;
   const canCompose = Boolean(
-    selectedConversation || (organisationId && !isOrganisation),
+    (selectedConversation && selectedConversationMatchesOrganisation) ||
+      (organisationId && !isOrganisation),
   );
   const hasMessagePayload = Boolean(draftMessage.trim() || selectedFile);
   const headerParticipant = selectedConversation?.participant;
