@@ -288,11 +288,6 @@ const VolunteerMessages = () => {
         <div className="messages-hero-copy">
           <div className="messages-hero-label">MESSAGES</div>
           <h1>Inbox</h1>
-          <p>
-            {isOrganisation
-              ? "Reply to volunteers and manage active conversations."
-              : "Continue conversations with organisations."}
-          </p>
         </div>
       </div>
 
