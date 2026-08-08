@@ -158,7 +158,7 @@
   padding: 4px 8px;
   border-radius: 999px;
   background: var(--profile-orange);
-  color: #ffffff;
+  color: var(--profile-green-dark);
   font-size: 12px;
   font-weight: 700;
 }
