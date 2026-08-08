@@ -29,12 +29,13 @@ const OrganisationDashboard = () => {
     "/organisation-dashboard/applications/volunteers",
   ];
   const isFlushPage = flushPages.some(page => location.pathname.startsWith(page));
+  const isMessagesPage = location.pathname === "/organisation-dashboard/messages";
 
   return (
     <div className="organisation-dashboard">
       <OrganisationSidebar />
       <main
-        className={`organisation-content${sidebarCollapsed ? " sidebar-collapsed" : ""}${isFlushPage ? " organisation-content-flush" : ""}`}
+        className={`organisation-content${sidebarCollapsed ? " sidebar-collapsed" : ""}${isFlushPage ? " organisation-content-flush" : ""}${isMessagesPage ? " organisation-content-messages" : ""}`}
       >
         <Routes>
           <Route path="/" element={<OrganisationHomepage />} />

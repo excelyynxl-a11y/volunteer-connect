@@ -388,11 +388,7 @@ const VolunteerMessages = () => {
                   <p>New conversation</p>
                 </div>
               </div>
-            ) : (
-              <div className="messages-no-selection">
-                {emptyConversationMessage}
-              </div>
-            )}
+            ) : null}
           </div>
 
           <DeadlineNotice deadline={selectedConversation?.responseDeadline} />
