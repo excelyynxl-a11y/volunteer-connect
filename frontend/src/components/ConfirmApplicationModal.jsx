@@ -1,12 +1,14 @@
-import { FileText } from "lucide-react";
+import { FileText, AlertTriangle } from "lucide-react";
 import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
   getOrganisationName,
 } from "../lib/opportunity";
+import { isOpportunityInsideAvailability } from "../lib/availability.js";
 
 const ConfirmApplicationModal = ({
   opportunity,
+  volunteerAvailability = [],
   onCancel,
   onConfirm,
   isSubmitting,
@@ -19,6 +21,11 @@ const ConfirmApplicationModal = ({
     opportunity.endAt
   );
   const organisationName = getOrganisationName(opportunity);
+
+  // Validate if opportunity fits volunteer availability
+  const isAvailable =
+    volunteerAvailability.length === 0 ||
+    isOpportunityInsideAvailability(opportunity, volunteerAvailability);
 
   return (
     <div className="application-modal-overlay" onClick={onCancel}>
@@ -45,6 +52,13 @@ const ConfirmApplicationModal = ({
           </span>
         </div>
 
+        {!isAvailable && (
+          <div className="application-modal-warning" style={{ color: "#dc2626", display: "flex", gap: "8px", alignItems: "center" }}>
+            <AlertTriangle size={18} />
+            <span>This opportunity is outside your set availability times.</span>
+          </div>
+        )}
+
         <div className="application-modal-actions">
           <button
             type="button"
@@ -58,7 +72,7 @@ const ConfirmApplicationModal = ({
             type="button"
             className="btn-confirm-apply"
             onClick={onConfirm}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isAvailable}
           >
             {isSubmitting ? "Applying..." : "Confirm & Apply"}
           </button>

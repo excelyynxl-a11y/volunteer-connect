@@ -444,11 +444,12 @@ const handleConfirmApply = async () => {
       />
 
       <ConfirmApplicationModal
-        opportunity={applyingOpportunity}
-        onCancel={() => setApplyingOpportunity(null)}
-        onConfirm={handleConfirmApply}
-        isSubmitting={isSubmittingApplication}
-      />
+  opportunity={applyingOpportunity}
+  volunteerAvailability={sortedVolunteerAvailability}
+  onCancel={() => setApplyingOpportunity(null)}
+  onConfirm={handleConfirmApply}
+  isSubmitting={isSubmittingApplication}
+/>
 
       {showBackToTop && (
         <button

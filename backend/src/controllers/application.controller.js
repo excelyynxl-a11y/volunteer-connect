@@ -16,6 +16,8 @@ const sendNotImplemented = (res, feature) =>
  * the same volunteer/opportunity pair, non-active or full opportunities, and
  * submissions after the application deadline.
  */
+import { isOpportunityInsideAvailability } from "../lib/availability.js"; // adjust path as needed
+
 export const createApplication = async (req, res) => {
   try {
     const { opportunityId } = req.body;
@@ -31,10 +33,7 @@ export const createApplication = async (req, res) => {
     // 1. Check if opportunity exists and validate status & deadline
     const opportunity = await Opportunity.findById(opportunityId);
     if (!opportunity) {
-      return res.status(404).json({
-        success: false,
-        message: "Opportunity not found",
-      });
+      return res.status(404).json({ success: false, message: "Opportunity not found" });
     }
 
     if (opportunity.status?.toLowerCase() !== "active") {
@@ -61,7 +60,24 @@ export const createApplication = async (req, res) => {
       });
     }
 
-    // 2. Prevent duplicate applications
+    // 2. Validate availability requirements
+    const userAvailability = req.user?.availability || [];
+    if (userAvailability.length > 0) {
+      const isAvailable = isOpportunityInsideAvailability(
+        opportunity,
+        userAvailability
+      );
+      
+
+      if (!isAvailable) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot apply for an opportunity outside your specified availability times.",
+        });
+      }
+    }
+
+    // 3. Prevent duplicate applications
     const existingApplication = await Application.findOne({
       volunteerId,
       opportunityId,
@@ -74,20 +90,20 @@ export const createApplication = async (req, res) => {
       });
     }
 
-    // 3. Create application
+    // 4. Create application
     const application = await Application.create({
       volunteerId,
       opportunityId,
       status: "pending",
     });
 
-    // 4. Populate opportunity AND organisationId before returning
+    // 5. Populate opportunity AND organisationId before returning
     const populatedApplication = await Application.findById(application._id)
       .populate("volunteerId", "-password")
       .populate({
         path: "opportunityId",
         populate: {
-          path: "organisationId", // Nested populate gives the frontend organisation details
+          path: "organisationId",
         },
       });
 

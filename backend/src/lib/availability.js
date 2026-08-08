@@ -120,3 +120,78 @@ export const sortAvailability = (availability) =>
       getMinutesFromTime(secondSlot.startTime)
     );
   });
+
+// Target timezone for local application execution (adjusts Docker UTC ISO timestamps)
+const TARGET_TIMEZONE = process.env.TZ || "Asia/Kuala_Lumpur";
+
+/**
+ * Extracts minutes from midnight for a given ISO Date in the target timezone
+ */
+const getMinutesInTimezone = (date, timeZone = TARGET_TIMEZONE) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+    timeZone,
+  }).formatToParts(date);
+
+  let hours = 0;
+  let minutes = 0;
+  for (const part of parts) {
+    if (part.type === "hour") hours = parseInt(part.value, 10) % 24;
+    if (part.type === "minute") minutes = parseInt(part.value, 10);
+  }
+  return hours * 60 + minutes;
+};
+
+/**
+ * Checks if an opportunity's start and end times fall completely within
+ * at least one of the volunteer's registered availability slots.
+ */
+export const isOpportunityInsideAvailability = (
+  opportunity,
+  availabilitySlots = []
+) => {
+  if (
+    !opportunity?.startAt ||
+    !opportunity?.endAt ||
+    !Array.isArray(availabilitySlots) ||
+    availabilitySlots.length === 0
+  ) {
+    return false;
+  }
+
+  const startDate = new Date(opportunity.startAt);
+  const endDate = new Date(opportunity.endAt);
+
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return false;
+  }
+
+  // Get local weekday name in target timezone (e.g., "Sunday")
+  const opportunityDay = startDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    timeZone: TARGET_TIMEZONE,
+  });
+
+  const opportunityStartMin = getMinutesInTimezone(startDate);
+  const opportunityEndMin = getMinutesInTimezone(endDate);
+
+  return availabilitySlots.some((slot) => {
+    if (
+      !slot?.dayOfWeek ||
+      slot.dayOfWeek.trim().toLowerCase() !== opportunityDay.toLowerCase()
+    ) {
+      return false;
+    }
+
+    const slotStartMin = getMinutesFromTime(slot.startTime);
+    const slotEndMin = getMinutesFromTime(slot.endTime);
+
+    if (slotStartMin === null || slotEndMin === null) return false;
+
+    return (
+      opportunityStartMin >= slotStartMin && opportunityEndMin <= slotEndMin
+    );
+  });
+};
