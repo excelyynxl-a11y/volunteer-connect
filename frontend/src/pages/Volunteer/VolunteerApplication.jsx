@@ -36,8 +36,11 @@ const mapApplicationToViewModel = (application) => {
     time: formatOpportunityTimeRange(opportunity.startAt, opportunity.endAt),
     submittedOn: application.createdAt,
     status: APPLICARION_TAB_STATUS_LABELS[application.status] || application.status,
+    // ✅ Look for rejectionReason or rejectionMessage from DB
     rejectionMessage:
-      application.withdrawalReason || "No reason was provided.",
+      application.rejectionReason ||
+      application.rejectionMessage ||
+      "No reason was provided.",
   };
 };
 

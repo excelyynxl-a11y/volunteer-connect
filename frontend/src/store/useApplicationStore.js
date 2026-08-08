@@ -103,10 +103,13 @@ export const useApplicationStore = create((set, get) => ({
   },
 
   // PUT /api/application/:id/reject - Reject application
-  rejectApplication: async (applicationId) => {
+  rejectApplication: async (applicationId, reason) => {
     set({ isUpdatingApplication: true, applicationsError: "" });
     try {
-      const response = await axiosInstance.put(`/application/${applicationId}/reject`);
+      const response = await axiosInstance.put(`/application/${applicationId}/reject`, {
+        reason,
+        rejectionReason: reason, // sending both keys so backend accepts either
+      });
       
       set((state) => ({
         applications: state.applications.map((app) =>

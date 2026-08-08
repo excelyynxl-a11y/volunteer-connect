@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatDate } from "../lib/utils";
-import { ArrowLeft, Check, ClipboardList, Eye, X } from "lucide-react";
+import { ArrowLeft, Check, ClipboardList, Eye, X, Calendar } from "lucide-react";
 import { APPLICATION_TABS } from "../lib/application";
 
 const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject }) => {
@@ -10,12 +10,12 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
 
-  const applications = opportunity.applications;
+  const applications = opportunity?.applications || [];
 
-  const countByStatus = (applications, status) =>
-  status === "All"
-    ? applications.length
-    : applications.filter((a) => a.status === status).length;
+  const countByStatus = (apps, status) =>
+    status === "All"
+      ? apps.length
+      : apps.filter((a) => a.status === status).length;
 
   const tabCounts = useMemo(() => {
     const counts = {};
@@ -32,7 +32,7 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
 
   const approvedCount = countByStatus(applications, "Approved");
   const pendingCount = countByStatus(applications, "Pending");
-  const spotsRemaining = Math.max(opportunity.capacity - approvedCount, 0);
+  const spotsRemaining = Math.max((opportunity?.capacity || 0) - approvedCount, 0);
 
   const openReview = (app) => {
     setReviewTarget(app);
@@ -73,10 +73,10 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
       <div className="app-detail-header">
         <div>
           <p className="app-detail-eyebrow">Opportunity applications</p>
-          <h1>{opportunity.title}</h1>
+          <h1>{opportunity?.title}</h1>
           <span className="app-detail-subtitle">
-            {formatDate(opportunity.eventDate)} · Application deadline{" "}
-            {formatDate(opportunity.deadline)}
+            {formatDate(opportunity?.eventDate)} · Application deadline{" "}
+            {formatDate(opportunity?.deadline)}
           </span>
         </div>
         <button type="button" className="app-back-btn" onClick={onBack}>
@@ -92,7 +92,7 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
         <div className="app-detail-stat-card">
           <span>Approved volunteers</span>
           <strong>
-            {approvedCount} / {opportunity.capacity}
+            {approvedCount} / {opportunity?.capacity || 0}
           </strong>
         </div>
         <div className="app-detail-stat-card">
@@ -133,62 +133,65 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
               </tr>
             </thead>
             <tbody>
-              {visibleApplications.map((app) => (
-                <tr key={app.id}>
-                  <td>
-                    <div className="app-volunteer-cell">
-                      <span className="app-volunteer-avatar">
-                        {app.volunteerInitials}
-                      </span>
-                      <strong>{app.volunteerName}</strong>
-                    </div>
-                  </td>
-                  <td>{formatDate(app.submittedOn)}</td>
-                  <td>
-                    <span
-                      className={`organisation-status ${app.status.toLowerCase()}`}
-                    >
-                      <span className="organisation-status-dot" />
-                      {app.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="app-view-details-btn"
-                      onClick={() => openReview(app)}
-                    >
-                      <Eye size={14} /> View Details
-                    </button>
-                  </td>
-                  <td>
-                    {app.status === "Pending" ? (
-                      <div className="app-row-actions">
-                        <button
-                          type="button"
-                          className="app-approve-btn"
-                          disabled={isSubmittingDecision}
-                          onClick={() => handleApprove(app.id)}
-                        >
-                          <Check size={14} /> Approve
-                        </button>
-                        <button
-                          type="button"
-                          className="app-reject-btn"
-                          disabled={isSubmittingDecision}
-                          onClick={() => openReview({ ...app, __reject: true })}
-                        >
-                          <X size={14} /> Reject
-                        </button>
+              {visibleApplications.map((app, index) => {
+                const appId = app.id || app._id || `app-${index}`;
+                return (
+                  <tr key={appId}>
+                    <td>
+                      <div className="app-volunteer-cell">
+                        <span className="app-volunteer-avatar">
+                          {app.volunteerInitials || app.volunteerName?.[0] || "V"}
+                        </span>
+                        <strong>{app.volunteerName || "Volunteer"}</strong>
                       </div>
-                    ) : (
-                      <span className="app-decision-recorded">
-                        Decision recorded
+                    </td>
+                    <td>{formatDate(app.submittedOn || app.createdAt)}</td>
+                    <td>
+                      <span
+                        className={`organisation-status ${app.status?.toLowerCase()}`}
+                      >
+                        <span className="organisation-status-dot" />
+                        {app.status}
                       </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="app-view-details-btn"
+                        onClick={() => openReview(app)}
+                      >
+                        <Eye size={14} /> View Details
+                      </button>
+                    </td>
+                    <td>
+                      {app.status === "Pending" ? (
+                        <div className="app-row-actions">
+                          <button
+                            type="button"
+                            className="app-approve-btn"
+                            disabled={isSubmittingDecision}
+                            onClick={() => handleApprove(appId)}
+                          >
+                            <Check size={14} /> Approve
+                          </button>
+                          <button
+                            type="button"
+                            className="app-reject-btn"
+                            disabled={isSubmittingDecision}
+                            onClick={() => openReview({ ...app, __reject: true })}
+                          >
+                            <X size={14} /> Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="app-decision-recorded">
+                          Decision recorded
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -201,7 +204,7 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
             onClick={(e) => e.stopPropagation()}
           >
             <div className="organisation-modal-header">
-              <h2>{reviewTarget.volunteerName}</h2>
+              <h2>{reviewTarget.volunteerName || "Volunteer Details"}</h2>
               <button
                 type="button"
                 className="organisation-modal-close"
@@ -215,11 +218,14 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
               <p className="app-modal-label">Skills</p>
               <div className="organisation-skill-tags" style={{ marginBottom: "20px" }}>
                 {reviewTarget.skills?.length ? (
-                  reviewTarget.skills.map((skill) => (
-                    <span className="organisation-skill-tag" key={skill}>
-                      {skill}
-                    </span>
-                  ))
+                  reviewTarget.skills.map((skill, index) => {
+                    const label = typeof skill === "string" ? skill : skill.name || skill.label;
+                    return (
+                      <span className="organisation-skill-tag" key={skill._id || `${label}-${index}`}>
+                        {label}
+                      </span>
+                    );
+                  })
                 ) : (
                   <span className="app-modal-empty">No skills listed</span>
                 )}
@@ -228,20 +234,26 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
               <p className="app-modal-label">Availability</p>
               <div className="organisation-availability-list" style={{ marginBottom: "20px" }}>
                 {reviewTarget.availability?.length ? (
-                  reviewTarget.availability.map((slot) => (
-                    <span
-                      className="organisation-availability-slot"
-                      key={`${slot.day}-${slot.time}`}
-                    >
-                      <Calendar size={13} />
-                      {slot.day} · {slot.time}
+                  reviewTarget.availability.map((slot, index) => {
+                    const day = slot.day || slot.dayOfWeek || "Day";
+                    const time = slot.time || slot.timeSlot || "Time";
+                    return (
                       <span
-                        className={`organisation-availability-pref ${slot.preference}`}
+                        className="organisation-availability-slot"
+                        key={slot._id || `${day}-${time}-${index}`}
                       >
-                        {slot.preference}
+                        <Calendar size={13} />
+                        {day} · {time}
+                        {slot.preference && (
+                          <span
+                            className={`organisation-availability-pref ${slot.preference}`}
+                          >
+                            {slot.preference}
+                          </span>
+                        )}
                       </span>
-                    </span>
-                  ))
+                    );
+                  })
                 ) : (
                   <span className="app-modal-empty">
                     No availability provided
@@ -251,10 +263,10 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
 
               {isDecided && (
                 <span
-                  className={`organisation-status ${reviewTarget.status.toLowerCase()}`}
+                  className={`organisation-status ${reviewTarget.status?.toLowerCase()}`}
                 >
                   <span className="organisation-status-dot" />
-                  Already {reviewTarget.status.toLowerCase()}
+                  Already {reviewTarget.status?.toLowerCase()}
                 </span>
               )}
 
@@ -289,7 +301,7 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
                       className="organisation-modal-approve-btn"
                       disabled={isSubmittingDecision}
                       onClick={() =>
-                        handleApprove(reviewTarget.id)
+                        handleApprove(reviewTarget.id || reviewTarget._id)
                       }
                     >
                       <Check size={16} /> {isSubmittingDecision ? "Approving..." : "Approve"}
@@ -298,9 +310,9 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
                       type="button"
                       className="organisation-modal-reject-btn"
                       disabled={isSubmittingDecision}
-                      onClick={() => handleReject(reviewTarget.id, rejectionReason.trim())}
+                      onClick={() => handleReject(reviewTarget.id || reviewTarget._id, rejectionReason.trim())}
                     >
-                      <X size={16} /> {isSubmittingDecision ? "Rejecting..." : "Confirm rejection"}
+                      <X size={16} /> {isSubmittingDecision ? "Confirm rejection" : "Confirm rejection"}
                     </button>
                   </>
                 ) : (
@@ -321,7 +333,7 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
                       type="button"
                       className="organisation-modal-reject-btn"
                       onClick={() =>
-                        handleReject(reviewTarget.id, rejectionReason.trim())
+                        handleReject(reviewTarget.id || reviewTarget._id, rejectionReason.trim())
                       }
                     >
                       <X size={16} /> Confirm rejection
