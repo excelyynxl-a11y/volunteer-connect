@@ -9,11 +9,13 @@ export const useFollowStore = create((set, get) => ({
   followers: [],
   isFollowing: false,
   isFollowLoading: false,
+  isFollowedOrganisationsLoading: false,
+  followMutationOrganisationId: null,
   followError: "",
   followersError: "",
 
   getMyFollowedOrganisations: async () => {
-    set({ isFollowLoading: true, followError: "" });
+    set({ isFollowedOrganisationsLoading: true, followError: "" });
 
     try {
       const response = await axiosInstance.get("/follow/me");
@@ -33,7 +35,7 @@ export const useFollowStore = create((set, get) => ({
       });
       return { success: false, error: message };
     } finally {
-      set({ isFollowLoading: false });
+      set({ isFollowedOrganisationsLoading: false });
     }
   },
 
@@ -62,7 +64,11 @@ export const useFollowStore = create((set, get) => ({
   },
 
   followOrganisation: async (organisationId) => {
-    set({ isFollowLoading: true, followError: "" });
+    set({
+      isFollowLoading: true,
+      followMutationOrganisationId: organisationId,
+      followError: "",
+    });
 
     try {
       const response = await axiosInstance.post(
@@ -85,12 +91,16 @@ export const useFollowStore = create((set, get) => ({
       set({ followError: message });
       return { success: false, error: message };
     } finally {
-      set({ isFollowLoading: false });
+      set({ isFollowLoading: false, followMutationOrganisationId: null });
     }
   },
 
   unfollowOrganisation: async (organisationId) => {
-    set({ isFollowLoading: true, followError: "" });
+    set({
+      isFollowLoading: true,
+      followMutationOrganisationId: organisationId,
+      followError: "",
+    });
 
     try {
       const response = await axiosInstance.delete(
@@ -113,7 +123,7 @@ export const useFollowStore = create((set, get) => ({
       set({ followError: message });
       return { success: false, error: message };
     } finally {
-      set({ isFollowLoading: false });
+      set({ isFollowLoading: false, followMutationOrganisationId: null });
     }
   },
 
