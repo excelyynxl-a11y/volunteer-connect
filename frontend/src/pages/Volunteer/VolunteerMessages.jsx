@@ -172,7 +172,9 @@ const VolunteerMessages = () => {
       (conversation) => getId(conversation.participant) === organisationId,
     );
     if (!existingConversation) {
-      clearSelectedConversation();
+      if (selectedConversationId || messages.length > 0) {
+        clearSelectedConversation();
+      }
       return;
     }
 
@@ -185,6 +187,7 @@ const VolunteerMessages = () => {
     getConversationMessages,
     isLoadingConversations,
     isOrganisation,
+    messages.length,
     organisationId,
     selectedConversationId,
   ]);

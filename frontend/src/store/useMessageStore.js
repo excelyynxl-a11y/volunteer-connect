@@ -56,12 +56,21 @@ export const useMessageStore = create((set, get) => ({
       )
         ? get().selectedConversationId
         : null;
+      const selectionWasCleared =
+        getId(selectedConversationId) !== getId(get().selectedConversationId);
+
+      if (selectionWasCleared) {
+        messageRequestSequence += 1;
+      }
 
       set({
         conversations,
         selectedConversationId,
         messages: selectedConversationId ? get().messages : [],
         draftMessage: selectedConversationId ? get().draftMessage : "",
+        isLoadingMessages: selectionWasCleared
+          ? false
+          : get().isLoadingMessages,
         isLoadingConversations: false,
       });
       return { success: true, conversations };
@@ -139,12 +148,15 @@ export const useMessageStore = create((set, get) => ({
     }
   },
 
-  clearSelectedConversation: () =>
+  clearSelectedConversation: () => {
+    messageRequestSequence += 1;
     set({
       selectedConversationId: null,
       messages: [],
       draftMessage: "",
-    }),
+      isLoadingMessages: false,
+    });
+  },
 
   markConversationAsRead: async (conversationId) => {
     try {
@@ -182,21 +194,40 @@ export const useMessageStore = create((set, get) => ({
       const message = response.data?.data?.message;
       const responseDeadline = response.data?.data?.responseDeadline ?? null;
 
-      set((state) => ({
-        messages: appendUniqueMessage(state.messages, message),
-        conversations: updateConversation(state.conversations, conversationId, {
-          lastMessage: message,
-          lastMessageAt: message?.createdAt,
-          responseDeadline,
-        }),
-        draftMessage: "",
-        isSendingMessage: false,
-      }));
+      set((state) => {
+        const isSelectedConversation =
+          getId(state.selectedConversationId) === getId(conversationId);
+
+        return {
+          messages: isSelectedConversation
+            ? appendUniqueMessage(state.messages, message)
+            : state.messages,
+          conversations: updateConversation(
+            state.conversations,
+            conversationId,
+            {
+              lastMessage: message,
+              lastMessageAt: message?.createdAt,
+              responseDeadline,
+            },
+          ),
+          draftMessage: isSelectedConversation
+            ? ""
+            : state.draftMessage,
+          isSendingMessage: false,
+        };
+      });
       await get().getMyConversations({ silent: true });
       return { success: true, data: response.data?.data };
     } catch (error) {
       const message = getErrorMessage(error, "Unable to send message.");
-      set({ messageError: message, isSendingMessage: false });
+      set((state) => ({
+        messageError:
+          getId(state.selectedConversationId) === getId(conversationId)
+            ? message
+            : state.messageError,
+        isSendingMessage: false,
+      }));
       return { success: false, error: message };
     }
   },
@@ -243,13 +274,25 @@ export const useMessageStore = create((set, get) => ({
 
     try {
       await axiosInstance.delete(`/message/conversations/${conversationId}`);
+      const wasSelected =
+        getId(get().selectedConversationId) === getId(conversationId);
+
+      if (wasSelected) {
+        messageRequestSequence += 1;
+      }
+
       set((state) => ({
         conversations: state.conversations.filter(
           (conversation) => getId(conversation._id) !== getId(conversationId),
         ),
-        selectedConversationId: null,
-        messages: [],
-        draftMessage: "",
+        ...(wasSelected
+          ? {
+              selectedConversationId: null,
+              messages: [],
+              draftMessage: "",
+              isLoadingMessages: false,
+            }
+          : {}),
         isEndingConversation: false,
       }));
       return { success: true };
@@ -306,9 +349,14 @@ export const useMessageStore = create((set, get) => ({
       );
 
       messageSocket.on("conversation:deleted", ({ conversationId }) => {
+        const wasSelected =
+          getId(get().selectedConversationId) === getId(conversationId);
+
+        if (wasSelected) {
+          messageRequestSequence += 1;
+        }
+
         set((state) => {
-          const wasSelected =
-            getId(state.selectedConversationId) === getId(conversationId);
           return {
             conversations: state.conversations.filter(
               (conversation) => getId(conversation._id) !== getId(conversationId),
@@ -318,6 +366,9 @@ export const useMessageStore = create((set, get) => ({
               : state.selectedConversationId,
             messages: wasSelected ? [] : state.messages,
             draftMessage: wasSelected ? "" : state.draftMessage,
+            isLoadingMessages: wasSelected
+              ? false
+              : state.isLoadingMessages,
           };
         });
       });
