@@ -1,40 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 
-const mockOrganisations = [
-  {
-    _id: "organisation-mock-001",
-    name: "Community Care Network",
-    avatar: "",
-    biodata: "Supporting local families through practical community programmes.",
-  },
-  {
-    _id: "organisation-mock-002",
-    name: "Green Neighbourhood Initiative",
-    avatar: "",
-    biodata: "Bringing volunteers together for cleaner and greener communities.",
-  },
-];
-
-const mockFollowers = [
-  {
-    _id: "volunteer-mock-001",
-    name: "Alex Volunteer",
-    avatar: "",
-  },
-  {
-    _id: "volunteer-mock-002",
-    name: "Jamie Helper",
-    avatar: "",
-  },
-];
-
-const createListResponse = (items) => ({
-  success: true,
-  count: items.length,
-  data: items,
-});
-
 const getFollowErrorMessage = (error, fallbackMessage) =>
   error.response?.data?.message || fallbackMessage;
 
@@ -44,6 +10,7 @@ export const useFollowStore = create((set, get) => ({
   isFollowing: false,
   isFollowLoading: false,
   followError: "",
+  followersError: "",
 
   getMyFollowedOrganisations: async () => {
     set({ isFollowLoading: true, followError: "" });
@@ -151,24 +118,25 @@ export const useFollowStore = create((set, get) => ({
   },
 
   getOrganisationFollowers: async (organisationId) => {
-    set({ isFollowLoading: true, followError: "" });
+    set({ isFollowLoading: true, followersError: "" });
 
     try {
-      const organisationFollowers =
-        organisationId === mockOrganisations[0]._id ? mockFollowers : [];
-      const response = {
-        data: {
-          ...createListResponse(organisationFollowers),
-          meta: { nextCursor: null },
-        },
-      };
-      // TODO(follow-api): replace the mock response with:
-      // const response = await axiosInstance.get(
-      //   `/follow/organisations/${organisationId}/followers`,
-      // );
+      const response = await axiosInstance.get(
+        `/follow/organisations/${organisationId}/followers`,
+      );
+      const followers = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
 
-      set({ followers: response.data.data });
+      set({ followers });
       return response.data;
+    } catch (error) {
+      const message = getFollowErrorMessage(
+        error,
+        "Failed to load organisation followers.",
+      );
+      set({ followers: [], followersError: message });
+      return { success: false, error: message };
     } finally {
       set({ isFollowLoading: false });
     }

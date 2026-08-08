@@ -1,0 +1,166 @@
+.organisation-followers-page {
+  min-height: 100%;
+  color: #1d2a32;
+}
+
+.organisation-followers-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 auto 24px;
+  max-width: 1200px;
+}
+
+.organisation-followers-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #b8782e;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+}
+
+.organisation-followers-header h1 {
+  margin: 0 0 8px;
+  color: #2c614f;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.organisation-followers-header p,
+.organisation-followers-panel-heading p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.organisation-followers-count {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border: 1px solid rgba(217, 170, 85, 0.35);
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #8c6422;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.organisation-followers-panel {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 26px;
+  border: 1px solid #e8ddd0;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 14px 40px rgba(20, 42, 39, 0.05);
+}
+
+.organisation-followers-panel-heading {
+  margin-bottom: 20px;
+}
+
+.organisation-followers-panel-heading h2 {
+  margin: 0 0 6px;
+  color: #2c614f;
+  font-size: 21px;
+}
+
+.organisation-followers-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.organisation-followers-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #eee4d8;
+  border-radius: 14px;
+  background: #fbf8f2;
+}
+
+.organisation-followers-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.organisation-followers-avatar-image {
+  object-fit: cover;
+}
+
+.organisation-followers-avatar-fallback {
+  background: #2c614f;
+  color: #ffffff;
+}
+
+.organisation-followers-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #1d2a32;
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organisation-followers-state {
+  margin: 0;
+  padding: 28px 12px;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+}
+
+.organisation-followers-state-error {
+  color: #a72d32;
+}
+
+.organisation-followers-state-error p {
+  margin: 0 0 12px;
+}
+
+.organisation-followers-state-error button {
+  padding: 8px 14px;
+  border: 1px solid rgba(44, 97, 79, 0.25);
+  border-radius: 9px;
+  background: #ffffff;
+  color: #2c614f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .organisation-followers-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .organisation-followers-header h1 {
+    font-size: 30px;
+  }
+
+  .organisation-followers-panel {
+    padding: 20px;
+  }
+
+  .organisation-followers-list {
+    grid-template-columns: 1fr;
+  }
+}
