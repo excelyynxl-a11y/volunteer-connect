@@ -2924,16 +2924,239 @@
   }
 }
 
-.organisation-content.organisation-content-messages {
-  height: 100vh;
-  box-sizing: border-box;
-  overflow: hidden;
+/* ── Organisation Report ── */
+
+.organisation-report-page {
+  min-height: 100vh;
+  color: #1d4a3a;
 }
 
-@media (max-width: 1160px) {
-  .organisation-content.organisation-content-messages {
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
+.organisation-report-hero {
+  margin-bottom: 22px;
+  padding: 24px 34px;
+  border: 3px solid #d9aa55;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 82% 100%, rgba(44, 97, 79, 0.14) 0 78px, transparent 79px),
+    linear-gradient(90deg, #ffffff 0 62%, #f5f1eb 62% 100%);
+}
+
+.organisation-report-hero p {
+  margin: 0 0 8px;
+  color: #b8782e;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+.organisation-report-hero h1 {
+  margin: 0 0 8px;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 40px;
+  line-height: 1;
+}
+
+.organisation-report-hero span {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.organisation-report-panel {
+  padding: 28px;
+  border: 3px solid #d9aa55;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.organisation-report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.organisation-report-header h2 {
+  margin: 0;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.organisation-report-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+}
+
+.organisation-report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.organisation-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.organisation-report-field-label {
+  color: #4d5760;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.organisation-report-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #ded5ca;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1d2a32;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.organisation-report-input::placeholder {
+  color: #bfc4c8;
+  font-weight: 500;
+}
+
+.organisation-report-input:focus {
+  border-color: #d9aa55;
+  box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
+}
+
+.organisation-report-input.error {
+  border-color: #ef4444;
+}
+
+.organisation-report-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8f94' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.organisation-report-textarea {
+  padding: 12px 16px;
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.organisation-report-field-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.organisation-report-error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.organisation-report-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 32px;
+  border: none;
+  border-radius: 10px;
+  background: #d9aa55;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  align-self: flex-start;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.organisation-report-submit:hover:not(:disabled) {
+  background: #c89a48;
+  transform: translateY(-1px);
+}
+
+.organisation-report-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.organisation-report-submit-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.organisation-report-submit-loader {
+  width: 18px;
+  height: 18px;
+  animation: org-report-spin 1s linear infinite;
+}
+
+@keyframes org-report-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Previous Reports Section ── */
+
+.organisation-report-previous {
+  margin-top: 22px;
+  padding: 28px;
+  border: 3px solid #d9aa55;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.organisation-report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.organisation-report-empty {
+  padding: 32px;
+  text-align: center;
+  color: #6b7280;
+  border: 2px dashed #ded5ca;
+  border-radius: 14px;
+  background: #faf8f4;
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .organisation-report-hero {
+    padding: 22px;
+  }
+
+  .organisation-report-hero h1 {
+    font-size: 32px;
+  }
+
+  .organisation-report-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .organisation-report-panel,
+  .organisation-report-previous {
+    padding: 22px;
   }
 }

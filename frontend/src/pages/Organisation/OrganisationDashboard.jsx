@@ -12,7 +12,7 @@ import "./Organisation.css";
 import OrganisationOpportunity from "./OrganisationOpportunity";
 import OrganisationApplication from "./OrganisationApplication";
 import OrganisationReport from "./OrganisationReport";
-import OrganisationFollowers from "./OrganisationFollowers";
+import ReportMadePage from "../Report/ReportMadePage";
 import ViewOpportunity from "./ViewOpportunity";
 import PublicVolunteerProfile from "../Volunteer/PublicVolunteerProfile";
 import VolunteerMessages from "../Volunteer/VolunteerMessages";
@@ -45,6 +45,7 @@ const OrganisationDashboard = () => {
           <Route path="followers" element={<OrganisationFollowers />} />
           <Route path="messages" element={<VolunteerMessages />} />
           <Route path="report" element={<OrganisationReport />} />
+          <Route path="report/:reportId" element={<ReportMadePage />} />
           <Route path="edit-opportunity/:id" element={<EditOpportunity />} />
           <Route path="view-opportunity/:id" element={<ViewOpportunity />} />
           <Route path="create-opportunity"element={<CreateOpportunityPage />}/>
