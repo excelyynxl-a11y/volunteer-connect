@@ -3059,3 +3059,126 @@
     font-size: 24px;
   }
 }
+
+/* Followed Organisations */
+.followed-organisations-search {
+  margin-top: 20px;
+}
+
+.followed-organisations-error {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #f1c6c3;
+  border-radius: 10px;
+  background: #fff5f5;
+  color: #b31212;
+}
+
+.followed-organisations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.followed-organisations-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid #efe7de;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.followed-organisations-summary {
+  display: flex;
+  flex: 1 1 360px;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.followed-organisations-avatar {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.followed-organisations-avatar-image {
+  object-fit: cover;
+}
+
+.followed-organisations-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d9aa55;
+  color: #fff;
+  font-weight: 800;
+}
+
+.followed-organisations-details {
+  flex: 1;
+  min-width: 0;
+  max-width: 720px;
+}
+
+.followed-organisations-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.followed-organisations-name,
+.followed-organisations-biodata {
+  overflow-wrap: anywhere;
+}
+
+.followed-organisations-biodata {
+  display: -webkit-box;
+  margin-top: 6px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 14px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.followed-organisations-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.followed-organisations-action {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.followed-organisations-view {
+  border: 1px solid #e6e2dc;
+}
+
+.followed-organisations-unfollow {
+  border: 1px solid #f1c6c3;
+  color: #b31212;
+}
+
+@media (max-width: 760px) {
+  .followed-organisations-summary {
+    flex-basis: 100%;
+  }
+
+  .followed-organisations-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

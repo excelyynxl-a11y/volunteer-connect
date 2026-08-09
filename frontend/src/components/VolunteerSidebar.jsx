@@ -5,8 +5,10 @@ import {
   File,
   Home,
   LogOut,
+  MessageCircle,
   Search,
   User,
+  Building2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getInitials } from "../lib/utils";
@@ -18,6 +20,8 @@ const navItems = [
   { key: "homepage", path: "/volunteer-dashboard", label: "Homepage", Icon: Home },
   { key: "opportunities", path: "/volunteer-dashboard/opportunities", label: "Opportunities", Icon: Search },
   { key: "applications", path: "/volunteer-dashboard/applications", label: "Applications", Icon: File },
+  { key: "organisations", path: "/volunteer-dashboard/organisations", label: "Organisations", Icon: Building2 },
+  { key: "messages", path: "/volunteer-dashboard/messages", label: "Messages", Icon: MessageCircle },
   { key: "report", path: "/volunteer-dashboard/report", label: "Report", Icon: AlertCircle },
   { key: "profile", path: "/volunteer-dashboard/profile", label: "Profile", Icon: User },
 ];
@@ -34,7 +38,15 @@ const VolunteerSidebar = () => {
     navigate("/logging-out");
   };
 
-  const activeKey = location.pathname.startsWith("/volunteer-dashboard/edit-profile")
+  const matchingNavItem = navItems.find(
+    (item) =>
+      item.path === location.pathname ||
+      (item.path !== "/volunteer-dashboard" &&
+        location.pathname.startsWith(`${item.path}/`)),
+  );
+  const activeKey = location.pathname.startsWith(
+    "/volunteer-dashboard/edit-profile",
+  )
     ? "profile"
     : navItems.find((item) =>
         item.path === "/volunteer-dashboard"

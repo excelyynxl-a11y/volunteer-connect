@@ -1,0 +1,335 @@
+.public-volunteer-profile-page {
+  --public-profile-green: #2c614f;
+  --public-profile-green-dark: #173f34;
+  --public-profile-gold: #d9aa55;
+  --public-profile-cream: #f7f3ed;
+  --public-profile-border: #eadfd1;
+  --public-profile-muted: #6b7280;
+
+  min-height: 100%;
+  padding: 2rem;
+  background: var(--public-profile-cream);
+  color: var(--public-profile-green-dark);
+}
+
+.public-volunteer-profile-hero,
+.public-volunteer-profile-card {
+  border: 2px solid var(--public-profile-gold);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 0.75rem 2rem rgba(23, 63, 52, 0.06);
+}
+
+.public-volunteer-profile-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.75rem 2rem;
+}
+
+.public-volunteer-profile-back {
+  position: absolute;
+  top: 1.25rem;
+  left: 0;
+  z-index: 1;
+  transform: translateX(-50%);
+}
+
+.public-volunteer-profile-avatar {
+  display: grid;
+  width: 6rem;
+  height: 6rem;
+  flex: 0 0 6rem;
+  place-items: center;
+  border: 2px solid var(--public-profile-gold);
+  border-radius: 50%;
+  background: var(--public-profile-green);
+  color: #ffffff;
+}
+
+.public-volunteer-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.public-volunteer-profile-avatar span {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.public-volunteer-profile-introduction {
+  min-width: 0;
+}
+
+.public-volunteer-profile-eyebrow,
+.public-volunteer-profile-section-label {
+  margin: 0;
+  color: #a3641f;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.public-volunteer-profile-introduction h1 {
+  margin: 0.25rem 0 0.35rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
+}
+
+.public-volunteer-profile-introduction > p:last-child,
+.public-volunteer-profile-card-heading p {
+  margin: 0;
+  color: var(--public-profile-muted);
+}
+
+.public-volunteer-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 24rem);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.public-volunteer-profile-main,
+.public-volunteer-profile-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.public-volunteer-profile-card {
+  padding: 1.75rem;
+}
+
+.public-volunteer-profile-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.public-volunteer-profile-card-heading h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.45rem;
+}
+
+.public-volunteer-profile-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 0.9rem;
+}
+
+.public-volunteer-profile-summary-item span {
+  color: #9a6b3e;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.public-volunteer-profile-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.public-volunteer-profile-skills span {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 999px;
+  background: #fcfaf7;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.public-volunteer-profile-count {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--public-profile-gold);
+  border-radius: 999px;
+  background: #fcf4e6;
+  color: #9a651f;
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.public-volunteer-profile-participation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.public-volunteer-profile-participation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 0.9rem;
+}
+
+.public-volunteer-profile-participation-icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--public-profile-green);
+  color: #ffffff;
+}
+
+.public-volunteer-profile-participation strong {
+  display: block;
+}
+
+.public-volunteer-profile-participation p {
+  margin: 0.2rem 0 0;
+  color: var(--public-profile-muted);
+  font-size: 0.875rem;
+}
+
+.public-volunteer-profile-status {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #e7f5eb;
+  color: #1d7142;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.public-volunteer-profile-resume {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-left: 4px solid var(--public-profile-gold);
+  border-radius: 0.75rem;
+  background: #fcfaf7;
+}
+
+.public-volunteer-profile-resume > span {
+  font-weight: 700;
+}
+
+.public-volunteer-profile-resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.public-volunteer-profile-resume-actions a,
+.public-volunteer-profile-resume-actions button {
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--public-profile-green);
+  border-radius: 0.7rem;
+  background: #ffffff;
+  color: var(--public-profile-green);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.public-volunteer-profile-resume-actions button {
+  background: var(--public-profile-green);
+  color: #ffffff;
+}
+
+.public-volunteer-profile-feedback {
+  width: 100%;
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--public-profile-border);
+  border-radius: 1rem;
+  background: #ffffff;
+  color: var(--public-profile-muted);
+  text-align: center;
+}
+
+.public-volunteer-profile-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 46rem;
+  margin: 4rem auto;
+}
+
+.public-volunteer-profile-feedback.error {
+  border-color: #d77a72;
+  color: #8f2f2a;
+}
+
+.public-volunteer-profile-empty.error {
+  border-color: #d77a72;
+  color: #8f2f2a;
+}
+
+.public-volunteer-profile-empty {
+  margin: 1.25rem 0 0;
+  padding: 1rem;
+  border: 1px dashed var(--public-profile-border);
+  border-radius: 0.9rem;
+  background: #fcfaf7;
+  color: var(--public-profile-muted);
+}
+
+@media (max-width: 900px) {
+  .public-volunteer-profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .public-volunteer-profile-aside {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .public-volunteer-profile-page {
+    padding: 1rem;
+  }
+
+  .public-volunteer-profile-hero {
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+
+  .public-volunteer-profile-state {
+    flex-direction: column;
+    margin-top: 2rem;
+  }
+
+  .public-volunteer-profile-avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+    flex-basis: 4.5rem;
+  }
+
+  .public-volunteer-profile-card {
+    padding: 1.25rem;
+  }
+
+  .public-volunteer-profile-aside {
+    display: flex;
+  }
+
+  .public-volunteer-profile-participation {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .public-volunteer-profile-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

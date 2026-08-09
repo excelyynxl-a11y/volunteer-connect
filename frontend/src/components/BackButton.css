@@ -1,0 +1,28 @@
+.back-icon-button {
+  display: inline-grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #d9aa55;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2c614f;
+  cursor: pointer;
+  box-shadow: 0 0.4rem 1rem rgba(23, 63, 52, 0.08);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.back-icon-button:hover {
+  background: #2c614f;
+  color: #ffffff;
+  transform: translateX(-2px);
+}
+
+.back-icon-button:focus-visible {
+  outline: 3px solid rgba(217, 170, 85, 0.45);
+  outline-offset: 3px;
+}

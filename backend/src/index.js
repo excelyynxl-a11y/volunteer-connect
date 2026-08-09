@@ -14,15 +14,22 @@
 
 import "dotenv/config";
 
+import { createServer } from "node:http";
+
 import app from "./app.js";
 import { connectDB } from "./lib/db.js";
+import { initializeSocketServer } from "./lib/socket.js";
+import { startMessagingMaintenance } from "./services/messagingMaintenance.service.js";
 
 const port = process.env.PORT || 5001;
+const httpServer = createServer(app);
 
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(port, () => {
+    initializeSocketServer(httpServer);
+    await startMessagingMaintenance();
+    httpServer.listen(port, () => {
       console.log(`Server is running on port: ${port}`);
     });
   } catch {
