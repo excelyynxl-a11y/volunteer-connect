@@ -38,12 +38,15 @@ const VolunteerSidebar = () => {
     navigate("/logging-out");
   };
 
-  const matchingNavItem = navItems.find(
-    (item) =>
-      item.path === location.pathname ||
-      (item.path !== "/volunteer-dashboard" &&
-        location.pathname.startsWith(`${item.path}/`)),
-  );
+  // commented off
+  // const matchingNavItem = navItems.find(
+  //   (item) =>
+  //     item.path === location.pathname ||
+  //     (item.path !== "/volunteer-dashboard" &&
+  //       location.pathname.startsWith(`${item.path}/`)),
+  // );
+
+   
   const activeKey = location.pathname.startsWith(
     "/volunteer-dashboard/edit-profile",
   )
