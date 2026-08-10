@@ -6,7 +6,7 @@ import OrganisationHomepage from "./OrganisationHomepage";
 import OrganisationProfile from "./OrganisationProfile";
 import EditOrganisationProfile from "./EditOrganisationProfile";
 import EditOpportunity from "./EditOpportunity";
-
+import OrganisationFollowers from "./OrganisationFollowers";
 import CreateOpportunityPage from "./CreateOpportunityPage";
 import "./Organisation.css";
 import OrganisationOpportunity from "./OrganisationOpportunity";
