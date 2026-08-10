@@ -327,6 +327,12 @@ const VolunteerHomepage = () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+        onAction={(action, organisationId) => {
+          if (action === "view-organisation" && organisationId) {
+            setSelectedOpportunity(null);
+            navigate(`/volunteer-dashboard/organisations/${organisationId}`);
+          }
+        }}
       />
     </div>
   );

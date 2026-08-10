@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowUp, ChevronDown, Search } from "lucide-react";
 import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
@@ -27,6 +28,7 @@ const initialCustomAvailability = {
 };
 
 const VolunteerOpportunities = () => {
+  const navigate = useNavigate();
   const authUser = useAuthStore((state) => state.authUser);
   const {
     opportunities,
@@ -434,9 +436,12 @@ const handleConfirmApply = async () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
-        onAction={(action) => {
+        onAction={(action, organisationId) => {
           if (action === "apply") {
             setApplyingOpportunity(selectedOpportunity);
+          } else if (action === "view-organisation" && organisationId) {
+            setSelectedOpportunity(null);
+            navigate(`/volunteer-dashboard/organisations/${organisationId}`);
           }
         }}
         volunteerAvailability={sortedVolunteerAvailability}
