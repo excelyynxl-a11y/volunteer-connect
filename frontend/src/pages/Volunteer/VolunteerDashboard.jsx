@@ -8,8 +8,7 @@ import EditVolunteerProfile from "./EditVolunteerProfile";
 import VolunteerOpportunities from "./VolunteerOpportunities";
 import FollowedOrganisations from "./FollowedOrganisations";
 import VolunteerReport from "./VolunteerReport";
-import PublicOrganisationProfile from "../Organisation/PublicOrganisationProfile";
-import VolunteerMessages from "./VolunteerMessages";
+import ReportMadePage from "../Report/ReportMadePage";
 
 import "./Volunteer.css";
 import VolunteerApplication from "./VolunteerApplication";
@@ -37,6 +36,7 @@ const VolunteerDashboard = () => {
           <Route path="applications" element={<VolunteerApplication />} />
           <Route path="messages" element={<VolunteerMessages />} />
           <Route path="report" element={<VolunteerReport />} />
+          <Route path="report/:reportId" element={<ReportMadePage />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="edit-profile" element={<EditVolunteerProfile />} />
           <Route

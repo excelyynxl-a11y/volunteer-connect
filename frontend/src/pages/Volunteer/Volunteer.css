@@ -2576,6 +2576,395 @@
   }
 }
 
+/* ── Report Form ── */
+
+.volunteer-report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.volunteer-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.volunteer-report-field-label {
+  color: #4d5760;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.volunteer-report-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #ded5ca;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1d2a32;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.volunteer-report-input::placeholder {
+  color: #bfc4c8;
+  font-weight: 500;
+}
+
+.volunteer-report-input:focus {
+  border-color: #d9aa55;
+  box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
+}
+
+.volunteer-report-input.error {
+  border-color: #ef4444;
+}
+
+.volunteer-report-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8f94' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.volunteer-report-textarea {
+  padding: 12px 16px;
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.volunteer-report-field-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.volunteer-report-error-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.volunteer-report-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 32px;
+  border: none;
+  border-radius: 10px;
+  background: #d9aa55;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  align-self: flex-start;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+
+.volunteer-report-submit:hover:not(:disabled) {
+  background: #c89a48;
+  transform: translateY(-1px);
+}
+
+.volunteer-report-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.volunteer-report-submit-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.volunteer-report-submit-loader {
+  width: 18px;
+  height: 18px;
+  animation: auth-spin 1s linear infinite;
+}
+
+/* ── Previous Reports Section ── */
+
+.volunteer-report-previous {
+  margin-top: 22px;
+  padding: 28px;
+  border: 3px solid var(--profile-orange);
+  border-radius: 18px;
+  background: var(--profile-cream-panel);
+}
+
+.volunteer-report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.volunteer-report-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--profile-muted);
+  border: 2px dashed #ded5ca;
+  border-radius: 14px;
+  background: #faf8f4;
+  font-size: 15px;
+}
+
+/* ── ReportMadeCard ── */
+
+.report-made-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #ded5ca;
+  border-radius: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    transform 0.15s,
+    box-shadow 0.2s;
+}
+
+.report-made-card:hover {
+  border-color: #d9aa55;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.report-made-card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.report-made-card-category {
+  color: var(--profile-orange-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.report-made-card-title {
+  margin: 0;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--profile-green-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-made-card-target {
+  color: var(--profile-muted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-made-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.report-made-card-date {
+  color: var(--profile-muted);
+  font-size: 13px;
+}
+
+.report-card-status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.report-card-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.report-card-status.investigating {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.report-card-status.resolved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.report-card-status.dismissed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.report-made-card-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--profile-muted);
+  flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+  .volunteer-report-previous {
+    padding: 22px;
+  }
+
+  .report-made-card {
+    padding: 16px;
+  }
+}
+
+/* ── ReportMadePage ── */
+
+.report-made-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.report-made-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8a8f94;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  align-self: flex-start;
+}
+
+.report-made-back:hover {
+  color: var(--profile-green);
+}
+
+.report-made-back svg {
+  width: 20px;
+  height: 20px;
+}
+
+.report-made-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.report-made-page-header h2 {
+  margin: 6px 0 0;
+  font-family: "Urbanist", Arial, sans-serif;
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--profile-green-dark);
+}
+
+.report-made-page-header .report-card-status {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+.report-made-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid #eee8e0;
+  border-radius: 12px;
+  background: #faf8f4;
+  margin-bottom: 24px;
+}
+
+.report-made-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.report-made-detail-label {
+  color: var(--profile-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.report-made-detail-value {
+  color: var(--profile-green-dark);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.report-made-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-made-content-text {
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid #eee8e0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1d2a32;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 760px) {
+  .report-made-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .report-made-page-header h2 {
+    font-size: 24px;
+  }
+
+  .report-made-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .report-made-detail-value {
+    text-align: left;
+  }
+}
+
 /* Volunteer Application */
 .volunteer-application-page {
   min-height: 100vh;
