@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   ArrowLeft,
@@ -18,6 +19,7 @@ import ApplicationOpportunityDetail from "../../components/ApplicationOpportunit
 
 const mapApplicationToViewModel = (application) => ({
   id: application._id,
+  volunteerId: application.volunteerId?._id,
   volunteerName: application.volunteerId?.name || "Unknown volunteer",
   volunteerInitials: getInitials(application.volunteerId?.name),
   submittedOn: application.createdAt,
@@ -43,6 +45,7 @@ const mapOpportunityToViewModel = (opportunity, applicationsForOpportunity) => (
 });
 
 const OrganisationApplication = () => {
+  const navigate = useNavigate();
   const {
     allMyOpportunities,
     isOpportunitiesLoading,
@@ -112,6 +115,13 @@ const OrganisationApplication = () => {
         onBack={() => setSelectedId(null)}
         onApprove={handleApprove}
         onReject={handleReject}
+        onViewVolunteer={(volunteerId) => {
+          if (volunteerId) {
+            navigate(
+              `/organisation-dashboard/applications/volunteers/${volunteerId}`,
+            );
+          }
+        }}
       />
     );
   }
