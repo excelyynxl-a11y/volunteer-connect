@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 
-export const useApplicationStore = create((set, get) => ({
+export const useApplicationStore = create((set) => ({
   applications: [],
   selectedApplication: null,
   isApplicationsLoading: false,
