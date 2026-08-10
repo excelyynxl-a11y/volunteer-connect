@@ -1,76 +1,7 @@
 import { create } from "zustand";
+import { axiosInstance } from "../lib/axios";
 
-const mockOrganisation = {
-  _id: "organisation-mock-001",
-  name: "Community Care Network",
-};
-
-const mockOpportunities = [
-  {
-    _id: "opportunity-mock-001",
-    title: "Community Food Distribution",
-    startAt: "2026-08-15T01:00:00.000Z",
-    endAt: "2026-08-15T05:00:00.000Z",
-    applicationDeadline: "2026-08-10T15:59:59.000Z",
-    status: "active",
-    organisationId: mockOrganisation,
-  },
-  {
-    _id: "opportunity-mock-002",
-    title: "Neighbourhood Clean-up",
-    startAt: "2026-08-22T00:00:00.000Z",
-    endAt: "2026-08-22T04:00:00.000Z",
-    applicationDeadline: "2026-08-18T15:59:59.000Z",
-    status: "active",
-    organisationId: mockOrganisation,
-  },
-];
-
-const mockVolunteer = {
-  _id: "volunteer-mock-001",
-  name: "Alex Volunteer",
-  avatar: "",
-  skills: ["Event Support", "Communication"],
-  availability: [],
-};
-
-const mockApplications = [
-  {
-    _id: "application-mock-001",
-    volunteerId: mockVolunteer,
-    opportunityId: mockOpportunities[0],
-    status: "pending",
-    withdrawalReason: "",
-    createdAt: "2026-07-10T03:00:00.000Z",
-    updatedAt: "2026-07-10T03:00:00.000Z",
-  },
-  {
-    _id: "application-mock-002",
-    volunteerId: mockVolunteer,
-    opportunityId: mockOpportunities[1],
-    status: "approved",
-    withdrawalReason: "",
-    createdAt: "2026-07-08T03:00:00.000Z",
-    updatedAt: "2026-07-09T03:00:00.000Z",
-  },
-];
-
-const filterApplications = (applications, { status, opportunityId } = {}) =>
-  applications.filter((application) => {
-    const matchesStatus = !status || application.status === status;
-    const matchesOpportunity =
-      !opportunityId || application.opportunityId?._id === opportunityId;
-
-    return matchesStatus && matchesOpportunity;
-  });
-
-const createListResponse = (applications) => ({
-  success: true,
-  count: applications.length,
-  data: applications,
-});
-
-export const useApplicationStore = create((set, get) => ({
+export const useApplicationStore = create((set) => ({
   applications: [],
   selectedApplication: null,
   isApplicationsLoading: false,
@@ -78,167 +9,141 @@ export const useApplicationStore = create((set, get) => ({
   isUpdatingApplication: false,
   applicationsError: "",
 
+  // GET /api/application - Fetch applications for the authenticated volunteer
   getMyApplications: async ({ status } = {}) => {
     set({ isApplicationsLoading: true, applicationsError: "" });
-
     try {
-      const filteredApplications = filterApplications(mockApplications, { status });
-      const response = { data: createListResponse(filteredApplications) };
-      // TODO(application-api): replace the mock response with:
-      // const response = await axiosInstance.get("/application/me", { params: { status } });
-
+      const response = await axiosInstance.get("/application", {
+        params: { status },
+      });
       set({ applications: response.data.data });
       return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to fetch applications";
+      set({ applicationsError: message });
+      throw error;
     } finally {
       set({ isApplicationsLoading: false });
     }
   },
 
+  // GET /api/application/organisation - Fetch applications received by the organisation
   getMyOrganisationApplications: async ({ status, opportunityId } = {}) => {
     set({ isApplicationsLoading: true, applicationsError: "" });
-
     try {
-      const filteredApplications = filterApplications(mockApplications, {
-        status,
-        opportunityId,
+      const response = await axiosInstance.get("/application/organisation", {
+        params: { status, opportunityId },
       });
-      const response = { data: createListResponse(filteredApplications) };
-      // TODO(application-api): replace the mock response with:
-      // const response = await axiosInstance.get("/application/organisation/me", {
-      //   params: { status, opportunityId },
-      // });
-
       set({ applications: response.data.data });
       return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to fetch organisation applications";
+      set({ applicationsError: message });
+      throw error;
     } finally {
       set({ isApplicationsLoading: false });
     }
   },
 
+  // GET /api/application/:id - Fetch single application details
   getApplicationById: async (applicationId) => {
     set({ isApplicationsLoading: true, applicationsError: "" });
-
     try {
-      const application = mockApplications.find(
-        (item) => item._id === applicationId,
-      );
-      const response = {
-        data: {
-          success: Boolean(application),
-          data: application ?? null,
-        },
-      };
-      // TODO(application-api): replace the mock response with:
-      // const response = await axiosInstance.get(`/application/${applicationId}`);
-
+      const response = await axiosInstance.get(`/application/${applicationId}`);
       set({ selectedApplication: response.data.data });
       return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to fetch application details";
+      set({ applicationsError: message });
+      throw error;
     } finally {
       set({ isApplicationsLoading: false });
     }
   },
 
+  // POST /api/application - Submit a new application
   createApplication: async (opportunityId) => {
     set({ isSubmittingApplication: true, applicationsError: "" });
-
     try {
-      const opportunity = mockOpportunities.find(
-        (item) => item._id === opportunityId,
-      );
-      const application = {
-        _id: `application-mock-${Date.now()}`,
-        volunteerId: mockVolunteer,
-        opportunityId: opportunity ?? { _id: opportunityId },
-        status: "pending",
-        withdrawalReason: "",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const response = {
-        data: {
-          success: true,
-          message: "Application submitted successfully",
-          data: application,
-        },
-      };
-      // TODO(application-api): replace the mock response with:
-      // const response = await axiosInstance.post("/application/create", { opportunityId });
-
-      set((state) => ({ applications: [response.data.data, ...state.applications] }));
+      const response = await axiosInstance.post("/application", { opportunityId });
+      
+      // Instantly prepend the populated database response into state
+      set((state) => ({
+        applications: [response.data.data, ...state.applications],
+      }));
       return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to submit application";
+      set({ applicationsError: message });
+      throw error;
     } finally {
       set({ isSubmittingApplication: false });
     }
   },
 
+  // PUT /api/application/:id/approve - Approve application
   approveApplication: async (applicationId) => {
-    const response = await get().updateMockApplication(applicationId, "approved", {
-      message: "Application approved successfully",
-    });
-
-    return {
-      ...response,
-      data: response.data
-        ? { application: response.data, spotsRemaining: 3 }
-        : null,
-    };
-  },
-
-  rejectApplication: async (applicationId) => {
-    return get().updateMockApplication(applicationId, "rejected", {
-      message: "Application rejected successfully",
-    });
-  },
-
-  withdrawApplication: async (applicationId, withdrawalReason) => {
-    return get().updateMockApplication(applicationId, "withdrawn", {
-      message: "Application withdrawn successfully",
-      withdrawalReason,
-    });
-  },
-
-  updateMockApplication: async (
-    applicationId,
-    status,
-    { message, withdrawalReason = "" },
-  ) => {
     set({ isUpdatingApplication: true, applicationsError: "" });
-
     try {
-      const existingApplication = get().applications.find(
-        (application) => application._id === applicationId,
-      ) ?? mockApplications.find((application) => application._id === applicationId);
-      const updatedApplication = existingApplication
-        ? {
-            ...existingApplication,
-            status,
-            withdrawalReason,
-            updatedAt: new Date().toISOString(),
-          }
-        : null;
-      const response = {
-        data: {
-          success: Boolean(updatedApplication),
-          message,
-          data: updatedApplication,
-        },
-      };
-      // TODO(application-api): replace this shared mock update with the matching
-      // approve, reject, or withdraw API request.
-
-      if (updatedApplication) {
-        set((state) => ({
-          applications: state.applications.map((application) =>
-            application._id === applicationId ? updatedApplication : application,
-          ),
-          selectedApplication:
-            state.selectedApplication?._id === applicationId
-              ? updatedApplication
-              : state.selectedApplication,
-        }));
-      }
-
+      const response = await axiosInstance.put(`/application/${applicationId}/approve`);
+      
+      set((state) => ({
+        applications: state.applications.map((app) =>
+          app._id === applicationId ? response.data.data : app
+        ),
+      }));
       return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to approve application";
+      set({ applicationsError: message });
+      throw error;
+    } finally {
+      set({ isUpdatingApplication: false });
+    }
+  },
+
+  // PUT /api/application/:id/reject - Reject application
+  rejectApplication: async (applicationId, reason) => {
+    set({ isUpdatingApplication: true, applicationsError: "" });
+    try {
+      const response = await axiosInstance.put(`/application/${applicationId}/reject`, {
+        reason,
+        rejectionReason: reason, // sending both keys so backend accepts either
+      });
+      
+      set((state) => ({
+        applications: state.applications.map((app) =>
+          app._id === applicationId ? response.data.data : app
+        ),
+      }));
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to reject application";
+      set({ applicationsError: message });
+      throw error;
+    } finally {
+      set({ isUpdatingApplication: false });
+    }
+  },
+
+  // PUT /api/application/:id/withdraw - Withdraw application
+  withdrawApplication: async (applicationId, withdrawalReason) => {
+    set({ isUpdatingApplication: true, applicationsError: "" });
+    try {
+      const response = await axiosInstance.put(`/application/${applicationId}/withdraw`, {
+        withdrawalReason,
+      });
+      
+      set((state) => ({
+        applications: state.applications.map((app) =>
+          app._id === applicationId ? response.data.data : app
+        ),
+      }));
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to withdraw application";
+      set({ applicationsError: message });
+      throw error;
     } finally {
       set({ isUpdatingApplication: false });
     }

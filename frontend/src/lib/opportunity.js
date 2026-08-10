@@ -1,3 +1,5 @@
+import { isOpportunityInsideAvailability } from "./availability"
+
 const getValidDate = (dateValue) => {
   if (!dateValue) return null
 
@@ -92,6 +94,26 @@ export const getSpotsRemaining = (opportunity) =>
       (opportunity?.approvedVolunteersCount || 0),
     0,
   )
+
+export const getApplyEligibility = (opportunity, volunteerAvailability = []) => {
+  if (!volunteerAvailability || volunteerAvailability.length === 0) {
+    return {
+      canApply: false,
+      reason: 'Add your availability in your profile to apply for opportunities.',
+    }
+  }
+
+  const isFullyCovered = isOpportunityInsideAvailability(opportunity, volunteerAvailability)
+
+  if (!isFullyCovered) {
+    return {
+      canApply: false,
+      reason: 'This opportunity falls outside your saved availability.',
+    }
+  }
+
+  return { canApply: true, reason: '' }
+}
 
 export const getRequirementItems = (requirements = '') =>
   requirements

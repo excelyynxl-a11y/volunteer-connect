@@ -21,6 +21,11 @@ const applicationSchema = new mongoose.Schema(
       index: true,
     },
 
+    rejectionReason: {
+    type: String,
+    default: "",
+    },
+
     withdrawalReason: {
       type: String,
       trim: true,

@@ -6,6 +6,7 @@ import {
   getOpportunityStatusClass,
   getSpotsRemaining,
 } from '../lib/opportunity';
+import { APPLICATION_STATUS_LABELS, getApplicationDisplayStatus } from '../lib/application';
 import './OpportunityCard.css';
 
 const OpportunityCard = ({
@@ -20,6 +21,7 @@ const OpportunityCard = ({
   onAction,
   actions,
   variant = 'default',
+  applicationStatus,
 }) => {
   const isModelOpportunity = Boolean(opportunity);
   const displayStatus = opportunity?.status || status || "Active";
@@ -44,25 +46,31 @@ const OpportunityCard = ({
     
   const displayActions = actions || (showActionButtons ? ['view', 'edit'] : []);
 
+  const { key: effectiveStatusKey, isLocked: isApplicationLocked } =
+    getApplicationDisplayStatus(applicationStatus, spotsRemaining);
+
   return (
     <div className={`event-card opportunity-card-${variant}`}>
       <div className="event-card-header">
-        {showStatus && (
-          <div className="header-left">
+        <div className="header-left">
+          {showStatus && (
             <div className={`event-tag status-${statusClass}`}>{displayStatus}</div>
-          </div>
-        )}
-        
-        {opportunity?.category && opportunity.category.length > 0 && (
-          <div className="header-right">
-            <div className="categories-container">
-              {opportunity.category.map((cat) => (
-                <div key={cat} className="event-category-tag">{cat}</div>
-              ))}
+          )}
+          
+          {(opportunity?.category && opportunity.category.length > 0 || (isModelOpportunity && effectiveStatusKey))&& (
+              <div className="categories-container">
+                {opportunity.category.map((cat) => (
+                  <div key={cat} className="event-category-tag">{cat}</div>
+                ))}
+              </div>
+          )}
+        </div>
+          {isModelOpportunity && effectiveStatusKey && (
+            <div className={`application-status-badge status-${effectiveStatusKey}`}>
+              {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
       <h5>{displayTitle}</h5>
       <p>{displayDetails}</p>
@@ -111,21 +119,43 @@ const OpportunityCard = ({
         )}
       </div>
 
-      {displayActions.length > 0 && (
+      {(displayActions.length > 0 || variant === 'volunteer') && (
         <div className="item-actions">
+          {/* 1. Render Organization/Standard Actions (View, Edit, Close) */}
           {displayActions.map((action) => (
             <button 
               className={`action-btn ${action}`} 
               key={action} 
               type="button" 
               onClick={() => onAction && onAction(action, opportunity?._id || opportunity)}
-              aria-label={`${action === 'view' ? 'View' : 'Edit'} ${
-                displayTitle || 'opportunity'
-              }`}
+              aria-label={`${action} ${displayTitle || 'opportunity'}`}
             >
-              {action === 'view' ? 'View' : 'Edit'}
+              {action.charAt(0).toUpperCase() + action.slice(1)}
             </button>
           ))}
+
+          {/* 2. Render Volunteer-Specific Actions (Apply, Status Badges) */}
+          {variant === 'volunteer' && (
+            isModelOpportunity && effectiveStatusKey ? (
+              <button
+                type="button"
+                className={`action-btn status-btn status-btn-${effectiveStatusKey}`}
+                disabled={isApplicationLocked}
+                aria-label={`${APPLICATION_STATUS_LABELS[effectiveStatusKey]} for ${displayTitle || 'opportunity'}`}
+              >
+                {APPLICATION_STATUS_LABELS[effectiveStatusKey]}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="action-btn apply-btn"
+                onClick={() => onAction && onAction('apply', opportunity?._id || opportunity)}
+                aria-label={`Apply for ${displayTitle || 'opportunity'}`}
+              >
+                Apply
+              </button>
+            )
+          )}
         </div>
       )}
     </div>

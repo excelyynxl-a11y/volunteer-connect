@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Application from "../models/application.model.js";
+import Opportunity from "../models/opportunity.model.js";
 
 const sendNotImplemented = (res, feature) =>
   res.status(501).json({
@@ -15,8 +16,106 @@ const sendNotImplemented = (res, feature) =>
  * the same volunteer/opportunity pair, non-active or full opportunities, and
  * submissions after the application deadline.
  */
-export const createApplication = (req, res) => {
-  return sendNotImplemented(res, "Application submission");
+import { isOpportunityInsideAvailability } from "../lib/availability.js"; // adjust path as needed
+
+export const createApplication = async (req, res) => {
+  try {
+    const { opportunityId } = req.body;
+    const volunteerId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(opportunityId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid opportunity ID",
+      });
+    }
+
+    // 1. Check if opportunity exists and validate status & deadline
+    const opportunity = await Opportunity.findById(opportunityId);
+    if (!opportunity) {
+      return res.status(404).json({ success: false, message: "Opportunity not found" });
+    }
+
+    if (opportunity.status?.toLowerCase() !== "active") {
+      return res.status(400).json({
+        success: false,
+        message: "This opportunity is not currently active for applications",
+      });
+    }
+
+    if (opportunity.applicationDeadline && new Date() > new Date(opportunity.applicationDeadline)) {
+      return res.status(400).json({
+        success: false,
+        message: "Application deadline has passed",
+      });
+    }
+
+    if (
+      opportunity.maxVolunteers &&
+      opportunity.currentVolunteers >= opportunity.maxVolunteers
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Opportunity has reached full capacity",
+      });
+    }
+
+    // 2. Validate availability requirements
+    const userAvailability = req.user?.availability || [];
+    if (userAvailability.length > 0) {
+      const isAvailable = isOpportunityInsideAvailability(
+        opportunity,
+        userAvailability
+      );
+      
+
+      if (!isAvailable) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot apply for an opportunity outside your specified availability times.",
+        });
+      }
+    }
+
+    // 3. Prevent duplicate applications
+    const existingApplication = await Application.findOne({
+      volunteerId,
+      opportunityId,
+    });
+
+    if (existingApplication) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already applied for this opportunity",
+      });
+    }
+
+    // 4. Create application
+    const application = await Application.create({
+      volunteerId,
+      opportunityId,
+      status: "pending",
+    });
+
+    // 5. Populate opportunity AND organisationId before returning
+    const populatedApplication = await Application.findById(application._id)
+      .populate("volunteerId", "-password")
+      .populate({
+        path: "opportunityId",
+        populate: {
+          path: "organisationId",
+        },
+      });
+
+    return res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+      data: populatedApplication,
+    });
+  } catch (err) {
+    console.log("Error in createApplication controller: ", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 /**
@@ -25,22 +124,90 @@ export const createApplication = (req, res) => {
  * Success: { success, count, data: application[] }
  * When status is omitted, return all of the volunteer's applications.
  */
-export const getMyApplications = (req, res) => {
-  return sendNotImplemented(res, "Volunteer application listing");
+export const getMyApplications = async (req, res) => {
+  try {
+    const volunteerId = req.user._id;
+    const { status } = req.query;
+    const query = { volunteerId };
+
+    if (status) query.status = status.toLowerCase();
+
+    const applications = await Application.find(query)
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: applications.length,
+      data: applications,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 /**
- * TODO(application): List applications received by the authenticated organisation.
+ * List applications received by the authenticated organisation.
  * Query: {
  *   status?: "pending" | "approved" | "rejected" | "withdrawn",
  *   opportunityId?: string
  * }
  * Success: { success, count, data: application[] }
- * Rules: return applications only for opportunities owned by req.user. When
- * opportunityId is omitted, return applications across all owned opportunities.
  */
-export const getMyOrganisationApplications = (req, res) => {
-  return sendNotImplemented(res, "Organisation application listing");
+export const getMyOrganisationApplications = async (req, res) => {
+  try {
+    const organisationId = req.user._id;
+    const { status, opportunityId } = req.query;
+
+    // 1. Find all opportunities owned by this organisation
+    const myOpportunities = await Opportunity.find({ organisationId }).select("_id");
+    const myOpportunityIds = myOpportunities.map((op) => op._id);
+
+    // 2. Build the query targeting applications for this org's opportunities
+    const query = {
+      opportunityId: { $in: myOpportunityIds },
+    };
+
+    // Filter by specific opportunity if supplied
+    if (opportunityId) {
+      if (!mongoose.Types.ObjectId.isValid(opportunityId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid opportunity ID",
+        });
+      }
+      query.opportunityId = opportunityId;
+    }
+
+    // Filter by application status if supplied
+    if (status) {
+      query.status = status.toLowerCase();
+    }
+
+    // 3. Fetch applications and populate volunteer details and opportunity details
+    const applications = await Application.find(query)
+      .populate("volunteerId", "-password")
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: applications.length,
+      data: applications,
+    });
+  } catch (err) {
+    console.log("Error in getMyOrganisationApplications controller: ", err.message);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };
 
 /**
@@ -52,8 +219,66 @@ export const getMyOrganisationApplications = (req, res) => {
  * withdrawn; release capacity atomically when withdrawing an approved
  * application; rejected and withdrawn applications are terminal.
  */
-export const withdrawApplication = (req, res) => {
-  return sendNotImplemented(res, "Application withdrawal");
+export const withdrawApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { withdrawalReason } = req.body;
+    const volunteerId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    // Ensure only the applicant can withdraw
+    if (application.volunteerId.toString() !== volunteerId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorised to withdraw this application",
+      });
+    }
+
+    // Reject withdrawal for terminal states
+    if (["rejected", "withdrawn"].includes(application.status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot withdraw an application that is already ${application.status}`,
+      });
+    }
+
+    application.status = "withdrawn";
+    if (withdrawalReason) {
+      application.withdrawalReason = withdrawalReason;
+    }
+
+    await application.save();
+
+    const populatedApplication = await Application.findById(id)
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Application withdrawn successfully",
+      data: populatedApplication,
+    });
+  } catch (err) {
+    console.log("Error in withdrawApplication controller: ", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 export const getAllApplications = async (req, res) => {
@@ -107,43 +332,6 @@ export const getApplicationById = async (req, res) => {
   }
 };
 
-export const approveApplication = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid application ID",
-      });
-    }
-
-    const application = await Application.findById(id).populate("opportunityId");
-
-    if (!application) {
-      return res.status(404).json({
-        success: false,
-        message: "Application not found",
-      });
-    }
-
-    // TODO(application): allow only the opportunity-owning organisation,
-    // require pending status, reserve capacity atomically, and prevent approval
-    // when the opportunity is full. Admins cannot approve applications.
-    application.status = "approved";
-    await application.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Application approved successfully",
-      data: application,
-    });
-  } catch (err) {
-    console.log("Error in approveApplication controller: ", err.message);
-    res.status(500).json({ message: err.message });
-  }
-};
-
 export const rejectApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -155,7 +343,7 @@ export const rejectApplication = async (req, res) => {
       });
     }
 
-    const application = await Application.findById(id).populate("opportunityId");
+    const application = await Application.findById(id);
 
     if (!application) {
       return res.status(404).json({
@@ -171,20 +359,78 @@ export const rejectApplication = async (req, res) => {
       });
     }
 
-    // TODO(application): allow only the opportunity-owning organisation and
-    // require pending status. Rejected applications are terminal and cannot be
-    // changed back to approved. Admins cannot reject applications.
-    application.status = "rejected";
-    await application.save();
+    // Safely extract reason regardless of payload structure
+    const reasonText =
+      typeof req.body === "string"
+        ? req.body
+        : req.body?.reason || req.body?.rejectionReason || "";
 
-    res.status(200).json({
+    // Atomically update without .save() casting issues
+    const updatedApplication = await Application.findByIdAndUpdate(
+      id,
+      {
+        status: "rejected",
+        rejectionReason: reasonText,
+      },
+      { new: true }
+    ).populate({
+      path: "opportunityId",
+      populate: { path: "organisationId" },
+    });
+
+    return res.status(200).json({
       success: true,
       message: "Application rejected successfully",
-      data: application,
+      data: updatedApplication,
     });
   } catch (err) {
     console.log("Error in rejectApplication controller: ", err.message);
-    res.status(500).json({ 
+    return res.status(500).json({ 
+      success: false,
+      message: err.message 
+    });
+  }
+};
+
+export const approveApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid application ID",
+      });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+      });
+    }
+
+    // Atomically update status
+    const updatedApplication = await Application.findByIdAndUpdate(
+      id,
+      { status: "approved" },
+      { new: true }
+    ).populate({
+      path: "opportunityId",
+      populate: { path: "organisationId" },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Application approved successfully",
+      data: updatedApplication,
+    });
+  } catch (err) {
+    console.log("Error in approveApplication controller: ", err.message);
+    return res.status(500).json({ 
+      success: false,
       message: err.message 
     });
   }

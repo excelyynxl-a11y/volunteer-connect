@@ -3,6 +3,7 @@ import { ArrowUp, ChevronDown, Search } from "lucide-react";
 import CustomSelect from "../../components/CustomSelect";
 import OpportunityCard from "../../components/OpportunityCard";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
+import ConfirmApplicationModal from "../../components/ConfirmApplicationModal";
 import {
   formatAvailabilitySlot,
   getMinutesFromTime,
@@ -17,6 +18,7 @@ import {
 } from "../../lib/data";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
 
 const initialCustomAvailability = {
   dayOfWeek: "",
@@ -32,7 +34,14 @@ const VolunteerOpportunities = () => {
     opportunitiesError,
     getAllOpportunities,
   } = useVolunteerStore();
+  const {
+    applications,
+    getMyApplications,
+    createApplication,
+    isSubmittingApplication,
+  } = useApplicationStore();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [applyingOpportunity, setApplyingOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
@@ -67,6 +76,10 @@ const VolunteerOpportunities = () => {
   useEffect(() => {
     getAllOpportunities();
   }, [getAllOpportunities]);
+
+  useEffect(() => {
+    getMyApplications();
+  }, [getMyApplications]);
 
   const shouldFilterByAvailability =
     hasVolunteerAvailability && matchesAvailabilityOnly;
@@ -123,6 +136,14 @@ const VolunteerOpportunities = () => {
     );
   });
 
+  const applicationStatusByOpportunity = applications.reduce((statusMap, application) => {
+      const opportunityId = application.opportunityId?._id;
+      if (opportunityId) {
+        statusMap[opportunityId] = application.status;
+      }
+      return statusMap;
+    }, {});
+
   const toggleCategory = (category) => {
     setSelectedCategories((currentCategories) =>
       currentCategories.includes(category)
@@ -145,6 +166,17 @@ const VolunteerOpportunities = () => {
     setCustomAvailability(initialCustomAvailability);
     setIsCustomAvailabilityOpen(false);
   };
+
+const handleConfirmApply = async () => {
+  if (!applyingOpportunity) return;
+  try {
+    await createApplication(applyingOpportunity._id);
+    await getMyApplications(); 
+    setApplyingOpportunity(null);
+  } catch (error) {
+    console.error("Failed to submit application:", error);
+  }
+};
 
   return (
     <div className="volunteer-opportunities-page">
@@ -371,12 +403,15 @@ const VolunteerOpportunities = () => {
                     variant="volunteer"
                     actions={["view"]}
                     showStatus={false}
+                    applicationStatus={applicationStatusByOpportunity[opportunity._id]}
                     onAction={(action, selectedCardOpportunity) => {
                       if (action === "view") {
                         const opportunityToView = activeOpportunities.find(
                           (opportunity) => opportunity._id === selectedCardOpportunity,
                         );
                         setSelectedOpportunity(opportunityToView || null);
+                      } else if (action === "apply") {
+                        setApplyingOpportunity(opportunity);
                       }
                     }}
                   />
@@ -399,7 +434,22 @@ const VolunteerOpportunities = () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+        onAction={(action) => {
+          if (action === "apply") {
+            setApplyingOpportunity(selectedOpportunity);
+          }
+        }}
+        volunteerAvailability={sortedVolunteerAvailability}
+        applicationStatus={applicationStatusByOpportunity[selectedOpportunity?._id]}
       />
+
+      <ConfirmApplicationModal
+  opportunity={applyingOpportunity}
+  volunteerAvailability={sortedVolunteerAvailability}
+  onCancel={() => setApplyingOpportunity(null)}
+  onConfirm={handleConfirmApply}
+  isSubmitting={isSubmittingApplication}
+/>
 
       {showBackToTop && (
         <button
