@@ -14,7 +14,7 @@ import { useOrganisationStore } from "../../store/useOrganisationStore";
 import "./PublicVolunteerProfile.css";
 
 const PublicVolunteerProfile = () => {
-  const { volunteerId } = useParams();
+  const { opportunityId, volunteerId } = useParams();
   const [isResumePreviewOpen, setIsResumePreviewOpen] = useState(false);
   const {
     getPublicVolunteerPastExperience,
@@ -37,7 +37,13 @@ const PublicVolunteerProfile = () => {
   ]);
 
   const backControl = (
-    <BackButton fallbackPath="/organisation-dashboard/applications" />
+    <BackButton
+      fallbackPath={
+        opportunityId
+          ? `/organisation-dashboard/applications/${opportunityId}`
+          : "/organisation-dashboard/applications"
+      }
+    />
   );
 
   if (isPublicVolunteerProfileLoading) {

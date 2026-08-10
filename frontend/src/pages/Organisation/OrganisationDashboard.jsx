@@ -26,9 +26,13 @@ const OrganisationDashboard = () => {
     "/organisation-dashboard/profile",
     "/organisation-dashboard/edit-organisation-profile",
     "/organisation-dashboard/edit-opportunity",
-    "/organisation-dashboard/applications/volunteers",
   ];
-  const isFlushPage = flushPages.some(page => location.pathname.startsWith(page));
+  const isApplicationVolunteerProfile =
+    location.pathname.startsWith("/organisation-dashboard/applications/") &&
+    location.pathname.includes("/volunteers/");
+  const isFlushPage =
+    flushPages.some(page => location.pathname.startsWith(page)) ||
+    isApplicationVolunteerProfile;
   const isMessagesPage = location.pathname === "/organisation-dashboard/messages";
 
   return (
@@ -41,6 +45,8 @@ const OrganisationDashboard = () => {
           <Route path="/" element={<OrganisationHomepage />} />
           <Route path="opportunities" element={<OrganisationOpportunity />} />
           <Route path="applications" element={<OrganisationApplication />} />
+          <Route path="applications/:opportunityId" element={<OrganisationApplication />} />
+          <Route path="applications/:opportunityId/volunteers/:volunteerId" element={<PublicVolunteerProfile />} />
           <Route path="applications/volunteers/:volunteerId" element={<PublicVolunteerProfile />} />
           <Route path="followers" element={<OrganisationFollowers />} />
           <Route path="messages" element={<VolunteerMessages />} />

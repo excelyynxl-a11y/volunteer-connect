@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Search,
   ArrowLeft,
@@ -46,6 +46,8 @@ const mapOpportunityToViewModel = (opportunity, applicationsForOpportunity) => (
 
 const OrganisationApplication = () => {
   const navigate = useNavigate();
+  const { opportunityId } = useParams();
+  const [hasLoadedApplications, setHasLoadedApplications] = useState(false);
   const {
     allMyOpportunities,
     isOpportunitiesLoading,
@@ -61,24 +63,40 @@ const OrganisationApplication = () => {
     rejectApplication,
   } = useApplicationStore();
 
-  const [selectedId, setSelectedId] = useState(null);
-
   useEffect(() => {
-    getMyOpportunities();
-    getMyOrganisationApplications();
+    let isActive = true;
+
+    const loadApplicationManagement = async () => {
+      await Promise.allSettled([
+        getMyOpportunities(),
+        getMyOrganisationApplications(),
+      ]);
+
+      if (isActive) {
+        setHasLoadedApplications(true);
+      }
+    };
+
+    loadApplicationManagement();
+
+    return () => {
+      isActive = false;
+    };
   }, [getMyOpportunities, getMyOrganisationApplications]);
 
   const opportunityViewModels = useMemo(() => {
     return allMyOpportunities.map((opportunity) => {
       const applicationsForOpportunity = applications.filter(
-        (application) => application.opportunityId?._id === opportunity._id
+        (application) =>
+          String(application.opportunityId?._id ?? application.opportunityId) ===
+          String(opportunity._id),
       );
       return mapOpportunityToViewModel(opportunity, applicationsForOpportunity);
     });
   }, [allMyOpportunities, applications]);
 
   const selectedOpportunity = opportunityViewModels.find(
-    (o) => o.id === selectedId
+    (opportunity) => String(opportunity.id) === opportunityId,
   );
 
   const handleApprove = async (applicationId) => {
@@ -99,10 +117,33 @@ const OrganisationApplication = () => {
     );
   }
 
-  if (isOpportunitiesLoading || isApplicationsLoading) {
+  if (
+    !hasLoadedApplications ||
+    isOpportunitiesLoading ||
+    isApplicationsLoading
+  ) {
     return (
       <div className="organisation-page">
         <p>Loading opportunities...</p>
+      </div>
+    );
+  }
+
+  if (opportunityId && !selectedOpportunity) {
+    return (
+      <div className="organisation-page">
+        <div className="organisation-empty">
+          <ClipboardList className="organisation-empty-icon" />
+          <h3>Opportunity applications unavailable</h3>
+          <p>This opportunity could not be found for your organisation.</p>
+          <button
+            type="button"
+            className="app-back-btn"
+            onClick={() => navigate("/organisation-dashboard/applications")}
+          >
+            <ArrowLeft size={14} /> Back to Opportunities
+          </button>
+        </div>
       </div>
     );
   }
@@ -112,13 +153,13 @@ const OrganisationApplication = () => {
       <ApplicationOpportunityDetail
         key={selectedOpportunity.id}
         opportunity={selectedOpportunity}
-        onBack={() => setSelectedId(null)}
+        onBack={() => navigate("/organisation-dashboard/applications")}
         onApprove={handleApprove}
         onReject={handleReject}
         onViewVolunteer={(volunteerId) => {
           if (volunteerId) {
             navigate(
-              `/organisation-dashboard/applications/volunteers/${volunteerId}`,
+              `/organisation-dashboard/applications/${selectedOpportunity.id}/volunteers/${volunteerId}`,
             );
           }
         }}
@@ -129,7 +170,9 @@ const OrganisationApplication = () => {
   return (
     <ApplicationOpportunityList
       opportunities={opportunityViewModels}
-      onManage={(id) => setSelectedId(id)}
+      onManage={(id) =>
+        navigate(`/organisation-dashboard/applications/${id}`)
+      }
     />
   );
 };
