@@ -22,6 +22,7 @@ import {
   formatOpportunityTimeRange,
   getOpportunityImage,
   getUpcomingOpportunities,
+  isOpportunityOpen,
 } from "../../lib/opportunity";
 import "./Volunteer.css";
 
@@ -67,8 +68,9 @@ const VolunteerHomepage = () => {
     ? sortAvailabilitySlots(authUser.availability)
     : [];
 
-  const activeOpportunities = opportunities.filter(
-    (opportunity) => opportunity.status?.toLowerCase() === "active",
+  // Filter active opportunities that haven't started or passed application deadline
+  const activeOpportunities = opportunities.filter((opportunity) =>
+    isOpportunityOpen(opportunity),
   );
 
   const upcomingOpportunities = getUpcomingOpportunities(activeOpportunities);
