@@ -9,7 +9,6 @@ import {
   User,
 } from 'lucide-react'
 import VolunteerHoursCard from '../../components/VolunteerHoursCard'
-import VolunteerTopbar from '../../components/VolunteerTopbar'
 import { sortAvailabilitySlots } from '../../lib/availability'
 import { formatApprovalStatus, getInitials } from '../../lib/utils'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -55,8 +54,6 @@ const VolunteerProfile = () => {
   return (
     <div className="volunteer-profile-page">
       <div className="volunteer-profile-content">
-        <VolunteerTopbar />
-
         {/* Profile hero section */}
         <section className="profile-hero">
           <div className="profile-avatar-large">
