@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
 import { getInitials } from "../../lib/utils";
 import { useFollowStore } from "../../store/useFollowStore";
 import "./Volunteer.css";
@@ -40,6 +41,7 @@ const FollowedOrganisations = () => {
   } = useFollowStore();
   const [query, setQuery] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
   useEffect(() => {
     getMyFollowedOrganisations();
@@ -89,17 +91,57 @@ const FollowedOrganisations = () => {
             <p>Manage your followed organisations and view their profiles.</p>
           </div>
           <div className="followed-organisations-header-actions">
-            <label className="followed-organisations-sort">
-              <span>Sort by</span>
-              <select
-                aria-label="Sort followed organisations by name"
-                value={sortOrder}
-                onChange={(event) => setSortOrder(event.target.value)}
+            <div
+              className="followed-organisations-sort"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setIsSortMenuOpen(false);
+                }
+              }}
+            >
+              <button
+                type="button"
+                className="followed-organisations-sort-trigger"
+                aria-haspopup="menu"
+                aria-expanded={isSortMenuOpen}
+                onClick={() => setIsSortMenuOpen((isOpen) => !isOpen)}
               >
-                <option value="asc">Name: A–Z</option>
-                <option value="desc">Name: Z–A</option>
-              </select>
-            </label>
+                <ArrowUpDown size={18} aria-hidden="true" />
+                <span>Sort</span>
+                <ChevronDown size={16} aria-hidden="true" />
+              </button>
+
+              {isSortMenuOpen && (
+                <div className="followed-organisations-sort-menu" role="menu">
+                  <button
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={sortOrder === "asc"}
+                    className={sortOrder === "asc" ? "selected" : ""}
+                    onClick={() => {
+                      setSortOrder("asc");
+                      setIsSortMenuOpen(false);
+                    }}
+                  >
+                    <ArrowUp size={20} aria-hidden="true" />
+                    <span>Ascending</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={sortOrder === "desc"}
+                    className={sortOrder === "desc" ? "selected" : ""}
+                    onClick={() => {
+                      setSortOrder("desc");
+                      setIsSortMenuOpen(false);
+                    }}
+                  >
+                    <ArrowDown size={20} aria-hidden="true" />
+                    <span>Descending</span>
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="volunteer-opportunities-count">{followedOrganisations.length} following</div>
           </div>
         </div>
