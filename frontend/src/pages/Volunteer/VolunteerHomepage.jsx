@@ -8,8 +8,10 @@ import {
   MapPin,
 } from "lucide-react";
 import OpportunityDetailModal from "../../components/OpportunityDetailModal";
+import ConfirmApplicationModal from "../../components/ConfirmApplicationModal";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
+import { useApplicationStore } from "../../store/useApplicationStore";
 import {
   isOpportunityInsideAvailability,
   shortDay,
@@ -20,13 +22,16 @@ import {
   formatOpportunityTimeRange,
   getOpportunityImage,
   getUpcomingOpportunities,
+  isOpportunityOpen,
 } from "../../lib/opportunity";
 import "./Volunteer.css";
 
 const VolunteerHomepage = () => {
   const authUser = useAuthStore((state) => state.authUser);
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [applyingOpportunity, setApplyingOpportunity] = useState(null);
   const availabilitySummaryLimit = 3;
+
   const {
     opportunities,
     isOpportunitiesLoading,
@@ -39,14 +44,23 @@ const VolunteerHomepage = () => {
     getAllOpportunities,
   } = useVolunteerStore();
 
+  const {
+    applications,
+    getMyApplications,
+    createApplication,
+    isSubmittingApplication,
+  } = useApplicationStore();
+
   useEffect(() => {
     getAllOpportunities();
+    getMyApplications();
     if (authUser?._id) {
       getVolunteerPastExperience(authUser._id);
     }
   }, [
     authUser?._id,
     getAllOpportunities,
+    getMyApplications,
     getVolunteerPastExperience,
   ]);
 
@@ -54,8 +68,9 @@ const VolunteerHomepage = () => {
     ? sortAvailabilitySlots(authUser.availability)
     : [];
 
-  const activeOpportunities = opportunities.filter(
-    (opportunity) => opportunity.status?.toLowerCase() === "active",
+  // Filter active opportunities that haven't started or passed application deadline
+  const activeOpportunities = opportunities.filter((opportunity) =>
+    isOpportunityOpen(opportunity),
   );
 
   const upcomingOpportunities = getUpcomingOpportunities(activeOpportunities);
@@ -68,10 +83,29 @@ const VolunteerHomepage = () => {
 
   const recommendedOpportunities = matchingOpportunities.slice(0, 2);
 
+  const applicationStatusByOpportunity = applications.reduce((statusMap, application) => {
+    const opportunityId = application.opportunityId?._id;
+    if (opportunityId) {
+      statusMap[opportunityId] = application.status;
+    }
+    return statusMap;
+  }, {});
+
   const navigate = useNavigate();
 
   const handleSeeMore = () => {
     navigate("/volunteer-dashboard/opportunities");
+  };
+
+  const handleConfirmApply = async () => {
+    if (!applyingOpportunity) return;
+    try {
+      await createApplication(applyingOpportunity._id);
+      await getMyApplications();
+      setApplyingOpportunity(null);
+    } catch (error) {
+      console.error("Failed to submit application:", error);
+    }
   };
 
   const summaryCards = [
@@ -327,6 +361,24 @@ const VolunteerHomepage = () => {
       <OpportunityDetailModal
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+        onAction={(action, organisationId) => {
+          if (action === "apply") {
+            setApplyingOpportunity(selectedOpportunity);
+          } else if (action === "view-organisation" && organisationId) {
+            setSelectedOpportunity(null);
+            navigate(`/volunteer-dashboard/organisations/${organisationId}`);
+          }
+        }}
+        volunteerAvailability={displayAvailability}
+        applicationStatus={applicationStatusByOpportunity[selectedOpportunity?._id]}
+      />
+
+      <ConfirmApplicationModal
+        opportunity={applyingOpportunity}
+        volunteerAvailability={displayAvailability}
+        onCancel={() => setApplyingOpportunity(null)}
+        onConfirm={handleConfirmApply}
+        isSubmitting={isSubmittingApplication}
       />
     </div>
   );

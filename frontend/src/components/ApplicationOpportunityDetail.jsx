@@ -3,7 +3,13 @@ import { formatDate } from "../lib/utils";
 import { ArrowLeft, Check, ClipboardList, Eye, X, Calendar } from "lucide-react";
 import { APPLICATION_TABS } from "../lib/application";
 
-const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject }) => {
+const ApplicationOpportunityDetail = ({
+  opportunity,
+  onBack,
+  onApprove,
+  onReject,
+  onViewVolunteer,
+}) => {
   const [activeTab, setActiveTab] = useState("All");
   const [reviewTarget, setReviewTarget] = useState(null);
   const [rejectMode, setRejectMode] = useState(false);
@@ -158,7 +164,8 @@ const ApplicationOpportunityDetail = ({ opportunity, onBack, onApprove, onReject
                       <button
                         type="button"
                         className="app-view-details-btn"
-                        onClick={() => openReview(app)}
+                        disabled={!app.volunteerId}
+                        onClick={() => onViewVolunteer(app.volunteerId)}
                       >
                         <Eye size={14} /> View Details
                       </button>

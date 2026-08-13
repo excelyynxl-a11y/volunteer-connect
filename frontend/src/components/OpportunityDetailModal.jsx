@@ -32,6 +32,10 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
 
   const spotsRemaining = getSpotsRemaining(opportunity);
   const organisationName = getOrganisationName(opportunity);
+  const organisationId =
+    typeof opportunity.organisationId === "object"
+      ? opportunity.organisationId?._id
+      : opportunity.organisationId;
 
   const { key: effectiveStatusKey, isLocked } = getApplicationDisplayStatus(
     applicationStatus,
@@ -72,7 +76,14 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
             <h2 id="opportunity-detail-title">{opportunity.title}</h2>
             <div className="opportunity-organisation-row">
               <p>{organisationName}</p>
-              <button type="button" className="view-organisation-button">
+              <button
+                type="button"
+                className="view-organisation-button"
+                disabled={!organisationId}
+                onClick={() =>
+                  onAction && onAction("view-organisation", organisationId)
+                }
+              >
                 <Building2 size={16} />
                 View organisation profile
               </button>

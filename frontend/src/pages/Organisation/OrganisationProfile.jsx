@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, Plus, Search } from 'lucide-react'
+import { AlertCircle, Loader2, Plus } from 'lucide-react'
 import { getInitials } from '../../lib/utils.js';
-import { opportunityMatchesSearch } from '../../lib/opportunity.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useOrganisationStore } from '../../store/useOrganisationStore.js';
 import OpportunityCard from '../../components/OpportunityCard.jsx';
@@ -18,7 +17,6 @@ const OrganisationProfile = () => {
     opportunitiesError,
   } = useOrganisationStore();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (authUser?._id) {
@@ -26,38 +24,16 @@ const OrganisationProfile = () => {
     }
   }, [authUser?._id, getMyOpportunities]);
 
-  const filteredActiveOpportunities = useMemo(
-    () =>
-      activeOpportunities.filter((opportunity) =>
-        opportunityMatchesSearch(opportunity, searchQuery),
-      ),
-    [activeOpportunities, searchQuery],
-  );
-  const filteredHistoricalOpportunities = useMemo(
-    () =>
-      [...closedOpportunities, ...cancelledOpportunities].filter(
-        (opportunity) => opportunityMatchesSearch(opportunity, searchQuery),
-      ),
-    [cancelledOpportunities, closedOpportunities, searchQuery],
-  );
+  const historicalOpportunities = [
+    ...closedOpportunities,
+    ...cancelledOpportunities,
+  ];
 
   return (
     <div className="org-profile-page">
 
       <div className="org-profile-main">
 
-        <header className="org-profile-header">
-          <div className="org-profile-search">
-            <Search size={18} />
-            <input
-              type="search"
-              placeholder="Search your postings..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
-          </div>
-        </header>
-        
         <section className="org-profile-banner">
           <div className="org-profile-banner-text">
             <span className="org-profile-eyebrow">
@@ -142,8 +118,8 @@ const OrganisationProfile = () => {
                 <p className="org-profile-empty-text">
                   Historical postings are currently unavailable.
                 </p>
-              ) : filteredHistoricalOpportunities.length > 0 ? (
-                filteredHistoricalOpportunities.map((opp) => (
+              ) : historicalOpportunities.length > 0 ? (
+                historicalOpportunities.map((opp) => (
                   <OpportunityCard 
                     key={opp._id} 
                     opportunity={opp}
@@ -152,9 +128,7 @@ const OrganisationProfile = () => {
                 ))
               ) : (
                 <p className="org-profile-empty-text">
-                  {searchQuery.trim()
-                    ? 'No historical postings match your search.'
-                    : 'No previous or historical events found in the database.'}
+                  No previous or historical events found in the database.
                 </p>
               )}
             </div>
@@ -187,8 +161,8 @@ const OrganisationProfile = () => {
                   Try Again
                 </button>
               </div>
-            ) : filteredActiveOpportunities.length > 0 ? (
-              filteredActiveOpportunities.map((opp) => (
+            ) : activeOpportunities.length > 0 ? (
+              activeOpportunities.map((opp) => (
                 <OpportunityCard
                   key={opp._id}
                   opportunity={opp}
@@ -206,9 +180,7 @@ const OrganisationProfile = () => {
               ))
             ) : (
               <p className="org-profile-empty-text">
-                {searchQuery.trim()
-                  ? 'No active postings match your search.'
-                  : "No active postings found. Click 'Create New Posting' above to publish one."}
+                No active postings found. Click 'Create New Posting' above to publish one.
               </p>
             )}
           </div>

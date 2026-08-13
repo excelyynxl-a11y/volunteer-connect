@@ -149,6 +149,46 @@
   color: #a92727;
 }
 
+.public-org-opportunities {
+  margin-top: 28px;
+  padding: 30px 32px 32px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.public-org-opportunities-header {
+  margin-bottom: 22px;
+}
+
+.public-org-opportunities-header p {
+  margin: 0 0 6px;
+  color: #ad6719;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.public-org-opportunities-header h2 {
+  margin: 0 0 8px;
+  color: #073f35;
+  font-size: 28px;
+}
+
+.public-org-opportunities-header span,
+.public-org-opportunities-state {
+  color: #667085;
+}
+
+.public-org-opportunities-state {
+  margin: 0;
+}
+
+.public-org-opportunities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
 @media (max-width: 1000px) {
   .public-org-hero {
     flex-wrap: wrap;
@@ -174,6 +214,14 @@
   .public-org-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .public-org-opportunities {
+    padding: 24px 20px;
+  }
+
+  .public-org-opportunities-grid {
+    grid-template-columns: 1fr;
   }
 
 }

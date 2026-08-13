@@ -943,66 +943,6 @@
   gap: 32px;
 }
 
-.org-profile-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.org-profile-search {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: min(450px, 100%);
-  min-height: 42px;
-  padding: 0 14px;
-  border: 1px solid #ded5ca;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #6b7280;
-}
-
-.org-profile-search input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #1d2a32;
-  font: inherit;
-  font-size: 14px;
-}
-
-.org-profile-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.org-profile-notification {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid #ded5ca;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #2c614f;
-}
-
-.org-profile-bell-dot {
-  position: absolute;
-  top: 10px;
-  right: 11px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
-  background: #d9aa55;
-}
-
 .org-profile-banner {
   display: flex;
   align-items: center;
@@ -1502,8 +1442,7 @@
 }
 
 .org-profile-edit-input-group input:focus,
-.org-profile-edit-input-group textarea:focus,
-.org-profile-search:focus-within {
+.org-profile-edit-input-group textarea:focus {
   border-color: #d9aa55;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(217, 170, 85, 0.15);
@@ -1531,7 +1470,6 @@
     padding: 20px 16px;
   }
 
-  .org-profile-header,
   .org-profile-header-inner,
   .org-profile-card-header {
     align-items: flex-start;
@@ -3250,6 +3188,20 @@
  
   .app-row-actions {
     flex-direction: column;
+  }
+}
+
+.organisation-content.organisation-content-messages {
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (max-width: 1160px) {
+  .organisation-content.organisation-content-messages {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
   }
 }
 

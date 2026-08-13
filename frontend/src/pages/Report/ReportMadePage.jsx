@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { ArrowBigLeft } from "lucide-react";
+import { ArrowBigLeft, Pencil } from "lucide-react";
 import { useReportStore } from "../../store/useReportStore";
 import { useAdminStore } from "../../store/useAdminStore";
+import { reportStatus } from "../../lib/report";
 import { formatDate } from "../../lib/utils";
 
 const ReportMadePage = () => {
@@ -9,7 +11,10 @@ const ReportMadePage = () => {
   const location = useLocation();
   const { reportId } = useParams();
   const { previousReports } = useReportStore();
-  const { reports } = useAdminStore();
+  const { reports, updateReportStatus } = useAdminStore();
+
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [localStatus, setLocalStatus] = useState(null);
 
   // read report from navigation state, fall back to store lookup by id
   const report =
@@ -23,6 +28,8 @@ const ReportMadePage = () => {
       ? "/organisation-dashboard"
       : "/volunteer-dashboard";
 
+  const isAdmin = basePath === "/admin-dashboard";
+
   const handleBack = () => {
     const backPath = location.pathname.startsWith("/admin-dashboard")
       ? `${basePath}/manage-report`
@@ -30,7 +37,21 @@ const ReportMadePage = () => {
     navigate(backPath);
   };
 
-  const status = report?.status?.toLowerCase() || "pending";
+  const currentStatus = localStatus || report?.status || "Pending";
+
+  const handleStatusUpdate = async (newStatus) => {
+    if (newStatus === currentStatus) {
+      setIsEditingStatus(false);
+      return;
+    }
+    const result = await updateReportStatus(report._id, newStatus);
+    if (result.success) {
+      setLocalStatus(newStatus);
+    }
+    setIsEditingStatus(false);
+  };
+
+  const status = currentStatus.toLowerCase();
 
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
@@ -72,9 +93,35 @@ const ReportMadePage = () => {
             </span>
             <h2>{report.title || "Untitled report"}</h2>
           </div>
-          <span className={`report-card-status ${status}`}>
-            {report.status || "Pending"}
-          </span>
+          <div className="report-made-status-group">
+            <span className={`report-card-status ${status}`}>
+              {currentStatus}
+            </span>
+            {isAdmin && (
+              <div className="report-made-edit-wrapper">
+                <button
+                  className="report-made-edit-btn"
+                  onClick={() => setIsEditingStatus((prev) => !prev)}
+                  title="Edit report status"
+                >
+                  <Pencil size={14} />
+                </button>
+                {isEditingStatus && (
+                  <div className="report-made-status-dropdown">
+                    {reportStatus.map((s) => (
+                      <button
+                        key={s}
+                        className={`report-made-status-option ${s === currentStatus ? "active" : ""}`}
+                        onClick={() => handleStatusUpdate(s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* report details */}
@@ -100,7 +147,7 @@ const ReportMadePage = () => {
               Status
             </span>
             <span className="report-made-detail-value">
-              {report.status || "Pending"}
+              {currentStatus}
             </span>
           </div>
         </div>

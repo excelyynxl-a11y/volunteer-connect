@@ -9,6 +9,8 @@ import VolunteerOpportunities from "./VolunteerOpportunities";
 import FollowedOrganisations from "./FollowedOrganisations";
 import VolunteerReport from "./VolunteerReport";
 import ReportMadePage from "../Report/ReportMadePage";
+import PublicOrganisationProfile from "../Organisation/PublicOrganisationProfile";
+import VolunteerMessages from "./VolunteerMessages";
 
 import "./Volunteer.css";
 import VolunteerApplication from "./VolunteerApplication";

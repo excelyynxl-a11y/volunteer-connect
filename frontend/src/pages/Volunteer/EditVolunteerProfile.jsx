@@ -9,7 +9,6 @@ import {
   X,
 } from 'lucide-react'
 import CustomSelect from '../../components/CustomSelect'
-import VolunteerTopbar from '../../components/VolunteerTopbar'
 import {
   volunteerAgeGroupOptions,
   volunteerAvailabilityDays,
@@ -304,8 +303,6 @@ const EditVolunteerProfile = () => {
   return (
     <div className="edit-profile-page">
       <div className="edit-profile-content">
-        <VolunteerTopbar />
-
         {/* Profile hero section */}
         <section className="profile-hero">
           <div>
