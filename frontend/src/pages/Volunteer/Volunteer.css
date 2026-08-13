@@ -3323,17 +3323,56 @@
   padding: 8px 12px;
   border-radius: 8px;
   background: #fff;
+  font: inherit;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 }
 
 .followed-organisations-view {
   border: 1px solid #e6e2dc;
+  color: var(--profile-green-dark);
+}
+
+.followed-organisations-view:hover,
+.followed-organisations-view:focus-visible {
+  border-color: var(--profile-green);
+  background: var(--profile-green);
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(44, 97, 79, 0.2);
 }
 
 .followed-organisations-unfollow {
   border: 1px solid #f1c6c3;
   color: #b31212;
+}
+
+.followed-organisations-unfollow:hover:not(:disabled),
+.followed-organisations-unfollow:focus-visible:not(:disabled) {
+  border-color: #b31212;
+  background: #b31212;
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(179, 18, 18, 0.18);
+}
+
+.followed-organisations-action:focus-visible {
+  outline: 3px solid rgba(217, 170, 85, 0.35);
+  outline-offset: 2px;
+}
+
+.followed-organisations-action:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none;
+}
+
+.followed-organisations-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 760px) {
