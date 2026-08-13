@@ -3146,6 +3146,40 @@
   margin-top: 20px;
 }
 
+.followed-organisations-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.followed-organisations-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--profile-muted);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.followed-organisations-sort select {
+  min-height: 38px;
+  padding: 0 34px 0 12px;
+  border: 1px solid #ded5ca;
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--profile-green-dark);
+  font: inherit;
+  cursor: pointer;
+}
+
+.followed-organisations-sort select:focus-visible {
+  outline: 3px solid rgba(217, 170, 85, 0.35);
+  outline-offset: 2px;
+}
+
 .followed-organisations-error {
   margin: 0 0 16px;
   padding: 12px 14px;
@@ -3254,6 +3288,11 @@
 }
 
 @media (max-width: 760px) {
+  .followed-organisations-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .followed-organisations-summary {
     flex-basis: 100%;
   }

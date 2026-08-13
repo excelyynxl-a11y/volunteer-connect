@@ -39,18 +39,30 @@ const FollowedOrganisations = () => {
     followError,
   } = useFollowStore();
   const [query, setQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => {
     getMyFollowedOrganisations();
   }, [getMyFollowedOrganisations]);
 
-  const filtered = useMemo(() => {
+  const displayedOrganisations = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return followedOrganisations;
-    return followedOrganisations.filter((o) =>
-      (o.name || "").toLowerCase().includes(q),
-    );
-  }, [followedOrganisations, query]);
+    const filtered = q
+      ? followedOrganisations.filter((o) =>
+          (o.name || "").toLowerCase().includes(q),
+        )
+      : followedOrganisations;
+
+    return [...filtered].sort((first, second) => {
+      const comparison = (first.name || "").localeCompare(
+        second.name || "",
+        undefined,
+        { sensitivity: "base" },
+      );
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [followedOrganisations, query, sortOrder]);
 
   return (
     <div className="volunteer-opportunities-page">
@@ -76,7 +88,20 @@ const FollowedOrganisations = () => {
             <h2>Followed organisations</h2>
             <p>Manage your followed organisations and view their profiles.</p>
           </div>
-          <div className="volunteer-opportunities-count">{followedOrganisations.length} following</div>
+          <div className="followed-organisations-header-actions">
+            <label className="followed-organisations-sort">
+              <span>Sort by</span>
+              <select
+                aria-label="Sort followed organisations by name"
+                value={sortOrder}
+                onChange={(event) => setSortOrder(event.target.value)}
+              >
+                <option value="asc">Name: A–Z</option>
+                <option value="desc">Name: Z–A</option>
+              </select>
+            </label>
+            <div className="volunteer-opportunities-count">{followedOrganisations.length} following</div>
+          </div>
         </div>
 
         <div>
@@ -88,11 +113,11 @@ const FollowedOrganisations = () => {
 
           {isFollowedOrganisationsLoading && followedOrganisations.length === 0 ? (
             <p>Loading...</p>
-          ) : filtered.length === 0 && !followError ? (
+          ) : displayedOrganisations.length === 0 && !followError ? (
             <p>No followed organisations.</p>
-          ) : filtered.length > 0 ? (
+          ) : displayedOrganisations.length > 0 ? (
             <div className="followed-organisations-list">
-              {filtered.map((org) => (
+              {displayedOrganisations.map((org) => (
                 <div key={org._id} className="followed-organisations-card">
                   <div className="followed-organisations-summary">
                     <OrganisationAvatar name={org.name} avatar={org.avatar} />
