@@ -170,4 +170,11 @@ describe("follow controller", () => {
     expect(response.statusCode).toBe(400);
     expect(Organisation.findOne).not.toHaveBeenCalled();
   });
+
+  it.todo("creates a follow for an approved organisation and returns safe fields");
+  it.todo("rejects a missing, unapproved, or already followed organisation");
+  it.todo("makes unfollow idempotent for an existing or missing relationship");
+  it.todo("returns true and false follow status for the authenticated volunteer");
+  it.todo("lists only approved followed organisations with safe fields");
+  it.todo("handles model failures without returning stale success data");
 });

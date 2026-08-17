@@ -210,4 +210,10 @@ describe("uploadAvatar", () => {
   });
 });
 
+describe("remaining upload middleware coverage", () => {
+  it.todo("accepts one allowed message attachment at or below 5MB");
+  it.todo("rejects an attachment whose content signature does not match its type");
+  it.todo("calls next exactly once when an optional upload is not supplied");
+});
+
 

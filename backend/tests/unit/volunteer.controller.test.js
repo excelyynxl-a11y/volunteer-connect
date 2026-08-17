@@ -206,6 +206,8 @@ describe("getVolunteerProfile", () => {
       message: "Database error",
     });
   });
+
+  it.todo("returns only the intended volunteer profile fields");
 });
 
 describe("updateVolunteerProfile", () => {
@@ -366,6 +368,12 @@ describe("updateVolunteerProfile", () => {
       data: updatedVolunteer,
     });
   });
+
+  it.todo("validates the name and biodata boundaries");
+  it.todo("parses, normalises, limits, and deduplicates skills");
+  it.todo("normalises, validates, and sorts availability slots");
+  it.todo("uploads an avatar through the Cloudinary service boundary");
+  it.todo("returns a safe error when avatar upload or persistence fails");
 });
 
 describe("getVolunteerPastExperience", () => {
@@ -494,5 +502,7 @@ describe("getVolunteerPastExperience", () => {
       message: "Database error",
     });
   });
+
+  it.todo("does not describe scheduled duration as verified volunteer hours");
 });
 
