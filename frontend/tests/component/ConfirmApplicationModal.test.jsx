@@ -88,4 +88,55 @@ describe('ConfirmApplicationModal', () => {
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Applying...' })).toBeDisabled()
   })
+
+  it('lets the volunteer cancel without confirming', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    const onConfirm = vi.fn()
+
+    render(
+      <ConfirmApplicationModal
+        opportunity={opportunity}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        volunteerAvailability={matchingAvailability}
+        isSubmitting={false}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(onCancel).toHaveBeenCalledOnce()
+    expect(onConfirm).not.toHaveBeenCalled()
+  })
+
+  it('does not render without an opportunity', () => {
+    const { container } = render(
+      <ConfirmApplicationModal
+        opportunity={null}
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+        volunteerAvailability={matchingAvailability}
+        isSubmitting={false}
+      />,
+    )
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('allows confirmation when no availability restrictions are configured', () => {
+    render(
+      <ConfirmApplicationModal
+        opportunity={opportunity}
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+        volunteerAvailability={[]}
+        isSubmitting={false}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Confirm & Apply' })).toBeEnabled()
+    expect(
+      screen.queryByText('This opportunity is outside your set availability times.'),
+    ).not.toBeInTheDocument()
+  })
 })
