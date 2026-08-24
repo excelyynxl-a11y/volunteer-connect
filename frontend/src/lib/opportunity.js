@@ -27,11 +27,11 @@ export const isOpportunityOpen = (opportunity, now = Date.now()) => {
     if (deadlineDate) {
       // If deadline is set to midnight (00:00:00), extend to 23:59:59 of that day
       if (
-        deadlineDate.getUTCHours() === 0 &&
-        deadlineDate.getUTCMinutes() === 0 &&
-        deadlineDate.getUTCSeconds() === 0
+        deadlineDate.getHours() === 0 &&
+        deadlineDate.getMinutes() === 0 &&
+        deadlineDate.getSeconds() === 0
       ) {
-        deadlineDate.setUTCHours(23, 59, 59, 999)
+        deadlineDate.setHours(23, 59, 59, 999)
       }
 
       if (deadlineDate.getTime() < now) {
