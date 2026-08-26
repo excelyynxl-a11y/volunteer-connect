@@ -84,5 +84,47 @@ export const getVolunteerSignUpAnalytics = async (req, res) => {
     }
 };
 
+export const getOrganisationSignUpAnalytics = async (req, res) => {
+    // example output:
+    // [{month, count, org [{name, email, signUpAt}]}]
+
+    try {
+        // extract start - end month
+        const { startMonth, endMonth } = resolveRange(req.query);
+        const rangeStart = parseMonth(startMonth);
+        const rangeEnd = parseMonth(endMonth);
+        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+
+        const organisations = await Organisation.find(
+            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
+            "name email createdAt",
+        ).sort({ createdAt: 1 });
+
+        // group org by month
+        const grouped = {};
+        for (const month of generateMonthRange(startMonth, endMonth)) {
+            grouped[month] = { month, count: 0, organisations: [] };
+        }
+
+    // generate count of volunteer in each month
+    for (const org of organisations) {
+        const key = toMonthKey(org.createdAt);
+        if (grouped[key]) {
+            grouped[key].count += 1;
+            grouped[key].organisations.push({
+            name: org.name,
+            email: org.email,
+            signedUpAt: org.createdAt,
+            });
+        }
+    }
+
+    res.status(200).json(Object.values(grouped));
+  } catch (err) {
+        console.log("Error in getOrganisationSignUpAnalytics controller: ", err.message);
+        res.status(500).json({ message: err.message });
+  }
+};
+
 
 
