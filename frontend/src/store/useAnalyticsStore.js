@@ -63,7 +63,106 @@ export const useAnalyticsStore = create((set, get) => ({
   reportAnalyticsError: "",
   analyticsOverviewRequestId: 0,
 
-  getAnalyticsOverview: async (startMonth, endMonth) => {},
+  getAnalyticsOverview: async (startMonth, endMonth) => {
+    const requestId = Date.now();
+    const range = resolveAnalyticsRange(startMonth, endMonth);
+
+    set({
+      analyticsOverviewRequestId: requestId,
+      isVolunteerSignUpAnaltyicsLoading: true,
+      isOrganisationSignUpAnaltyicsLoading: true,
+      isOpportunityCreatedAnaltyicsLoading: true,
+      isReportAnaltyicsLoading: true,
+      volunteerSignUpAnalyticsError: "",
+      organisationSignUpAnalyticsError: "",
+      opportunityCreatedAnalyticsError: "",
+      reportAnalyticsError: ""
+    });
+
+    try {
+      const [volunteerRes, organisationRes, opportunityRes, reportRes] =
+        await Promise.allSettled([
+          axiosInstance.get("/analytics/volunteer-signups", { params: range }),
+          axiosInstance.get("/analytics/organisation-signups", {
+            params: range
+          }),
+          axiosInstance.get("/analytics/opportunities-created", {
+            params: range
+          }),
+          axiosInstance.get("/analytics/reports", { params: range })
+        ]);
+
+      if (get().analyticsOverviewRequestId !== requestId) {
+        return { success: false, stale: true };
+      }
+
+      const parseSettled = (result) =>
+        result.status === "fulfilled"
+          ? normalizeAnalyticsList(result.value.data)
+          : [];
+
+      const parseError = (result, fallbackMessage) =>
+        result.status === "rejected"
+          ? getErrorMessage(result.reason, fallbackMessage)
+          : "";
+
+      set({
+        volunteerSignUpAnaltyics: parseSettled(volunteerRes),
+        organisationSignUpAnaltyics: parseSettled(organisationRes),
+        opportunityCreatedAnaltyics: parseSettled(opportunityRes),
+        reportAnaltyics: parseSettled(reportRes),
+        volunteerSignUpAnalyticsError: parseError(
+          volunteerRes,
+          "Failed to load volunteer analytics"
+        ),
+        organisationSignUpAnalyticsError: parseError(
+          organisationRes,
+          "Failed to load organisation analytics"
+        ),
+        opportunityCreatedAnalyticsError: parseError(
+          opportunityRes,
+          "Failed to load opportunity analytics"
+        ),
+        reportAnalyticsError: parseError(
+          reportRes,
+          "Failed to load report analytics"
+        ),
+        isVolunteerSignUpAnaltyicsLoading: false,
+        isOrganisationSignUpAnaltyicsLoading: false,
+        isOpportunityCreatedAnaltyicsLoading: false,
+        isReportAnaltyicsLoading: false
+      });
+
+      return { success: true };
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Failed to load analytics overview"
+      );
+
+      if (get().analyticsOverviewRequestId !== requestId) {
+        return { success: false, stale: true };
+      }
+
+      set({
+        volunteerSignUpAnaltyics: [],
+        organisationSignUpAnaltyics: [],
+        opportunityCreatedAnaltyics: [],
+        reportAnaltyics: [],
+        volunteerSignUpAnalyticsError: message,
+        organisationSignUpAnalyticsError: message,
+        opportunityCreatedAnalyticsError: message,
+        reportAnalyticsError: message,
+        isVolunteerSignUpAnaltyicsLoading: false,
+        isOrganisationSignUpAnaltyicsLoading: false,
+        isOpportunityCreatedAnaltyicsLoading: false,
+        isReportAnaltyicsLoading: false
+      });
+
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  },
 
   getVolunteerSignUpAnalytics: async (startMonth, endMonth) => {},
 
