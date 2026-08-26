@@ -1,9 +1,15 @@
 import React from "react";
 import { BarChart3 } from "lucide-react";
+import VolunteerAnalyticsCard from "../../components/VolunteerAnalyticsCard";
+import OrganisationAnalyticsCard from "../../components/OrgansitionAnalyticsCard";
+import OpportunityAnalyticsCard from "../../components/OpportunityAnalytics";
+import ReportAnalyticsCard from "../../components/ReportAnalytics";
 
 const AdminAnalytics = () => {
 
-  // TODO: analytics in Milestone 3
+  // TODO: extract GET values from useAnalyticsStore and throw to individual AnalyticsCard component
+  // each graph should have input field for startmonth and endmonth (optional, defualt set to start = Mar2026 and end = current month)
+  // throw startmonth and endmonth to useAnalyticsStore get method as params
   return (
     <div className="admin-page">
       <div className="admin-page-header">
@@ -23,7 +29,7 @@ const AdminAnalytics = () => {
             Volunteer Growth
           </h3>
           <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
+            <VolunteerAnalyticsCard />
             Volunteer sign up agaisnt time graph 
           </div>
         </div>
@@ -34,7 +40,7 @@ const AdminAnalytics = () => {
             Organisation Growth
           </h3>
           <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
+            <OrganisationAnalyticsCard />
             Organisation sign up agaisnt time graph
           </div>
         </div>
@@ -45,7 +51,7 @@ const AdminAnalytics = () => {
             Opportunity Growth
           </h3>
           <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
+            <OpportunityAnalyticsCard />
             Opportunity created agaisnt time graph
           </div>
         </div>
@@ -56,7 +62,7 @@ const AdminAnalytics = () => {
             Report Activity
           </h3>
           <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
+            <ReportAnalyticsCard /> 
             Report received agaisnt time graph
           </div>
         </div>
