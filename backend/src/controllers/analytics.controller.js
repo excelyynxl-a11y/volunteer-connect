@@ -173,5 +173,46 @@ export const getOpportunityCreatedAnalytics = async (req, res) => {
     }
 };
 
+export const getReportAnalytics = async (req, res) => {
+    // example output:
+    // [month, count, reports[{title, reportType, status, createdAt}]]
+    
+    // extract start - end month
+    try {
+        const { startMonth, endMonth } = resolveRange(req.query);
+        const rangeStart = parseMonth(startMonth);
+        const rangeEnd = parseMonth(endMonth);
+        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
 
+        // group report by month
+        const reports = await Report.find(
+            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
+            "title reportType status createdAt",
+        ).sort({ createdAt: 1 });
+
+        const grouped = {};
+        for (const month of generateMonthRange(startMonth, endMonth)) {
+            grouped[month] = { month, count: 0, reports: [] };
+        }
+
+        // generate count of volunteer in each month
+        for (const report of reports) {
+        const key = toMonthKey(report.createdAt);
+        if (grouped[key]) {
+            grouped[key].count += 1;
+            grouped[key].reports.push({
+                title: report.title,
+                reportType: report.reportType,
+                status: report.status,
+                createdAt: report.createdAt,
+            });
+        }
+        }
+
+        res.status(200).json(Object.values(grouped));
+    } catch (err) {
+        console.log("Error in getReportAnalytics controller: ", err.message);
+        res.status(500).json({ message: err.message });
+    }
+};
 
