@@ -38,5 +38,51 @@ const resolveRange = (query) => {
   return { startMonth, endMonth };
 };
 
+export const getVolunteerSignUpAnalytics = async (req, res) => {
+    // example output:
+    // [{month, count, volunteers [{name, email, signUpAt}]}]
+
+    try {
+        // extract start - end month
+        const { startMonth, endMonth } = resolveRange(req.query);
+        const rangeStart = parseMonth(startMonth);
+        const rangeEnd = parseMonth(endMonth);
+        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1); 
+
+        const volunteers = await Volunteer.find(
+            {createdAt: 
+                { 
+                    $gte: rangeStart, 
+                    $lt: rangeEnd 
+                }
+            }, "name email createdAt",
+        ).sort({ createdAt: 1 });
+
+        // group volunteers by month
+        const grouped = {};
+        for (const month of generateMonthRange(startMonth, endMonth)) {
+            grouped[month] = { month, count: 0, volunteers: [] };
+        }
+
+        // generate count of volunteer in each month
+        for (const v of volunteers) {
+        const key = toMonthKey(v.createdAt);
+        if (grouped[key]) {
+            grouped[key].count += 1;
+            grouped[key].volunteers.push({
+            name: v.name,
+            email: v.email,
+            signedUpAt: v.createdAt,
+            });
+        }
+        }
+
+        res.status(200).json(Object.values(grouped));
+    } catch (err) {
+        console.log("Error in getVolunteerSignUpAnalytics controller: ", err.message);
+        res.status(500).json({ message: err.message });
+    }
+};
+
 
 
