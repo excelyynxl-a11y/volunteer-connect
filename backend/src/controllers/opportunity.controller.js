@@ -4,6 +4,9 @@ import Opportunity, {
   OPPORTUNITY_STATUSES,
 } from "../models/opportunity.model.js";
 
+import Follow from "../models/follow.model.js";
+
+
 const STRING_LIMITS = {
   title: 120,
   details: 5000,
@@ -610,5 +613,53 @@ export const getOrganisationOpportunities = async (req, res) => {
     res.status(500).json({ 
       message: err.message 
     });
+  }
+};
+
+
+
+
+const notifyFollowersOfNewOpportunity = async (opportunity, organisation) => {
+  try {
+    // 1. Query Follow collection for all followers of this organisation
+    const follows = await Follow.find({
+      organisationId: organisation._id,
+    }).populate({
+      path: "volunteerId",
+      select: "name email approvalStatus",
+      match: {
+        approvalStatus: "approved",
+      },
+    });
+
+    // 2. Extract valid volunteer emails
+    const followers = follows
+      .map((f) => f.volunteerId)
+      .filter((v) => v && v.email);
+
+    if (!followers.length) return;
+
+    // 3. Dispatch EmailJS requests
+    const emailPromises = followers.map((follower) =>
+      emailjs.send(
+        process.env.EMAILJS_SERVICE_ID,
+        process.env.EMAILJS_TEMPLATE_ID,
+        {
+          to_email: follower.email,
+          to_name: follower.name || "Volunteer",
+          org_name: organisation.name || "An Organisation",
+          opportunity_title: opportunity.title,
+          opportunity_link: `${process.env.CLIENT_URL || "http://localhost:5173"}/opportunities/${opportunity._id}`,
+        },
+        {
+          publicKey: process.env.EMAILJS_PUBLIC_KEY,
+          privateKey: process.env.EMAILJS_PRIVATE_KEY,
+        }
+      )
+    );
+
+    await Promise.allSettled(emailPromises);
+  } catch (err) {
+    console.error("Failed to send follower notification emails:", err.message);
   }
 };
