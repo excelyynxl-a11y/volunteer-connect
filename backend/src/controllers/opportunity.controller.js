@@ -209,6 +209,7 @@ export const createOpportunity = async (req, res) => {
     });
 
     await newOpportunity.save();
+    notifyFollowersOfNewOpportunity(newOpportunity, req.user);
 
     res.status(201).json({
       success: true,
