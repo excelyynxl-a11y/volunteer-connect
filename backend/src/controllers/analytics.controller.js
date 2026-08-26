@@ -126,5 +126,52 @@ export const getOrganisationSignUpAnalytics = async (req, res) => {
   }
 };
 
+export const getOpportunityCreatedAnalytics = async (req, res) => {
+    // example output:
+    // [month, count, opportunities[{title, organisationName, organisationEmail, maxVolunteers, createdAt, eventDate}]]
+
+    try {
+        // extract start - end month
+        const { startMonth, endMonth } = resolveRange(req.query);
+        const rangeStart = parseMonth(startMonth);
+        const rangeEnd = parseMonth(endMonth);
+        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+
+        const opportunities = await Opportunity.find(
+            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
+            "title organisationId maxVolunteers createdAt startAt",
+        )
+        .populate("organisationId", "name email")
+        .sort({ createdAt: 1 });
+
+        // group opportunity by month
+        const grouped = {};
+        for (const month of generateMonthRange(startMonth, endMonth)) {
+            grouped[month] = { month, count: 0, opportunities: [] };
+        }
+
+        // generate count of volunteer in each month
+        for (const opp of opportunities) {
+            const key = toMonthKey(opp.createdAt);
+            if (grouped[key]) {
+                grouped[key].count += 1;
+                grouped[key].opportunities.push({
+                    title: opp.title,
+                    organisationName: opp.organisationId?.name ?? "Unknown",
+                    organisationEmail: opp.organisationId?.email ?? "",
+                    maxVolunteers: opp.maxVolunteers,
+                    createdAt: opp.createdAt,
+                    eventDate: opp.startAt,
+                });
+            }
+        }
+
+        res.status(200).json(Object.values(grouped));
+    } catch (err) {
+        console.log("Error in getOpportunityCreatedAnalytics controller: ", err.message);
+        res.status(500).json({ message: err.message });
+    }
+};
+
 
 
