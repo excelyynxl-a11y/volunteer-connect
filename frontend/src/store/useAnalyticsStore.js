@@ -164,11 +164,55 @@ export const useAnalyticsStore = create((set, get) => ({
     }
   },
 
-  getVolunteerSignUpAnalytics: async (startMonth, endMonth) => {},
+  getVolunteerSignUpAnalytics: async (startMonth, endMonth) => {
+    return fetchAnalyticsMetric({
+      set,
+      path: "/analytics/volunteer-signups",
+      dataKey: "volunteerSignUpAnaltyics",
+      loadingKey: "isVolunteerSignUpAnaltyicsLoading",
+      errorKey: "volunteerSignUpAnalyticsError",
+      startMonth,
+      endMonth,
+      fallbackMessage: "Failed to load volunteer analytics"
+    });
+  },
 
-  getOrganisationSignUpAnalytics: async (startMonth, endMonth) => {},
+  getOrganisationSignUpAnalytics: async (startMonth, endMonth) => {
+    return fetchAnalyticsMetric({
+      set,
+      path: "/analytics/organisation-signups",
+      dataKey: "organisationSignUpAnaltyics",
+      loadingKey: "isOrganisationSignUpAnaltyicsLoading",
+      errorKey: "organisationSignUpAnalyticsError",
+      startMonth,
+      endMonth,
+      fallbackMessage: "Failed to load organisation analytics"
+    });
+  },
 
-  getOpportunityCreatedAnalytics: async (startMonth, endMonth) => {},
+  getOpportunityCreatedAnalytics: async (startMonth, endMonth) => {
+    return fetchAnalyticsMetric({
+      set,
+      path: "/analytics/opportunities-created",
+      dataKey: "opportunityCreatedAnaltyics",
+      loadingKey: "isOpportunityCreatedAnaltyicsLoading",
+      errorKey: "opportunityCreatedAnalyticsError",
+      startMonth,
+      endMonth,
+      fallbackMessage: "Failed to load opportunity analytics"
+    });
+  },
 
-  getReportAnalytics: async (startMonth, endMonth) => {}
+  getReportAnalytics: async (startMonth, endMonth) => {
+    return fetchAnalyticsMetric({
+      set,
+      path: "/analytics/reports",
+      dataKey: "reportAnaltyics",
+      loadingKey: "isReportAnaltyicsLoading",
+      errorKey: "reportAnalyticsError",
+      startMonth,
+      endMonth,
+      fallbackMessage: "Failed to load report analytics"
+    });
+  }
 }));
