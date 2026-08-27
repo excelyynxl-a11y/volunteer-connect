@@ -1,13 +1,35 @@
-import React from 'react'
+import React from "react";
+import AnalyticsChartCard, { formatDateValue } from "./AnalyticsChartCard";
 
-// TODO: display graph of number of report created against time (month), 
-// each point on graph is hoverable to show the actual {title, reportType, status, createdAt} of the particular point
-// reportList sample format: [month, count, reports[{title, reportType, status, createdAt}]]
-const ReportAnalyticsCard = ({reportList}) => {
+const ReportAnalyticsCard = ({
+  reportList = [],
+  isLoading = false,
+  error = "",
+  onRetry
+}) => {
+  return (
+    <AnalyticsChartCard
+      title="Report Activity"
+      subtitle="Monthly report submissions across the selected range."
+      data={reportList}
+      isLoading={isLoading}
+      error={error}
+      emptyMessage="No reports were submitted during the selected period."
+      summaryLabel="reports"
+      accent="#7a5b8c"
+      detailKey="reports"
+      detailLabel="reports"
+      onRetry={onRetry}
+      renderTooltipItem={(report) => (
+        <div className="admin-chart-tooltip-item-content">
+          <strong>{report.title || "Untitled report"}</strong>
+          <span>{report.reportType || "Unknown type"}</span>
+          <span>{report.status || "Unknown status"}</span>
+          <span>{formatDateValue(report.createdAt)}</span>
+        </div>
+      )}
+    />
+  );
+};
 
-    return (
-        <div>ReportAnalyticsCard</div>
-    )
-}
-
-export default ReportAnalyticsCard
+export default ReportAnalyticsCard;
