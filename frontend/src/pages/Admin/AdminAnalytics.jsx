@@ -29,6 +29,15 @@ const AdminAnalytics = () => {
   const [startMonth, setStartMonth] = useState(DEFAULT_START_MONTH);
   const [endMonth, setEndMonth] = useState(getCurrentMonthKey());
 
+  const organisationSignUpAnaltyics = useAnalyticsStore(
+    (state) => state.organisationSignUpAnaltyics
+  );
+  const isOrganisationSignUpAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isOrganisationSignUpAnaltyicsLoading
+  );
+  const organisationSignUpAnalyticsError = useAnalyticsStore(
+    (state) => state.organisationSignUpAnalyticsError
+  );
   const opportunityCreatedAnaltyics = useAnalyticsStore(
     (state) => state.opportunityCreatedAnaltyics
   );
@@ -56,13 +65,19 @@ const AdminAnalytics = () => {
   const summaryCards = useMemo(
     () => [
       {
+        key: "organisations",
+        label: "Organisation sign-ups",
+        value: sumCounts(organisationSignUpAnaltyics),
+        Icon: Building2
+      },
+      {
         key: "opportunities",
         label: "Opportunities created",
         value: sumCounts(opportunityCreatedAnaltyics),
         Icon: Lightbulb
       }
     ],
-    [opportunityCreatedAnaltyics]
+    [opportunityCreatedAnaltyics, organisationSignUpAnaltyics]
   );
 
   const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
@@ -151,6 +166,13 @@ const AdminAnalytics = () => {
           </div>
 
           <div className="admin-analytics-grid">
+            <OrganisationAnalyticsCard
+              organisationSignUpList={organisationSignUpAnaltyics}
+              isLoading={isOrganisationSignUpAnaltyicsLoading}
+              error={organisationSignUpAnalyticsError}
+              onRetry={handleRefresh}
+            />
+
             <OpportunityAnalyticsCard
               opportunityCreatedList={opportunityCreatedAnaltyics}
               isLoading={isOpportunityCreatedAnaltyicsLoading}
