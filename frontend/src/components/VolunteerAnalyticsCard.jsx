@@ -1,13 +1,38 @@
-import React from 'react'
+import React from "react";
+import AnalyticsChartCard, { formatDateValue } from "./AnalyticsChartCard";
 
-// TODO: display graph of number of volunteer sign up against time (month), 
-// each point on graph is hoverable to show the actual {name, email, signUpAt} of the particular point
-// volunteerSignUpList sample format: [{month, count, volunteers [{name, email, signUpAt}]}]
-const VolunteerAnalyticsCard = ({volunteerSignUpList}) => {
+const VolunteerAnalyticsCard = ({
+  volunteerSignUpList = [],
+  isLoading = false,
+  error = "",
+  onRetry
+}) => {
+  return (
+    <AnalyticsChartCard
+      title="Volunteer Growth"
+      subtitle="Monthly volunteer registrations across the selected range."
+      data={volunteerSignUpList}
+      isLoading={isLoading}
+      error={error}
+      emptyMessage="No volunteer sign-ups were recorded for the selected period."
+      summaryLabel="volunteer sign-ups"
+      accent="#2c614f"
+      detailKey="volunteers"
+      detailLabel="volunteers"
+      onRetry={onRetry}
+      renderTooltipItem={(volunteer) => (
+        <div className="admin-chart-tooltip-item-content">
+          <strong>{volunteer.name || "Unknown volunteer"}</strong>
+          <span>{volunteer.email || "No email available"}</span>
+          <span>
+            {formatDateValue(
+              volunteer.signedUpAt || volunteer.signUpAt || volunteer.createdAt
+            )}
+          </span>
+        </div>
+      )}
+    />
+  );
+};
 
-    return (
-        <div>VolunteerAnalyticsCard</div>
-    )
-}
-
-export default VolunteerAnalyticsCard
+export default VolunteerAnalyticsCard;
