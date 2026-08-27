@@ -29,6 +29,16 @@ const AdminAnalytics = () => {
   const [startMonth, setStartMonth] = useState(DEFAULT_START_MONTH);
   const [endMonth, setEndMonth] = useState(getCurrentMonthKey());
 
+  const opportunityCreatedAnaltyics = useAnalyticsStore(
+    (state) => state.opportunityCreatedAnaltyics
+  );
+  const isOpportunityCreatedAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isOpportunityCreatedAnaltyicsLoading
+  );
+  const opportunityCreatedAnalyticsError = useAnalyticsStore(
+    (state) => state.opportunityCreatedAnalyticsError
+  );
+
   const getAnalyticsOverview = useAnalyticsStore(
     (state) => state.getAnalyticsOverview
   );
@@ -42,6 +52,18 @@ const AdminAnalytics = () => {
 
     void getAnalyticsOverview(startMonth, endMonth);
   }, [endMonth, getAnalyticsOverview, rangeIsValid, startMonth]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        key: "opportunities",
+        label: "Opportunities created",
+        value: sumCounts(opportunityCreatedAnaltyics),
+        Icon: Lightbulb
+      }
+    ],
+    [opportunityCreatedAnaltyics]
+  );
 
   const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
 
@@ -126,6 +148,15 @@ const AdminAnalytics = () => {
                 statKey={key}
               />
             ))}
+          </div>
+
+          <div className="admin-analytics-grid">
+            <OpportunityAnalyticsCard
+              opportunityCreatedList={opportunityCreatedAnaltyics}
+              isLoading={isOpportunityCreatedAnaltyicsLoading}
+              error={opportunityCreatedAnalyticsError}
+              onRetry={handleRefresh}
+            />
           </div>
         </>
       )}
