@@ -1,13 +1,36 @@
-import React from 'react'
+import React from "react";
+import AnalyticsChartCard, { formatDateValue } from "./AnalyticsChartCard";
 
-// TODO: display graph of number of opportunity created against time (month), 
-// each point on graph is hoverable to show the actual {title, organisationName, organisationEmail, maxVolunteers, createdAt, eventDate} of the particular point
-// opportunityCreatedList sample format: [month, count, opportunities[{title, organisationName, organisationEmail, maxVolunteers, createdAt, eventDate}]]
-const OpportunityAnalyticsCard = ({opportunityCreatedList}) => {
+const OpportunityAnalyticsCard = ({
+  opportunityCreatedList = [],
+  isLoading = false,
+  error = "",
+  onRetry
+}) => {
+  return (
+    <AnalyticsChartCard
+      title="Opportunity Growth"
+      subtitle="Monthly opportunity creation trends across the selected range."
+      data={opportunityCreatedList}
+      isLoading={isLoading}
+      error={error}
+      emptyMessage="No opportunities were created during the selected period."
+      summaryLabel="opportunities created"
+      accent="#4b6f8c"
+      detailKey="opportunities"
+      detailLabel="opportunities"
+      onRetry={onRetry}
+      renderTooltipItem={(opportunity) => (
+        <div className="admin-chart-tooltip-item-content">
+          <strong>{opportunity.title || "Untitled opportunity"}</strong>
+          <span>{opportunity.organisationName || "Unknown organisation"}</span>
+          <span>
+            {formatDateValue(opportunity.eventDate || opportunity.createdAt)}
+          </span>
+        </div>
+      )}
+    />
+  );
+};
 
-    return (
-        <div>OpportunityAnalyticsCard</div>
-    )
-}
-
-export default OpportunityAnalyticsCard
+export default OpportunityAnalyticsCard;
