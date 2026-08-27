@@ -29,6 +29,15 @@ const AdminAnalytics = () => {
   const [startMonth, setStartMonth] = useState(DEFAULT_START_MONTH);
   const [endMonth, setEndMonth] = useState(getCurrentMonthKey());
 
+  const volunteerSignUpAnaltyics = useAnalyticsStore(
+    (state) => state.volunteerSignUpAnaltyics
+  );
+  const isVolunteerSignUpAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isVolunteerSignUpAnaltyicsLoading
+  );
+  const volunteerSignUpAnalyticsError = useAnalyticsStore(
+    (state) => state.volunteerSignUpAnalyticsError
+  );
   const organisationSignUpAnaltyics = useAnalyticsStore(
     (state) => state.organisationSignUpAnaltyics
   );
@@ -71,6 +80,12 @@ const AdminAnalytics = () => {
   const summaryCards = useMemo(
     () => [
       {
+        key: "volunteers",
+        label: "Volunteer sign-ups",
+        value: sumCounts(volunteerSignUpAnaltyics),
+        Icon: Users
+      },
+      {
         key: "organisations",
         label: "Organisation sign-ups",
         value: sumCounts(organisationSignUpAnaltyics),
@@ -89,7 +104,12 @@ const AdminAnalytics = () => {
         Icon: AlertCircle
       }
     ],
-    [organisationSignUpAnaltyics, opportunityCreatedAnaltyics, reportAnaltyics]
+    [
+      organisationSignUpAnaltyics,
+      opportunityCreatedAnaltyics,
+      reportAnaltyics,
+      volunteerSignUpAnaltyics
+    ]
   );
 
   const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
@@ -178,6 +198,13 @@ const AdminAnalytics = () => {
           </div>
 
           <div className="admin-analytics-grid">
+            <VolunteerAnalyticsCard
+              volunteerSignUpList={volunteerSignUpAnaltyics}
+              isLoading={isVolunteerSignUpAnaltyicsLoading}
+              error={volunteerSignUpAnalyticsError}
+              onRetry={handleRefresh}
+            />
+
             <OrganisationAnalyticsCard
               organisationSignUpList={organisationSignUpAnaltyics}
               isLoading={isOrganisationSignUpAnaltyicsLoading}
