@@ -403,6 +403,146 @@ describe("updateVolunteerProfile", () => {
     });
     expect(findVolunteerByIdMock).not.toHaveBeenCalled();
   });
+
+  it("rejects an empty full name", async () => {
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { fullName: "   " },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Full name cannot be empty",
+    });
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-string biodata", async () => {
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { biodata: { text: "Invalid biodata" } },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Biodata must be a string with at most 1000 characters",
+    });
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts biodata containing exactly 1000 characters", async () => {
+    const biodata = "a".repeat(1000);
+    const volunteer = createVolunteer();
+    const updatedVolunteer = {
+      ...volunteer,
+      biodata,
+    };
+
+    findVolunteerByIdMock
+      .mockReturnValueOnce(Promise.resolve(volunteer))
+      .mockReturnValueOnce(createFindByIdChain(updatedVolunteer));
+
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { biodata },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(volunteer.biodata).toBe(biodata);
+    expect(volunteer.save).toHaveBeenCalledOnce();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Volunteer profile updated successfully",
+      data: updatedVolunteer,
+    });
+  });
+
+  it("rejects skills that cannot be parsed as an array", async () => {
+    parseArrayFieldMock.mockReturnValue("React");
+
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { skills: "React" },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Skills must be an array",
+    });
+    expect(normalizeSkillsMock).not.toHaveBeenCalled();
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects more than 20 skills", async () => {
+    const parsedSkills = Array.from(
+      { length: 21 },
+      (_, index) => `Skill ${index + 1}`,
+    );
+
+    parseArrayFieldMock.mockReturnValue(parsedSkills);
+    normalizeSkillsMock.mockReturnValue(parsedSkills);
+
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { skills: parsedSkills },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(normalizeSkillsMock).toHaveBeenCalledWith(parsedSkills);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "A volunteer can have at most 20 skills",
+    });
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a skill longer than 50 characters", async () => {
+    const parsedSkills = ["a".repeat(51)];
+
+    parseArrayFieldMock.mockReturnValue(parsedSkills);
+    normalizeSkillsMock.mockReturnValue(parsedSkills);
+
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      user: { _id: "507f1f77bcf86cd799439011" },
+      body: { skills: parsedSkills },
+    };
+    const res = createResponse();
+
+    await updateVolunteerProfile(req, res);
+
+    expect(normalizeSkillsMock).toHaveBeenCalledWith(parsedSkills);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Each skill must be at most 50 characters",
+    });
+    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+  });
+
   it("parses and stores normalised skills", async () => {
     const volunteer = createVolunteer();
     const parsedSkills = [" React ", "React", "Node"];
