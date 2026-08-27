@@ -47,7 +47,13 @@ const AdminAnalytics = () => {
   const opportunityCreatedAnalyticsError = useAnalyticsStore(
     (state) => state.opportunityCreatedAnalyticsError
   );
-
+  const reportAnaltyics = useAnalyticsStore((state) => state.reportAnaltyics);
+  const isReportAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isReportAnaltyicsLoading
+  );
+  const reportAnalyticsError = useAnalyticsStore(
+    (state) => state.reportAnalyticsError
+  );
   const getAnalyticsOverview = useAnalyticsStore(
     (state) => state.getAnalyticsOverview
   );
@@ -75,9 +81,15 @@ const AdminAnalytics = () => {
         label: "Opportunities created",
         value: sumCounts(opportunityCreatedAnaltyics),
         Icon: Lightbulb
+      },
+      {
+        key: "reports",
+        label: "Reports submitted",
+        value: sumCounts(reportAnaltyics),
+        Icon: AlertCircle
       }
     ],
-    [opportunityCreatedAnaltyics, organisationSignUpAnaltyics]
+    [organisationSignUpAnaltyics, opportunityCreatedAnaltyics, reportAnaltyics]
   );
 
   const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
@@ -177,6 +189,13 @@ const AdminAnalytics = () => {
               opportunityCreatedList={opportunityCreatedAnaltyics}
               isLoading={isOpportunityCreatedAnaltyicsLoading}
               error={opportunityCreatedAnalyticsError}
+              onRetry={handleRefresh}
+            />
+
+            <ReportAnalyticsCard
+              reportList={reportAnaltyics}
+              isLoading={isReportAnaltyicsLoading}
+              error={reportAnalyticsError}
               onRetry={handleRefresh}
             />
           </div>
