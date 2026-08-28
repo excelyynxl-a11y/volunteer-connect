@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Application from "../models/application.model.js";
 import Opportunity from "../models/opportunity.model.js";
-import { Organisation, Volunteer } from "../models/user.model.js";
+import { Organisation, Volunteer, Admin } from "../models/user.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -145,6 +145,21 @@ const volunteers = [
     ],
   },
 ];
+
+const admins = [
+  {
+    key: "admin1",
+    name: "Admin 1",
+    email: "vc.seed.admin1@gmail.com",
+    biodata: "Admin 1"
+  },
+  {
+    key: "admin2",
+    name: "Admin 2",
+    email: "vc.seed.admin2@gmail.com",
+    biodata: "Admin 2"
+  }
+]
 
 const daysFromNow = (days, hour, minute = 0) => {
   const date = new Date();
@@ -529,6 +544,26 @@ const upsertSeedUsers = async () => {
     volunteerDocs.push(doc);
   }
 
+  const adminDocs = [];
+
+  for (const admin of admins) {
+    const doc = await Admin.findOneAndUpdate(
+      { email: admin.email },
+      {
+        $set: {
+          name: admin.name,
+          email: admin.email,
+          password,
+          biodata: admin.biodata,
+          avatar: "",
+          approvalStatus: "approved",
+        },
+      },
+      { returnDocument: "after", upsert: true, setDefaultsOnInsert: true },
+    );
+    adminDocs.push(doc);
+  }
+
   return {
     organisationByKey: Object.fromEntries(
       organisations.map((organisation, index) => [organisation.key, organisationDocs[index]]),
@@ -536,8 +571,12 @@ const upsertSeedUsers = async () => {
     volunteerByKey: Object.fromEntries(
       volunteers.map((volunteer, index) => [volunteer.key, volunteerDocs[index]]),
     ),
+    adminByKey: Object.fromEntries(
+      admins.map((admin, index) => [admin.key, adminDocs[index]]),
+    ),
     organisationDocs,
     volunteerDocs,
+    adminDocs,
   };
 };
 
@@ -620,9 +659,9 @@ const createSeedApplications = async (volunteerByKey, opportunityDocs) => {
   return applicationDocs;
 };
 
-const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applicationDocs }) => {
+const printSummary = ({ organisationDocs, volunteerDocs, adminDocs, opportunityDocs, applicationDocs }) => {
   console.log("\nSeed completed.");
-  console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`);
+  console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers, ${adminDocs.length} admins`);
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
   console.log(`Password for all seed accounts: ${SEED_PASSWORD}`);
@@ -635,6 +674,11 @@ const printSummary = ({ organisationDocs, volunteerDocs, opportunityDocs, applic
   console.log("\nVolunteer accounts:");
   volunteerDocs.forEach((volunteer) => {
     console.log(`- ${volunteer.email} (${volunteer.name})`);
+  });
+
+  console.log("\nAdmin accounts:");
+  adminDocs.forEach((admin) => {
+    console.log(`- ${admin.email} (${admin.name})`);
   });
 };
 
@@ -663,6 +707,7 @@ const seed = async () => {
       volunteerByKey,
       organisationDocs,
       volunteerDocs,
+      adminDocs,
     } = await upsertSeedUsers();
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
@@ -671,6 +716,7 @@ const seed = async () => {
     printSummary({
       organisationDocs,
       volunteerDocs,
+      adminDocs,
       opportunityDocs,
       applicationDocs,
     });
