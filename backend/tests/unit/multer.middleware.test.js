@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { uploadResume, uploadAvatar } from "../../src/middlewares/multer.middleware.js";
+import {
+  uploadAvatar,
+  uploadMessageAttachment,
+  uploadResume,
+  validateMessageAttachmentSignature,
+} from "../../src/middlewares/multer.middleware.js";
 
 vi.mock("multer", () => {
   class MulterError extends Error {
@@ -211,9 +216,53 @@ describe("uploadAvatar", () => {
 });
 
 describe("remaining upload middleware coverage", () => {
-  it.todo("accepts one allowed message attachment at or below 5MB");
-  it.todo("rejects an attachment whose content signature does not match its type");
-  it.todo("calls next exactly once when an optional upload is not supplied");
+  it("accepts one allowed message attachment at or below 5MB", () => {
+    const file = {
+      fieldname: "attachment",
+      originalname: "evidence.pdf",
+      mimetype: "application/pdf",
+      buffer: Buffer.from("%PDF-test content"),
+      size: 5 * 1024 * 1024,
+    };
+
+    const upload = runMiddleware(uploadMessageAttachment, file);
+    expect(upload.next).toHaveBeenCalledOnce();
+    expect(upload.res.status).not.toHaveBeenCalled();
+
+    const signatureNext = vi.fn();
+    validateMessageAttachmentSignature(upload.req, createResponse(), signatureNext);
+    expect(signatureNext).toHaveBeenCalledOnce();
+  });
+
+  it("rejects an attachment whose content signature does not match its type", () => {
+    const req = {
+      file: {
+        originalname: "evidence.pdf",
+        mimetype: "application/pdf",
+        buffer: Buffer.from("not a PDF"),
+      },
+    };
+    const res = createResponse();
+    const next = vi.fn();
+
+    validateMessageAttachmentSignature(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Message attachment content does not match its file type.",
+    });
+  });
+
+  it("calls next exactly once when an optional upload is not supplied", () => {
+    const upload = runMiddleware(uploadMessageAttachment);
+    expect(upload.next).toHaveBeenCalledOnce();
+
+    const signatureNext = vi.fn();
+    validateMessageAttachmentSignature(upload.req, createResponse(), signatureNext);
+    expect(signatureNext).toHaveBeenCalledOnce();
+  });
 });
 
 
