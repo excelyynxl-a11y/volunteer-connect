@@ -12,8 +12,8 @@ import VolunteerAnalyticsCard from "../../components/VolunteerAnalyticsCard";
 import OrganisationAnalyticsCard from "../../components/OrgansitionAnalyticsCard";
 import OpportunityAnalyticsCard from "../../components/OpportunityAnalytics";
 import ReportAnalyticsCard from "../../components/ReportAnalytics";
-import { formatMonthLabel } from "../../components/AnalyticsChartCard";
 import { useAnalyticsStore } from "../../store/useAnalyticsStore";
+import { formatMonthLabel } from "../../utils/analyticsFormatters";
 
 const DEFAULT_START_MONTH = "2026-03";
 

@@ -1,5 +1,6 @@
 import React from "react";
-import AnalyticsChartCard, { formatDateValue } from "./AnalyticsChartCard";
+import { formatDateValue } from "../utils/analyticsFormatters";
+import AnalyticsChartCard from "./AnalyticsChartCard";
 
 const OrganisationAnalyticsCard = ({
   organisationSignUpList = [],
