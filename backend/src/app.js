@@ -6,6 +6,7 @@ import cors from "cors";
 import express from "express";
 
 import adminRoutes from "./routes/admin.route.js";
+import analyticsRoutes from "./routes/analytics.route.js";
 import applicationRoutes from "./routes/application.route.js";
 import authRoutes from "./routes/auth.route.js";
 import followRoutes from "./routes/follow.route.js";
@@ -40,6 +41,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/admin", adminRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/follow", followRoutes);
