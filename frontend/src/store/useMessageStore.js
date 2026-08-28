@@ -6,6 +6,21 @@ import { messageSocket } from "../lib/messageSocket";
 const getErrorMessage = (error, fallback) =>
   error.response?.data?.message || error.message || fallback;
 
+const getAttachmentDownloadError = async (error, fallback) => {
+  const responseData = error.response?.data;
+
+  if (typeof Blob !== "undefined" && responseData instanceof Blob) {
+    try {
+      const body = JSON.parse(await responseData.text());
+      return body?.message || fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  return getErrorMessage(error, fallback);
+};
+
 const getId = (value) => String(value?._id ?? value ?? "");
 
 const appendUniqueMessage = (messages, message) => {
@@ -303,14 +318,31 @@ export const useMessageStore = create((set, get) => ({
     }
   },
 
-  downloadAttachment: (conversationId, messageId) => {
-    const baseUrl = String(axiosInstance.defaults.baseURL).replace(/\/$/, "");
-    const link = document.createElement("a");
-    link.href = `${baseUrl}/message/conversations/${conversationId}/messages/${messageId}/attachment`;
-    link.rel = "noopener";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  downloadAttachment: async (conversationId, messageId, fileName = "attachment") => {
+    try {
+      const response = await axiosInstance.get(
+        `/message/conversations/${conversationId}/messages/${messageId}/attachment`,
+        { responseType: "blob" },
+      );
+      const downloadUrl = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = fileName;
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+      return { success: true };
+    } catch (error) {
+      const message = await getAttachmentDownloadError(
+        error,
+        "Unable to download attachment.",
+      );
+      set({ messageError: message });
+      return { success: false, error: message };
+    }
   },
 
   connectRealtime: () => {

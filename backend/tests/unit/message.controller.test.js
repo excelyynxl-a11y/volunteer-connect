@@ -36,6 +36,7 @@ vi.mock("../../src/services/attachmentCleanup.service.js", () => ({
 }));
 
 vi.mock("../../src/services/cloudinary.service.js", () => ({
+  downloadMessageAttachmentFromCloudinary: vi.fn(),
   getMessageAttachmentDownloadUrl: vi.fn(),
   uploadMessageAttachmentToCloudinary: vi.fn(),
 }));
@@ -52,6 +53,7 @@ vi.mock("../../src/services/conversationExpiry.service.js", () => ({
 }));
 
 import {
+  downloadMessageAttachment,
   endConversation,
   initiateConversation,
   sendMessage,
@@ -73,10 +75,12 @@ import {
   cancelConversationExpiry,
   scheduleConversationExpiry,
 } from "../../src/services/conversationExpiry.service.js";
+import { downloadMessageAttachmentFromCloudinary } from "../../src/services/cloudinary.service.js";
 
 const createResponse = () => {
   const response = {
     body: null,
+    headers: {},
     statusCode: null,
   };
 
@@ -86,6 +90,14 @@ const createResponse = () => {
   });
   response.json = vi.fn((body) => {
     response.body = body;
+    return response;
+  });
+  response.send = vi.fn((body) => {
+    response.body = body;
+    return response;
+  });
+  response.set = vi.fn((headers) => {
+    response.headers = headers;
     return response;
   });
 
@@ -320,5 +332,84 @@ describe("message controller lifecycle", () => {
     expect(cancelConversationExpiry).toHaveBeenCalledWith(conversation._id);
     expect(emitConversationDeleted).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
+  });
+
+  it("returns an authorised attachment as a download response", async () => {
+    const conversationId = new mongoose.Types.ObjectId();
+    const messageId = new mongoose.Types.ObjectId();
+    const conversation = {
+      _id: conversationId,
+      deletionStartedAt: null,
+      responseDeadline: null,
+    };
+    const attachment = {
+      fileName: "event guide.pdf",
+      mimeType: "application/pdf",
+      publicId: "message-attachments/event-guide.pdf",
+      resourceType: "raw",
+      size: 2048,
+    };
+    const message = {
+      _id: messageId,
+      attachment,
+      conversationId,
+    };
+    const response = createResponse();
+
+    Conversation.findById.mockResolvedValue(conversation);
+    Message.findOne.mockResolvedValue(message);
+    downloadMessageAttachmentFromCloudinary.mockResolvedValue({
+      buffer: Buffer.from("file contents"),
+      contentType: "application/pdf",
+    });
+
+    await downloadMessageAttachment(
+      {
+        params: {
+          conversationId: String(conversationId),
+          messageId: String(messageId),
+        },
+        user: createUser("volunteer"),
+      },
+      response,
+    );
+
+    expect(downloadMessageAttachmentFromCloudinary).toHaveBeenCalledWith(
+      attachment,
+    );
+    expect(response.statusCode).toBe(200);
+    expect(response.headers).toEqual({
+      "Cache-Control": "no-store",
+      "Content-Disposition": 'attachment; filename="event_guide.pdf"',
+      "Content-Type": "application/pdf",
+    });
+    expect(response.body).toEqual(Buffer.from("file contents"));
+  });
+
+  it("does not fetch an attachment for a non-participant", async () => {
+    const conversationId = new mongoose.Types.ObjectId();
+    const response = createResponse();
+    const conversation = {
+      _id: conversationId,
+      deletionStartedAt: null,
+      responseDeadline: null,
+    };
+
+    Conversation.findById.mockResolvedValue(conversation);
+    isConversationParticipant.mockReturnValue(false);
+
+    await downloadMessageAttachment(
+      {
+        params: {
+          conversationId: String(conversationId),
+          messageId: String(new mongoose.Types.ObjectId()),
+        },
+        user: createUser("volunteer"),
+      },
+      response,
+    );
+
+    expect(response.statusCode).toBe(403);
+    expect(downloadMessageAttachmentFromCloudinary).not.toHaveBeenCalled();
   });
 });

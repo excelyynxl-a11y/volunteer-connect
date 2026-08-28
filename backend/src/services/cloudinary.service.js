@@ -76,8 +76,21 @@ export const deleteMessageAttachmentFromCloudinary = async ({
 
 export const getMessageAttachmentDownloadUrl = (attachment) =>
   cloudinary.url(attachment.publicId, {
-    flags: `attachment:${getSafeDownloadName(attachment.fileName)}`,
+    flags: "attachment",
     resource_type: attachment.resourceType,
     secure: true,
     type: "upload",
   });
+
+export const downloadMessageAttachmentFromCloudinary = async (attachment) => {
+  const response = await fetch(getMessageAttachmentDownloadUrl(attachment));
+
+  if (!response.ok) {
+    throw new Error(`Cloudinary attachment download failed (${response.status})`);
+  }
+
+  return {
+    buffer: Buffer.from(await response.arrayBuffer()),
+    contentType: response.headers.get("content-type") || attachment.mimeType,
+  };
+};
