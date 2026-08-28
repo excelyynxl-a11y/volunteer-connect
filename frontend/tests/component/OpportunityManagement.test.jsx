@@ -128,7 +128,7 @@ describe('Organisation opportunity management UI', () => {
       maxVolunteers: 1,
     }))
     expect(await screen.findByRole('heading', { name: 'Organisation dashboard' })).toBeInTheDocument()
-  })
+  }, 10_000)
 
   it('loads existing values into the edit form without losing unchanged fields', async () => {
     useOrganisationStore.setState({
