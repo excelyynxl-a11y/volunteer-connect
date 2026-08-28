@@ -17,6 +17,7 @@ const sendNotImplemented = (res, feature) =>
  * submissions after the application deadline.
  */
 import { isOpportunityInsideAvailability } from "../lib/availability.js"; // adjust path as needed
+import { sendApplicationStatusEmail } from "../lib/email.js";
 
 export const createApplication = async (req, res) => {
   try {
@@ -373,16 +374,22 @@ export const rejectApplication = async (req, res) => {
         rejectionReason: reasonText,
       },
       { new: true }
-    ).populate({
-      path: "opportunityId",
-      populate: { path: "organisationId" },
-    });
+    )
+      .populate("volunteerId", "-password")
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Application rejected successfully",
       data: updatedApplication,
     });
+
+    // Fire-and-forget: don't block or fail the response on email delivery.
+    sendApplicationStatusEmail(updatedApplication, "rejected");
+    return;
   } catch (err) {
     console.log("Error in rejectApplication controller: ", err.message);
     return res.status(500).json({ 
@@ -417,16 +424,22 @@ export const approveApplication = async (req, res) => {
       id,
       { status: "approved" },
       { new: true }
-    ).populate({
-      path: "opportunityId",
-      populate: { path: "organisationId" },
-    });
+    )
+      .populate("volunteerId", "-password")
+      .populate({
+        path: "opportunityId",
+        populate: { path: "organisationId" },
+      });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Application approved successfully",
       data: updatedApplication,
     });
+
+    // Fire-and-forget: don't block or fail the response on email delivery.
+    sendApplicationStatusEmail(updatedApplication, "approved");
+    return;
   } catch (err) {
     console.log("Error in approveApplication controller: ", err.message);
     return res.status(500).json({ 
