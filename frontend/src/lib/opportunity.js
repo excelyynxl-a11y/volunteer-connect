@@ -90,11 +90,6 @@ export const formatOpportunityTimeRange = (startAt, endAt, fallback = '') => {
 export const getOpportunityStatusClass = (status = 'pending') =>
   String(status).trim().toLowerCase().replace(/\s+/g, '-') || 'pending'
 
-export const getOpportunityImage = (opportunity) => {
-  if (!Array.isArray(opportunity?.images)) return ''
-  return opportunity.images.find(Boolean) || ''
-}
-
 export const getOrganisationName = (opportunity) =>
   opportunity?.organisationId?.name ||
   opportunity?.organisationName ||

@@ -153,7 +153,7 @@ describe('Application feature UI', () => {
     expect(screen.getByText('Application Approved')).toBeInTheDocument()
   })
 
-  it('allows withdrawal only for a pending application', async () => {
+  it('allows withdrawal for pending and approved applications', async () => {
     const user = userEvent.setup()
     const withdrawApplication = vi.fn().mockResolvedValue({ success: true })
     useApplicationStore.setState({
@@ -163,8 +163,8 @@ describe('Application feature UI', () => {
     })
     render(<VolunteerApplications />)
 
-    expect(screen.getAllByRole('button', { name: 'Withdraw' })).toHaveLength(1)
-    await user.click(screen.getByRole('button', { name: 'Withdraw' }))
+    expect(screen.getAllByRole('button', { name: 'Withdraw' })).toHaveLength(2)
+    await user.click(screen.getAllByRole('button', { name: 'Withdraw' })[0])
     await user.click(screen.getByRole('button', { name: 'Withdraw Application' }))
     expect(withdrawApplication).toHaveBeenCalledWith('application-pending')
   })

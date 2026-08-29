@@ -1,14 +1,15 @@
-import { User, Volunteer, Organisation, Admin } from "../models/user.model.js";
+import { User, Volunteer, Organisation } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
+
+const PUBLIC_SIGNUP_ROLES = ["volunteer", "organisation"];
 
 export const signup = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     const normalizedName = typeof name === "string" ? name.trim() : "";
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-    const allowedRoles = ["volunteer", "organisation", "admin"];
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -27,11 +28,13 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (!allowedRoles.includes(role)) {
-      return res.status(400).json({ message: "Invalid user role." });
+    if (!PUBLIC_SIGNUP_ROLES.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid user role. Public signup is only available for volunteers and organisations.",
+      });
     }
 
-    const userExist = await User.findOne({ email: normalizedEmail });
+    const userExist = await User.findOne({ email: normalizedEmail, deletedAt: null });
 
     if (userExist) {
       return res.status(400).json({
@@ -110,16 +113,6 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (role === "admin") {
-      // create admin User (newUser)
-      newUser = new Admin({
-        name: normalizedName,
-        email: normalizedEmail,
-        password: hashedPassword,
-        approvalStatus: "approved",
-      });
-    }
-
     if (newUser) {
       await newUser.save();
 
@@ -161,7 +154,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    const user = await User.findOne({ email: normalizedEmail });
+    const user = await User.findOne({ email: normalizedEmail, deletedAt: null }).select("+password");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password." });

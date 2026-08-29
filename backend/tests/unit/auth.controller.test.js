@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import cloudinary from "../../src/lib/cloudinary.js";
 import { generateToken } from "../../src/lib/utils.js";
 import { login, logout, signup } from "../../src/controllers/auth.controller.js";
-import { Admin, Organisation, User, Volunteer } from "../../src/models/user.model.js";
+import { Organisation, User, Volunteer } from "../../src/models/user.model.js";
 
 vi.mock("bcryptjs", () => ({
   default: {
@@ -21,7 +21,6 @@ vi.mock("../../src/models/user.model.js", () => ({
   User: { findOne: vi.fn() },
   Volunteer: vi.fn(),
   Organisation: vi.fn(),
-  Admin: vi.fn(),
 }));
 
 const createResponse = () => {
@@ -50,6 +49,12 @@ const createAccount = (data, overrides = {}) => ({
   ...overrides,
 });
 
+const mockLoginUser = (user) => {
+  const select = vi.fn().mockResolvedValue(user);
+  User.findOne.mockReturnValue({ select });
+  return select;
+};
+
 describe("auth controller", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,9 +66,6 @@ describe("auth controller", () => {
     });
     Volunteer.mockImplementation(function MockVolunteer(data) {
       return createAccount(data, { role: "volunteer" });
-    });
-    Admin.mockImplementation(function MockAdmin(data) {
-      return createAccount(data, { role: "admin" });
     });
   });
 
@@ -84,6 +86,18 @@ describe("auth controller", () => {
       expect(User.findOne).not.toHaveBeenCalled();
     });
 
+    it("does not allow public signup to create an admin account", async () => {
+      const res = createResponse();
+
+      await signup({ body: baseSignup({ role: "admin" }) }, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        message: expect.stringContaining("Public signup"),
+      }));
+      expect(User.findOne).not.toHaveBeenCalled();
+    });
+
     it("normalises name and email before checking and saving the user", async () => {
       const account = createAccount({}, { role: "organisation" });
       Organisation.mockImplementation(function MockOrganisation(data) {
@@ -97,7 +111,7 @@ describe("auth controller", () => {
         biodata: "  Community organisation  ",
       }) }, res);
 
-      expect(User.findOne).toHaveBeenCalledWith({ email: "alex@example.com" });
+      expect(User.findOne).toHaveBeenCalledWith({ email: "alex@example.com", deletedAt: null });
       expect(Organisation).toHaveBeenCalledWith(expect.objectContaining({
         name: "Alex Tan",
         email: "alex@example.com",
@@ -107,13 +121,13 @@ describe("auth controller", () => {
       expect(account.save).toHaveBeenCalledOnce();
     });
 
-    it("rejects an email that already belongs to a user", async () => {
+    it("rejects an email that already belongs to a non-deleted user", async () => {
       User.findOne.mockResolvedValue({ _id: "existing-user" });
       const res = createResponse();
 
       await signup({ body: baseSignup({ email: "  ALEX@example.com " }) }, res);
 
-      expect(User.findOne).toHaveBeenCalledWith({ email: "alex@example.com" });
+      expect(User.findOne).toHaveBeenCalledWith({ email: "alex@example.com", deletedAt: null });
       expect(res.status).toHaveBeenCalledWith(400);
       expect(Organisation).not.toHaveBeenCalled();
     });
@@ -172,27 +186,6 @@ describe("auth controller", () => {
       expect(response).not.toHaveProperty("password");
     });
 
-    it("issues a token only when the created account is approved", async () => {
-      const account = createAccount({
-        name: "System Admin",
-        email: "admin@example.com",
-      }, { role: "admin", approvalStatus: "approved" });
-      Admin.mockImplementation(function MockAdmin() {
-        return account;
-      });
-      const res = createResponse();
-
-      await signup({ body: baseSignup({
-        name: "System Admin",
-        email: "admin@example.com",
-        role: "admin",
-        biodata: undefined,
-      }) }, res);
-
-      expect(generateToken).toHaveBeenCalledWith(account._id, res);
-      expect(res.status).toHaveBeenCalledWith(201);
-    });
-
     it("returns a safe error when resume upload or persistence fails", async () => {
       cloudinary.uploader.upload_stream.mockImplementation((_options, callback) => ({
         end: () => callback(new Error("upload failed")),
@@ -221,11 +214,11 @@ describe("auth controller", () => {
 
   describe("login and session", () => {
     it("returns the same response for an unknown email and wrong password", async () => {
-      User.findOne.mockResolvedValueOnce(null);
+      mockLoginUser(null);
       const unknownRes = createResponse();
       await login({ body: { email: "missing@example.com", password: "Password1" } }, unknownRes);
 
-      User.findOne.mockResolvedValueOnce({ password: "hash" });
+      mockLoginUser({ password: "hash" });
       bcrypt.compare.mockResolvedValue(false);
       const wrongRes = createResponse();
       await login({ body: { email: "user@example.com", password: "WrongPass1" } }, wrongRes);
@@ -235,13 +228,33 @@ describe("auth controller", () => {
       expect(unknownRes.json.mock.calls[0][0]).toEqual(wrongRes.json.mock.calls[0][0]);
     });
 
+    it("explicitly selects the password hash only during login", async () => {
+      const user = {
+        _id: "user-id",
+        name: "Approved User",
+        email: "user@example.com",
+        password: "stored-hash",
+        role: "volunteer",
+        approvalStatus: "approved",
+      };
+      const select = mockLoginUser(user);
+      bcrypt.compare.mockResolvedValue(true);
+      const res = createResponse();
+
+      await login({ body: { email: " USER@example.com ", password: "Password1" } }, res);
+
+      expect(User.findOne).toHaveBeenCalledWith({ email: "user@example.com", deletedAt: null });
+      expect(select).toHaveBeenCalledWith("+password");
+      expect(generateToken).toHaveBeenCalledWith(user._id, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      const response = res.json.mock.calls[0][0];
+      expect(response).toMatchObject({ _id: user._id, role: "volunteer" });
+      expect(response).not.toHaveProperty("password");
+    });
+
     it("blocks pending and rejected accounts without issuing a token", async () => {
       for (const approvalStatus of ["pending", "rejected"]) {
-        User.findOne.mockResolvedValueOnce({
-          password: "hash",
-          approvalStatus,
-          role: "volunteer",
-        });
+        mockLoginUser({ password: "hash", approvalStatus, role: "volunteer" });
         bcrypt.compare.mockResolvedValueOnce(true);
         const res = createResponse();
         await login({ body: { email: "alex@example.com", password: "StrongPass1" } }, res);
@@ -249,31 +262,6 @@ describe("auth controller", () => {
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ approvalStatus }));
       }
       expect(generateToken).not.toHaveBeenCalled();
-    });
-
-    it("issues a token and returns safe profile fields for an approved user", async () => {
-      const user = {
-        _id: "user-1",
-        name: "Alex Tan",
-        email: "alex@example.com",
-        password: "hash",
-        role: "volunteer",
-        approvalStatus: "approved",
-        skills: ["First Aid"],
-        availability: [],
-      };
-      User.findOne.mockResolvedValue(user);
-      bcrypt.compare.mockResolvedValue(true);
-      const res = createResponse();
-
-      await login({ body: { email: " ALEX@example.com ", password: "StrongPass1" } }, res);
-
-      expect(User.findOne).toHaveBeenCalledWith({ email: "alex@example.com" });
-      expect(generateToken).toHaveBeenCalledWith(user._id, res);
-      expect(res.status).toHaveBeenCalledWith(200);
-      const response = res.json.mock.calls[0][0];
-      expect(response).toMatchObject({ _id: user._id, role: "volunteer", skills: ["First Aid"] });
-      expect(response).not.toHaveProperty("password");
     });
 
     it("clears the authentication cookie on logout", async () => {

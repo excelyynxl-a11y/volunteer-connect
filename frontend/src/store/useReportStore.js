@@ -15,7 +15,9 @@ export const useReportStore = create((set) => ({
     });
 
     try {
-      const res = await axiosInstance.get("/report/my-reports");
+      const res = await axiosInstance.get("/report/my-reports", {
+        params: { page: 1, limit: 100 },
+      });
 
       const reports = Array.isArray(res.data?.reports) ? res.data.reports : [];
 

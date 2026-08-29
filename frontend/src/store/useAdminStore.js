@@ -28,8 +28,8 @@ export const useAdminStore = create((set, get) => ({
       const [volRes, orgRes, oppRes, repRes] = await Promise.all([
         axiosInstance.get("/user/volunteers"),
         axiosInstance.get("/user/organisations"),
-        axiosInstance.get("/opportunities"),
-        axiosInstance.get("/report/")
+        axiosInstance.get("/opportunities", { params: { page: 1, limit: 100 } }),
+        axiosInstance.get("/report/", { params: { page: 1, limit: 100 } })
       ]);
 
       const volunteers = Array.isArray(volRes.data?.volunteers)
@@ -159,7 +159,9 @@ export const useAdminStore = create((set, get) => ({
     set({ isOpportunitiesLoading: true, opportunitiesError: "" });
 
     try {
-      const res = await axiosInstance.get("/opportunities");
+      const res = await axiosInstance.get("/opportunities", {
+        params: { page: 1, limit: 100 },
+      });
       const opportunities = Array.isArray(res.data?.data) ? res.data.data : [];
       set({ opportunities });
       return { success: true, opportunities };
@@ -181,7 +183,9 @@ export const useAdminStore = create((set, get) => ({
     });
 
     try {
-      const res = await axiosInstance.get("/report/");
+      const res = await axiosInstance.get("/report/", {
+        params: { page: 1, limit: 100 },
+      });
       const reports = Array.isArray(res.data?.reports) ? res.data.reports : [];
 
       set({ reports });

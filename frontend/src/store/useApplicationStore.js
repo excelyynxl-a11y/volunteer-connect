@@ -8,13 +8,14 @@ export const useApplicationStore = create((set) => ({
   isSubmittingApplication: false,
   isUpdatingApplication: false,
   applicationsError: "",
+  clearApplicationsError: () => set({ applicationsError: "" }),
 
   // GET /api/application - Fetch applications for the authenticated volunteer
   getMyApplications: async ({ status } = {}) => {
     set({ isApplicationsLoading: true, applicationsError: "" });
     try {
       const response = await axiosInstance.get("/application", {
-        params: { status },
+        params: { status, page: 1, limit: 100 },
       });
       set({ applications: response.data.data });
       return response.data;
@@ -32,7 +33,7 @@ export const useApplicationStore = create((set) => ({
     set({ isApplicationsLoading: true, applicationsError: "" });
     try {
       const response = await axiosInstance.get("/application/organisation", {
-        params: { status, opportunityId },
+        params: { status, opportunityId, page: 1, limit: 100 },
       });
       set({ applications: response.data.data });
       return response.data;

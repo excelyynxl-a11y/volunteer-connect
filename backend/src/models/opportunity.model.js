@@ -44,17 +44,6 @@ const opportunitySchema = new mongoose.Schema(
       required: true,
     },
 
-    // Cloudinary image URLs
-    images: {
-      type: [
-        {
-          type: String,
-          trim: true,
-        },
-      ],
-      default: [],
-    },
-
     // Location information (format: "State, City")
     location: {
       type: String,
@@ -125,6 +114,13 @@ const opportunitySchema = new mongoose.Schema(
     publishedAt: {
       type: Date,
       default: Date.now,
+      index: true,
+    },
+
+    // Preserve historical application/report references after moderation removal.
+    deletedAt: {
+      type: Date,
+      default: null,
       index: true,
     },
   },

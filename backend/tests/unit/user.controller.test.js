@@ -11,7 +11,7 @@ import {
 import { Admin, Organisation, User, Volunteer } from "../../src/models/user.model.js";
 
 vi.mock("../../src/models/user.model.js", () => ({
-  User: { find: vi.fn(), findById: vi.fn(), findByIdAndDelete: vi.fn() },
+  User: { find: vi.fn(), findOne: vi.fn(), findOneAndUpdate: vi.fn() },
   Volunteer: { find: vi.fn() },
   Organisation: { find: vi.fn() },
   Admin: { find: vi.fn() },
@@ -53,7 +53,7 @@ describe("admin user-management controller", () => {
       model.find.mockReturnValue(query);
       const res = createResponse();
       await controller({}, res);
-      expect(model.find).toHaveBeenCalledWith();
+      expect(model.find).toHaveBeenCalledWith({ deletedAt: null });
       expect(query.select).toHaveBeenCalledWith("-password -__v");
       expect(res.json).toHaveBeenCalledWith({ count: 1, [key]: records });
     }
@@ -62,39 +62,42 @@ describe("admin user-management controller", () => {
   it("returns one safe user by ID", async () => {
     const user = { _id: "user-1", name: "Alex" };
     const query = selected(user);
-    User.findById.mockReturnValue(query);
+    User.findOne.mockReturnValue(query);
     const res = createResponse();
 
     await getUserById({ params: { id: "user-1" } }, res);
 
-    expect(User.findById).toHaveBeenCalledWith("user-1");
+    expect(User.findOne).toHaveBeenCalledWith({ _id: "user-1", deletedAt: null });
     expect(query.select).toHaveBeenCalledWith("-password -__v");
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ user });
   });
 
   it("returns not found when the requested user does not exist", async () => {
-    User.findById.mockReturnValue(selected(null));
+    User.findOne.mockReturnValue(selected(null));
     const res = createResponse();
     await getUserById({ params: { id: "missing" } }, res);
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
   it("deletes an existing user and reports success", async () => {
-    User.findById.mockResolvedValue({ _id: "user-1" });
-    User.findByIdAndDelete.mockResolvedValue({ _id: "user-1" });
+    User.findOne.mockResolvedValue({ _id: "user-1" });
+    User.findOneAndUpdate.mockResolvedValue({ _id: "user-1" });
     const res = createResponse();
     await deleteUser({ params: { id: "user-1" } }, res);
-    expect(User.findByIdAndDelete).toHaveBeenCalledWith("user-1");
+    expect(User.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: "user-1", deletedAt: null },
+      expect.objectContaining({ $set: expect.objectContaining({ approvalStatus: "rejected" }) }),
+    );
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   it("does not report success when the user to delete is missing", async () => {
-    User.findById.mockResolvedValue(null);
+    User.findOne.mockResolvedValue(null);
     const res = createResponse();
     await deleteUser({ params: { id: "missing" } }, res);
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(User.findByIdAndDelete).not.toHaveBeenCalled();
+    expect(User.findOneAndUpdate).not.toHaveBeenCalled();
   });
 
   it("returns a safe server error when a user query fails", async () => {

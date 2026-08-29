@@ -26,7 +26,7 @@ describe('application store', () => {
     const result = await useApplicationStore.getState().getMyApplications({ status: 'pending' })
 
     expect(axiosInstance.get).toHaveBeenCalledWith('/application', {
-      params: { status: 'pending' },
+      params: { status: 'pending', page: 1, limit: 100 },
     })
     expect(result).toEqual({ success: true, data: applications })
     expect(useApplicationStore.getState()).toMatchObject({
@@ -46,7 +46,7 @@ describe('application store', () => {
     })
 
     expect(axiosInstance.get).toHaveBeenCalledWith('/application/organisation', {
-      params: { status: 'approved', opportunityId: 'opportunity-1' },
+      params: { status: 'approved', opportunityId: 'opportunity-1', page: 1, limit: 100 },
     })
     expect(useApplicationStore.getState().applications).toEqual(applications)
   })

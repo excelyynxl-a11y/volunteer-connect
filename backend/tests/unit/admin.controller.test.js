@@ -9,7 +9,7 @@ import { Admin, User } from "../../src/models/user.model.js";
 import { uploadAvatarToCloudinary } from "../../src/services/cloudinary.service.js";
 
 vi.mock("../../src/models/user.model.js", () => ({
-  User: { findById: vi.fn() },
+  User: { findOne: vi.fn() },
   Admin: { findById: vi.fn() },
 }));
 vi.mock("../../src/services/cloudinary.service.js", () => ({
@@ -34,14 +34,14 @@ describe("admin controller", () => {
       await approveUserAccount({ params: { id: "invalid" } }, invalidRes);
       expect(invalidRes.status).toHaveBeenCalledWith(400);
 
-      User.findById.mockResolvedValue(null);
+      User.findOne.mockResolvedValue(null);
       const missingRes = createResponse();
       await rejectUserAccount({ params: { id: validId } }, missingRes);
       expect(missingRes.status).toHaveBeenCalledWith(404);
     });
 
     it("rejects attempts to review an admin account", async () => {
-      User.findById.mockResolvedValue({ role: "admin", approvalStatus: "pending" });
+      User.findOne.mockResolvedValue({ role: "admin", approvalStatus: "pending" });
       const res = createResponse();
       await approveUserAccount({ params: { id: validId } }, res);
       expect(res.status).toHaveBeenCalledWith(400);
@@ -58,7 +58,7 @@ describe("admin controller", () => {
         save: vi.fn().mockResolvedValue(undefined),
       };
       const safeUser = { _id: validId, role: "volunteer", approvalStatus: "approved" };
-      User.findById.mockResolvedValueOnce(user).mockReturnValueOnce(selected(safeUser));
+      User.findOne.mockResolvedValueOnce(user).mockReturnValueOnce(selected(safeUser));
       const res = createResponse();
 
       await approveUserAccount({ params: { id: validId } }, res);
@@ -69,7 +69,7 @@ describe("admin controller", () => {
         message: "User account approved successfully.",
         user: safeUser,
       });
-      expect(User.findById.mock.results[1].value.select).toHaveBeenCalledWith("-password -__v");
+      expect(User.findOne.mock.results[1].value.select).toHaveBeenCalledWith("-password -__v");
     });
 
     it("rejects a volunteer or organisation and returns safe fields", async () => {
@@ -80,7 +80,7 @@ describe("admin controller", () => {
         save: vi.fn().mockResolvedValue(undefined),
       };
       const safeUser = { _id: validId, role: "organisation", approvalStatus: "rejected" };
-      User.findById.mockResolvedValueOnce(user).mockReturnValueOnce(selected(safeUser));
+      User.findOne.mockResolvedValueOnce(user).mockReturnValueOnce(selected(safeUser));
       const res = createResponse();
 
       await rejectUserAccount({ params: { id: validId } }, res);
@@ -91,19 +91,19 @@ describe("admin controller", () => {
     });
 
     it("rejects an already completed approval or rejection", async () => {
-      User.findById.mockResolvedValueOnce({ role: "volunteer", approvalStatus: "approved" });
+      User.findOne.mockResolvedValueOnce({ role: "volunteer", approvalStatus: "approved" });
       const approvedRes = createResponse();
       await approveUserAccount({ params: { id: validId } }, approvedRes);
       expect(approvedRes.status).toHaveBeenCalledWith(400);
 
-      User.findById.mockResolvedValueOnce({ role: "organisation", approvalStatus: "rejected" });
+      User.findOne.mockResolvedValueOnce({ role: "organisation", approvalStatus: "rejected" });
       const rejectedRes = createResponse();
       await rejectUserAccount({ params: { id: validId } }, rejectedRes);
       expect(rejectedRes.status).toHaveBeenCalledWith(400);
     });
 
     it("returns a safe server error when account review persistence fails", async () => {
-      User.findById.mockResolvedValue({
+      User.findOne.mockResolvedValue({
         _id: validId,
         role: "volunteer",
         approvalStatus: "pending",

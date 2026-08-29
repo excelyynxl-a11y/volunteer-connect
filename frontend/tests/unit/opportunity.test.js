@@ -5,7 +5,6 @@ import {
   formatOpportunityDateTime,
   formatOpportunityTimeRange, 
   getApplyEligibility,
-  getOpportunityImage,
   getOpportunityStatusClass,
   getOrganisationName,
   getRequirementItems,
@@ -71,12 +70,7 @@ describe('frontend opportunity rules', () => {
     expect(formatOpportunityDateTime('not-a-date', 'No date')).toBe('No date')
   })
 
-  it('returns safe image, organisation name, status class, and requirement values', () => {
-    // image
-    expect(getOpportunityImage({ images: ['', null, 'photo.jpg'] })).toBe('photo.jpg')
-    expect(getOpportunityImage({ images: [] })).toBe('')
-    expect(getOpportunityImage({ images: undefined })).toBe('')
-
+  it('returns safe organisation name, status class, and requirement values', () => {
     // organisation name
     expect(getOrganisationName({ organisationId: { name: 'Green Neighbours' } })).toBe('Green Neighbours')
     expect(getOrganisationName({ organisationName: 'Yolo Org' })).toBe('Yolo Org')

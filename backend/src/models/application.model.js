@@ -22,8 +22,10 @@ const applicationSchema = new mongoose.Schema(
     },
 
     rejectionReason: {
-    type: String,
-    default: "",
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 500,
     },
 
     withdrawalReason: {

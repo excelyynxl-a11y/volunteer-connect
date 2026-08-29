@@ -1,10 +1,10 @@
 FROM node:22-alpine
 
-WORKDIR app/
+WORKDIR /app
 
-COPY package.json .
+COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
 EXPOSE 5173
 

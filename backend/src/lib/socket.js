@@ -46,9 +46,10 @@ export const authenticateSocket = async (socket, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId).select(
-      "_id role approvalStatus",
-    );
+    const user = await User.findOne({
+      _id: decoded.userId,
+      deletedAt: null,
+    }).select("_id role approvalStatus");
 
     if (!user) {
       return next(

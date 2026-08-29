@@ -4,6 +4,10 @@ import Opportunity, {
   OPPORTUNITY_STATUSES,
 } from "../models/opportunity.model.js";
 
+import { notifyFollowersOfNewOpportunity } from "../lib/email.js";
+import { parsePagination } from "../lib/pagination.js";
+
+
 const STRING_LIMITS = {
   title: 120,
   details: 5000,
@@ -17,15 +21,6 @@ const normalizeStringArray = (value) => {
   if (value.some((item) => typeof item !== "string")) return null;
 
   return [...new Set(value.map((item) => item.trim()).filter(Boolean))];
-};
-
-const isValidHttpUrl = (value) => {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 };
 
 const isValidationError = (error) =>
@@ -44,7 +39,6 @@ export const createOpportunity = async (req, res) => {
       location,
       category,
       requirements,
-      images,
     } = req.body;
 
     if (
@@ -175,22 +169,6 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
-    const normalizedImages = normalizeStringArray(images);
-    if (normalizedImages === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must be an array",
-      });
-    }
-
-
-    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must contain valid HTTP or HTTPS URLs",
-      });
-    }
-
     const newOpportunity = new Opportunity({
       title: title.trim(),
       details: details.trim(),
@@ -201,11 +179,11 @@ export const createOpportunity = async (req, res) => {
       maxVolunteers: parsedMaxVolunteers,
       category: normalizedCategory ?? [],
       requirements: requirements !== undefined ? requirements.trim() : "",
-      images: normalizedImages ?? [],
       organisationId: req.user._id,
     });
 
     await newOpportunity.save();
+    void notifyFollowersOfNewOpportunity(newOpportunity, req.user);
 
     res.status(201).json({
       success: true,
@@ -223,14 +201,26 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find()
-      .populate("organisationId", "name")
-      .sort({ publishedAt: -1 });
+    const pagination = parsePagination(req.query);
+    const query = { deletedAt: null };
+    const [opportunities, totalCount] = await Promise.all([
+      Opportunity.find(query)
+        .skip(pagination.skip)
+        .limit(pagination.limit)
+        .populate("organisationId", "name")
+        .sort({ publishedAt: -1 }),
+      Opportunity.countDocuments(query),
+    ]);
 
     // const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
-      count: opportunities.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: opportunities,
     });
   } catch (err) {
@@ -253,7 +243,7 @@ export const getOpportunityById = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id)
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null })
       .populate("organisationId", "name");
 
     if (!opportunity) {
@@ -290,7 +280,6 @@ export const updateOpportunity = async (req, res) => {
       endAt,
       applicationDeadline,
       requirements,
-      images,
     } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -310,8 +299,7 @@ export const updateOpportunity = async (req, res) => {
       applicationDeadline === undefined &&
       status === undefined &&
       category === undefined &&
-      requirements === undefined &&
-      images === undefined
+      requirements === undefined
     ) {
       return res.status(400).json({
         success: false,
@@ -387,12 +375,33 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null });
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    if (
+      ["completed", "cancelled"].includes(opportunity.status) &&
+      status !== undefined &&
+      status !== opportunity.status
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Completed and cancelled opportunities cannot be reopened",
+      });
+    }
+
+    const nextStatus = status ?? opportunity.status;
     if (parsedStartAt) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const startDateOnly = new Date(parsedStartAt);
       startDateOnly.setHours(0, 0, 0, 0);
-      if (startDateOnly < today) {
+      if (startDateOnly < today && !["completed", "cancelled"].includes(nextStatus)) {
         return res.status(400).json({
           success: false,
           message: "Start date cannot be before today",
@@ -434,31 +443,6 @@ export const updateOpportunity = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Requirements must be a string with at most 2000 characters",
-      });
-    }
-
-    const normalizedImages = normalizeStringArray(images);
-    if (normalizedImages === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must be an array",
-      });
-    }
-
-
-    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must contain valid HTTP or HTTPS URLs",
-      });
-    }
-
-    const opportunity = await Opportunity.findById(id);
-
-    if (!opportunity) {
-      return res.status(404).json({
-        success: false,
-        message: "Opportunity not found",
       });
     }
 
@@ -542,10 +526,6 @@ export const updateOpportunity = async (req, res) => {
       opportunity.requirements = requirements.trim();
     }
 
-    if (normalizedImages !== undefined) {
-      opportunity.images = normalizedImages;
-    }
-
     await opportunity.save();
 
     res.status(200).json({
@@ -573,7 +553,7 @@ export const deleteOpportunity = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id);
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null });
 
     if (!opportunity) {
       return res.status(404).json({
@@ -582,7 +562,9 @@ export const deleteOpportunity = async (req, res) => {
       });
     }
 
-    await Opportunity.findByIdAndDelete(id);
+    opportunity.status = "cancelled";
+    opportunity.deletedAt = new Date();
+    await opportunity.save();
 
     res.status(200).json({
       success: true,
@@ -598,11 +580,27 @@ export const deleteOpportunity = async (req, res) => {
 
 export const getOrganisationOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find({ organisationId: req.user._id });
+    const pagination = parsePagination(req.query);
+    const query = {
+      organisationId: req.user._id,
+      deletedAt: null,
+    };
+    const [opportunities, totalCount] = await Promise.all([
+      Opportunity.find(query)
+        .skip(pagination.skip)
+        .limit(pagination.limit)
+        .sort({ publishedAt: -1 }),
+      Opportunity.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
-      count: opportunities.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: opportunities,
     });
   } catch (err) {

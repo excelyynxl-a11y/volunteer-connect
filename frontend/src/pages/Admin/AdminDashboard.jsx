@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminSidebar from "../../components/AdminSidebar";
 import { useAdminStore } from "../../store/useAdminStore";
@@ -8,9 +8,10 @@ import ManageOrganisation from "./ManageOrganisation";
 import ManageOpportunity from "./ManageOpportunity";
 import ManageReport from "./ManageReport";
 import ReportMadePage from "../Report/ReportMadePage";
-import AdminAnalytics from "./AdminAnalytics";
 import AdminProfile from "./AdminProfile";
 import "./Admin.css";
+
+const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
 
 const AdminDashboard = () => {
   const { sidebarCollapsed } = useAdminStore();
@@ -28,7 +29,14 @@ const AdminDashboard = () => {
           <Route path="manage-opportunity" element={<ManageOpportunity />} />
           <Route path="manage-report" element={<ManageReport />} />
           <Route path="manage-report/:reportId" element={<ReportMadePage />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route
+            path="analytics"
+            element={
+              <Suspense fallback={<p className="admin-loading">Loading analytics...</p>}>
+                <AdminAnalytics />
+              </Suspense>
+            }
+          />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />
         </Routes>

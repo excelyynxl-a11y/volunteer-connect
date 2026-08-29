@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -161,7 +161,8 @@ describe('Follow feature UI', () => {
     })
     renderWithRouter(<FollowedOrganisations />)
 
-    await user.click(screen.getAllByRole('button', { name: 'Unfollow' })[0])
+    const greenCard = screen.getByText('Green Neighbours').closest('.followed-organisations-card')
+    await user.click(within(greenCard).getByRole('button', { name: 'Unfollow' }))
     expect(unfollowOrganisation).toHaveBeenCalledWith('org-1')
     expect(screen.queryByText('Green Neighbours')).not.toBeInTheDocument()
     expect(screen.getByText('Animal Friends')).toBeInTheDocument()

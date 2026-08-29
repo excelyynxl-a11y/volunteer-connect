@@ -1,16 +1,20 @@
-# React + Vite
+# VolunteerConnect frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a React/Vite application. From this directory:
 
-Currently, two official plugins are available:
+```bash
+npm ci
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Available scripts:
 
-## React Compiler
+- `npm run dev` — start the Vite development server
+- `npm run lint` — run ESLint
+- `npm run test:unit` — run the frontend unit tests once
+- `npm run build` — create the production bundle
+- `npm run preview` — preview the production bundle locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Copy `.env.example` to `.env` when the API is not running at the default local address. `VITE_API_URI` should contain the API origin only, such as `http://localhost:5001`; the application appends `/api` automatically. Vite environment variables are embedded during the build, so they must be available when the bundle is built.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Frontend business and display rules are implemented in `src/lib/`, with tests next to the relevant helpers. The frontend receives server-side pagination metadata, while the current dashboard views request the bounded collection size supported by the API.

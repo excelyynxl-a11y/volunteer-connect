@@ -24,7 +24,7 @@ const mapApplicationToViewModel = (application) => ({
   volunteerInitials: getInitials(application.volunteerId?.name),
   submittedOn: application.createdAt,
   status: APPLICARION_TAB_STATUS_LABELS[application.status] || application.status,
-  rejectionMessage: application.withdrawalReason || "",
+  rejectionMessage: application.rejectionReason || application.withdrawalReason || "",
   skills: application.volunteerId?.skills || [],
   availability: application.volunteerId?.availability || [],
 });
@@ -61,6 +61,7 @@ const OrganisationApplication = () => {
     getMyOrganisationApplications,
     approveApplication,
     rejectApplication,
+    clearApplicationsError,
   } = useApplicationStore();
 
   useEffect(() => {
@@ -100,13 +101,35 @@ const OrganisationApplication = () => {
   );
 
   const handleApprove = async (applicationId) => {
-    await approveApplication(applicationId);
-    await getMyOrganisationApplications();
+    try {
+      await approveApplication(applicationId);
+      const refreshResult = await getMyOrganisationApplications();
+      return refreshResult?.success === false
+        ? refreshResult
+        : { success: true };
+    } catch (error) {
+      clearApplicationsError();
+      return {
+        success: false,
+        error: error.response?.data?.message || "The application could not be approved.",
+      };
+    }
   };
 
   const handleReject = async (applicationId, reason) => {
-    await rejectApplication(applicationId, reason);
-    await getMyOrganisationApplications();
+    try {
+      await rejectApplication(applicationId, reason);
+      const refreshResult = await getMyOrganisationApplications();
+      return refreshResult?.success === false
+        ? refreshResult
+        : { success: true };
+    } catch (error) {
+      clearApplicationsError();
+      return {
+        success: false,
+        error: error.response?.data?.message || "The application could not be rejected.",
+      };
+    }
   };
 
   if (opportunitiesError || applicationsError) {

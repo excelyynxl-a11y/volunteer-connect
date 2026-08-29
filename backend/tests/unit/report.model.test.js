@@ -12,12 +12,18 @@ const createUserReport = () => ({
   details: "The volunteer arrived after the agreed starting time.",
 });
 
-const validationError = async (data) =>
-  new Report(data).validate().catch((error) => error);
+const createOpportunityReport = () => ({
+  submittedBy: new mongoose.Types.ObjectId(),
+  reportType: "OpportunityViolation",
+  opportunityViolationType: "Others",
+  reportedOpportunityId: new mongoose.Types.ObjectId(),
+  title: "A report",
+  details: "Some report details",
+});
 
 describe("report model", () => {
-  it("requires submitter, report type, title, details, and a valid status", async () => {
-    const error = await validationError({ status: "Closed" });
+  it("requires submitter, report type, title, details, and a valid status", () => {
+    const error = new Report({ status: "Closed" }).validateSync();
 
     expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
     expect(error.errors.submittedBy).toBeDefined();
@@ -27,57 +33,52 @@ describe("report model", () => {
     expect(error.errors.status).toBeDefined();
   });
 
-  it("requires the user subtype and target only for a user violation", async () => {
-    const data = createUserReport();
-    delete data.userViolationType;
-    delete data.reportedUserId;
-    const error = await validationError(data);
+  it("validates both supported report shapes and defaults status", () => {
+    const opportunityReport = new Report(createOpportunityReport());
+    const userReport = new Report(createUserReport());
 
-    expect(error.errors.userViolationType).toBeDefined();
-    expect(error.errors.reportedUserId).toBeDefined();
-    expect(error.errors.opportunityViolationType).toBeUndefined();
-    expect(error.errors.reportedOpportunityId).toBeUndefined();
+    expect(opportunityReport.status).toBe("Pending");
+    expect(opportunityReport.validateSync()).toBeUndefined();
+    expect(userReport.validateSync()).toBeUndefined();
   });
 
-  it("requires the opportunity subtype and target only for an opportunity violation", async () => {
-    const data = { ...createUserReport(), reportType: "OpportunityViolation" };
-    delete data.userViolationType;
-    delete data.reportedUserId;
-    const error = await validationError(data);
-
-    expect(error.errors.opportunityViolationType).toBeDefined();
-    expect(error.errors.reportedOpportunityId).toBeDefined();
-    expect(error.errors.userViolationType).toBeUndefined();
-    expect(error.errors.reportedUserId).toBeUndefined();
-  });
-
-  it("rejects unsupported violation subtypes", async () => {
-    const userError = await validationError({
-      ...createUserReport(),
-      userViolationType: "Unsupported",
-    });
+  it("requires the matching subtype and target for each report type", () => {
+    const missingUser = { ...createUserReport() };
+    delete missingUser.userViolationType;
+    delete missingUser.reportedUserId;
+    const userError = new Report(missingUser).validateSync();
     expect(userError.errors.userViolationType).toBeDefined();
+    expect(userError.errors.reportedUserId).toBeDefined();
+    expect(userError.errors.opportunityViolationType).toBeUndefined();
+    expect(userError.errors.reportedOpportunityId).toBeUndefined();
 
-    const opportunityError = await validationError({
-      submittedBy: new mongoose.Types.ObjectId(),
-      reportType: "OpportunityViolation",
-      opportunityViolationType: "Unsupported",
-      reportedOpportunityId: new mongoose.Types.ObjectId(),
-      title: "Unsafe event",
-      details: "The event did not follow its safety plan.",
-    });
+    const missingOpportunity = { ...createOpportunityReport() };
+    delete missingOpportunity.opportunityViolationType;
+    delete missingOpportunity.reportedOpportunityId;
+    const opportunityError = new Report(missingOpportunity).validateSync();
     expect(opportunityError.errors.opportunityViolationType).toBeDefined();
+    expect(opportunityError.errors.reportedOpportunityId).toBeDefined();
   });
 
-  it("trims and limits the report title", async () => {
+  it("rejects unsupported violation subtypes", () => {
+    const user = new Report({ ...createUserReport(), userViolationType: "Unsupported" });
+    const opportunity = new Report({
+      ...createOpportunityReport(),
+      opportunityViolationType: "Unsupported",
+    });
+
+    expect(user.validateSync().errors.userViolationType).toBeDefined();
+    expect(opportunity.validateSync().errors.opportunityViolationType).toBeDefined();
+  });
+
+  it("trims and limits report title and details", () => {
     const report = new Report({ ...createUserReport(), title: "  Trimmed title  " });
-    await report.validate();
+    expect(report.validateSync()).toBeUndefined();
     expect(report.title).toBe("Trimmed title");
 
-    const error = await validationError({
-      ...createUserReport(),
-      title: "x".repeat(121),
-    });
-    expect(error.errors.title).toBeDefined();
+    const longTitle = new Report({ ...createUserReport(), title: "x".repeat(121) });
+    const longDetails = new Report({ ...createUserReport(), details: "d".repeat(2001) });
+    expect(longTitle.validateSync().errors.title).toBeDefined();
+    expect(longDetails.validateSync().errors.details).toBeDefined();
   });
 });

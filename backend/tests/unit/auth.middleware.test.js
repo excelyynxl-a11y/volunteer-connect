@@ -6,7 +6,7 @@ import { User } from "../../src/models/user.model.js";
 
 vi.mock("jsonwebtoken", () => ({ default: { verify: vi.fn() } }));
 vi.mock("../../src/models/user.model.js", () => ({
-  User: { findById: vi.fn() },
+  User: { findOne: vi.fn() },
 }));
 
 const createResponse = () => {
@@ -57,7 +57,7 @@ describe("authentication and role middleware", () => {
 
   it("rejects a valid token when the user no longer exists", async () => {
     jwt.verify.mockReturnValue({ userId: "user-1" });
-    User.findById.mockReturnValue(selectedUser(null));
+    User.findOne.mockReturnValue(selectedUser(null));
     const res = createResponse();
 
     await protectRoute({ cookies: { jwt: "valid-token" } }, res, vi.fn());
@@ -70,7 +70,7 @@ describe("authentication and role middleware", () => {
 
   it("rejects a valid user whose account is not approved", async () => {
     jwt.verify.mockReturnValue({ userId: "user-1" });
-    User.findById.mockReturnValue(selectedUser({
+    User.findOne.mockReturnValue(selectedUser({
       role: "volunteer",
       approvalStatus: "pending",
     }));
@@ -89,12 +89,13 @@ describe("authentication and role middleware", () => {
     const user = { _id: "user-1", role: "organisation", approvalStatus: "approved" };
     const query = selectedUser(user);
     jwt.verify.mockReturnValue({ userId: "user-1" });
-    User.findById.mockReturnValue(query);
+    User.findOne.mockReturnValue(query);
     const req = { cookies: { jwt: "valid-token" } };
     const next = vi.fn();
 
     await protectRoute(req, createResponse(), next);
 
+    expect(User.findOne).toHaveBeenCalledWith({ _id: "user-1", deletedAt: null });
     expect(query.select).toHaveBeenCalledWith("-password");
     expect(req.user).toBe(user);
     expect(next).toHaveBeenCalledOnce();

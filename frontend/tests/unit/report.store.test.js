@@ -27,7 +27,9 @@ describe('report store', () => {
 
     const result = await useReportStore.getState().getMyReports('UserViolation')
 
-    expect(axiosInstance.get).toHaveBeenCalledWith('/report/my-reports')
+    expect(axiosInstance.get).toHaveBeenCalledWith('/report/my-reports', {
+      params: { page: 1, limit: 100 },
+    })
     expect(result).toEqual({ success: true, data: [userReport] })
     expect(useReportStore.getState().previousReports).toEqual([userReport])
   })

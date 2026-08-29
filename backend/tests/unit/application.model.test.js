@@ -9,36 +9,48 @@ const validApplication = () => ({
 });
 
 describe("application model", () => {
-  it("requires an opportunity and volunteer", async () => {
-    const error = await new Application({}).validate().catch((value) => value);
+  it("requires an opportunity and volunteer", () => {
+    const error = new Application({}).validateSync();
+
     expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
     expect(error.errors.opportunityId).toBeDefined();
     expect(error.errors.volunteerId).toBeDefined();
   });
 
-  it("defaults status to pending and rejects unsupported statuses", async () => {
+  it("defaults status to pending and supports the defined lifecycle", () => {
     const application = new Application(validApplication());
+
     expect(application.status).toBe("pending");
-    await expect(application.validate()).resolves.toBeUndefined();
+    expect(application.validateSync()).toBeUndefined();
+    expect(Application.schema.path("status").enumValues).toEqual([
+      "pending",
+      "approved",
+      "rejected",
+      "withdrawn",
+    ]);
 
     const invalid = new Application({ ...validApplication(), status: "cancelled" });
-    const error = await invalid.validate().catch((value) => value);
-    expect(error.errors.status).toBeDefined();
+    expect(invalid.validateSync().errors.status).toBeDefined();
   });
 
-  it("trims and limits a withdrawal reason", async () => {
+  it("trims and limits moderation and withdrawal reasons", () => {
     const application = new Application({
       ...validApplication(),
+      rejectionReason: "  Not available  ",
       withdrawalReason: "  Schedule conflict  ",
     });
-    await application.validate();
+
+    expect(application.validateSync()).toBeUndefined();
+    expect(application.rejectionReason).toBe("Not available");
     expect(application.withdrawalReason).toBe("Schedule conflict");
 
     const invalid = new Application({
       ...validApplication(),
-      withdrawalReason: "x".repeat(501),
+      rejectionReason: "r".repeat(501),
+      withdrawalReason: "w".repeat(501),
     });
-    const error = await invalid.validate().catch((value) => value);
+    const error = invalid.validateSync();
+    expect(error.errors.rejectionReason).toBeDefined();
     expect(error.errors.withdrawalReason).toBeDefined();
   });
 

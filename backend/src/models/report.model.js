@@ -84,6 +84,8 @@ const reportSchema = new mongoose.Schema(
     details: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 2000,
     },
 
     status: {
@@ -94,6 +96,8 @@ const reportSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+reportSchema.index({ submittedBy: 1, reportType: 1, status: 1, createdAt: -1 });
 
 const Report = mongoose.model("Report", reportSchema);
 export default Report;

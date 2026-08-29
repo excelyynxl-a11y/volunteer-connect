@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { Volunteer } from "../models/user.model.js";
 
-const MONGO_URI = process.env.LOCAL_MONGODB_URI || process.env.LOCAL_MONGODB_URI;
+const MONGO_URI = process.env.LOCAL_MONGODB_URI || process.env.MONGODB_URI;
 
 const volunteers = [
   {

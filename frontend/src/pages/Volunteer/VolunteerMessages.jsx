@@ -103,7 +103,9 @@ const MessageAttachment = ({ message, conversationId, onDownload }) => {
     <button
       type="button"
       className="messages-attachment-item"
-      onClick={() => onDownload(conversationId, message._id)}
+      onClick={() =>
+        onDownload(conversationId, message._id, message.attachment.fileName)
+      }
       aria-label={`Download ${message.attachment.fileName}`}
     >
       <span className="messages-attachment-icon">

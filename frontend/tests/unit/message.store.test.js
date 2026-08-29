@@ -197,17 +197,27 @@ describe('message store', () => {
     expect(state.messages).toEqual([{ _id: 'm1' }])
   })
 
-  it('uses an authenticated download URL for an attachment', () => {
+  it('downloads an attachment as a blob without navigating away from the inbox', async () => {
     const clickSpy = vi.fn()
     const removeSpy = vi.fn()
-    vi.spyOn(document, 'createElement').mockReturnValue({ click: clickSpy, remove: removeSpy, href: '', rel: '' })
+    const link = { click: clickSpy, remove: removeSpy, href: '', download: '', rel: '' }
+    vi.spyOn(document, 'createElement').mockReturnValue(link)
     const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => {})
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test-download')
+    axiosInstance.get.mockResolvedValue({ data: new Blob(['attachment'], { type: 'image/png' }) })
 
-    useMessageStore.getState().downloadAttachment('c1', 'm1')
+    const result = await useMessageStore.getState().downloadAttachment('c1', 'm1', 'photo.png')
 
-    const createdLink = document.createElement.mock.results[0].value
-    expect(createdLink.href).toBe('http://localhost:5000/api/message/conversations/c1/messages/m1/attachment')
+    expect(result).toEqual({ success: true })
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      '/message/conversations/c1/messages/m1/attachment',
+      { responseType: 'blob' },
+    )
+    expect(createObjectUrlSpy).toHaveBeenCalledWith(expect.any(Blob))
+    expect(link.href).toBe('blob:test-download')
+    expect(link.download).toBe('photo.png')
     expect(clickSpy).toHaveBeenCalledOnce()
+    expect(removeSpy).toHaveBeenCalledOnce()
     appendSpy.mockRestore()
   })
 

@@ -43,6 +43,15 @@ frontend_lint:
     - npm ci --cache ../.npm --prefer-offline
     - npm run lint
 
+frontend_unit_test:
+  stage: test
+  script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm run test:unit
+  needs:
+    - frontend_lint
+
 backend_unit_test:
   stage: test
   script:
