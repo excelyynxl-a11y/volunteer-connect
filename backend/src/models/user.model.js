@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
       default: "pending",
     },
     avatar: { type: String, default: "" },
+    deletedAt: { type: Date, default: null, index: true },
   },
   baseOptions,
 );

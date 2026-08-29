@@ -8,7 +8,7 @@ vi.mock("jsonwebtoken", () => ({
 
 vi.mock("../../src/models/user.model.js", () => ({
   User: {
-    findById: vi.fn(),
+    findOne: vi.fn(),
   },
 }));
 
@@ -60,7 +60,7 @@ describe("messaging socket authentication", () => {
       role: "volunteer",
     };
     jwt.verify.mockReturnValue({ userId: user._id });
-    User.findById.mockReturnValue({
+    User.findOne.mockReturnValue({
       select: vi.fn().mockResolvedValue(user),
     });
     const socket = {
@@ -78,7 +78,7 @@ describe("messaging socket authentication", () => {
 
   it("rejects admins and unapproved accounts", async () => {
     jwt.verify.mockReturnValue({ userId: "admin-1" });
-    User.findById.mockReturnValue({
+    User.findOne.mockReturnValue({
       select: vi.fn().mockResolvedValue({
         _id: "admin-1",
         approvalStatus: "approved",

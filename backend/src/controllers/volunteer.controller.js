@@ -67,7 +67,7 @@ export const getVolunteerProfile = async (req, res) => {
       req.user.role === "volunteer" && String(req.user._id) === id
         ? OWNER_PROFILE_FIELDS
         : ORGANISATION_PROFILE_FIELDS;
-    const volunteer = await Volunteer.findById(id).select(profileFields);
+    const volunteer = await Volunteer.findOne({ _id: id, deletedAt: null }).select(profileFields);
 
     if (!volunteer) {
       return res.status(404).json({
@@ -199,7 +199,7 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    const volunteer = await Volunteer.findById(id);
+    const volunteer = await Volunteer.findOne({ _id: id, deletedAt: null });
 
     if (!volunteer) {
       return res.status(404).json({
@@ -234,7 +234,7 @@ export const updateVolunteerProfile = async (req, res) => {
 
     await volunteer.save();
 
-    const updatedVolunteer = await Volunteer.findById(id).select(OWNER_PROFILE_FIELDS);
+    const updatedVolunteer = await Volunteer.findOne({ _id: id, deletedAt: null }).select(OWNER_PROFILE_FIELDS);
 
     res.status(200).json({
       success: true,
@@ -259,7 +259,7 @@ export const getVolunteerPastExperience = async (req, res) => {
       });
     }
 
-    const volunteer = await Volunteer.findById(id).select("_id");
+    const volunteer = await Volunteer.findOne({ _id: id, deletedAt: null }).select("_id");
 
     if (!volunteer) {
       return res.status(404).json({

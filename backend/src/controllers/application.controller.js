@@ -81,7 +81,7 @@ export const createApplication = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(opportunityId);
+    const opportunity = await Opportunity.findOne({ _id: opportunityId, deletedAt: null });
     if (!opportunity) {
       return res.status(404).json({ success: false, message: "Opportunity not found" });
     }
@@ -209,7 +209,10 @@ export const getMyOrganisationApplications = async (req, res) => {
       });
     }
 
-    const myOpportunities = await Opportunity.find({ organisationId }).select("_id");
+    const myOpportunities = await Opportunity.find({
+      organisationId,
+      deletedAt: null,
+    }).select("_id");
     const myOpportunityIds = myOpportunities.map((opportunity) => opportunity._id);
 
     if (opportunityId !== undefined) {

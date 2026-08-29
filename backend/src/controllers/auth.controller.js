@@ -34,7 +34,7 @@ export const signup = async (req, res) => {
       });
     }
 
-    const userExist = await User.findOne({ email: normalizedEmail });
+    const userExist = await User.findOne({ email: normalizedEmail, deletedAt: null });
 
     if (userExist) {
       return res.status(400).json({
@@ -154,7 +154,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
     const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-    const user = await User.findOne({ email: normalizedEmail }).select("+password");
+    const user = await User.findOne({ email: normalizedEmail, deletedAt: null }).select("+password");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password." });

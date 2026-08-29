@@ -227,7 +227,7 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find()
+    const opportunities = await Opportunity.find({ deletedAt: null })
       .populate("organisationId", "name")
       .sort({ publishedAt: -1 });
 
@@ -257,7 +257,7 @@ export const getOpportunityById = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id)
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null })
       .populate("organisationId", "name");
 
     if (!opportunity) {
@@ -391,7 +391,7 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id);
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null });
 
     if (!opportunity) {
       return res.status(404).json({
@@ -589,7 +589,7 @@ export const deleteOpportunity = async (req, res) => {
       });
     }
 
-    const opportunity = await Opportunity.findById(id);
+    const opportunity = await Opportunity.findOne({ _id: id, deletedAt: null });
 
     if (!opportunity) {
       return res.status(404).json({
@@ -598,7 +598,9 @@ export const deleteOpportunity = async (req, res) => {
       });
     }
 
-    await Opportunity.findByIdAndDelete(id);
+    opportunity.status = "cancelled";
+    opportunity.deletedAt = new Date();
+    await opportunity.save();
 
     res.status(200).json({
       success: true,
@@ -614,7 +616,10 @@ export const deleteOpportunity = async (req, res) => {
 
 export const getOrganisationOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find({ organisationId: req.user._id });
+    const opportunities = await Opportunity.find({
+      organisationId: req.user._id,
+      deletedAt: null,
+    });
 
     res.status(200).json({
       success: true,

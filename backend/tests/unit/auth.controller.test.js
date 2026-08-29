@@ -91,7 +91,10 @@ describe("auth controller security boundaries", () => {
       response,
     );
 
-    expect(User.findOne).toHaveBeenCalledWith({ email: "user@example.com" });
+    expect(User.findOne).toHaveBeenCalledWith({
+      email: "user@example.com",
+      deletedAt: null,
+    });
     expect(select).toHaveBeenCalledWith("+password");
     expect(response.statusCode).toBe(200);
   });

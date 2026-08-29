@@ -127,6 +127,13 @@ const opportunitySchema = new mongoose.Schema(
       default: Date.now,
       index: true,
     },
+
+    // Preserve historical application/report references after moderation removal.
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
   },
   {
     timestamps: true,
