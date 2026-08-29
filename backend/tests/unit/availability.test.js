@@ -37,6 +37,114 @@ describe("availability domain rules", () => {
     ]);
   });
 
+  it("preserves an explicitly supplied preference", () => { 
+    expect(normalizeAvailability([
+      { 
+        dayOfWeek: "Monday",
+        startTime: "09:00", 
+        endTime: "11:00", 
+        preference: " preferred ", },
+      ]),
+    ).toEqual([
+      { 
+        dayOfWeek: "Monday", 
+        startTime: "09:00", 
+        endTime: "11:00", 
+        preference: "preferred",
+      },
+    ]);
+  });
+
+  it("rejects an invalid availability day", () => { 
+    const error = getAvailabilityValidationError([ 
+      { 
+        dayOfWeek: "punday", 
+        startTime: "09:00", 
+        endTime: "10:00", 
+        preference: "available", 
+      }, 
+    ]); 
+
+    expect(error).toBe(
+       "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference", 
+    ); 
+  });
+
+  it("rejects an invalid availability preference", () => {
+    const error = getAvailabilityValidationError([ 
+      { 
+        dayOfWeek: "Monday", 
+        startTime: "09:00", 
+        endTime: "10:00", 
+        preference: "maybe", 
+      }, 
+    ]); 
+    
+    expect(error).toBe( 
+      "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference",
+    ); 
+  });
+
+  it("rejects a slot when start time equals end time", () => { 
+    const error = getAvailabilityValidationError([ 
+      { 
+        dayOfWeek: "Monday", 
+        startTime: "10:00", 
+        endTime: "10:00", 
+        preference: "available", 
+      }, 
+    ]); 
+    
+    expect(error).toBe(
+      "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference", 
+    ); 
+  });
+
+  it("rejects a slot when start time is after end time", () => { 
+    const error = getAvailabilityValidationError([ 
+      { 
+        dayOfWeek: "Monday", 
+        startTime: "11:00", 
+        endTime: "10:00", 
+        preference: "available", 
+      }, 
+    ]); 
+    
+    expect(error).toBe(
+      "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference", 
+    ); 
+  });
+
+  it("rejects invalid availability slot values", () => { 
+    const error = getAvailabilityValidationError([ 
+      null, 
+    ]); 
+    
+    expect(error).toBe(
+      "Each availability slot must include a valid dayOfWeek, startTime, endTime, and preference", 
+    ); 
+  }); 
+  
+  it("allows slots on different days even when their times overlap", () => { 
+    const error = getAvailabilityValidationError([ 
+      { 
+        dayOfWeek: "Monday", 
+        startTime: "09:00", 
+        endTime: "11:00", 
+        preference: "available", 
+      }, 
+      { 
+        dayOfWeek: "Tuesday", 
+        startTime: "09:30", 
+        endTime: "10:30", 
+        preference: "preferred", 
+      }, 
+    ]); 
+    
+    expect(error).toBe(""); 
+  
+  });
+
   it("allows adjacent slots on the same day", () => {
     const error = getAvailabilityValidationError([
       {

@@ -57,18 +57,39 @@ backend_unit_test:
   script:
     - cd backend
     - npm ci --cache ../.npm --prefer-offline
-    - npm run test:unit
+    - npm run test:unit -- --reporter=default --reporter=junit --outputFile.junit=backend-unit-junit.xml
   needs:
     - backend_lint
+  artifacts:
+    when: always
+    reports:
+      junit: backend/backend-unit-junit.xml
 
 backend_integration_test:
   stage: test
   script:
     - cd backend
     - npm ci --cache ../.npm --prefer-offline
-    - npm run test:integration
+    - npm run test:integration -- --reporter=default --reporter=junit --outputFile.junit=backend-integration-junit.xml
   needs:
     - backend_lint
+  artifacts:
+    when: always
+    reports:
+      junit: backend/backend-integration-junit.xml
+
+frontend_test:
+  stage: test
+  script:
+    - cd frontend
+    - npm ci --cache ../.npm --prefer-offline
+    - npm test -- --reporter=default --reporter=junit --outputFile.junit=frontend-junit.xml
+  needs:
+    - frontend_lint
+  artifacts:
+    when: always
+    reports:
+      junit: frontend/frontend-junit.xml
 
 frontend_build:
   stage: build
@@ -78,7 +99,7 @@ frontend_build:
     - npm run build
   needs:
     - frontend_lint
-    - frontend_unit_test
+    - frontend_test
   artifacts:
     paths:
       - frontend/dist/
