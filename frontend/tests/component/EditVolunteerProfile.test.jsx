@@ -146,10 +146,10 @@ describe('edit volunteer profile UI', () => {
       updateVolunteerProfile,
     }
     useVolunteerStore.mockReturnValue(volunteerStore)
-    renderEditProfile()
+    const loadingView = renderEditProfile()
     expect(screen.getByRole('button', { name: 'Saving...' })).toBeDisabled()
 
-    document.body.innerHTML = ''
+    loadingView.unmount()
     volunteerStore = {
       isUpdatingVolunteerProfile: false,
       updateVolunteerProfile: vi.fn().mockResolvedValue({

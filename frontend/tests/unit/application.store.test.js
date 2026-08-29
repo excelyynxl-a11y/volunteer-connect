@@ -62,8 +62,6 @@ describe('application store', () => {
     expect(useApplicationStore.getState().selectedApplication).toEqual(application)
   })
 
-  it.todo('clears the selected application when detail is closed or cannot be loaded')
-
   it('adds a newly created application without duplicating existing state', async () => {
     const existing = { _id: 'application-1' }
     const created = { _id: 'application-2', status: 'pending' }
