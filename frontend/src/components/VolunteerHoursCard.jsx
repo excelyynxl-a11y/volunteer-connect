@@ -5,7 +5,7 @@ const VolunteerHoursCard = ({ totalVolunteerHours }) => {
     <section className="hours-card">
       <span>Total Volunteer Hours</span>
       <strong>{totalVolunteerHours}</strong>
-      <p>Logged across completed opportunities.</p>
+      <p>Planned duration across completed opportunities.</p>
     </section>
   )
 }

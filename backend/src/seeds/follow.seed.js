@@ -570,7 +570,6 @@ const buildOpportunityDocument = (template, organisationByKey, index) => {
     title: `${SEED_TITLE_PREFIX} ${template.title}`,
     details: template.details,
     organisationId: organisationByKey[template.orgKey]._id,
-    images: [],
     location: template.location,
     startAt,
     endAt,

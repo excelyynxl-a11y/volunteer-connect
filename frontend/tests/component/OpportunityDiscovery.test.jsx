@@ -131,7 +131,7 @@ describe('Volunteer opportunity discovery UI', () => {
     ])
   })
 
-  it('opens details with safe organisation, image, requirement, date, and capacity values', async () => {
+  it('opens details with safe organisation, requirement, date, and capacity values', async () => {
     const user = userEvent.setup()
     useVolunteerStore.setState({ opportunities: [openOpportunity] })
     renderDiscovery()
@@ -140,7 +140,6 @@ describe('Volunteer opportunity discovery UI', () => {
     const dialog = screen.getByRole('dialog', { name: 'Community Garden Day' })
     expect(dialog).toBeInTheDocument()
     expect(within(dialog).getByText('Green Neighbours')).toBeInTheDocument()
-    expect(within(dialog).getByAltText('Community Garden Day photo')).toBeInTheDocument()
     expect(within(dialog).getByText('Closed shoes')).toBeInTheDocument()
     expect(within(dialog).getByText('7 spots left')).toBeInTheDocument()
   })

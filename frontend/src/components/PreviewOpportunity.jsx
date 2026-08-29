@@ -117,24 +117,6 @@ const PreviewOpportunity = ({ opportunity, onClose }) => {
             </span>
           </div>
 
-          {/* Images */}
-          <div className="admin-profile-field">
-            <label>Images</label>
-            {opportunity.images?.length ? (
-              <div className="admin-opportunity-image-list">
-                {opportunity.images.map((src, index) => (
-                  <img
-                    key={`${src}-${index}`}
-                    src={src}
-                    alt={`Opportunity image ${index + 1}`}
-                    className="admin-opportunity-image"
-                  />
-                ))}
-              </div>
-            ) : (
-              <span>—</span>
-            )}
-          </div>
         </div>
       </div>
     </div>

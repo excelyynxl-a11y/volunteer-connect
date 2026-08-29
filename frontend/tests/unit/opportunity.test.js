@@ -5,7 +5,6 @@ import {
   formatOpportunityDateTime,
   formatOpportunityTimeRange, 
   getApplyEligibility,
-  getOpportunityImage,
   getOpportunityStatusClass,
   getOrganisationName,
   getRequirementItems,
@@ -41,22 +40,20 @@ describe('frontend opportunity rules', () => {
     expect(isOpportunityOpen(null, now)).toBe(false)
   })
 
-  it.todo('treats a date-only midnight deadline as the end of that day', () => {
-    // 18:00 Malaysia time on the deadline date
-    const now = new Date('2030-01-15T10:00:00.000Z').getTime()
-   
+  it('treats a date-only midnight deadline as effective at 00:00', () => {
     const opportunity = {
       status: 'active',
       startAt: '2030-02-01T00:00:00.000Z',
       applicationDeadline: '2030-01-15T00:00:00.000Z',
     }
 
-    // still open because midnight is extended to 23:59:59 of that day
-    expect(isOpportunityOpen(opportunity, now)).toBe(true)
+    expect(
+      isOpportunityOpen(opportunity, new Date('2030-01-14T23:59:59.000Z').getTime()),
+    ).toBe(true)
 
-    // a midnight deadline the day before now should still close it
-    const pastMidnight = new Date('2030-01-16T00:00:01.000Z').getTime()
-    expect(isOpportunityOpen(opportunity, pastMidnight)).toBe(false)
+    expect(
+      isOpportunityOpen(opportunity, new Date('2030-01-15T00:00:01.000Z').getTime()),
+    ).toBe(false)
   })
 
   it('formats valid dates and time ranges with safe fallbacks', () => {
@@ -71,12 +68,7 @@ describe('frontend opportunity rules', () => {
     expect(formatOpportunityDateTime('not-a-date', 'No date')).toBe('No date')
   })
 
-  it('returns safe image, organisation name, status class, and requirement values', () => {
-    // image
-    expect(getOpportunityImage({ images: ['', null, 'photo.jpg'] })).toBe('photo.jpg')
-    expect(getOpportunityImage({ images: [] })).toBe('')
-    expect(getOpportunityImage({ images: undefined })).toBe('')
-
+  it('returns safe organisation name, status class, and requirement values', () => {
     // organisation name
     expect(getOrganisationName({ organisationId: { name: 'Green Neighbours' } })).toBe('Green Neighbours')
     expect(getOrganisationName({ organisationName: 'Yolo Org' })).toBe('Yolo Org')

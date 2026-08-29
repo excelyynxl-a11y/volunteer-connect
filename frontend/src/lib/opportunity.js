@@ -25,15 +25,7 @@ export const isOpportunityOpen = (opportunity, now = Date.now()) => {
   if (opportunity.applicationDeadline) {
     const deadlineDate = getValidDate(opportunity.applicationDeadline)
     if (deadlineDate) {
-      // If deadline is set to midnight (00:00:00), extend to 23:59:59 of that day
-      if (
-        deadlineDate.getHours() === 0 &&
-        deadlineDate.getMinutes() === 0 &&
-        deadlineDate.getSeconds() === 0
-      ) {
-        deadlineDate.setHours(23, 59, 59, 999)
-      }
-
+      // A date-only deadline is intentionally effective at 00:00 on that date.
       if (deadlineDate.getTime() < now) {
         return false
       }
@@ -89,11 +81,6 @@ export const formatOpportunityTimeRange = (startAt, endAt, fallback = '') => {
 
 export const getOpportunityStatusClass = (status = 'pending') =>
   String(status).trim().toLowerCase().replace(/\s+/g, '-') || 'pending'
-
-export const getOpportunityImage = (opportunity) => {
-  if (!Array.isArray(opportunity?.images)) return ''
-  return opportunity.images.find(Boolean) || ''
-}
 
 export const getOrganisationName = (opportunity) =>
   opportunity?.organisationId?.name ||

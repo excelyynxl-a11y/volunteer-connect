@@ -140,7 +140,7 @@ const VolunteerProfile = () => {
               <div className="profile-panel-header">
                 <div>
                   <h2>Past Participation</h2>
-                  <p>Recent activities counted toward volunteer hours.</p>
+                  <p>Recent activities counted toward planned participation hours.</p>
                 </div>
                 <span className="count-badge">{participationHistory.length}</span>
               </div>

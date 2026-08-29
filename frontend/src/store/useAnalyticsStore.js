@@ -2,15 +2,20 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
-const DEFAULT_START_MONTH = "2026-03";
-
 const getCurrentMonthKey = () => {
   const now = new Date();
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 };
 
+const getDefaultStartMonthKey = () => {
+  const date = new Date();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() - 11);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+
 const resolveAnalyticsRange = (startMonth, endMonth) => ({
-  startMonth: startMonth || DEFAULT_START_MONTH,
+  startMonth: startMonth || getDefaultStartMonthKey(),
   endMonth: endMonth || getCurrentMonthKey()
 });
 

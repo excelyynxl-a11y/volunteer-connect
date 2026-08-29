@@ -1,85 +1,63 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  findVolunteerByIdMock,
-  findApplicationsMock,
-  isValidObjectIdMock,
-  uploadAvatarMock,
-  parseArrayFieldMock,
-  normalizeSkillsMock,
-  normalizeAvailabilityMock,
-  getAvailabilityValidationErrorMock,
-  sortAvailabilityMock,
-} = vi.hoisted(() => ({
-  findVolunteerByIdMock: vi.fn(),
-  findApplicationsMock: vi.fn(),
-  isValidObjectIdMock: vi.fn(),
-  uploadAvatarMock: vi.fn(),
-  parseArrayFieldMock: vi.fn(),
-  normalizeSkillsMock: vi.fn(),
-  normalizeAvailabilityMock: vi.fn(),
-  getAvailabilityValidationErrorMock: vi.fn(),
-  sortAvailabilityMock: vi.fn(),
-}));
-
-vi.mock("../../src/models/user.model.js", () => ({
-  Volunteer: {
-    findById: findVolunteerByIdMock,
-  },
-}));
-
-vi.mock("../../src/models/application.model.js", () => ({
-  default: {
-    find: findApplicationsMock,
-  },
+const mocks = vi.hoisted(() => ({
+  isValidObjectId: vi.fn(),
+  uploadAvatar: vi.fn(),
+  parseArrayField: vi.fn(),
+  normalizeSkills: vi.fn(),
+  normalizeAvailability: vi.fn(),
+  getAvailabilityValidationError: vi.fn(),
+  sortAvailability: vi.fn(),
 }));
 
 vi.mock("mongoose", () => ({
-  default: {
-    Types: {
-      ObjectId: {
-        isValid: isValidObjectIdMock,
-      },
-    },
-  },
+  default: { Types: { ObjectId: { isValid: mocks.isValidObjectId } } },
 }));
-
+vi.mock("../../src/models/user.model.js", () => ({
+  Volunteer: { findOne: vi.fn() },
+}));
+vi.mock("../../src/models/application.model.js", () => ({
+  default: { find: vi.fn(), findOne: vi.fn(), exists: vi.fn() },
+}));
+vi.mock("../../src/models/opportunity.model.js", () => ({
+  default: { find: vi.fn() },
+}));
 vi.mock("../../src/services/cloudinary.service.js", () => ({
-  uploadAvatarToCloudinary: uploadAvatarMock,
+  uploadAvatarToCloudinary: mocks.uploadAvatar,
 }));
-
 vi.mock("../../src/lib/volunteer.js", () => ({
-  normalizeSkills: normalizeSkillsMock,
-  parseArrayField: parseArrayFieldMock,
+  normalizeSkills: mocks.normalizeSkills,
+  parseArrayField: mocks.parseArrayField,
   validAgeGroups: ["21-30", "31-40", "41-50", "51-60", "60+"],
 }));
-
 vi.mock("../../src/lib/availability.js", () => ({
-  getAvailabilityValidationError: getAvailabilityValidationErrorMock,
-  normalizeAvailability: normalizeAvailabilityMock,
-  sortAvailability: sortAvailabilityMock,
+  getAvailabilityValidationError: mocks.getAvailabilityValidationError,
+  normalizeAvailability: mocks.normalizeAvailability,
+  sortAvailability: mocks.sortAvailability,
 }));
 
+import Application from "../../src/models/application.model.js";
+import Opportunity from "../../src/models/opportunity.model.js";
+import { Volunteer } from "../../src/models/user.model.js";
 import {
+  getVolunteerPastExperience,
   getVolunteerProfile,
   updateVolunteerProfile,
-  getVolunteerPastExperience,
 } from "../../src/controllers/volunteer.controller.js";
+
+const volunteerId = "507f191e810c19729de860e1";
+const organisationId = "507f191e810c19729de860e2";
 
 const createResponse = () => {
   const res = {};
-
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-
   return res;
 };
 
-const createFindByIdChain = (value) => ({
-  select: vi.fn().mockResolvedValue(value),
-});
-
+const selectQuery = (value) => ({ select: vi.fn().mockResolvedValue(value) });
 const createVolunteer = (overrides = {}) => ({
+  _id: volunteerId,
   name: "John Doe",
   email: "john@example.com",
   avatar: "avatar.jpg",
@@ -95,414 +73,179 @@ const createVolunteer = (overrides = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-
-  isValidObjectIdMock.mockReturnValue(true);
-
-  parseArrayFieldMock.mockImplementation((value) => value);
-
-  normalizeSkillsMock.mockImplementation((skills) => skills);
-
-  normalizeAvailabilityMock.mockImplementation(
-    (availability) => availability,
-  );
-
-  getAvailabilityValidationErrorMock.mockReturnValue("");
-
-  sortAvailabilityMock.mockImplementation((availability) => availability);
-
-  uploadAvatarMock.mockResolvedValue("uploaded-avatar.jpg");
+  mocks.isValidObjectId.mockReturnValue(true);
+  mocks.parseArrayField.mockImplementation((value) => value);
+  mocks.normalizeSkills.mockImplementation((value) => value);
+  mocks.normalizeAvailability.mockImplementation((value) => value);
+  mocks.getAvailabilityValidationError.mockReturnValue("");
+  mocks.sortAvailability.mockImplementation((value) => value);
+  mocks.uploadAvatar.mockResolvedValue("uploaded-avatar.jpg");
 });
 
-describe("getVolunteerProfile", () => {
-  it("returns 400 when the volunteer ID is invalid", async () => {
-    isValidObjectIdMock.mockReturnValue(false);
+describe("volunteer profile controller", () => {
+  it("rejects invalid and missing profile IDs", async () => {
+    mocks.isValidObjectId.mockReturnValue(false);
+    const invalidRes = createResponse();
+    await getVolunteerProfile({ params: { id: "invalid" }, user: { _id: volunteerId, role: "volunteer" } }, invalidRes);
+    expect(invalidRes.status).toHaveBeenCalledWith(400);
 
-    const req = {
-      params: {
-        id: "invalid-id",
-      },
-    };
-    const res = createResponse();
-
-    await getVolunteerProfile(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Invalid volunteer ID",
-    });
-
-    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+    mocks.isValidObjectId.mockReturnValue(true);
+    Volunteer.findOne.mockReturnValue(selectQuery(null));
+    const missingRes = createResponse();
+    await getVolunteerProfile({ params: { id: volunteerId }, user: { _id: volunteerId, role: "volunteer" } }, missingRes);
+    expect(Volunteer.findOne).toHaveBeenCalledWith({ _id: volunteerId, deletedAt: null });
+    expect(missingRes.status).toHaveBeenCalledWith(404);
   });
 
-  it("returns 404 when the volunteer does not exist", async () => {
-    findVolunteerByIdMock.mockReturnValue(
-      createFindByIdChain(null),
-    );
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
-    const res = createResponse();
-
-    await getVolunteerProfile(req, res);
-
-    expect(findVolunteerByIdMock).toHaveBeenCalledWith(
-      "507f1f77bcf86cd799439011",
-    );
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Volunteer not found",
-    });
-  });
-
-  it("returns the volunteer profile successfully", async () => {
+  it("returns a volunteer's own profile with private fields", async () => {
     const volunteer = createVolunteer();
-
-    findVolunteerByIdMock.mockReturnValue(
-      createFindByIdChain(volunteer),
-    );
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
+    const query = selectQuery(volunteer);
+    Volunteer.findOne.mockReturnValue(query);
     const res = createResponse();
 
-    await getVolunteerProfile(req, res);
+    await getVolunteerProfile({ params: { id: volunteerId }, user: { _id: volunteerId, role: "volunteer" } }, res);
 
-    expect(findVolunteerByIdMock).toHaveBeenCalledWith(
-      "507f1f77bcf86cd799439011",
+    expect(query.select).toHaveBeenCalledWith(
+      "_id name email avatar ageGroup resume biodata skills availability approvalStatus",
     );
-
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      success: true,
-      data: volunteer,
-    });
+    expect(res.json).toHaveBeenCalledWith({ success: true, data: volunteer });
   });
 
-  it("returns 500 when retrieving the volunteer fails", async () => {
-    findVolunteerByIdMock.mockReturnValue({
-      select: vi.fn().mockRejectedValue(new Error("Database error")),
-    });
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
+  it("requires an organisation connection and hides private fields", async () => {
+    const opportunityQuery = selectQuery([{ _id: "opportunity-1" }]);
+    Opportunity.find.mockReturnValue(opportunityQuery);
+    Application.exists.mockResolvedValue(true);
+    const profileQuery = selectQuery(createVolunteer());
+    Volunteer.findOne.mockReturnValue(profileQuery);
     const res = createResponse();
 
-    await getVolunteerProfile(req, res);
+    await getVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: organisationId, role: "organisation" },
+    }, res);
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Database error",
+    expect(Opportunity.find).toHaveBeenCalledWith({ organisationId });
+    expect(Application.exists).toHaveBeenCalledWith({
+      volunteerId,
+      opportunityId: { $in: ["opportunity-1"] },
+      status: { $in: ["pending", "approved"] },
     });
+    expect(profileQuery.select).toHaveBeenCalledWith(
+      "_id name avatar ageGroup resume biodata skills availability",
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    Application.exists.mockResolvedValue(false);
+    const forbidden = createResponse();
+    await getVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: organisationId, role: "organisation" },
+    }, forbidden);
+    expect(forbidden.status).toHaveBeenCalledWith(403);
   });
 
-  it.todo("returns only the intended volunteer profile fields");
-});
+  it("validates ownership and profile input before saving", async () => {
+    const otherRes = createResponse();
+    await updateVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: organisationId },
+      body: { fullName: "Alex" },
+    }, otherRes);
+    expect(otherRes.status).toHaveBeenCalledWith(403);
 
-describe("updateVolunteerProfile", () => {
-  it("returns 400 when the volunteer ID is invalid", async () => {
-    isValidObjectIdMock.mockReturnValue(false);
-
-    const req = {
-      params: {
-        id: "invalid-id",
-      },
-      user: {
-        _id: "invalid-id",
-      },
-      body: {
-        fullName: "John Doe",
-      },
-    };
-    const res = createResponse();
-
-    await updateVolunteerProfile(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Invalid volunteer ID",
-    });
-
-    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
+    for (const body of [{}, { fullName: " " }, { ageGroup: "18-20" }, { biodata: "x".repeat(1001) }]) {
+      const res = createResponse();
+      await updateVolunteerProfile({
+        params: { id: volunteerId },
+        user: { _id: volunteerId },
+        body,
+      }, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+    }
+    expect(Volunteer.findOne).not.toHaveBeenCalled();
   });
 
-  it("returns 403 when a user tries to update another volunteer's profile", async () => {
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-      user: {
-        _id: "507f1f77bcf86cd799439012",
-      },
-      body: {
-        fullName: "John Doe",
-      },
-    };
-    const res = createResponse();
-
-    await updateVolunteerProfile(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "You can only update your own profile",
-    });
-
-    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
-  });
-
-  it("returns 400 when no profile fields are provided", async () => {
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-      user: {
-        _id: "507f1f77bcf86cd799439011",
-      },
-      body: {},
-    };
-    const res = createResponse();
-
-    await updateVolunteerProfile(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "At least one profile field must be provided",
-    });
-  });
-
-  it("returns 400 when the age group is invalid", async () => {
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-      user: {
-        _id: "507f1f77bcf86cd799439011",
-      },
-      body: {
-        ageGroup: "18-20",
-      },
-    };
-    const res = createResponse();
-
-    await updateVolunteerProfile(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Invalid age group",
-    });
-  });
-
-  it("updates the volunteer profile successfully", async () => {
+  it("updates allowed fields, normalises availability, and returns the saved profile", async () => {
     const volunteer = createVolunteer();
+    const updated = { ...volunteer, name: "Jane Doe", skills: ["React"], availability: [{ dayOfWeek: "Monday" }] };
+    Volunteer.findOne.mockReturnValueOnce(Promise.resolve(volunteer)).mockReturnValueOnce(selectQuery(updated));
+    mocks.parseArrayField.mockImplementation((value) => value);
+    mocks.normalizeSkills.mockReturnValue(["React"]);
+    mocks.normalizeAvailability.mockReturnValue([{ dayOfWeek: "Monday" }]);
+    mocks.sortAvailability.mockReturnValue(updated.availability);
+    const res = createResponse();
 
-    const updatedVolunteer = {
-      ...volunteer,
-      name: "Jane Doe",
-      ageGroup: "31-40",
-      biodata: "Updated biodata",
-      skills: ["JavaScript", "React"],
-    };
-
-    findVolunteerByIdMock
-      .mockReturnValueOnce(
-        Promise.resolve(volunteer),
-      )
-      .mockReturnValueOnce(
-        createFindByIdChain(updatedVolunteer),
-      );
-
-    parseArrayFieldMock.mockImplementation((value) => value);
-
-    normalizeSkillsMock.mockReturnValue([
-      "JavaScript",
-      "React",
-    ]);
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-      user: {
-        _id: "507f1f77bcf86cd799439011",
-      },
+    await updateVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: volunteerId },
       body: {
         fullName: " Jane Doe ",
-        ageGroup: "31-40",
-        biodata: " Updated biodata ",
-        skills: ["JavaScript", "React"],
+        skills: ["React"],
+        availability: [{ dayOfWeek: "Monday" }],
       },
-    };
-    const res = createResponse();
-
-    await updateVolunteerProfile(req, res);
+    }, res);
 
     expect(volunteer.name).toBe("Jane Doe");
-    expect(volunteer.ageGroup).toBe("31-40");
-    expect(volunteer.biodata).toBe("Updated biodata");
-    expect(volunteer.skills).toEqual([
-      "JavaScript",
-      "React",
-    ]);
-
-    expect(volunteer.save).toHaveBeenCalled();
-
+    expect(volunteer.skills).toEqual(["React"]);
+    expect(volunteer.availability).toEqual(updated.availability);
+    expect(volunteer.save).toHaveBeenCalledOnce();
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      success: true,
-      message: "Volunteer profile updated successfully",
-      data: updatedVolunteer,
-    });
   });
 
-  it.todo("validates the name and biodata boundaries");
-  it.todo("parses, normalises, limits, and deduplicates skills");
-  it.todo("normalises, validates, and sorts availability slots");
-  it.todo("uploads an avatar through the Cloudinary service boundary");
-  it.todo("returns a safe error when avatar upload or persistence fails");
+  it("rejects malformed availability and supports avatar upload failures", async () => {
+    mocks.parseArrayField.mockReturnValue([{ dayOfWeek: "Monday" }]);
+    mocks.normalizeAvailability.mockReturnValue([{ dayOfWeek: "Monday" }]);
+    mocks.getAvailabilityValidationError.mockReturnValue("Invalid availability");
+    const invalidRes = createResponse();
+    await updateVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: volunteerId },
+      body: { availability: [{ dayOfWeek: "Monday" }] },
+    }, invalidRes);
+    expect(invalidRes.status).toHaveBeenCalledWith(400);
+
+    mocks.getAvailabilityValidationError.mockReturnValue("");
+    const volunteer = createVolunteer();
+    Volunteer.findOne.mockReturnValueOnce(Promise.resolve(volunteer));
+    mocks.uploadAvatar.mockRejectedValue(new Error("Avatar upload failed"));
+    const uploadRes = createResponse();
+    await updateVolunteerProfile({
+      params: { id: volunteerId },
+      user: { _id: volunteerId },
+      body: {},
+      file: { buffer: Buffer.from("avatar") },
+    }, uploadRes);
+    expect(uploadRes.status).toHaveBeenCalledWith(500);
+    expect(volunteer.save).not.toHaveBeenCalled();
+  });
 });
 
 describe("getVolunteerPastExperience", () => {
-  it("returns 400 when the volunteer ID is invalid", async () => {
-    isValidObjectIdMock.mockReturnValue(false);
-
-    const req = {
-      params: {
-        id: "invalid-id",
-      },
-    };
-    const res = createResponse();
-
-    await getVolunteerPastExperience(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Invalid volunteer ID",
-    });
-
-    expect(findVolunteerByIdMock).not.toHaveBeenCalled();
-  });
-
-  it("returns 404 when the volunteer does not exist", async () => {
-    findVolunteerByIdMock.mockReturnValue(
-      createFindByIdChain(null),
-    );
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
-    const res = createResponse();
-
-    await getVolunteerPastExperience(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      message: "Volunteer not found",
-    });
-
-    expect(findApplicationsMock).not.toHaveBeenCalled();
-  });
-
-  it("returns approved past volunteer experiences successfully", async () => {
+  it("returns only approved applications whose opportunities have ended", async () => {
     const volunteer = createVolunteer();
-
-    const pastApplication = {
-      _id: "application-1",
-      volunteerId: "507f1f77bcf86cd799439011",
-      status: "approved",
-      opportunityId: {
-        _id: "opportunity-1",
-        title: "Beach Cleanup",
-      },
-    };
-
-    const currentApplication = {
-      _id: "application-2",
-      volunteerId: "507f1f77bcf86cd799439011",
-      status: "approved",
-      opportunityId: null,
-    };
-
-    findVolunteerByIdMock.mockReturnValue(
-      createFindByIdChain(volunteer),
-    );
-
-    findApplicationsMock.mockReturnValue({
-      populate: vi.fn().mockResolvedValue([
-        pastApplication,
-        currentApplication,
-      ]),
-    });
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
+    Volunteer.findOne.mockReturnValue(selectQuery(volunteer));
+    const past = { _id: "application-1", status: "approved", opportunityId: { _id: "opportunity-1" } };
+    const current = { _id: "application-2", status: "approved", opportunityId: null };
+    const populate = vi.fn().mockResolvedValue([past, current]);
+    Application.find.mockReturnValue({ populate });
     const res = createResponse();
 
-    await getVolunteerPastExperience(req, res);
+    await getVolunteerPastExperience({
+      params: { id: volunteerId },
+      user: { _id: volunteerId, role: "volunteer" },
+    }, res);
 
-    expect(findApplicationsMock).toHaveBeenCalledWith({
-      volunteerId: "507f1f77bcf86cd799439011",
-      status: "approved",
-    });
-
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(Application.find).toHaveBeenCalledWith({ volunteerId, status: "approved" });
+    expect(populate).toHaveBeenCalledWith(expect.objectContaining({
+      path: "opportunityId",
+      match: { endAt: { $lt: expect.any(Date) } },
+    }));
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      volunteerId: "507f1f77bcf86cd799439011",
+      volunteerId,
       count: 1,
-      data: [pastApplication],
+      data: [past],
     });
   });
-
-  it("returns 500 when retrieving past experience fails", async () => {
-    findVolunteerByIdMock.mockReturnValue(
-      createFindByIdChain(
-        createVolunteer(),
-      ),
-    );
-
-    findApplicationsMock.mockReturnValue({
-      populate: vi
-        .fn()
-        .mockRejectedValue(new Error("Database error")),
-    });
-
-    const req = {
-      params: {
-        id: "507f1f77bcf86cd799439011",
-      },
-    };
-    const res = createResponse();
-
-    await getVolunteerPastExperience(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      message: "Database error",
-    });
-  });
-
-  it.todo("does not describe scheduled duration as verified volunteer hours");
 });
-

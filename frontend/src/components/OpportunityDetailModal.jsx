@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Building2, CalendarDays, Clock, MapPin, Users, X } from "lucide-react";
 import {
   formatOpportunityDate,
@@ -18,17 +17,9 @@ import {
 
 
 const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvailability = [], applicationStatus }) => {
-  const [selectedImage, setSelectedImage] = useState("");
-  const opportunityImages = Array.isArray(opportunity?.images)
-    ? opportunity.images.filter(Boolean)
-    : [];
-
   if (!opportunity) return null;
 
   const requirementItems = getRequirementItems(opportunity.requirements);
-  const heroImage = opportunityImages.includes(selectedImage)
-    ? selectedImage
-    : opportunityImages[0];
 
   const spotsRemaining = getSpotsRemaining(opportunity);
   const organisationName = getOrganisationName(opportunity);
@@ -116,33 +107,6 @@ const OpportunityDetailModal = ({ opportunity, onClose, onAction, volunteerAvail
             )}
           </div>
         </div>
-
-        {heroImage && (
-          <section className="opportunity-detail-media" aria-label="Opportunity photos">
-            <img
-              className="opportunity-detail-hero-image"
-              src={heroImage}
-              alt={`${opportunity.title} photo`}
-            />
-            {opportunityImages.length > 1 && (
-              <div className="opportunity-detail-thumbnail-list">
-                {opportunityImages.map((image, index) => (
-                  <button
-                    key={`${image}-${index}`}
-                    type="button"
-                    className={`opportunity-detail-thumbnail-button${
-                      image === heroImage ? " selected" : ""
-                    }`}
-                    aria-label={`View ${opportunity.title} photo ${index + 1}`}
-                    onClick={() => setSelectedImage(image)}
-                  >
-                    <img src={image} alt={`${opportunity.title} photo ${index + 1}`} />
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
 
         <div className="opportunity-detail-meta">
           {opportunity.location && (

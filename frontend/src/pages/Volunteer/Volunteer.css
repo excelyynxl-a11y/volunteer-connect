@@ -618,6 +618,7 @@
 .opportunity-detail-modal {
   position: relative;
   width: min(980px, 100%);
+  min-width: 0;
   max-height: min(860px, calc(100vh - 64px));
   display: flex;
   flex-direction: column;
@@ -631,9 +632,11 @@
 
 .opportunity-detail-modal-scroll {
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 34px 36px 38px;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
 }
 
 .opportunity-detail-close {
@@ -659,9 +662,14 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  min-width: 0;
   gap: 24px;
   padding: 0 50px 24px 0;
   border-bottom: 1px solid #ded5ca;
+}
+
+.opportunity-detail-header > :first-child {
+  min-width: 0;
 }
 
 .opportunity-detail-header .apply-disabled-reason {
@@ -690,6 +698,7 @@
   font-size: 37px;
   line-height: 1.08;
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .opportunity-detail-header p {
@@ -708,7 +717,9 @@
 }
 
 .opportunity-organisation-row p {
+  min-width: 0;
   font-size: 20px;
+  overflow-wrap: anywhere;
 }
 
 .view-organisation-button {
@@ -725,6 +736,9 @@
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
 }
 
 .view-organisation-button:hover {
@@ -805,56 +819,10 @@
   background: #ded5ca;
 }
 
-.opportunity-detail-media {
-  margin-top: 24px;
-}
-
-.opportunity-detail-hero-image {
-  width: 100%;
-  height: clamp(260px, 42vw, 390px);
-  display: block;
-  border: 1px solid #ded5ca;
-  border-radius: 16px;
-  background: #faf8f4;
-  object-fit: cover;
-}
-
-.opportunity-detail-thumbnail-list {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.opportunity-detail-thumbnail-button {
-  width: 100%;
-  padding: 0;
-  border: 1px solid #ded5ca;
-  border-radius: 10px;
-  background: #ffffff;
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.opportunity-detail-thumbnail-button:hover,
-.opportunity-detail-thumbnail-button.selected {
-  border-color: var(--profile-green);
-}
-
-.opportunity-detail-thumbnail-button.selected {
-  box-shadow: 0 0 0 3px rgba(44, 97, 79, 0.16);
-}
-
-.opportunity-detail-thumbnail-button img {
-  width: 100%;
-  height: 88px;
-  display: block;
-  object-fit: cover;
-}
-
 .opportunity-detail-meta {
   display: flex;
   flex-wrap: wrap;
+  min-width: 0;
   gap: 10px;
   margin: 24px 0 26px;
   padding-bottom: 22px;
@@ -864,16 +832,24 @@
 .opportunity-detail-meta span {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
   gap: 8px;
   padding: 9px 13px;
   border-radius: 999px;
   background: #f5f1eb;
   color: var(--profile-green-dark);
   font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.opportunity-detail-meta span svg {
+  flex: 0 0 auto;
 }
 
 .opportunity-detail-section {
   margin-top: 22px;
+  min-width: 0;
 }
 
 .opportunity-detail-section h3 {
@@ -881,6 +857,7 @@
   color: var(--profile-green-dark);
   font-size: 25px;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .opportunity-detail-copy p,
@@ -889,6 +866,7 @@
   color: #444a4d;
   font-size: 16px;
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .opportunity-detail-muted {
@@ -2168,10 +2146,6 @@
   transform: translateY(-1px);
 }
 
-.homepage-opportunity-card.has-image {
-  grid-template-columns: 96px minmax(0, 1fr) auto;
-}
-
 .homepage-opportunity-copy {
   min-width: 0;
 }
@@ -2239,15 +2213,6 @@
 
 .homepage-opportunity-view:hover {
   background: var(--profile-green-dark);
-}
-
-.homepage-opportunity-image {
-  width: 96px;
-  height: 84px;
-  justify-self: start;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid #ded5ca;
 }
 
 .homepage-state-message {
@@ -2330,14 +2295,6 @@
 
   .homepage-opportunity-card {
     grid-template-columns: 1fr;
-  }
-
-  .homepage-opportunity-card.has-image {
-    grid-template-columns: 1fr;
-  }
-
-  .homepage-opportunity-image {
-    justify-self: start;
   }
 
   .section-heading {

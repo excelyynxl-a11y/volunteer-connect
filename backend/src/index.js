@@ -20,12 +20,14 @@ import app from "./app.js";
 import { connectDB } from "./lib/db.js";
 import { initializeSocketServer } from "./lib/socket.js";
 import { startMessagingMaintenance } from "./services/messagingMaintenance.service.js";
+import { validateEnvironment } from "./config/env.js";
 
 const port = process.env.PORT || 5001;
 const httpServer = createServer(app);
 
 const startServer = async () => {
   try {
+    validateEnvironment();
     await connectDB();
     initializeSocketServer(httpServer);
     await startMessagingMaintenance();

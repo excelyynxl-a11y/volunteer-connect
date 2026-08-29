@@ -17,17 +17,13 @@ const createValidOpportunity = () => ({
   maxVolunteers: 20,
   category: ["Environment"],
   requirements: "Bring gloves.",
-  images: ["https://example.com/image.jpg"],
 });
 
 describe("opportunity model", () => {
-  it("requires title, details, organisation, location, dates, and capacity", async () => {
-    const opportunity = new Opportunity({});
-
-    const error = await opportunity.validate().catch((err) => err);
+  it("requires title, details, organisation, location, dates, and capacity", () => {
+    const error = new Opportunity({}).validateSync();
 
     expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-
     expect(error.errors.title).toBeDefined();
     expect(error.errors.details).toBeDefined();
     expect(error.errors.organisationId).toBeDefined();
@@ -38,132 +34,76 @@ describe("opportunity model", () => {
     expect(error.errors.maxVolunteers).toBeDefined();
   });
 
-  it("accepts a valid opportunity", async () => {
-    const opportunity = new Opportunity(createValidOpportunity());
-
-    await expect(opportunity.validate()).resolves.toBeUndefined();
-  });
-
-  it("rejects unsupported category and status values", async () => {
-    const categoryData = createValidOpportunity();
-    categoryData.category = ["Invalid Category"];
-
-    const categoryOpportunity = new Opportunity(categoryData);
-
-    const categoryError = await categoryOpportunity
-      .validate()
-      .catch((err) => err);
-
-    expect(categoryError).toBeInstanceOf(
-      mongoose.Error.ValidationError,
-    );
-    expect(categoryError.errors["category.0"]).toBeDefined();
-
-    const statusData = createValidOpportunity();
-    statusData.status = "invalid-status";
-
-    const statusOpportunity = new Opportunity(statusData);
-
-    const statusError = await statusOpportunity
-      .validate()
-      .catch((err) => err);
-
-    expect(statusError).toBeInstanceOf(
-      mongoose.Error.ValidationError,
-    );
-    expect(statusError.errors.status).toBeDefined();
-  });
-
-  it("accepts all supported category and status values", async () => {
+  it("accepts supported categories and statuses", () => {
     for (const category of OPPORTUNITY_CATEGORIES) {
-      const data = createValidOpportunity();
-      data.category = [category];
-
-      const opportunity = new Opportunity(data);
-
-      await expect(opportunity.validate()).resolves.toBeUndefined();
+      const opportunity = new Opportunity({ ...createValidOpportunity(), category: [category] });
+      expect(opportunity.validateSync()).toBeUndefined();
     }
 
     for (const status of OPPORTUNITY_STATUSES) {
-      const data = createValidOpportunity();
-      data.status = status;
-
-      const opportunity = new Opportunity(data);
-
-      await expect(opportunity.validate()).resolves.toBeUndefined();
+      const opportunity = new Opportunity({ ...createValidOpportunity(), status });
+      expect(opportunity.validateSync()).toBeUndefined();
     }
   });
 
-  it("requires the end time to be after the start time", async () => {
-    const data = createValidOpportunity();
+  it("rejects unsupported category and status values", () => {
+    const category = new Opportunity({ ...createValidOpportunity(), category: ["Invalid Category"] });
+    const status = new Opportunity({ ...createValidOpportunity(), status: "invalid-status" });
 
-    data.endAt = new Date("2099-07-20T09:00:00.000Z");
-
-    const opportunity = new Opportunity(data);
-
-    const error = await opportunity.validate().catch((err) => err);
-
-    expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(error.errors.endAt).toBeDefined();
-    expect(error.errors.endAt.message).toBe(
-      "End date/time must be after start date/time.",
-    );
+    expect(category.validateSync().errors["category.0"]).toBeDefined();
+    expect(status.validateSync().errors.status).toBeDefined();
   });
 
-  it("requires the application deadline to be before the start time", async () => {
-    const data = createValidOpportunity();
+  it("requires the end time to be after the start time and the deadline before start", () => {
+    const invalidEnd = new Opportunity({
+      ...createValidOpportunity(),
+      endAt: new Date("2099-07-20T09:00:00.000Z"),
+    });
+    const invalidDeadline = new Opportunity({
+      ...createValidOpportunity(),
+      applicationDeadline: new Date("2099-07-20T11:00:00.000Z"),
+    });
 
-    data.applicationDeadline = new Date(
-      "2099-07-20T11:00:00.000Z",
+    expect(invalidEnd.validateSync().errors.endAt.message).toBe(
+      "End date/time must be after start date/time.",
     );
-
-    const opportunity = new Opportunity(data);
-
-    const error = await opportunity.validate().catch((err) => err);
-
-    expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(error.errors.applicationDeadline).toBeDefined();
-    expect(error.errors.applicationDeadline.message).toBe(
+    expect(invalidDeadline.validateSync().errors.applicationDeadline.message).toBe(
       "Application deadline must be before the opportunity start time.",
     );
   });
 
-  it("prevents approved volunteers from exceeding maximum capacity", async () => {
-    const data = createValidOpportunity();
+  it("prevents approved volunteers from exceeding maximum capacity", () => {
+    const opportunity = new Opportunity({
+      ...createValidOpportunity(),
+      maxVolunteers: 10,
+      approvedVolunteersCount: 11,
+    });
 
-    data.maxVolunteers = 10;
-    data.approvedVolunteersCount = 11;
-
-    const opportunity = new Opportunity(data);
-
-    const error = await opportunity.validate().catch((err) => err);
-
-    expect(error).toBeInstanceOf(mongoose.Error.ValidationError);
-    expect(error.errors.approvedVolunteersCount).toBeDefined();
-    expect(error.errors.approvedVolunteersCount.message).toBe(
+    expect(opportunity.validateSync().errors.approvedVolunteersCount.message).toBe(
       "Approved volunteers count cannot exceed maximum volunteers.",
     );
   });
 
   it("calculates remaining spots and full state without negative values", () => {
-    const data = createValidOpportunity();
-
-    data.maxVolunteers = 20;
-    data.approvedVolunteersCount = 5;
-
-    const opportunity = new Opportunity(data);
+    const opportunity = new Opportunity({
+      ...createValidOpportunity(),
+      maxVolunteers: 20,
+      approvedVolunteersCount: 5,
+    });
 
     expect(opportunity.spotsRemaining).toBe(15);
     expect(opportunity.isFull).toBe(false);
-
     opportunity.approvedVolunteersCount = 20;
-
     expect(opportunity.spotsRemaining).toBe(0);
     expect(opportunity.isFull).toBe(true);
-
     opportunity.approvedVolunteersCount = 25;
-
     expect(opportunity.spotsRemaining).toBe(0);
     expect(opportunity.isFull).toBe(true);
+  });
+
+  it("does not expose the retired images field", () => {
+    expect(Opportunity.schema.path("images")).toBeUndefined();
+    const opportunity = new Opportunity({ images: ["https://example.com/image.jpg"] });
+    expect(opportunity.toObject()).not.toHaveProperty("images");
   });
 });

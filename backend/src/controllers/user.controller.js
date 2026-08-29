@@ -4,7 +4,7 @@ const ADMIN_USER_PROJECTION = "-password -__v";
 
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select(ADMIN_USER_PROJECTION);
+        const users = await User.find({ deletedAt: null }).select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: users.length,
@@ -21,7 +21,7 @@ export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const user = await User.findById(id).select(ADMIN_USER_PROJECTION);
+        const user = await User.findOne({ _id: id, deletedAt: null }).select(ADMIN_USER_PROJECTION);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
@@ -39,13 +39,16 @@ export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const userToDelete = await User.findById(id);
+        const userToDelete = await User.findOne({ _id: id, deletedAt: null });
 
         if (!userToDelete) {
             return res.status(404).json({ message: 'User not found.'});
         }
 
-        await User.findByIdAndDelete(id);
+        await User.findOneAndUpdate(
+            { _id: id, deletedAt: null },
+            { $set: { deletedAt: new Date(), approvalStatus: 'rejected' } },
+        );
 
         res.status(200).json({
             message: 'User deleted successfully.' 
@@ -59,7 +62,7 @@ export const deleteUser = async (req, res) => {
 
 export const getAllVolunteers = async (req, res) => {
     try {
-        const volunteers = await Volunteer.find().select(ADMIN_USER_PROJECTION);
+        const volunteers = await Volunteer.find({ deletedAt: null }).select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: volunteers.length,
@@ -74,7 +77,7 @@ export const getAllVolunteers = async (req, res) => {
 
 export const getAllOrganisations = async (req, res) => {
     try {
-        const organisations = await Organisation.find().select(ADMIN_USER_PROJECTION);
+        const organisations = await Organisation.find({ deletedAt: null }).select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: organisations.length,
@@ -89,7 +92,7 @@ export const getAllOrganisations = async (req, res) => {
 
 export const getAllAdmins = async (req, res) => {
     try {
-        const admins = await Admin.find().select(ADMIN_USER_PROJECTION);
+        const admins = await Admin.find({ deletedAt: null }).select(ADMIN_USER_PROJECTION);
 
         res.status(200).json({
             count: admins.length,

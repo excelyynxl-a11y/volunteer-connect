@@ -117,7 +117,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Support food packing, registration, and distribution for local families during a weekend food drive.",
     organisationId: organisations[0]._id,
-    images: [],
     location: "Selangor, Cheras",
     startAt: daysFromNow(7, 9),
     endAt: daysFromNow(7, 14),
@@ -135,7 +134,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Help collect litter, sort recyclables, and document cleanup progress along the shoreline.",
     organisationId: organisations[1]._id,
-    images: [],
     location: "Pulau Pinang, Batu Ferringhi",
     startAt: daysFromNow(10, 8),
     endAt: daysFromNow(10, 12),
@@ -153,7 +151,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Help primary school students practise reading and short writing exercises.",
     organisationId: organisations[2]._id,
-    images: [],
     location: "Selangor, Kajang",
     startAt: daysFromNow(12, 15),
     endAt: daysFromNow(12, 18),
@@ -170,7 +167,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Assist shelter staff with feeding routines, kennel cleaning, and enrichment activities.",
     organisationId: organisations[3]._id,
-    images: [],
     location: "Kuala Lumpur, Setapak",
     startAt: daysFromNow(14, 9),
     endAt: daysFromNow(14, 13),
@@ -187,7 +183,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Sort recyclables, guide drop-off visitors, and track collection categories.",
     organisationId: organisations[1]._id,
-    images: [],
     location: "Pulau Pinang, Butterworth",
     startAt: daysFromNow(16, 9),
     endAt: daysFromNow(16, 12, 30),
@@ -204,7 +199,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Help run a public booth, explain campaign goals, and record donation pledges.",
     organisationId: organisations[2]._id,
-    images: [],
     location: "Selangor, Subang Jaya",
     startAt: daysFromNow(18, 11),
     endAt: daysFromNow(18, 17),
@@ -221,7 +215,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Spend time with seniors through conversation, games, and light activity support.",
     organisationId: organisations[0]._id,
-    images: [],
     location: "Kuala Lumpur, Setapak",
     startAt: daysFromNow(20, 10),
     endAt: daysFromNow(20, 13),
