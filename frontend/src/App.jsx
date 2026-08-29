@@ -9,6 +9,7 @@ import Login from "./pages/Auth/Login";
 import LoggingOut from "./pages/Auth/LoggingOut";
 import Pending from "./pages/Auth/Pending";
 import { Toaster } from "react-hot-toast";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { useAuthStore } from "./store/useAuthStore";
 import {
   GuestRoute,
@@ -26,6 +27,7 @@ const App = () => {
   return (
     <div className="app-shell">
       <Toaster />
+      <ErrorBoundary>
       <Routes>
         {/* landing page route */}
         <Route path='/' element={<LandingPage />} />
@@ -59,6 +61,7 @@ const App = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
+      </ErrorBoundary>
     </div>
   );
 };

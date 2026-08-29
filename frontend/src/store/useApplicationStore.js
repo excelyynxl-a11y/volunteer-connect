@@ -8,6 +8,7 @@ export const useApplicationStore = create((set) => ({
   isSubmittingApplication: false,
   isUpdatingApplication: false,
   applicationsError: "",
+  clearApplicationsError: () => set({ applicationsError: "" }),
 
   // GET /api/application - Fetch applications for the authenticated volunteer
   getMyApplications: async ({ status } = {}) => {

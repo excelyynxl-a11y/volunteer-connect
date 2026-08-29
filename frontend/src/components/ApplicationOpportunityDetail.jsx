@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatDate } from "../lib/utils";
 import { ArrowLeft, Check, ClipboardList, Eye, X, Calendar } from "lucide-react";
 import { APPLICATION_TABS } from "../lib/application";
@@ -15,8 +15,12 @@ const ApplicationOpportunityDetail = ({
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
+  const [decisionError, setDecisionError] = useState("");
 
-  const applications = opportunity?.applications || [];
+  const applications = useMemo(
+    () => opportunity?.applications ?? [],
+    [opportunity?.applications],
+  );
 
   const countByStatus = (apps, status) =>
     status === "All"
@@ -44,19 +48,36 @@ const ApplicationOpportunityDetail = ({
     setReviewTarget(app);
     setRejectMode(false);
     setRejectionReason("");
+    setDecisionError("");
   };
 
-  const closeReview = () => {
+  const closeReview = useCallback(() => {
     setReviewTarget(null);
     setRejectMode(false);
     setRejectionReason("");
-  };
+    setDecisionError("");
+  }, []);
+
+  useEffect(() => {
+    if (!reviewTarget) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && !isSubmittingDecision) closeReview();
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [closeReview, isSubmittingDecision, reviewTarget]);
 
   const handleApprove = async (applicationId) => {
     setIsSubmittingDecision(true);
     try {
-      await onApprove(applicationId);
-      closeReview();
+      const result = await onApprove(applicationId);
+      if (result?.success === false) {
+        setDecisionError(result.error || "The application could not be approved.");
+      } else {
+        closeReview();
+      }
     } finally {
       setIsSubmittingDecision(false);
     }
@@ -65,8 +86,12 @@ const ApplicationOpportunityDetail = ({
   const handleReject = async (applicationId, reason) => {
     setIsSubmittingDecision(true);
     try {
-      await onReject(applicationId, reason);
-      closeReview();
+      const result = await onReject(applicationId, reason);
+      if (result?.success === false) {
+        setDecisionError(result.error || "The application could not be rejected.");
+      } else {
+        closeReview();
+      }
     } finally {
       setIsSubmittingDecision(false);
     }
@@ -208,14 +233,18 @@ const ApplicationOpportunityDetail = ({
         <div className="organisation-modal-overlay" onClick={closeReview}>
           <div
             className="organisation-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="application-review-title"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="organisation-modal-header">
-              <h2>{reviewTarget.volunteerName || "Volunteer Details"}</h2>
+              <h2 id="application-review-title">{reviewTarget.volunteerName || "Volunteer Details"}</h2>
               <button
                 type="button"
                 className="organisation-modal-close"
                 onClick={closeReview}
+                aria-label="Close volunteer review"
               >
                 <X size={18} />
               </button>
@@ -243,7 +272,9 @@ const ApplicationOpportunityDetail = ({
                 {reviewTarget.availability?.length ? (
                   reviewTarget.availability.map((slot, index) => {
                     const day = slot.day || slot.dayOfWeek || "Day";
-                    const time = slot.time || slot.timeSlot || "Time";
+                    const time = slot.startTime && slot.endTime
+                      ? `${slot.startTime} - ${slot.endTime}`
+                      : slot.time || slot.timeSlot || "Time";
                     return (
                       <span
                         className="organisation-availability-slot"
@@ -283,14 +314,22 @@ const ApplicationOpportunityDetail = ({
                 </p>
               )}
 
+              {decisionError && (
+                <p className="app-modal-reason" role="alert">
+                  {decisionError}
+                </p>
+              )}
+
               {!isDecided && (reviewTarget.__reject || rejectMode) && (
                 <div>
-                  <p className="app-modal-label">
+                  <label className="app-modal-label" htmlFor="rejection-reason">
                     Reason for rejection (optional)
-                  </p>
+                  </label>
                   <textarea
+                    id="rejection-reason"
                     className="app-modal-textarea"
                     rows={3}
+                    maxLength={500}
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Let the volunteer know why this application wasn't successful..."
@@ -339,6 +378,7 @@ const ApplicationOpportunityDetail = ({
                     <button
                       type="button"
                       className="organisation-modal-reject-btn"
+                      disabled={isSubmittingDecision}
                       onClick={() =>
                         handleReject(reviewTarget.id || reviewTarget._id, rejectionReason.trim())
                       }

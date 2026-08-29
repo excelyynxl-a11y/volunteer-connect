@@ -168,7 +168,7 @@ const AdminAnalytics = () => {
             <input
               type="month"
               value={endMonth}
-              min={startMonth || DEFAULT_START_MONTH}
+              min={startMonth || undefined}
               max={getCurrentMonthKey()}
               onChange={(event) => setEndMonth(event.target.value)}
             />
@@ -185,8 +185,8 @@ const AdminAnalytics = () => {
         </div>
 
         <p className="admin-analytics-range-note">
-          Showing data from {selectedRangeLabel}. Default range starts at March
-          2026 and ends at the current month.
+          Showing data from {selectedRangeLabel}. The default range covers the
+          last 12 months through the current month.
         </p>
       </div>
 
