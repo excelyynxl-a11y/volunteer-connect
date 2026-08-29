@@ -10,12 +10,13 @@ import {
   getNextResponseDeadline,
   isResponseDeadlineExpired,
 } from "../lib/messageLifecycle.js";
+import { getSafeDownloadName } from "../lib/messageAttachment.js";
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { Organisation } from "../models/user.model.js";
 import { cleanupUploadedAttachment } from "../services/attachmentCleanup.service.js";
 import {
-  getMessageAttachmentDownloadUrl,
+  downloadMessageAttachmentFromCloudinary,
   uploadMessageAttachmentToCloudinary,
 } from "../services/cloudinary.service.js";
 import {
@@ -456,9 +457,21 @@ export const downloadMessageAttachment = async (req, res) => {
       });
     }
 
-    const downloadUrl = getMessageAttachmentDownloadUrl(message.attachment);
-    res.set("Cache-Control", "no-store");
-    return res.redirect(302, downloadUrl);
+    const attachment = await downloadMessageAttachmentFromCloudinary(
+      message.attachment,
+    );
+    const fileName = getSafeDownloadName(message.attachment.fileName);
+
+    res.set({
+      "Cache-Control": "no-store",
+      "Content-Disposition": `attachment; filename="${fileName}"`,
+      "Content-Type":
+        attachment.contentType ||
+        message.attachment.mimeType ||
+        "application/octet-stream",
+    });
+
+    return res.status(200).send(attachment.buffer);
   } catch (error) {
     console.log(
       "Error in downloadMessageAttachment controller: ",

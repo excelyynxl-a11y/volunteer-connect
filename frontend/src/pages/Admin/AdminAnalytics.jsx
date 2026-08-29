@@ -1,67 +1,233 @@
-import React from "react";
-import { BarChart3 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  AlertCircle,
+  Building2,
+  CalendarRange,
+  Lightbulb,
+  RotateCcw,
+  Users
+} from "lucide-react";
+import AdminStatsCard from "../../components/AdminStatsCard";
+import VolunteerAnalyticsCard from "../../components/VolunteerAnalyticsCard";
+import OrganisationAnalyticsCard from "../../components/OrgansitionAnalyticsCard";
+import OpportunityAnalyticsCard from "../../components/OpportunityAnalytics";
+import ReportAnalyticsCard from "../../components/ReportAnalytics";
+import { useAnalyticsStore } from "../../store/useAnalyticsStore";
+import { formatMonthLabel } from "../../utils/analyticsFormatters";
+
+const DEFAULT_START_MONTH = "2026-03";
+
+const getCurrentMonthKey = () => {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+
+const sumCounts = (entries = []) =>
+  entries.reduce((sum, entry) => sum + Number(entry?.count || 0), 0);
 
 const AdminAnalytics = () => {
+  const [startMonth, setStartMonth] = useState(DEFAULT_START_MONTH);
+  const [endMonth, setEndMonth] = useState(getCurrentMonthKey());
 
-  // TODO: analytics in Milestone 3
+  const volunteerSignUpAnaltyics = useAnalyticsStore(
+    (state) => state.volunteerSignUpAnaltyics
+  );
+  const isVolunteerSignUpAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isVolunteerSignUpAnaltyicsLoading
+  );
+  const volunteerSignUpAnalyticsError = useAnalyticsStore(
+    (state) => state.volunteerSignUpAnalyticsError
+  );
+  const organisationSignUpAnaltyics = useAnalyticsStore(
+    (state) => state.organisationSignUpAnaltyics
+  );
+  const isOrganisationSignUpAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isOrganisationSignUpAnaltyicsLoading
+  );
+  const organisationSignUpAnalyticsError = useAnalyticsStore(
+    (state) => state.organisationSignUpAnalyticsError
+  );
+  const opportunityCreatedAnaltyics = useAnalyticsStore(
+    (state) => state.opportunityCreatedAnaltyics
+  );
+  const isOpportunityCreatedAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isOpportunityCreatedAnaltyicsLoading
+  );
+  const opportunityCreatedAnalyticsError = useAnalyticsStore(
+    (state) => state.opportunityCreatedAnalyticsError
+  );
+  const reportAnaltyics = useAnalyticsStore((state) => state.reportAnaltyics);
+  const isReportAnaltyicsLoading = useAnalyticsStore(
+    (state) => state.isReportAnaltyicsLoading
+  );
+  const reportAnalyticsError = useAnalyticsStore(
+    (state) => state.reportAnalyticsError
+  );
+  const getAnalyticsOverview = useAnalyticsStore(
+    (state) => state.getAnalyticsOverview
+  );
+
+  const rangeIsValid = !startMonth || !endMonth || startMonth <= endMonth;
+
+  useEffect(() => {
+    if (!rangeIsValid) {
+      return;
+    }
+
+    void getAnalyticsOverview(startMonth, endMonth);
+  }, [endMonth, getAnalyticsOverview, rangeIsValid, startMonth]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        key: "volunteers",
+        label: "Volunteer sign-ups",
+        value: sumCounts(volunteerSignUpAnaltyics),
+        Icon: Users
+      },
+      {
+        key: "organisations",
+        label: "Organisation sign-ups",
+        value: sumCounts(organisationSignUpAnaltyics),
+        Icon: Building2
+      },
+      {
+        key: "opportunities",
+        label: "Opportunities created",
+        value: sumCounts(opportunityCreatedAnaltyics),
+        Icon: Lightbulb
+      },
+      {
+        key: "reports",
+        label: "Reports submitted",
+        value: sumCounts(reportAnaltyics),
+        Icon: AlertCircle
+      }
+    ],
+    [
+      organisationSignUpAnaltyics,
+      opportunityCreatedAnaltyics,
+      reportAnaltyics,
+      volunteerSignUpAnaltyics
+    ]
+  );
+
+  const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
+
+  const handleResetRange = () => {
+    setStartMonth(DEFAULT_START_MONTH);
+    setEndMonth(getCurrentMonthKey());
+  };
+
+  const handleRefresh = () => {
+    if (rangeIsValid) {
+      void getAnalyticsOverview(startMonth, endMonth);
+    }
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-page-header">
-        <h1>
-          Analytics
-        </h1>
-        <p>
-          Platform-wide statistics and trends.
+        <h1>Analytics</h1>
+        <p>Platform-wide statistics and trends for the selected month range.</p>
+      </div>
+
+      <div className="admin-analytics-toolbar">
+        <div className="admin-analytics-range">
+          <label className="admin-analytics-field">
+            <span>
+              <CalendarRange size={14} />
+              Start month
+            </span>
+            <input
+              type="month"
+              value={startMonth}
+              max={getCurrentMonthKey()}
+              onChange={(event) => setStartMonth(event.target.value)}
+            />
+          </label>
+
+          <label className="admin-analytics-field">
+            <span>
+              <CalendarRange size={14} />
+              End month
+            </span>
+            <input
+              type="month"
+              value={endMonth}
+              min={startMonth || DEFAULT_START_MONTH}
+              max={getCurrentMonthKey()}
+              onChange={(event) => setEndMonth(event.target.value)}
+            />
+          </label>
+
+          <button
+            type="button"
+            className="admin-analytics-reset-btn"
+            onClick={handleResetRange}
+          >
+            <RotateCcw size={14} />
+            Reset range
+          </button>
+        </div>
+
+        <p className="admin-analytics-range-note">
+          Showing data from {selectedRangeLabel}. Default range starts at March
+          2026 and ends at the current month.
         </p>
       </div>
 
-      <div className="admin-analytics-grid">
-
-        {/* Trend 1: new volunteer sign up agaisnt time graph */}
-        <div className="admin-analytics-card">
-          <h3>
-            Volunteer Growth
-          </h3>
-          <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
-            Volunteer sign up agaisnt time graph 
-          </div>
+      {!rangeIsValid ? (
+        <div className="admin-dashboard-state" role="alert">
+          <AlertCircle size={32} />
+          <h2>Invalid month range</h2>
+          <p>The start month must be earlier than or equal to the end month.</p>
         </div>
-
-        {/* Trend 2: new organisation sign up agaisnt time graph */}
-        <div className="admin-analytics-card">
-          <h3>
-            Organisation Growth
-          </h3>
-          <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
-            Organisation sign up agaisnt time graph
+      ) : (
+        <>
+          <div className="admin-stats admin-analytics-summary">
+            {summaryCards.map(({ key, label, value, Icon }) => (
+              <AdminStatsCard
+                key={key}
+                Icon={Icon}
+                value={value}
+                label={label}
+                statKey={key}
+              />
+            ))}
           </div>
-        </div>
 
-        {/* Trend 3: new opportunity created agaisnt time graph */}
-        <div className="admin-analytics-card">
-          <h3>
-            Opportunity Growth
-          </h3>
-          <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
-            Opportunity created agaisnt time graph
-          </div>
-        </div>
+          <div className="admin-analytics-grid">
+            <VolunteerAnalyticsCard
+              volunteerSignUpList={volunteerSignUpAnaltyics}
+              isLoading={isVolunteerSignUpAnaltyicsLoading}
+              error={volunteerSignUpAnalyticsError}
+              onRetry={handleRefresh}
+            />
 
-        {/* Trend 4: new report received agaisnt time graph */}
-        <div className="admin-analytics-card">
-          <h3>
-            Report Activity
-          </h3>
-          <div className="admin-chart-placeholder">
-            <BarChart3 size={32} /> 
-            Report received agaisnt time graph
+            <OrganisationAnalyticsCard
+              organisationSignUpList={organisationSignUpAnaltyics}
+              isLoading={isOrganisationSignUpAnaltyicsLoading}
+              error={organisationSignUpAnalyticsError}
+              onRetry={handleRefresh}
+            />
+
+            <OpportunityAnalyticsCard
+              opportunityCreatedList={opportunityCreatedAnaltyics}
+              isLoading={isOpportunityCreatedAnaltyicsLoading}
+              error={opportunityCreatedAnalyticsError}
+              onRetry={handleRefresh}
+            />
+
+            <ReportAnalyticsCard
+              reportList={reportAnaltyics}
+              isLoading={isReportAnaltyicsLoading}
+              error={reportAnalyticsError}
+              onRetry={handleRefresh}
+            />
           </div>
-        </div>
-        
-      </div>
+        </>
+      )}
     </div>
   );
 };
