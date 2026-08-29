@@ -7,6 +7,7 @@
     "dev": "nodemon -L --watch src src/index.js",
     "start": "node src/index.js",
     "lint": "eslint .",
+    "migrate:remove-opportunity-images": "node src/migrations/remove-opportunity-images.js",
     "seed:dev": "node src/seeds/follow.seed.js",
     "test": "vitest run",
     "test:integration": "vitest run tests/integration",

@@ -57,6 +57,23 @@ docker compose up --build
 
 The frontend is available at `http://localhost:5173`, the API at `http://localhost:5001`, and MongoDB is bound to `127.0.0.1:27017`. MongoDB data is persisted in the `mongo-data` named volume.
 
+### Remove legacy Opportunity image data
+
+Opportunity images are no longer part of the application. Existing MongoDB documents may still contain the old `images` field, so a one-time cleanup migration is included. It is a dry run by default and makes no changes:
+
+```bash
+cd backend
+npm run migrate:remove-opportunity-images
+```
+
+After taking a backup and reviewing the dry-run count, run the migration with explicit confirmation:
+
+```bash
+CONFIRM_REMOVE_OPPORTUNITY_IMAGES=true npm run migrate:remove-opportunity-images
+```
+
+In PowerShell, use `$env:CONFIRM_REMOVE_OPPORTUNITY_IMAGES="true"` before the command. Remote MongoDB URIs also require `ALLOW_REMOTE_MIGRATION=true` as an additional safeguard.
+
 ## Tests and quality checks
 
 Run the same checks locally that are used by CI:
