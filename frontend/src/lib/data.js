@@ -45,7 +45,7 @@ export const aboutUsCards = [
   {
     icon: Heart,
     title: 'About Us',
-    text: 'Founded by community advocates, VolunteerConnect empowers both volunteers and organizations with tools for opportunity discovery, application management, scheduling, and verified hour-logging - all in one trusted platform.',
+    text: 'Founded by community advocates, VolunteerConnect empowers both volunteers and organizations with tools for opportunity discovery, application management, scheduling, and clear participation tracking - all in one trusted platform.',
   },
 ]
 
@@ -71,7 +71,7 @@ export const howItWorkSteps = [
   {
     step: '4',
     title: 'Track Your Impact',
-    text: 'Log hours, earn recognition, and build a verified volunteering history you can share with the world.',
+    text: 'Track your impact, earn recognition, and review the planned duration of completed volunteering opportunities.',
     image: '/vc3.png',
   },
 ]

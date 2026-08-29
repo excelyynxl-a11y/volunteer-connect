@@ -4,8 +4,7 @@ import Opportunity, {
   OPPORTUNITY_STATUSES,
 } from "../models/opportunity.model.js";
 
-import Follow from "../models/follow.model.js";
-import emailjs from "@emailjs/nodejs";
+import { notifyFollowersOfNewOpportunity } from "../lib/email.js";
 
 
 const STRING_LIMITS = {
@@ -210,7 +209,7 @@ export const createOpportunity = async (req, res) => {
     });
 
     await newOpportunity.save();
-    notifyFollowersOfNewOpportunity(newOpportunity, req.user);
+    void notifyFollowersOfNewOpportunity(newOpportunity, req.user);
 
     res.status(201).json({
       success: true,
@@ -615,76 +614,5 @@ export const getOrganisationOpportunities = async (req, res) => {
     res.status(500).json({ 
       message: err.message 
     });
-  }
-};
-
-
-
-
-const notifyFollowersOfNewOpportunity = async (opportunity, organisation) => {
-  try {
-    console.log("--> 1. Starting notification trigger for org ID:", organisation._id);
-
-    // Verify environment variables are loaded
-    if (
-      !process.env.EMAILJS_SERVICE_ID ||
-      !process.env.EMAILJS_TEMPLATE_ID ||
-      !process.env.EMAILJS_PUBLIC_KEY ||
-      !process.env.EMAILJS_PRIVATE_KEY
-    ) {
-      console.error("--> ERROR: Missing EmailJS environment variables in .env:", {
-        service: Boolean(process.env.EMAILJS_SERVICE_ID),
-        template: Boolean(process.env.EMAILJS_TEMPLATE_ID),
-        publicKey: Boolean(process.env.EMAILJS_PUBLIC_KEY),
-        privateKey: Boolean(process.env.EMAILJS_PRIVATE_KEY),
-      });
-      return;
-    }
-
-    // Step 1: Query Follow table
-    const follows = await Follow.find({
-      organisationId: organisation._id,
-    }).populate("volunteerId", "name email approvalStatus role");
-
-    console.log("--> 2. Raw follows found in DB:", follows.length);
-    console.log("--> 2a. Follow documents:", JSON.stringify(follows, null, 2));
-
-    // Step 2: Filter valid volunteers
-    // filter out seeds because this causes unnecessary emails 
-    const followers = follows
-    .map((f) => f.volunteerId)
-    .filter((v) => v && v.email && !v.email.includes("seed.volunteer"));
-
-    console.log("--> 3. Valid followers with email:", followers.length, followers);
-
-    if (!followers.length) {
-      console.log("--> ABORTING: No matching followers found to email.");
-      return;
-    }
-
-    // Step 3: Dispatch emails
-    console.log("--> 4. Dispatching EmailJS requests...");
-    const emailPromises = followers.map((follower) =>
-      emailjs.send(
-        process.env.EMAILJS_SERVICE_ID,
-        process.env.EMAILJS_TEMPLATE_ID,
-        {
-          to_email: follower.email,
-          to_name: follower.name || "Volunteer",
-          org_name: organisation.name || "An Organisation",
-          opportunity_title: opportunity.title,
-          opportunity_link: `${process.env.CLIENT_URL || "http://localhost:5173"}/opportunities/${opportunity._id}`,
-        },
-        {
-          publicKey: process.env.EMAILJS_PUBLIC_KEY,
-          privateKey: process.env.EMAILJS_PRIVATE_KEY,
-        }
-      )
-    );
-
-    const results = await Promise.allSettled(emailPromises);
-    console.log("--> 5. EmailJS send results:", JSON.stringify(results, null, 2));
-  } catch (err) {
-    console.error("--> CRITICAL ERROR in notifyFollowersOfNewOpportunity:", err);
   }
 };
