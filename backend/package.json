@@ -25,9 +25,11 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.3.3",
-    "multer": "^2.1.1",
+    "mongoose": "^9.9.4",
+    "multer": "^2.3.0",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
@@ -37,5 +39,13 @@
     "nodemon": "^3.1.14",
     "supertest": "^7.1.4",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "body-parser": "^2.3.0",
+    "qs": "^6.15.3",
+    "engine.io": "^6.6.9",
+    "socket.io-adapter": "^2.5.8",
+    "socket.io-parser": "^4.2.7",
+    "ws": "^8.21.3"
   }
 }

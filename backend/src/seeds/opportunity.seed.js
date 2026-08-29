@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import Opportunity from "../models/opportunity.model.js";
 import { Organisation } from "../models/user.model.js";
 
-const MONGO_URI = "mongodb://localhost:27017/VolunteerConnect";
+const MONGO_URI = process.env.LOCAL_MONGODB_URI || process.env.MONGODB_URI;
 
 const sampleOrganisations = [
   {
@@ -72,7 +72,7 @@ const buildOpportunities = (organisations) => [
     title: "Community Food Drive Helper",
     details:
       "Support food packing, registration, and distribution for local families during a weekend food drive.",
-    organisationId: '6a06531556b67d61f9cd19b9',
+    organisationId: organisations[0]._id,
     images: [],
     location: "Selangor, Cheras",
     startAt: daysFromNow(7, 9),
