@@ -44,17 +44,6 @@ const opportunitySchema = new mongoose.Schema(
       required: true,
     },
 
-    // Cloudinary image URLs
-    images: {
-      type: [
-        {
-          type: String,
-          trim: true,
-        },
-      ],
-      default: [],
-    },
-
     // Location information (format: "State, City")
     location: {
       type: String,

@@ -23,15 +23,6 @@ const normalizeStringArray = (value) => {
   return [...new Set(value.map((item) => item.trim()).filter(Boolean))];
 };
 
-const isValidHttpUrl = (value) => {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-};
-
 const isValidationError = (error) =>
   error.name === "ValidationError" || error.name === "CastError";
 
@@ -48,7 +39,6 @@ export const createOpportunity = async (req, res) => {
       location,
       category,
       requirements,
-      images,
     } = req.body;
 
     if (
@@ -179,22 +169,6 @@ export const createOpportunity = async (req, res) => {
       });
     }
 
-    const normalizedImages = normalizeStringArray(images);
-    if (normalizedImages === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must be an array",
-      });
-    }
-
-
-    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must contain valid HTTP or HTTPS URLs",
-      });
-    }
-
     const newOpportunity = new Opportunity({
       title: title.trim(),
       details: details.trim(),
@@ -205,7 +179,6 @@ export const createOpportunity = async (req, res) => {
       maxVolunteers: parsedMaxVolunteers,
       category: normalizedCategory ?? [],
       requirements: requirements !== undefined ? requirements.trim() : "",
-      images: normalizedImages ?? [],
       organisationId: req.user._id,
     });
 
@@ -307,7 +280,6 @@ export const updateOpportunity = async (req, res) => {
       endAt,
       applicationDeadline,
       requirements,
-      images,
     } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -327,8 +299,7 @@ export const updateOpportunity = async (req, res) => {
       applicationDeadline === undefined &&
       status === undefined &&
       category === undefined &&
-      requirements === undefined &&
-      images === undefined
+      requirements === undefined
     ) {
       return res.status(400).json({
         success: false,
@@ -475,22 +446,6 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
-    const normalizedImages = normalizeStringArray(images);
-    if (normalizedImages === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must be an array",
-      });
-    }
-
-
-    if (normalizedImages?.some((image) => !isValidHttpUrl(image))) {
-      return res.status(400).json({
-        success: false,
-        message: "Images must contain valid HTTP or HTTPS URLs",
-      });
-    }
-
     if (
       maxVolunteers !== undefined &&
       Number(maxVolunteers) < opportunity.approvedVolunteersCount
@@ -569,10 +524,6 @@ export const updateOpportunity = async (req, res) => {
 
     if (requirements !== undefined) {
       opportunity.requirements = requirements.trim();
-    }
-
-    if (normalizedImages !== undefined) {
-      opportunity.images = normalizedImages;
     }
 
     await opportunity.save();

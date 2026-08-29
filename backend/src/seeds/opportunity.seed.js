@@ -73,7 +73,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Support food packing, registration, and distribution for local families during a weekend food drive.",
     organisationId: organisations[0]._id,
-    images: [],
     location: "Selangor, Cheras",
     startAt: daysFromNow(7, 9),
     endAt: daysFromNow(7, 14),
@@ -91,7 +90,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Help collect litter, sort recyclables, and document cleanup progress along the shoreline.",
     organisationId: organisations[1]._id,
-    images: [],
     location: "Pulau Pinang, Batu Ferringhi",
     startAt: daysFromNow(10, 8),
     endAt: daysFromNow(10, 12),
@@ -109,7 +107,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Assist shelter staff with feeding routines, kennel cleaning, and basic enrichment activities.",
     organisationId: organisations[2]._id,
-    images: [],
     location: "Kuala Lumpur, Setapak",
     startAt: daysFromNow(12, 9),
     endAt: daysFromNow(12, 13),
@@ -127,7 +124,6 @@ const buildOpportunities = (organisations) => [
     details:
       "Prepared planting beds, labelled seedlings, and arranged gardening tools for a community garden.",
     organisationId: organisations[0]._id,
-    images: [],
     location: "Selangor, Semenyih",
     startAt: daysFromNow(-14, 8, 30),
     endAt: daysFromNow(-14, 11, 30),
@@ -144,7 +140,6 @@ const buildOpportunities = (organisations) => [
     details:
       "A public health awareness booth that was cancelled due to weather conditions.",
     organisationId: organisations[1]._id,
-    images: [],
     location: "Kuala Lumpur, Sentul",
     startAt: daysFromNow(3, 10),
     endAt: daysFromNow(3, 15),
