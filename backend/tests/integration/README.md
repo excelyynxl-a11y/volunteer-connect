@@ -12,5 +12,6 @@ in-memory fixture), add database-backed tests for application capacity races,
 ownership/privacy queries, follow idempotency, messaging persistence, report
 population, and profile/upload flows here.
 
-Notification API tests remain deferred in `notification.api.test.js` because the
-notification controller and routes are not implemented yet.
+Email delivery behaviour is covered by `backend/tests/unit/email.service.test.js`.
+No separate in-app notification test suite is kept in this branch because that
+feature is not part of the current product scope.
