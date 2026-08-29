@@ -1,15 +1,48 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/opportunity.model.js";
 import Report from "../models/report.model.js";
+import Application from "../models/application.model.js";
 import { User } from "../models/user.model.js";
 
 const REPORT_TYPES = ["UserViolation", "OpportunityViolation"];
+const USER_VIOLATION_TYPES = [
+  "Last Minute Ghosting",
+  "Not Punctual",
+  "Poor Work Ethics",
+  "Rudeness and Disrespectful",
+  "Inappropriate Dress Code",
+  "Property Damage",
+  "Harassment and Discrimination",
+  "Others",
+];
+const OPPORTUNITY_VIOLATION_TYPES = [
+  "Harassment and Discrimination",
+  "Security and Crowd Failures",
+  "Health and Safety Breaches",
+  "Disorganized Schedules",
+  "Role Misrepresentation",
+  "Lack of Training",
+  "Absent Coordination",
+  "No Expense Reimbursement as Promised",
+  "Inadequate Volunteer Perk as Promised",
+  "Hazardous Environment",
+  "Mistreatment and Disrespect",
+  "Liability and Injury Exposure",
+  "Others",
+];
+const REPORT_TITLE_MAX_LENGTH = 120;
+const REPORT_DETAILS_MAX_LENGTH = 2000;
+const SAFE_USER_FIELDS = "_id name role avatar";
 
 const populateReport = (query) =>
   query
-    .populate("submittedBy", "-password")
-    .populate("reportedUserId", "-password")
-    .populate("reportedOpportunityId");
+    .populate("submittedBy", SAFE_USER_FIELDS)
+    .populate("reportedUserId", SAFE_USER_FIELDS)
+    .populate({
+      path: "reportedOpportunityId",
+      select: "_id title location startAt endAt status organisationId",
+      populate: { path: "organisationId", select: SAFE_USER_FIELDS },
+    });
 
 export const getAllReports = async (req, res) => {
   try {
@@ -165,17 +198,25 @@ export const createReport = async (req, res) => {
       });
     }
 
-    if (typeof title !== "string" || !title.trim()) {
+    if (
+      typeof title !== "string" ||
+      !title.trim() ||
+      title.trim().length > REPORT_TITLE_MAX_LENGTH
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Report title is required."
+        message: `Report title must be a non-empty string with at most ${REPORT_TITLE_MAX_LENGTH} characters.`
       });
     }
 
-    if (typeof details !== "string" || !details.trim()) {
+    if (
+      typeof details !== "string" ||
+      !details.trim() ||
+      details.trim().length > REPORT_DETAILS_MAX_LENGTH
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Report details are required."
+        message: `Report details must be a non-empty string with at most ${REPORT_DETAILS_MAX_LENGTH} characters.`
       });
     }
 
@@ -218,6 +259,13 @@ export const createReport = async (req, res) => {
         });
       }
 
+      if (!USER_VIOLATION_TYPES.includes(userViolationType.trim())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid user violation type."
+        });
+      }
+
       if (!mongoose.Types.ObjectId.isValid(reportedUserId)) {
         return res.status(400).json({
           success: false,
@@ -225,11 +273,43 @@ export const createReport = async (req, res) => {
         });
       }
 
-      const reportedUser = await User.findById(reportedUserId).select("_id");
+      const reportedUser = await User.findById(reportedUserId).select("_id role");
       if (!reportedUser) {
         return res.status(404).json({
           success: false,
           message: "Reported user not found."
+        });
+      }
+
+      if (reportedUser.role !== "volunteer") {
+        return res.status(400).json({
+          success: false,
+          message: "Only volunteer accounts can be reported as a user violation."
+        });
+      }
+
+      if (String(reportedUserId) === String(req.user._id)) {
+        return res.status(400).json({
+          success: false,
+          message: "You cannot report your own account."
+        });
+      }
+
+      const organisationOpportunityDocs = await Opportunity.find({
+        organisationId: req.user._id,
+      }).select("_id");
+      const organisationOpportunityIds = organisationOpportunityDocs.map(
+        (opportunity) => opportunity._id,
+      );
+      const relatedApplication = await Application.findOne({
+        volunteerId: reportedUserId,
+        opportunityId: { $in: organisationOpportunityIds },
+      }).select("_id");
+
+      if (!relatedApplication) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only report volunteers connected to your opportunities."
         });
       }
 
@@ -243,6 +323,13 @@ export const createReport = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: "Opportunity violation type is required."
+        });
+      }
+
+      if (!OPPORTUNITY_VIOLATION_TYPES.includes(opportunityViolationType.trim())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid opportunity violation type."
         });
       }
 
@@ -263,8 +350,36 @@ export const createReport = async (req, res) => {
         });
       }
 
+      const relatedApplication = await Application.findOne({
+        volunteerId: req.user._id,
+        opportunityId: reportedOpportunityId,
+      }).select("_id");
+
+      if (!relatedApplication) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only report opportunities you have applied for."
+        });
+      }
+
       reportData.opportunityViolationType = opportunityViolationType.trim();
       reportData.reportedOpportunityId = reportedOpportunityId;
+    }
+
+    const duplicateReport = await Report.findOne({
+      submittedBy: req.user._id,
+      reportType,
+      ...(reportType === "UserViolation"
+        ? { reportedUserId }
+        : { reportedOpportunityId }),
+      status: { $in: ["Pending", "Investigating"] },
+    }).select("_id");
+
+    if (duplicateReport) {
+      return res.status(409).json({
+        success: false,
+        message: "You already have an open report for this target."
+      });
     }
 
     const newReport = await Report.create(reportData);

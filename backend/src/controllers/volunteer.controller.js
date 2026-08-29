@@ -1,5 +1,6 @@
 import { Volunteer } from "../models/user.model.js";
 import Application from "../models/application.model.js";
+import Opportunity from "../models/opportunity.model.js";
 import mongoose from "mongoose";
 import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
 import {
@@ -12,6 +13,35 @@ import {
   parseArrayField,
   validAgeGroups,
 } from "../lib/volunteer.js";
+
+const OWNER_PROFILE_FIELDS =
+  "_id name email avatar ageGroup resume biodata skills availability approvalStatus";
+const ORGANISATION_PROFILE_FIELDS =
+  "_id name avatar ageGroup resume biodata skills availability";
+
+const canViewVolunteerProfile = async (req, volunteerId) => {
+  if (req.user.role === "admin") return true;
+  if (req.user.role === "volunteer") {
+    return String(req.user._id) === volunteerId;
+  }
+
+  if (req.user.role !== "organisation") return false;
+
+  const organisationOpportunityIds = await Opportunity.find({
+    organisationId: req.user._id,
+  }).select("_id");
+  const opportunityIds = organisationOpportunityIds.map((opportunity) => opportunity._id);
+
+  if (!opportunityIds.length) return false;
+
+  return Boolean(
+    await Application.exists({
+      volunteerId,
+      opportunityId: { $in: opportunityIds },
+      status: { $in: ["pending", "approved"] },
+    }),
+  );
+};
 
 // Get volunteer profile
 export const getVolunteerProfile = async (req, res) => {
@@ -26,10 +56,18 @@ export const getVolunteerProfile = async (req, res) => {
       });
     }
 
-    // Get one volunteer profile only
-    const volunteer = await Volunteer.findById(id).select(
-      "name email avatar ageGroup resume biodata skills availability approvalStatus"
-    );
+    if (!(await canViewVolunteerProfile(req, id))) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorised to view this volunteer profile",
+      });
+    }
+
+    const profileFields =
+      req.user.role === "volunteer" && String(req.user._id) === id
+        ? OWNER_PROFILE_FIELDS
+        : ORGANISATION_PROFILE_FIELDS;
+    const volunteer = await Volunteer.findById(id).select(profileFields);
 
     if (!volunteer) {
       return res.status(404).json({
@@ -84,10 +122,13 @@ export const updateVolunteerProfile = async (req, res) => {
       });
     }
 
-    if (fullName !== undefined && fullName.trim() === "") {
+    if (
+      fullName !== undefined &&
+      (typeof fullName !== "string" || !fullName.trim() || fullName.trim().length > 120)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Full name cannot be empty",
+        message: "Full name must be a non-empty string with at most 120 characters",
       });
     }
 
@@ -193,7 +234,7 @@ export const updateVolunteerProfile = async (req, res) => {
 
     await volunteer.save();
 
-    const updatedVolunteer = await Volunteer.findById(id).select("-password");
+    const updatedVolunteer = await Volunteer.findById(id).select(OWNER_PROFILE_FIELDS);
 
     res.status(200).json({
       success: true,
@@ -218,7 +259,7 @@ export const getVolunteerPastExperience = async (req, res) => {
       });
     }
 
-    const volunteer = await Volunteer.findById(id).select("-password");
+    const volunteer = await Volunteer.findById(id).select("_id");
 
     if (!volunteer) {
       return res.status(404).json({
@@ -227,10 +268,28 @@ export const getVolunteerPastExperience = async (req, res) => {
       });
     }
 
-    const approvedApplications = await Application.find({
+    if (!(await canViewVolunteerProfile(req, id))) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorised to view this volunteer history",
+      });
+    }
+
+    const experienceQuery = {
       volunteerId: id,
       status: "approved",
-    }).populate({
+    };
+
+    if (req.user.role === "organisation") {
+      const organisationOpportunityIds = await Opportunity.find({
+        organisationId: req.user._id,
+      }).select("_id");
+      experienceQuery.opportunityId = {
+        $in: organisationOpportunityIds.map((opportunity) => opportunity._id),
+      };
+    }
+
+    const approvedApplications = await Application.find(experienceQuery).populate({
       path: "opportunityId",
       match: { endAt: { $lt: new Date() } },
       populate: {
