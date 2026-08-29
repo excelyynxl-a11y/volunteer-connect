@@ -15,18 +15,28 @@ import ReportAnalyticsCard from "../../components/ReportAnalytics";
 import { useAnalyticsStore } from "../../store/useAnalyticsStore";
 import { formatMonthLabel } from "../../utils/analyticsFormatters";
 
-const DEFAULT_START_MONTH = "2026-03";
-
 const getCurrentMonthKey = () => {
   const now = new Date();
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+
+const getDefaultStartMonthKey = () => {
+  const date = new Date();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() - 11);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+};
+
+const monthIndex = (month) => {
+  const [year, value] = month.split("-").map(Number);
+  return year * 12 + value;
 };
 
 const sumCounts = (entries = []) =>
   entries.reduce((sum, entry) => sum + Number(entry?.count || 0), 0);
 
 const AdminAnalytics = () => {
-  const [startMonth, setStartMonth] = useState(DEFAULT_START_MONTH);
+  const [startMonth, setStartMonth] = useState(getDefaultStartMonthKey);
   const [endMonth, setEndMonth] = useState(getCurrentMonthKey());
 
   const volunteerSignUpAnaltyics = useAnalyticsStore(
@@ -67,7 +77,10 @@ const AdminAnalytics = () => {
     (state) => state.getAnalyticsOverview
   );
 
-  const rangeIsValid = !startMonth || !endMonth || startMonth <= endMonth;
+  const rangeIsValid =
+    !startMonth ||
+    !endMonth ||
+    (startMonth <= endMonth && monthIndex(endMonth) - monthIndex(startMonth) < 24);
 
   useEffect(() => {
     if (!rangeIsValid) {
@@ -115,7 +128,7 @@ const AdminAnalytics = () => {
   const selectedRangeLabel = `${formatMonthLabel(startMonth)} to ${formatMonthLabel(endMonth)}`;
 
   const handleResetRange = () => {
-    setStartMonth(DEFAULT_START_MONTH);
+    setStartMonth(getDefaultStartMonthKey());
     setEndMonth(getCurrentMonthKey());
   };
 

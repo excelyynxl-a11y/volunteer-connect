@@ -3,6 +3,7 @@ import Application from "../models/application.model.js";
 import Opportunity from "../models/opportunity.model.js";
 import { isOpportunityInsideAvailability } from "../lib/availability.js";
 import { sendApplicationStatusEmail } from "../lib/email.js";
+import { parsePagination } from "../lib/pagination.js";
 
 const APPLICATION_STATUSES = ["pending", "approved", "rejected", "withdrawn"];
 const SAFE_VOLUNTEER_FIELDS = "_id name role avatar skills availability";
@@ -171,6 +172,7 @@ export const getMyApplications = async (req, res) => {
     const volunteerId = req.user._id;
     const { status } = req.query;
     const query = { volunteerId };
+    const pagination = parsePagination(req.query);
 
     if (status !== undefined) {
       if (!isValidStatus(status)) {
@@ -182,13 +184,24 @@ export const getMyApplications = async (req, res) => {
       query.status = toStatus(status);
     }
 
-    const applications = await populateApplication(
-      Application.find(query).sort({ createdAt: -1 }),
-    );
+    const [applications, totalCount] = await Promise.all([
+      populateApplication(
+        Application.find(query)
+          .sort({ createdAt: -1 })
+          .skip(pagination.skip)
+          .limit(pagination.limit),
+      ),
+      Application.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       success: true,
-      count: applications.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: applications,
     });
   } catch {
@@ -201,6 +214,7 @@ export const getMyOrganisationApplications = async (req, res) => {
   try {
     const organisationId = req.user._id;
     const { status, opportunityId } = req.query;
+    const pagination = parsePagination(req.query);
 
     if (status !== undefined && !isValidStatus(status)) {
       return res.status(400).json({
@@ -239,13 +253,24 @@ export const getMyOrganisationApplications = async (req, res) => {
       query.status = toStatus(status);
     }
 
-    const applications = await populateApplication(
-      Application.find(query).sort({ createdAt: -1 }),
-    );
+    const [applications, totalCount] = await Promise.all([
+      populateApplication(
+        Application.find(query)
+          .sort({ createdAt: -1 })
+          .skip(pagination.skip)
+          .limit(pagination.limit),
+      ),
+      Application.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       success: true,
-      count: applications.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: applications,
     });
   } catch (err) {
@@ -362,11 +387,25 @@ export const withdrawApplication = async (req, res) => {
 
 export const getAllApplications = async (req, res) => {
   try {
-    const applications = await populateApplication(Application.find());
+    const pagination = parsePagination(req.query);
+    const [applications, totalCount] = await Promise.all([
+      populateApplication(
+        Application.find()
+          .sort({ createdAt: -1 })
+          .skip(pagination.skip)
+          .limit(pagination.limit),
+      ),
+      Application.countDocuments(),
+    ]);
 
     res.status(200).json({
       success: true,
-      count: applications.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: applications,
     });
   } catch (err) {

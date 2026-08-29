@@ -3,6 +3,7 @@ import Opportunity from "../models/opportunity.model.js";
 import Report from "../models/report.model.js";
 import Application from "../models/application.model.js";
 import { User } from "../models/user.model.js";
+import { parsePagination } from "../lib/pagination.js";
 
 const REPORT_TYPES = ["UserViolation", "OpportunityViolation"];
 const USER_VIOLATION_TYPES = [
@@ -46,11 +47,25 @@ const populateReport = (query) =>
 
 export const getAllReports = async (req, res) => {
   try {
-    const reports = await populateReport(Report.find()).sort({ createdAt: -1 });
+    const pagination = parsePagination(req.query);
+    const [reports, totalCount] = await Promise.all([
+      populateReport(
+        Report.find()
+          .sort({ createdAt: -1 })
+          .skip(pagination.skip)
+          .limit(pagination.limit),
+      ),
+      Report.countDocuments(),
+    ]);
 
     res.status(200).json({
-      count: reports.length,
-      reports
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
+      reports,
     });
   } catch (err) {
     console.log("Error in getAllReports controller: ", err.message);
@@ -61,13 +76,26 @@ export const getAllReports = async (req, res) => {
 export const getMyReports = async (req, res) => {
   try {
     const userId = req.user._id;
+    const pagination = parsePagination(req.query);
+    const query = { submittedBy: userId };
 
-    const reports = await populateReport(
-      Report.find({ submittedBy: userId })
-    ).sort({ createdAt: -1 });
+    const [reports, totalCount] = await Promise.all([
+      populateReport(
+        Report.find(query)
+          .sort({ createdAt: -1 })
+          .skip(pagination.skip)
+          .limit(pagination.limit),
+      ),
+      Report.countDocuments(query),
+    ]);
 
     res.status(200).json({
-      count: reports.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       reports
     });
   } catch (err) {

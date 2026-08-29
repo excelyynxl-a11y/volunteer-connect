@@ -5,6 +5,7 @@ import Opportunity, {
 } from "../models/opportunity.model.js";
 
 import { notifyFollowersOfNewOpportunity } from "../lib/email.js";
+import { parsePagination } from "../lib/pagination.js";
 
 
 const STRING_LIMITS = {
@@ -227,14 +228,26 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find({ deletedAt: null })
-      .populate("organisationId", "name")
-      .sort({ publishedAt: -1 });
+    const pagination = parsePagination(req.query);
+    const query = { deletedAt: null };
+    const [opportunities, totalCount] = await Promise.all([
+      Opportunity.find(query)
+        .skip(pagination.skip)
+        .limit(pagination.limit)
+        .populate("organisationId", "name")
+        .sort({ publishedAt: -1 }),
+      Opportunity.countDocuments(query),
+    ]);
 
     // const opportunities = await Opportunity.find({ status: "active" });
     res.status(200).json({
       success: true,
-      count: opportunities.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: opportunities,
     });
   } catch (err) {
@@ -616,14 +629,27 @@ export const deleteOpportunity = async (req, res) => {
 
 export const getOrganisationOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find({
+    const pagination = parsePagination(req.query);
+    const query = {
       organisationId: req.user._id,
       deletedAt: null,
-    });
+    };
+    const [opportunities, totalCount] = await Promise.all([
+      Opportunity.find(query)
+        .skip(pagination.skip)
+        .limit(pagination.limit)
+        .sort({ publishedAt: -1 }),
+      Opportunity.countDocuments(query),
+    ]);
 
     res.status(200).json({
       success: true,
-      count: opportunities.length,
+      count: totalCount,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(totalCount / pagination.limit),
+      },
       data: opportunities,
     });
   } catch (err) {
