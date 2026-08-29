@@ -15,7 +15,7 @@ export const useApplicationStore = create((set) => ({
     set({ isApplicationsLoading: true, applicationsError: "" });
     try {
       const response = await axiosInstance.get("/application", {
-        params: { status },
+        params: { status, page: 1, limit: 100 },
       });
       set({ applications: response.data.data });
       return response.data;
@@ -33,7 +33,7 @@ export const useApplicationStore = create((set) => ({
     set({ isApplicationsLoading: true, applicationsError: "" });
     try {
       const response = await axiosInstance.get("/application/organisation", {
-        params: { status, opportunityId },
+        params: { status, opportunityId, page: 1, limit: 100 },
       });
       set({ applications: response.data.data });
       return response.data;
