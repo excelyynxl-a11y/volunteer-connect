@@ -147,7 +147,34 @@ describe('Organisation opportunity management UI', () => {
     expect(view.container.querySelector('[name="status"]')).toHaveValue('active')
   })
 
-  it.todo('prevents capacity from being reduced below the approved count')
+  it('surfaces the server guard when capacity is reduced below approved volunteers', async () => {
+    const user = userEvent.setup()
+    const updateOpportunity = vi.fn().mockResolvedValue({
+      success: false,
+      error: 'Max volunteers cannot be lower than the approved volunteer count',
+    })
+    useOrganisationStore.setState({
+      allMyOpportunities: [opportunity],
+      getAllMyOpportunities: vi.fn(),
+      updateOpportunity,
+    })
+
+    const view = renderManagementRoute(
+      <EditOpportunity />,
+      '/organisation-dashboard/edit-opportunity/opportunity-1',
+    )
+
+    const capacityInput = view.container.querySelector('[name="maxVolunteers"]')
+    await user.clear(capacityInput)
+    await user.type(capacityInput, '2')
+    await user.click(screen.getByRole('button', { name: 'Save Changes' }))
+
+    expect(updateOpportunity).toHaveBeenCalledWith(
+      opportunity._id,
+      expect.objectContaining({ maxVolunteers: 2 }),
+    )
+    expect(await screen.findByText('Max volunteers cannot be lower than the approved volunteer count')).toBeInTheDocument()
+  })
 
   it('moves an updated opportunity to the correct status filter without duplication', async () => {
     const user = userEvent.setup()

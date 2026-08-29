@@ -119,10 +119,6 @@ describe('Volunteer profile UI', () => {
     expect(screen.queryByText(/verified/i)).not.toBeInTheDocument() // the component must not claim this figure is "verified"
   })
 
-  it.todo('validates name, age group, biodata, skills, and availability before save')
-  it.todo('allows adjacent availability and blocks overlapping slots')
-  it.todo('previews a valid avatar and rejects invalid or oversized files')
-  it.todo('disables duplicate save actions and shows success or recoverable failure')
   it('renders loading, empty, error, and retry states accessibly', () => {
     // loading states
     useVolunteerStore.mockReturnValue({ ...baseVolunteerStore, isLoading: true })
