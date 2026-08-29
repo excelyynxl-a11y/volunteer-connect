@@ -391,12 +391,33 @@ export const updateOpportunity = async (req, res) => {
       });
     }
 
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    if (
+      ["completed", "cancelled"].includes(opportunity.status) &&
+      status !== undefined &&
+      status !== opportunity.status
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Completed and cancelled opportunities cannot be reopened",
+      });
+    }
+
+    const nextStatus = status ?? opportunity.status;
     if (parsedStartAt) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const startDateOnly = new Date(parsedStartAt);
       startDateOnly.setHours(0, 0, 0, 0);
-      if (startDateOnly < today) {
+      if (startDateOnly < today && !["completed", "cancelled"].includes(nextStatus)) {
         return res.status(400).json({
           success: false,
           message: "Start date cannot be before today",
@@ -454,15 +475,6 @@ export const updateOpportunity = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Images must contain valid HTTP or HTTPS URLs",
-      });
-    }
-
-    const opportunity = await Opportunity.findById(id);
-
-    if (!opportunity) {
-      return res.status(404).json({
-        success: false,
-        message: "Opportunity not found",
       });
     }
 

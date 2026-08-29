@@ -50,6 +50,8 @@ const CreateOpportunityPage = () => {
   const [formData, setFormData] = useState({
     title: "",
     details: "",
+    requirements: "",
+    images: "",
     maxVolunteers: 1,
     applicationDeadline: "",
     startDate: "",
@@ -66,16 +68,6 @@ const CreateOpportunityPage = () => {
   const selectedCities = malaysiaStateCities[selectedState] || [];
   const availableCategories = EVENT_CATEGORIES.filter(
     (category) => !selectedCategory.includes(category),
-  );
-
-  const titleProgress = Math.min(
-    (formData.title.length / 15) * 100,
-    100
-  );
-
-  const detailsProgress = Math.min(
-    (formData.details.length / 50) * 100,
-    100
   );
 
   const handleChange = (e) => {
@@ -154,6 +146,21 @@ const CreateOpportunityPage = () => {
         "Description must be at least 50 characters";
     }
 
+    if (formData.requirements.trim().length > 2000) {
+      newErrors.requirements = "Requirements must be 2,000 characters or fewer";
+    }
+
+    const imageUrls = formData.images
+      .split(/\r?\n/)
+      .map((image) => image.trim())
+      .filter(Boolean);
+    if (
+      imageUrls.length > 6 ||
+      imageUrls.some((image) => !/^https?:\/\/[^\s]+$/i.test(image))
+    ) {
+      newErrors.images = "Add up to 6 valid HTTP or HTTPS image URLs, one per line";
+    }
+
     // location validation
     if (!selectedState || !selectedCity) {
       newErrors.location =
@@ -222,6 +229,8 @@ const CreateOpportunityPage = () => {
     const submissionData = {
       title: formData.title.trim(),
       details: formData.details.trim(),
+      requirements: formData.requirements.trim(),
+      images: imageUrls,
       maxVolunteers: Number(formData.maxVolunteers),
       startAt: startDateTime.toISOString(),
       endAt: endDateTime.toISOString(),
@@ -243,6 +252,8 @@ const CreateOpportunityPage = () => {
         setFormData({
           title: "",
           details: "",
+          requirements: "",
+          images: "",
           maxVolunteers: 1,
           applicationDeadline: "",
           startDate: "",
@@ -352,7 +363,8 @@ const CreateOpportunityPage = () => {
                   <input
                     type="text"
                     name="title"
-                    value={formData.title}
+                     value={formData.title}
+                     maxLength={120}
                     onChange={handleChange}
                     placeholder="A clear, inviting title for your event"
                     className={
@@ -364,13 +376,13 @@ const CreateOpportunityPage = () => {
                     <div className="organisation-progress-bar">
                       <span
                         style={{
-                          width: `${titleProgress}%`,
+                         width: `${Math.min((formData.title.length / 120) * 100, 100)}%`,
                         }}
                       />
                     </div>
 
                     <div className="organisation-character-count">
-                      {formData.title.length}/15
+                      {formData.title.length}/120
                     </div>
                   </div>
 
@@ -390,7 +402,8 @@ const CreateOpportunityPage = () => {
 
                   <textarea
                     name="details"
-                    value={formData.details}
+                     value={formData.details}
+                     maxLength={5000}
                     onChange={handleChange}
                     placeholder="Describe what volunteers will do, who they will help, and why it matters"
                     className={
@@ -402,13 +415,13 @@ const CreateOpportunityPage = () => {
                     <div className="organisation-progress-bar">
                       <span
                         style={{
-                          width: `${detailsProgress}%`,
+                           width: `${Math.min((formData.details.length / 5000) * 100, 100)}%`,
                         }}
                       />
                     </div>
 
                     <div className="organisation-character-count">
-                      {formData.details.length}/50
+                      {formData.details.length}/5000
                     </div>
                   </div>
 
@@ -416,6 +429,46 @@ const CreateOpportunityPage = () => {
                     <p className="organisation-error-text">
                       {errors.details}
                     </p>
+                  )}
+                </div>
+
+                <div className="organisation-form-group">
+                  <label>
+                    <FileText size={16} />
+                    Requirements (optional)
+                  </label>
+                  <textarea
+                    name="requirements"
+                    value={formData.requirements}
+                    onChange={handleChange}
+                    maxLength={2000}
+                    rows={4}
+                    placeholder="List useful skills, equipment, or preparation volunteers should have"
+                    className={errors.requirements ? "error" : ""}
+                  />
+                  <div className="organisation-character-count">
+                    {formData.requirements.length}/2000
+                  </div>
+                  {errors.requirements && (
+                    <p className="organisation-error-text">{errors.requirements}</p>
+                  )}
+                </div>
+
+                <div className="organisation-form-group">
+                  <label>
+                    <FileText size={16} />
+                    Image URLs (optional)
+                  </label>
+                  <textarea
+                    name="images"
+                    value={formData.images}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Paste one public HTTPS image URL per line"
+                    className={errors.images ? "error" : ""}
+                  />
+                  {errors.images && (
+                    <p className="organisation-error-text">{errors.images}</p>
                   )}
                 </div>
               </div>
