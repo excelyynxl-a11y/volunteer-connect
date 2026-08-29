@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+.vitest
+npm-debug.log*
+.env
+.env.*
+.git
+.gitignore
