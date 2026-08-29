@@ -1693,33 +1693,6 @@
   line-height: 1.5;
 }
 
-.admin-opportunity-image-list {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.admin-opportunity-image-list::-webkit-scrollbar {
-  height: 6px;
-}
-
-.admin-opportunity-image-list::-webkit-scrollbar-thumb {
-  background: #d0c8c0;
-  border-radius: 3px;
-}
-
-.admin-opportunity-image {
-  flex: 0 0 auto;
-  width: 180px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #e8ddd0;
-  background: #f6f2ed;
-}
-
 /* Availability list */
 
 .admin-availability-list {

@@ -227,7 +227,7 @@ const VolunteerApplications = () => {
                       Details
                     </button>
 
-                    {app.status === "Pending" && (
+                    {(app.status === "Pending" || app.status === "Approved") && (
                       <button
                         type="button"
                         className="application-withdraw-btn"
@@ -313,7 +313,7 @@ const VolunteerApplications = () => {
         </div>
       )}
 
-      {/* withdraw confirmation modal (Pending applications only) */}
+      {/* withdraw confirmation modal for pending or approved applications */}
       {withdrawTarget && (
         <div
           className="application-modal-overlay"
@@ -329,8 +329,10 @@ const VolunteerApplications = () => {
 
             <h2>Withdraw this application?</h2>
             <p className="application-modal-subtitle">
-              You are withdrawing a pending application. It will no longer be
-              considered by the organisation.
+              You are withdrawing a {withdrawTarget.status.toLowerCase()} application.
+              {withdrawTarget.status === "Approved"
+                ? " The opportunity will regain this approved place."
+                : " It will no longer be considered by the organisation."}
             </p>
 
             <div className="application-modal-card">

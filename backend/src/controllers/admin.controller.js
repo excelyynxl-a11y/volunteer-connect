@@ -10,7 +10,7 @@ const getReviewableUser = async (id, res) => {
     return null;
   }
 
-  const user = await User.findById(id);
+  const user = await User.findOne({ _id: id, deletedAt: null });
 
   if (!user) {
     res.status(404).json({ message: "User not found." });
@@ -27,7 +27,8 @@ const getReviewableUser = async (id, res) => {
   return user;
 };
 
-const getSafeUser = (id) => User.findById(id).select("-password -__v");
+const getSafeUser = (id) =>
+  User.findOne({ _id: id, deletedAt: null }).select("-password -__v");
 
 export const approveUserAccount = async (req, res) => {
   try {

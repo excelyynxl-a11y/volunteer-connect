@@ -14,6 +14,7 @@ const formatDBDateForInput = (dateString) => {
 const getInitialFormData = (opportunity) => ({
     title: opportunity?.title || "",
     details: opportunity?.details || "",
+    requirements: opportunity?.requirements || "",
     startAt: formatDBDateForInput(opportunity?.startAt),
     endAt: formatDBDateForInput(opportunity?.endAt),
     maxVolunteers: opportunity?.maxVolunteers || 0,
@@ -142,17 +143,28 @@ const EditOpportunity = () => {
 
         const newErrors = {};
         if (!formData.title?.trim()) newErrors.title = "Event title is required.";
+        if (formData.title?.trim().length > 120) newErrors.title = "Event title must be 120 characters or fewer.";
         if (!formData.details?.trim()) newErrors.details = "Event details are required.";
+        if (formData.details?.trim().length > 5000) newErrors.details = "Event details must be 5,000 characters or fewer.";
+        if (formData.requirements?.trim().length > 2000) newErrors.requirements = "Requirements must be 2,000 characters or fewer.";
         if (!selectedState || !selectedCity) newErrors.location = "Please select both State and City.";
         if (selectedCategory.length === 0) newErrors.category = "Please select at least one category.";
         if (!formData.startAt) newErrors.startAt = "Start date is required.";
         if (!formData.endAt) newErrors.endAt = "End date is required.";
+        if (!formData.applicationDeadline) newErrors.applicationDeadline = "Application deadline is required.";
+        if (!Number.isInteger(Number(formData.maxVolunteers)) || Number(formData.maxVolunteers) < 1) {
+            newErrors.maxVolunteers = "Volunteer capacity must be a positive integer.";
+        }
 
         if (formData.startAt && formData.endAt) {
             const startDate = new Date(formData.startAt);
             const endDate = new Date(formData.endAt);
             if (endDate <= startDate) {
                 newErrors.endAt = "End date/time must be after the start date/time.";
+            }
+
+            if (formData.applicationDeadline && new Date(formData.applicationDeadline) >= startDate) {
+                newErrors.applicationDeadline = "Application deadline must be before the start date/time.";
             }
         }
 
@@ -165,20 +177,21 @@ const EditOpportunity = () => {
         const finalDataToSubmit = {
             title: formData.title,
             details: formData.details,
+            requirements: formData.requirements.trim(),
             category: selectedCategory,
             location: `${selectedState}, ${selectedCity}`,
             startAt: new Date(formData.startAt).toISOString(),
             endAt: new Date(formData.endAt).toISOString(),
             maxVolunteers: Number(formData.maxVolunteers),
             applicationDeadline: formData.applicationDeadline
-                ? new Date(formData.applicationDeadline).toISOString() 
-                : new Date(formData.startAt).toISOString(),
+                ? new Date(formData.applicationDeadline).toISOString()
+                : undefined,
             status: formData.status
         };
 
         const result = await updateOpportunity(id, finalDataToSubmit);
         if (result?.success) {
-            navigate("/organisation-dashboard/profile");
+            navigate("/organisation-dashboard/opportunities");
         } else {
             const displayError = result?.error || "Failed to update opportunity.";
             setErrorMessage(displayError);
@@ -280,8 +293,14 @@ const EditOpportunity = () => {
 
                             <div className="org-profile-edit-input-group">
                                 <label><AlignLeft size={16} /> Event Details</label>
-                                <textarea name="details" value={formData.details} onChange={handleChange} rows="6" className={fieldErrors.details ? "input-error" : ""} />
+                                <textarea name="details" value={formData.details} onChange={handleChange} rows="6" maxLength={5000} className={fieldErrors.details ? "input-error" : ""} />
                                 {renderError("details")}
+                            </div>
+
+                            <div className="org-profile-edit-input-group">
+                                <label><AlignLeft size={16} /> Requirements (optional)</label>
+                                <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows="4" maxLength={2000} placeholder="List useful skills, equipment, or preparation volunteers should have" className={fieldErrors.requirements ? "input-error" : ""} />
+                                {renderError("requirements")}
                             </div>
 
                             <div className="org-profile-edit-input-group">
@@ -314,6 +333,18 @@ const EditOpportunity = () => {
                                     <option value="cancelled">Cancelled (Event will not happen)</option>
                                     <option value="completed">Completed (Event is finished)</option>
                                 </select>
+                            </div>
+
+                            <div className="org-profile-edit-input-group">
+                                <label>Volunteer Capacity</label>
+                                <input type="number" name="maxVolunteers" min="1" step="1" value={formData.maxVolunteers} onChange={handleChange} className={fieldErrors.maxVolunteers ? "input-error" : ""} />
+                                {renderError("maxVolunteers")}
+                            </div>
+
+                            <div className="org-profile-edit-input-group">
+                                <label>Application Deadline</label>
+                                <input type="datetime-local" name="applicationDeadline" value={formData.applicationDeadline} onChange={handleChange} className={fieldErrors.applicationDeadline ? "input-error" : ""} />
+                                {renderError("applicationDeadline")}
                             </div>
 
                             <div className="org-profile-edit-row">

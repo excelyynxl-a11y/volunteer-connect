@@ -20,7 +20,6 @@ import {
 import {
   formatOpportunityDate,
   formatOpportunityTimeRange,
-  getOpportunityImage,
   getUpcomingOpportunities,
   isOpportunityOpen,
 } from "../../lib/opportunity";
@@ -296,21 +295,11 @@ const VolunteerHomepage = () => {
             ) : (
               <div className="homepage-opportunity-list">
                 {recommendedOpportunities.map((opportunity) => {
-                  const opportunityImage = getOpportunityImage(opportunity);
-
                   return (
                     <article
-                      className={`homepage-opportunity-card${opportunityImage ? " has-image" : ""}`}
+                      className="homepage-opportunity-card"
                       key={opportunity._id}
                     >
-                      {opportunityImage && (
-                        <img
-                          className="homepage-opportunity-image"
-                          src={opportunityImage}
-                          alt={opportunity.title}
-                        />
-                      )}
-
                       <div className="homepage-opportunity-copy">
                         <span className="homepage-category-pill">
                           {opportunity.category?.[0] || "Opportunity"}

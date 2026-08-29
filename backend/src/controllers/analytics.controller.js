@@ -2,217 +2,213 @@ import { Organisation, Volunteer } from "../models/user.model.js";
 import Opportunity from "../models/opportunity.model.js";
 import Report from "../models/report.model.js";
 
-const DEFAULT_START_MONTH = "2026-03";
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+const MAX_ANALYTICS_MONTHS = 24;
 
+const parseMonth = (month) => new Date(`${month}-01T00:00:00.000Z`);
 
-// Parse a "YYYY-MM" string into a Date (first day of month, midnight UTC).
-const parseMonth = (monthStr) => new Date(`${monthStr}-01T00:00:00.000Z`);
-
-
-// Return the "YYYY-MM" key for a given Date.
 const toMonthKey = (date) => {
-  const y = date.getUTCFullYear();
-  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
 };
 
+const monthIndex = (month) => {
+  const date = parseMonth(month);
+  return date.getUTCFullYear() * 12 + date.getUTCMonth();
+};
 
-// Generate an ordered array of "YYYY-MM" keys between start and end (inclusive).
+const getDefaultStartMonth = () => {
+  const date = new Date();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() - (MAX_ANALYTICS_MONTHS - 1));
+  return toMonthKey(date);
+};
+
 const generateMonthRange = (startMonth, endMonth) => {
   const months = [];
   const cursor = parseMonth(startMonth);
   const end = parseMonth(endMonth);
+
   while (cursor <= end) {
     months.push(toMonthKey(cursor));
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
+
   return months;
 };
 
-// Resolve start/end month from query params with sensible defaults.
-const resolveRange = (query) => {
+export const resolveRange = (query = {}) => {
   const now = new Date();
-  const defaultEnd = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-  const startMonth = query.startMonth || DEFAULT_START_MONTH;
+  const defaultEnd = toMonthKey(now);
+  const startMonth = query.startMonth || getDefaultStartMonth();
   const endMonth = query.endMonth || defaultEnd;
-  return { startMonth, endMonth };
+
+  if (!MONTH_PATTERN.test(startMonth) || !MONTH_PATTERN.test(endMonth)) {
+    throw new Error("startMonth and endMonth must use YYYY-MM format");
+  }
+
+  const startIndex = monthIndex(startMonth);
+  const endIndex = monthIndex(endMonth);
+  if (startIndex > endIndex) {
+    throw new Error("startMonth must be before or equal to endMonth");
+  }
+
+  if (endIndex - startIndex + 1 > MAX_ANALYTICS_MONTHS) {
+    throw new Error(`Analytics range cannot exceed ${MAX_ANALYTICS_MONTHS} months`);
+  }
+
+  const rangeStart = parseMonth(startMonth);
+  const rangeEnd = parseMonth(endMonth);
+  rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+
+  return { startMonth, endMonth, rangeStart, rangeEnd };
 };
 
+const getRangeOrRespond = (req, res) => {
+  try {
+    return resolveRange(req.query);
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+    return null;
+  }
+};
+
+const createGroupedResult = (startMonth, endMonth, nestedKey) =>
+  Object.fromEntries(
+    generateMonthRange(startMonth, endMonth).map((month) => [
+      month,
+      { month, count: 0, [nestedKey]: [] },
+    ]),
+  );
+
 export const getVolunteerSignUpAnalytics = async (req, res) => {
-    // example output:
-    // [{month, count, volunteers [{name, email, signUpAt}]}]
+  try {
+    const range = getRangeOrRespond(req, res);
+    if (!range) return;
 
-    try {
-        // extract start - end month
-        const { startMonth, endMonth } = resolveRange(req.query);
-        const rangeStart = parseMonth(startMonth);
-        const rangeEnd = parseMonth(endMonth);
-        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1); 
+    const volunteers = await Volunteer.find(
+      {
+        deletedAt: null,
+        createdAt: { $gte: range.rangeStart, $lt: range.rangeEnd },
+      },
+      "name email createdAt",
+    ).sort({ createdAt: 1 });
 
-        const volunteers = await Volunteer.find(
-            {createdAt: 
-                { 
-                    $gte: rangeStart, 
-                    $lt: rangeEnd 
-                }
-            }, "name email createdAt",
-        ).sort({ createdAt: 1 });
-
-        // group volunteers by month
-        const grouped = {};
-        for (const month of generateMonthRange(startMonth, endMonth)) {
-            grouped[month] = { month, count: 0, volunteers: [] };
-        }
-
-        // generate count of volunteer in each month
-        for (const v of volunteers) {
-        const key = toMonthKey(v.createdAt);
-        if (grouped[key]) {
-            grouped[key].count += 1;
-            grouped[key].volunteers.push({
-            name: v.name,
-            email: v.email,
-            signedUpAt: v.createdAt,
-            });
-        }
-        }
-
-        res.status(200).json(Object.values(grouped));
-    } catch (err) {
-        console.log("Error in getVolunteerSignUpAnalytics controller: ", err.message);
-        res.status(500).json({ message: err.message });
+    const grouped = createGroupedResult(range.startMonth, range.endMonth, "volunteers");
+    for (const volunteer of volunteers) {
+      const month = grouped[toMonthKey(volunteer.createdAt)];
+      if (!month) continue;
+      month.count += 1;
+      month.volunteers.push({
+        name: volunteer.name,
+        email: volunteer.email,
+        signedUpAt: volunteer.createdAt,
+      });
     }
+
+    return res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.log("Error in volunteer signup analytics: ", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 export const getOrganisationSignUpAnalytics = async (req, res) => {
-    // example output:
-    // [{month, count, org [{name, email, signUpAt}]}]
+  try {
+    const range = getRangeOrRespond(req, res);
+    if (!range) return;
 
-    try {
-        // extract start - end month
-        const { startMonth, endMonth } = resolveRange(req.query);
-        const rangeStart = parseMonth(startMonth);
-        const rangeEnd = parseMonth(endMonth);
-        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+    const organisations = await Organisation.find(
+      {
+        deletedAt: null,
+        createdAt: { $gte: range.rangeStart, $lt: range.rangeEnd },
+      },
+      "name email createdAt",
+    ).sort({ createdAt: 1 });
 
-        const organisations = await Organisation.find(
-            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
-            "name email createdAt",
-        ).sort({ createdAt: 1 });
-
-        // group org by month
-        const grouped = {};
-        for (const month of generateMonthRange(startMonth, endMonth)) {
-            grouped[month] = { month, count: 0, organisations: [] };
-        }
-
-    // generate count of volunteer in each month
-    for (const org of organisations) {
-        const key = toMonthKey(org.createdAt);
-        if (grouped[key]) {
-            grouped[key].count += 1;
-            grouped[key].organisations.push({
-            name: org.name,
-            email: org.email,
-            signedUpAt: org.createdAt,
-            });
-        }
+    const grouped = createGroupedResult(range.startMonth, range.endMonth, "organisations");
+    for (const organisation of organisations) {
+      const month = grouped[toMonthKey(organisation.createdAt)];
+      if (!month) continue;
+      month.count += 1;
+      month.organisations.push({
+        name: organisation.name,
+        email: organisation.email,
+        signedUpAt: organisation.createdAt,
+      });
     }
 
-    res.status(200).json(Object.values(grouped));
-  } catch (err) {
-        console.log("Error in getOrganisationSignUpAnalytics controller: ", err.message);
-        res.status(500).json({ message: err.message });
+    return res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.log("Error in organisation signup analytics: ", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 export const getOpportunityCreatedAnalytics = async (req, res) => {
-    // example output:
-    // [month, count, opportunities[{title, organisationName, organisationEmail, maxVolunteers, createdAt, eventDate}]]
+  try {
+    const range = getRangeOrRespond(req, res);
+    if (!range) return;
 
-    try {
-        // extract start - end month
-        const { startMonth, endMonth } = resolveRange(req.query);
-        const rangeStart = parseMonth(startMonth);
-        const rangeEnd = parseMonth(endMonth);
-        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+    const opportunities = await Opportunity.find(
+      {
+        deletedAt: null,
+        createdAt: { $gte: range.rangeStart, $lt: range.rangeEnd },
+      },
+      "title organisationId maxVolunteers createdAt startAt",
+    )
+      .populate("organisationId", "name email")
+      .sort({ createdAt: 1 });
 
-        const opportunities = await Opportunity.find(
-            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
-            "title organisationId maxVolunteers createdAt startAt",
-        )
-        .populate("organisationId", "name email")
-        .sort({ createdAt: 1 });
-
-        // group opportunity by month
-        const grouped = {};
-        for (const month of generateMonthRange(startMonth, endMonth)) {
-            grouped[month] = { month, count: 0, opportunities: [] };
-        }
-
-        // generate count of volunteer in each month
-        for (const opp of opportunities) {
-            const key = toMonthKey(opp.createdAt);
-            if (grouped[key]) {
-                grouped[key].count += 1;
-                grouped[key].opportunities.push({
-                    title: opp.title,
-                    organisationName: opp.organisationId?.name ?? "Unknown",
-                    organisationEmail: opp.organisationId?.email ?? "",
-                    maxVolunteers: opp.maxVolunteers,
-                    createdAt: opp.createdAt,
-                    eventDate: opp.startAt,
-                });
-            }
-        }
-
-        res.status(200).json(Object.values(grouped));
-    } catch (err) {
-        console.log("Error in getOpportunityCreatedAnalytics controller: ", err.message);
-        res.status(500).json({ message: err.message });
+    const grouped = createGroupedResult(range.startMonth, range.endMonth, "opportunities");
+    for (const opportunity of opportunities) {
+      const month = grouped[toMonthKey(opportunity.createdAt)];
+      if (!month) continue;
+      month.count += 1;
+      month.opportunities.push({
+        title: opportunity.title,
+        organisationName: opportunity.organisationId?.name ?? "Unknown",
+        organisationEmail: opportunity.organisationId?.email ?? "",
+        maxVolunteers: opportunity.maxVolunteers,
+        createdAt: opportunity.createdAt,
+        eventDate: opportunity.startAt,
+      });
     }
+
+    return res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.log("Error in opportunity analytics: ", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 export const getReportAnalytics = async (req, res) => {
-    // example output:
-    // [month, count, reports[{title, reportType, status, createdAt}]]
-    
-    // extract start - end month
-    try {
-        const { startMonth, endMonth } = resolveRange(req.query);
-        const rangeStart = parseMonth(startMonth);
-        const rangeEnd = parseMonth(endMonth);
-        rangeEnd.setUTCMonth(rangeEnd.getUTCMonth() + 1);
+  try {
+    const range = getRangeOrRespond(req, res);
+    if (!range) return;
 
-        // group report by month
-        const reports = await Report.find(
-            { createdAt: { $gte: rangeStart, $lt: rangeEnd } },
-            "title reportType status createdAt",
-        ).sort({ createdAt: 1 });
+    const reports = await Report.find(
+      { createdAt: { $gte: range.rangeStart, $lt: range.rangeEnd } },
+      "title reportType status createdAt",
+    ).sort({ createdAt: 1 });
 
-        const grouped = {};
-        for (const month of generateMonthRange(startMonth, endMonth)) {
-            grouped[month] = { month, count: 0, reports: [] };
-        }
-
-        // generate count of volunteer in each month
-        for (const report of reports) {
-        const key = toMonthKey(report.createdAt);
-        if (grouped[key]) {
-            grouped[key].count += 1;
-            grouped[key].reports.push({
-                title: report.title,
-                reportType: report.reportType,
-                status: report.status,
-                createdAt: report.createdAt,
-            });
-        }
-        }
-
-        res.status(200).json(Object.values(grouped));
-    } catch (err) {
-        console.log("Error in getReportAnalytics controller: ", err.message);
-        res.status(500).json({ message: err.message });
+    const grouped = createGroupedResult(range.startMonth, range.endMonth, "reports");
+    for (const report of reports) {
+      const month = grouped[toMonthKey(report.createdAt)];
+      if (!month) continue;
+      month.count += 1;
+      month.reports.push({
+        title: report.title,
+        reportType: report.reportType,
+        status: report.status,
+        createdAt: report.createdAt,
+      });
     }
-};
 
+    return res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.log("Error in report analytics: ", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

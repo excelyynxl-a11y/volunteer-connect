@@ -301,7 +301,9 @@ export const useOrganisationStore = create((set, get) => ({
   getMyOpportunities: async () => {
     set({ isOpportunitiesLoading: true, opportunitiesError: "" });
     try {
-      const response = await axiosInstance.get("/opportunities/my-opportunities");
+      const response = await axiosInstance.get("/opportunities/my-opportunities", {
+        params: { page: 1, limit: 100 },
+      });
       const opportunities = getOpportunitiesFromResponse(response.data);
       set({
         allMyOpportunities: opportunities,

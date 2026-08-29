@@ -8,7 +8,8 @@ import Follow from "../models/follow.model.js";
 import Opportunity from "../models/opportunity.model.js";
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
-import { Organisation, Volunteer } from "../models/user.model.js";
+import Report from "../models/report.model.js";
+import { Admin, Organisation, Volunteer } from "../models/user.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,11 @@ const SEED_PASSWORD = process.env.SEED_PASSWORD || "Password123!";
 const ALLOW_REMOTE_SEED = process.env.ALLOW_REMOTE_SEED === "true";
 const SEED_TITLE_PREFIX = "[Seed]";
 const SEED_TITLE_PATTERN = `^${SEED_TITLE_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`;
+
+const admin = {
+  name: "VolunteerConnect Admin",
+  email: "vc.seed.admin@gmail.com",
+};
 
 const isRemoteMongoUri = (uri) => uri.startsWith("mongodb+srv://");
 
@@ -500,10 +506,94 @@ const followTemplates = [
   ["vol5", "org5"],
 ];
 
+const reportTemplates = [
+  {
+    submittedBy: ["organisation", "org1"],
+    reportType: "UserViolation",
+    violationType: "Last Minute Ghosting",
+    reportedUser: ["volunteer", "vol2"],
+    title: "Volunteer did not attend the confirmed shift",
+    details:
+      "The volunteer confirmed attendance but did not arrive and did not respond to follow-up messages.",
+    status: "Pending",
+  },
+  {
+    submittedBy: ["organisation", "org2"],
+    reportType: "UserViolation",
+    violationType: "Not Punctual",
+    reportedUser: ["volunteer", "vol4"],
+    title: "Repeated late arrival at volunteer briefing",
+    details:
+      "The volunteer arrived after the safety briefing had ended despite receiving the confirmed meeting time.",
+    status: "Investigating",
+  },
+  {
+    submittedBy: ["volunteer", "vol1"],
+    reportType: "UserViolation",
+    violationType: "Rudeness and Disrespectful",
+    reportedUser: ["organisation", "org4"],
+    title: "Disrespectful communication during event check-in",
+    details:
+      "A representative used dismissive language when volunteers asked for clarification about their assigned roles.",
+    status: "Resolved",
+  },
+  {
+    submittedBy: ["volunteer", "vol3"],
+    reportType: "OpportunityViolation",
+    violationType: "Health and Safety Breaches",
+    opportunityIndex: 0,
+    title: "Missing safety guidance before food distribution",
+    details:
+      "Volunteers began handling supplies before receiving the expected hygiene and safe-lifting briefing.",
+    status: "Pending",
+  },
+  {
+    submittedBy: ["volunteer", "vol5"],
+    reportType: "OpportunityViolation",
+    violationType: "Role Misrepresentation",
+    opportunityIndex: 3,
+    title: "Assigned duties differed from the opportunity description",
+    details:
+      "The duties assigned on arrival were substantially different from the responsibilities shown in the posting.",
+    status: "Investigating",
+  },
+  {
+    submittedBy: ["volunteer", "vol2"],
+    reportType: "OpportunityViolation",
+    violationType: "No Expense Reimbursement as Promised",
+    opportunityIndex: 1,
+    title: "Promised travel reimbursement was unavailable",
+    details:
+      "The posting stated that approved travel expenses would be reimbursed, but no reimbursement process was provided.",
+    status: "Dismissed",
+  },
+];
+
+const getSeedUser = (userReference, volunteerByKey, organisationByKey) => {
+  const [userType, userKey] = userReference;
+  return userType === "volunteer"
+    ? volunteerByKey[userKey]
+    : organisationByKey[userKey];
+};
+
 const upsertSeedUsers = async () => {
   const password = await bcrypt.hash(SEED_PASSWORD, 10);
   const organisationDocs = [];
   const volunteerDocs = [];
+
+  const adminDoc = await Admin.findOneAndUpdate(
+    { email: admin.email },
+    {
+      $set: {
+        name: admin.name,
+        email: admin.email,
+        password,
+        avatar: "",
+        approvalStatus: "approved",
+      },
+    },
+    { returnDocument: "after", upsert: true, setDefaultsOnInsert: true },
+  );
 
   for (const organisation of organisations) {
     const doc = await Organisation.findOneAndUpdate(
@@ -546,6 +636,7 @@ const upsertSeedUsers = async () => {
   }
 
   return {
+    adminDoc,
     organisationByKey: Object.fromEntries(
       organisations.map((organisation, index) => [organisation.key, organisationDocs[index]]),
     ),
@@ -555,6 +646,46 @@ const upsertSeedUsers = async () => {
     organisationDocs,
     volunteerDocs,
   };
+};
+
+const recreateSeedReports = async (
+  volunteerByKey,
+  organisationByKey,
+  opportunityDocs,
+) => {
+  await Report.deleteMany({
+    title: { $regex: SEED_TITLE_PATTERN },
+  });
+
+  return Report.insertMany(
+    reportTemplates.map((template) => {
+      const report = {
+        submittedBy: getSeedUser(
+          template.submittedBy,
+          volunteerByKey,
+          organisationByKey,
+        )._id,
+        reportType: template.reportType,
+        title: `${SEED_TITLE_PREFIX} ${template.title}`,
+        details: template.details,
+        status: template.status,
+      };
+
+      if (template.reportType === "UserViolation") {
+        report.userViolationType = template.violationType;
+        report.reportedUserId = getSeedUser(
+          template.reportedUser,
+          volunteerByKey,
+          organisationByKey,
+        )._id;
+      } else {
+        report.opportunityViolationType = template.violationType;
+        report.reportedOpportunityId = opportunityDocs[template.opportunityIndex]._id;
+      }
+
+      return report;
+    }),
+  );
 };
 
 const buildOpportunityDocument = (template, organisationByKey, index) => {
@@ -570,7 +701,6 @@ const buildOpportunityDocument = (template, organisationByKey, index) => {
     title: `${SEED_TITLE_PREFIX} ${template.title}`,
     details: template.details,
     organisationId: organisationByKey[template.orgKey]._id,
-    images: [],
     location: template.location,
     startAt,
     endAt,
@@ -758,6 +888,7 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
 };
 
 const printSummary = ({
+  adminDoc,
   organisationByKey,
   organisationDocs,
   volunteerDocs,
@@ -765,14 +896,21 @@ const printSummary = ({
   applicationDocs,
   followDocs,
   seededConversations,
+  reportDocs,
 }) => {
   console.log("\nSeed completed.");
-  console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`);
+  console.log(
+    `Users: 1 admin, ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`,
+  );
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
   console.log(`Follows: ${followDocs.length}`);
   console.log(`Conversations: ${seededConversations.length}`);
+  console.log(`Reports: ${reportDocs.length}`);
   console.log(`Password for all seed accounts: ${SEED_PASSWORD}`);
+
+  console.log("\nAdmin account:");
+  console.log(`- ${adminDoc.email} (${adminDoc.name})`);
 
   console.log("\nOrganisation accounts:");
   organisationDocs.forEach((organisation) => {
@@ -814,6 +952,7 @@ const seed = async () => {
     console.log("MongoDB connected");
 
     const {
+      adminDoc,
       organisationByKey,
       volunteerByKey,
       organisationDocs,
@@ -821,6 +960,11 @@ const seed = async () => {
     } = await upsertSeedUsers();
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
+    const reportDocs = await recreateSeedReports(
+      volunteerByKey,
+      organisationByKey,
+      opportunityDocs,
+    );
     const applicationDocs = await createSeedApplications(volunteerByKey, opportunityDocs);
     const followDocs = await createSeedFollows(
       volunteerByKey,
@@ -829,6 +973,7 @@ const seed = async () => {
     const seededConversations = await recreateSeedConversations(volunteerByKey, organisationByKey);
 
     printSummary({
+      adminDoc,
       organisationByKey,
       organisationDocs,
       volunteerDocs,
@@ -836,6 +981,7 @@ const seed = async () => {
       applicationDocs,
       followDocs,
       seededConversations,
+      reportDocs,
     });
   } catch (error) {
     console.error("Seed failed:", error);

@@ -164,7 +164,9 @@ export const useVolunteerStore = create((set) => ({
     });
 
     try {
-      const response = await axiosInstance.get("/opportunities");
+      const response = await axiosInstance.get("/opportunities", {
+        params: { page: 1, limit: 100 },
+      });
       const opportunities = Array.isArray(response.data?.data)
         ? response.data.data
         : [];
