@@ -51,7 +51,6 @@ const CreateOpportunityPage = () => {
     title: "",
     details: "",
     requirements: "",
-    images: "",
     maxVolunteers: 1,
     applicationDeadline: "",
     startDate: "",
@@ -150,17 +149,6 @@ const CreateOpportunityPage = () => {
       newErrors.requirements = "Requirements must be 2,000 characters or fewer";
     }
 
-    const imageUrls = formData.images
-      .split(/\r?\n/)
-      .map((image) => image.trim())
-      .filter(Boolean);
-    if (
-      imageUrls.length > 6 ||
-      imageUrls.some((image) => !/^https?:\/\/[^\s]+$/i.test(image))
-    ) {
-      newErrors.images = "Add up to 6 valid HTTP or HTTPS image URLs, one per line";
-    }
-
     // location validation
     if (!selectedState || !selectedCity) {
       newErrors.location =
@@ -230,7 +218,6 @@ const CreateOpportunityPage = () => {
       title: formData.title.trim(),
       details: formData.details.trim(),
       requirements: formData.requirements.trim(),
-      images: imageUrls,
       maxVolunteers: Number(formData.maxVolunteers),
       startAt: startDateTime.toISOString(),
       endAt: endDateTime.toISOString(),
@@ -253,7 +240,6 @@ const CreateOpportunityPage = () => {
           title: "",
           details: "",
           requirements: "",
-          images: "",
           maxVolunteers: 1,
           applicationDeadline: "",
           startDate: "",
@@ -454,23 +440,6 @@ const CreateOpportunityPage = () => {
                   )}
                 </div>
 
-                <div className="organisation-form-group">
-                  <label>
-                    <FileText size={16} />
-                    Image URLs (optional)
-                  </label>
-                  <textarea
-                    name="images"
-                    value={formData.images}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="Paste one public HTTPS image URL per line"
-                    className={errors.images ? "error" : ""}
-                  />
-                  {errors.images && (
-                    <p className="organisation-error-text">{errors.images}</p>
-                  )}
-                </div>
               </div>
 
               <div className="organisation-form-right">

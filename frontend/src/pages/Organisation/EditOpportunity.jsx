@@ -15,7 +15,6 @@ const getInitialFormData = (opportunity) => ({
     title: opportunity?.title || "",
     details: opportunity?.details || "",
     requirements: opportunity?.requirements || "",
-    images: Array.isArray(opportunity?.images) ? opportunity.images.join("\n") : "",
     startAt: formatDBDateForInput(opportunity?.startAt),
     endAt: formatDBDateForInput(opportunity?.endAt),
     maxVolunteers: opportunity?.maxVolunteers || 0,
@@ -157,14 +156,6 @@ const EditOpportunity = () => {
             newErrors.maxVolunteers = "Volunteer capacity must be a positive integer.";
         }
 
-        const imageUrls = (formData.images || "")
-            .split(/\r?\n/)
-            .map((image) => image.trim())
-            .filter(Boolean);
-        if (imageUrls.length > 6 || imageUrls.some((image) => !/^https?:\/\/[^\s]+$/i.test(image))) {
-            newErrors.images = "Add up to 6 valid HTTP or HTTPS image URLs, one per line.";
-        }
-
         if (formData.startAt && formData.endAt) {
             const startDate = new Date(formData.startAt);
             const endDate = new Date(formData.endAt);
@@ -187,7 +178,6 @@ const EditOpportunity = () => {
             title: formData.title,
             details: formData.details,
             requirements: formData.requirements.trim(),
-            images: imageUrls,
             category: selectedCategory,
             location: `${selectedState}, ${selectedCity}`,
             startAt: new Date(formData.startAt).toISOString(),
@@ -311,12 +301,6 @@ const EditOpportunity = () => {
                                 <label><AlignLeft size={16} /> Requirements (optional)</label>
                                 <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows="4" maxLength={2000} placeholder="List useful skills, equipment, or preparation volunteers should have" className={fieldErrors.requirements ? "input-error" : ""} />
                                 {renderError("requirements")}
-                            </div>
-
-                            <div className="org-profile-edit-input-group">
-                                <label><AlignLeft size={16} /> Image URLs (optional)</label>
-                                <textarea name="images" value={formData.images} onChange={handleChange} rows="3" placeholder="Paste one public HTTPS image URL per line" className={fieldErrors.images ? "input-error" : ""} />
-                                {renderError("images")}
                             </div>
 
                             <div className="org-profile-edit-input-group">
