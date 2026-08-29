@@ -47,6 +47,14 @@ CLOUDINARY_API_KEY=<ask team>
 CLOUDINARY_API_SECRET=<ask team>
 
 NODE_ENV=development
+
+# EmailJS services
+EMAILJS_SERVICE_ID=service_f3k5d4w
+EMAILJS_TEMPLATE_ID=template_yypuy49
+EMAILJS_TEMPLATE_ID_STATUS = template_zgf4yxm
+EMAILJS_PUBLIC_KEY=I8Y_Lu831UpuXl-c1
+EMAILJS_PRIVATE_KEY=PalU-jKRd_0IK-vhX-goG
+CLIENT_URL=http://localhost:5173
 ```
 
 > ⚠️ **Never commit `.env` to git.** It is listed in `.gitignore` for a reason. If you accidentally stage it, unstage with `git restore --staged backend/.env` before committing.
@@ -118,8 +126,7 @@ The repository might contain backend and frontend files that  are still scaffold
 - The **admin** account is a default (seeded) account. There is no public sign-up route for admins.
 - For the case where developer is forced to delete all Docker containers and rebuild, all previous entries (eg: User, Applications, Report) will be deleted from local MongoDB. Hence, we have prepared seed data for instant seeding by:
 ```bash
-cd backend
-node src/seeds/devSeed.js
+docker compose exec -T -e LOCAL_MONGODB_URI= -e MONGODB_URI=mongodb://mongodb:27017/VolunteerConnect backend npm run seed:dev
 ```
 All the account created have the same password: **Password123!**
 
