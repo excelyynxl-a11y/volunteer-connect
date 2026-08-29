@@ -8,6 +8,7 @@
     position: relative;
     display: flex;
     flex-direction: column; /* Allows margin-top: auto to push buttons down */
+    min-width: 0;
     background: #fdf8ed;
     border: 1px solid #e9c48b;
     border-radius: 14px;
@@ -25,6 +26,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    min-width: 0;
     width: 100%;
     gap: 12px;
     margin-bottom: 10px;
@@ -34,6 +36,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+    min-width: 0;
     gap: 6px;
 }
 
@@ -96,6 +99,7 @@
     margin: 0 0 6px 0;
     font-size: 18px;
     font-weight: bold;
+    overflow-wrap: anywhere;
 }
 
 .event-card p {
@@ -103,6 +107,7 @@
     font-size: 15px;
     margin: 0;
     line-height: 1.5;
+    overflow-wrap: anywhere;
 }
 
 .event-organisation {
@@ -110,6 +115,7 @@
     margin-top: 10px;
     color: #1a3c34;
     font-size: 15px;
+    overflow-wrap: anywhere;
 }
 
 /* Kept the stylish horizontal pill layout from HEAD */
@@ -127,11 +133,18 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
+    min-width: 0;
+    max-width: 100%;
     padding: 7px 10px;
     border-radius: 999px;
     background: #f4ead4;
     color: #1a3c34;
     font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.item-sub span svg {
+    flex: 0 0 auto;
 }
 
 .event-deadline {
