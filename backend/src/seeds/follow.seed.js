@@ -6,10 +6,14 @@ import { fileURLToPath } from "url";
 import Application from "../models/application.model.js";
 import Follow from "../models/follow.model.js";
 import Opportunity from "../models/opportunity.model.js";
+<<<<<<<< a65cceab7335a3024a1b2bb3e8d1cbae9f17e3da:backend/src/seeds/follow.seed.js
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import Report from "../models/report.model.js";
 import { Admin, Organisation, Volunteer } from "../models/user.model.js";
+========
+import { Organisation, Volunteer, Admin } from "../models/user.model.js";
+>>>>>>>> 70fa1660d328001417260a6896563d365687bbd3:backend/src/seeds/devSeed.js
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -154,6 +158,21 @@ const volunteers = [
     ],
   },
 ];
+
+const admins = [
+  {
+    key: "admin1",
+    name: "Admin 1",
+    email: "vc.seed.admin1@gmail.com",
+    biodata: "Admin 1"
+  },
+  {
+    key: "admin2",
+    name: "Admin 2",
+    email: "vc.seed.admin2@gmail.com",
+    biodata: "Admin 2"
+  }
+]
 
 const daysFromNow = (days, hour, minute = 0) => {
   const date = new Date();
@@ -635,6 +654,26 @@ const upsertSeedUsers = async () => {
     volunteerDocs.push(doc);
   }
 
+  const adminDocs = [];
+
+  for (const admin of admins) {
+    const doc = await Admin.findOneAndUpdate(
+      { email: admin.email },
+      {
+        $set: {
+          name: admin.name,
+          email: admin.email,
+          password,
+          biodata: admin.biodata,
+          avatar: "",
+          approvalStatus: "approved",
+        },
+      },
+      { returnDocument: "after", upsert: true, setDefaultsOnInsert: true },
+    );
+    adminDocs.push(doc);
+  }
+
   return {
     adminDoc,
     organisationByKey: Object.fromEntries(
@@ -643,8 +682,12 @@ const upsertSeedUsers = async () => {
     volunteerByKey: Object.fromEntries(
       volunteers.map((volunteer, index) => [volunteer.key, volunteerDocs[index]]),
     ),
+    adminByKey: Object.fromEntries(
+      admins.map((admin, index) => [admin.key, adminDocs[index]]),
+    ),
     organisationDocs,
     volunteerDocs,
+    adminDocs,
   };
 };
 
@@ -766,6 +809,7 @@ const createSeedApplications = async (volunteerByKey, opportunityDocs) => {
   return applicationDocs;
 };
 
+<<<<<<<< a65cceab7335a3024a1b2bb3e8d1cbae9f17e3da:backend/src/seeds/follow.seed.js
 const createSeedFollows = async (volunteerByKey, organisationByKey) => {
   const seedVolunteerIds = Object.values(volunteerByKey).map(
     (volunteer) => volunteer._id,
@@ -902,6 +946,11 @@ const printSummary = ({
   console.log(
     `Users: 1 admin, ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`,
   );
+========
+const printSummary = ({ organisationDocs, volunteerDocs, adminDocs, opportunityDocs, applicationDocs }) => {
+  console.log("\nSeed completed.");
+  console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers, ${adminDocs.length} admins`);
+>>>>>>>> 70fa1660d328001417260a6896563d365687bbd3:backend/src/seeds/devSeed.js
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
   console.log(`Follows: ${followDocs.length}`);
@@ -922,6 +971,7 @@ const printSummary = ({
     console.log(`- ${volunteer.email} (${volunteer.name})`);
   });
 
+<<<<<<<< a65cceab7335a3024a1b2bb3e8d1cbae9f17e3da:backend/src/seeds/follow.seed.js
   console.log("\nPrimary follow-page test account:");
   console.log(`- ${volunteers[0].email} (${volunteers[0].name}) follows:`);
   followTemplates
@@ -929,6 +979,12 @@ const printSummary = ({
     .forEach(([, organisationKey]) => {
       console.log(`  - ${organisationByKey[organisationKey].name}`);
     });
+========
+  console.log("\nAdmin accounts:");
+  adminDocs.forEach((admin) => {
+    console.log(`- ${admin.email} (${admin.name})`);
+  });
+>>>>>>>> 70fa1660d328001417260a6896563d365687bbd3:backend/src/seeds/devSeed.js
 };
 
 const seed = async () => {
@@ -957,6 +1013,7 @@ const seed = async () => {
       volunteerByKey,
       organisationDocs,
       volunteerDocs,
+      adminDocs,
     } = await upsertSeedUsers();
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
@@ -977,6 +1034,7 @@ const seed = async () => {
       organisationByKey,
       organisationDocs,
       volunteerDocs,
+      adminDocs,
       opportunityDocs,
       applicationDocs,
       followDocs,
