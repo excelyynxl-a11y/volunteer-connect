@@ -155,21 +155,6 @@ const volunteers = [
   },
 ];
 
-const admins = [
-  {
-    key: "admin1",
-    name: "Admin 1",
-    email: "vc.seed.admin1@gmail.com",
-    biodata: "Admin 1"
-  },
-  {
-    key: "admin2",
-    name: "Admin 2",
-    email: "vc.seed.admin2@gmail.com",
-    biodata: "Admin 2"
-  }
-]
-
 const daysFromNow = (days, hour, minute = 0) => {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -650,26 +635,6 @@ const upsertSeedUsers = async () => {
     volunteerDocs.push(doc);
   }
 
-  const adminDocs = [];
-
-  for (const admin of admins) {
-    const doc = await Admin.findOneAndUpdate(
-      { email: admin.email },
-      {
-        $set: {
-          name: admin.name,
-          email: admin.email,
-          password,
-          biodata: admin.biodata,
-          avatar: "",
-          approvalStatus: "approved",
-        },
-      },
-      { returnDocument: "after", upsert: true, setDefaultsOnInsert: true },
-    );
-    adminDocs.push(doc);
-  }
-
   return {
     adminDoc,
     organisationByKey: Object.fromEntries(
@@ -678,12 +643,8 @@ const upsertSeedUsers = async () => {
     volunteerByKey: Object.fromEntries(
       volunteers.map((volunteer, index) => [volunteer.key, volunteerDocs[index]]),
     ),
-    adminByKey: Object.fromEntries(
-      admins.map((admin, index) => [admin.key, adminDocs[index]]),
-    ),
     organisationDocs,
     volunteerDocs,
-    adminDocs,
   };
 };
 
@@ -926,9 +887,21 @@ const recreateSeedConversations = async (volunteerByKey, organisationByKey) => {
   return insertedConversations;
 };
 
-const printSummary = ({ organisationDocs, volunteerDocs, adminDocs, opportunityDocs, applicationDocs }) => {
+const printSummary = ({
+  adminDoc,
+  organisationByKey,
+  organisationDocs,
+  volunteerDocs,
+  opportunityDocs,
+  applicationDocs,
+  followDocs,
+  seededConversations,
+  reportDocs,
+}) => {
   console.log("\nSeed completed.");
-  console.log(`Users: ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers, ${adminDocs.length} admins`);
+  console.log(
+    `Users: 1 admin, ${organisationDocs.length} organisations, ${volunteerDocs.length} volunteers`,
+  );
   console.log(`Opportunities: ${opportunityDocs.length}`);
   console.log(`Applications: ${applicationDocs.length}`);
   console.log(`Follows: ${followDocs.length}`);
@@ -956,10 +929,6 @@ const printSummary = ({ organisationDocs, volunteerDocs, adminDocs, opportunityD
     .forEach(([, organisationKey]) => {
       console.log(`  - ${organisationByKey[organisationKey].name}`);
     });
-  console.log("\nAdmin accounts:");
-  adminDocs.forEach((admin) => {
-    console.log(`- ${admin.email} (${admin.name})`);
-  });
 };
 
 const seed = async () => {
@@ -988,7 +957,6 @@ const seed = async () => {
       volunteerByKey,
       organisationDocs,
       volunteerDocs,
-      adminDocs,
     } = await upsertSeedUsers();
 
     const opportunityDocs = await recreateSeedOpportunities(organisationByKey);
@@ -1009,7 +977,6 @@ const seed = async () => {
       organisationByKey,
       organisationDocs,
       volunteerDocs,
-      adminDocs,
       opportunityDocs,
       applicationDocs,
       followDocs,
