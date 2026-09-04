@@ -8,6 +8,9 @@ The system serves three primary roles:
 2. Organisations which require manual approval tools for fixed schedule opportunities as those applications will go through to the organisation’s application list. 
 3. Admins who oversees VolunteerConnect users across the platform, manage account approval and administrative work.
 
+## 🚀 Live on Render 
+VolunteerConnect is hosted live on Render [VolunteerConnect](https://volunteer-connect-icip.onrender.com/).
+
 ## 🔨 Software / Hardware to Run This Project
 
 ### Prerequisites
