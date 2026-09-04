@@ -10,7 +10,6 @@ import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import Report from "../models/report.model.js";
 import { Admin, Organisation, Volunteer } from "../models/user.model.js";
-import { Organisation, Volunteer, Admin } from "../models/user.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
