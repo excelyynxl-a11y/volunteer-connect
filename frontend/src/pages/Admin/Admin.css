@@ -684,6 +684,7 @@
   padding: 14px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  pointer-events: auto;
   border: 1px solid #e8ddd0;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.98);
