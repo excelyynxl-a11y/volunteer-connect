@@ -55,8 +55,10 @@ const ReportMadePage = () => {
 
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
-
-  // reported target: opportunity (for volunteer reports) or volunteer (for organisation reports)
+  const reportTypeRaw = report?.reportType;
+  const reportType = reportTypeRaw == "UserViolation" ?
+    "User Violation" : " Organisation Violation";
+  
   const isUserViolation = report?.reportType === "UserViolation";
   const targetLabel = isUserViolation
     ? "Reported Volunteer"
@@ -64,6 +66,11 @@ const ReportMadePage = () => {
   const targetName =
     report?.reportedUserId?.name || report?.reportedOpportunityId?.title;
 
+  const submittedBy = 
+    report?.submittedBy?.name || report?.reportedOpportunityId?.title;
+
+  // console.log(report)
+  
   if (!report) {
     return (
       <div className="report-made-page">
@@ -87,6 +94,12 @@ const ReportMadePage = () => {
       <section className="volunteer-report-panel">
         {/* report header */}
         <div className="report-made-page-header">
+          <div>
+            <span className="report-made-card-type">
+              {reportType || "Uncategorised"}
+            </span>
+          </div>
+          
           <div>
             <span className="report-made-card-category">
               {violationType || "Uncategorised"}
@@ -132,6 +145,14 @@ const ReportMadePage = () => {
             </span>
             <span className="report-made-detail-value">
               {targetName || "N/A"}
+            </span>
+          </div>
+          <div className="report-made-detail-row">
+            <span className="report-made-detail-label">
+              Submitted by
+            </span>
+            <span className="report-made-detail-value">
+              {submittedBy || "N/A"}
             </span>
           </div>
           <div className="report-made-detail-row">
