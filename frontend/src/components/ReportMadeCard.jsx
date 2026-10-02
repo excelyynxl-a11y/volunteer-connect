@@ -17,6 +17,13 @@ const ReportMadeCard = ({ report }) => {
   const violationType =
     report?.userViolationType || report?.opportunityViolationType;
 
+  const reportRawType = report?.reportType;
+  const reportType = reportRawType == "UserViolation" ?
+    "User Violation" : "Organisation Violation";
+
+  const submittedBy = 
+    report?.submittedBy?.name;
+
   // reported target: opportunity (for volunteer reports) or volunteer (for organisation reports)
   const targetLabel = report?.reportType === "UserViolation"
     ? "Reported Volunteer"
@@ -36,6 +43,9 @@ const ReportMadeCard = ({ report }) => {
   return (
     <div className="report-made-card" onClick={handleClick}>
       <div className="report-made-card-main">
+        <span className="report-made-card-type">
+          {reportType || "Uncategorised"}
+        </span>
         <span className="report-made-card-category">
           {violationType || "Uncategorised"}
         </span>
@@ -47,6 +57,9 @@ const ReportMadeCard = ({ report }) => {
             {targetLabel}: {targetName}
           </span>
         )}
+        <span className="report-made-card-target">
+          Submitted by: {submittedBy}
+        </span>
         <div className="report-made-card-meta">
           <span className="report-made-card-date">
             {formatDate(report?.createdAt)}

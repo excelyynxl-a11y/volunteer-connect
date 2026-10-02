@@ -614,8 +614,13 @@
 }
 
 .admin-chart-shell {
-  min-height: 280px;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 300px;
   padding: 14px 10px 6px 0;
+  box-sizing: border-box;
+  overflow: hidden;
   border-radius: 12px;
   background: #fffaf5;
 }
@@ -672,9 +677,14 @@
 }
 
 .admin-chart-tooltip {
+  box-sizing: border-box;
   min-width: 220px;
   max-width: 280px;
+  max-height: 252px;
   padding: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
   border: 1px solid #e8ddd0;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.98);
