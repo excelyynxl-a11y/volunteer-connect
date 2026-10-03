@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import CreateOpportunityPage from '../../src/pages/Organisation/CreateOpportunityPage.jsx'
 import EditOpportunity from '../../src/pages/Organisation/EditOpportunity.jsx'
 import OrganisationOpportunity from '../../src/pages/Organisation/OrganisationOpportunity.jsx'
+import OrganisationHomepage from '../../src/pages/Organisation/OrganisationHomepage.jsx'
 import { useOrganisationStore } from '../../src/store/useOrganisationStore.js'
 
 vi.mock('react-hot-toast', () => ({
@@ -30,6 +31,10 @@ const opportunity = {
 const resetStore = () => {
   useOrganisationStore.setState({
     allMyOpportunities: [],
+    activeOpportunities: [],
+    closedOpportunities: [],
+    cancelledOpportunities: [],
+    getMyOpportunities: vi.fn(),
     isOpportunitiesLoading: false,
     opportunitiesError: '',
     isCreatingOpportunity: false,
@@ -96,6 +101,12 @@ afterEach(() => {
 })
 
 describe('Organisation opportunity management UI', () => {
+  it('shows weekdays in the homepage next event and opportunity rows', () => {
+    useOrganisationStore.setState({ allMyOpportunities: [opportunity], activeOpportunities: [opportunity] })
+    renderManagementRoute(<OrganisationHomepage />)
+    expect(screen.getAllByText('Friday, 1 Feb 2030')).toHaveLength(2)
+  })
+
   it.each([
     ['a deadline after the start', 'applicationDeadline', '2030-02-02', /Application deadline must be before/],
     ['an end before the start', 'endDate', '2030-01-31', /End date\/time must be after/],

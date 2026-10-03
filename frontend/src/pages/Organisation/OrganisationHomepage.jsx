@@ -14,8 +14,9 @@ import {
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
-import { formatDate, formatTime } from "../../lib/utils";
+import { formatTime } from "../../lib/utils";
 import {
+  formatOpportunityDate,
   getUpcomingOpportunities,
   sortOpportunitiesByMostRecent,
 } from "../../lib/opportunity";
@@ -95,7 +96,7 @@ const OpportunityRow = ({
         </p>
         
         <div className="org-home-opportunity-meta" style={{ marginTop: '2px' }}>
-          {date && <span><CalendarDays size={iconSize} />{formatDate(date)}</span>}
+          {date && <span><CalendarDays size={iconSize} />{formatOpportunityDate(date, "Date unavailable")}</span>}
           {displayTime && <span><Clock3 size={iconSize} />{displayTime}</span>}
         </div>
       </div>
@@ -224,7 +225,7 @@ const OrganisationHomepage = () => {
                 <h3>{nextOpportunity.title}</h3>
                 <p>{nextOpportunity.detail || nextOpportunity.details}</p>
                 <div className="org-home-hero-card-meta">
-                  {nextDate && <span><CalendarDays size={14} />{formatDate(nextDate)}</span>}
+                  {nextDate && <span><CalendarDays size={14} />{formatOpportunityDate(nextDate, "Date unavailable")}</span>}
                   {nextDisplayTime && <span><Clock3 size={14} />{nextDisplayTime}</span>}
                 </div>
               </>

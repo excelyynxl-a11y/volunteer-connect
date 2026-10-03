@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { formatDate } from "../lib/utils";
+import { formatOpportunityDate } from "../lib/opportunity";
 import { ArrowRight, ClipboardList, Search } from "lucide-react";
 
 // application management
@@ -111,8 +111,8 @@ const ApplicationOpportunityList = ({ opportunities, onManage }) => {
                         {opp.category} · {opp.location}
                       </span>
                     </td>
-                    <td>{formatDate(opp.eventDate)}</td>
-                    <td>{formatDate(opp.deadline)}</td>
+                    <td>{formatOpportunityDate(opp.eventDate, "Date unavailable")}</td>
+                    <td>{formatOpportunityDate(opp.deadline, "Date unavailable")}</td>
                     <td>
                       {pendingCount > 0 ? (
                         <span className="app-pending-badge">

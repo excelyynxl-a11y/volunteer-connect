@@ -2279,6 +2279,7 @@
 
 .org-home-hero-card-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 18px;
   margin-top: 4px;
   color: #2c614f;
@@ -2545,6 +2546,7 @@
 
 .org-home-opportunity-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   margin-top: 4px;
   color: #9a8268;

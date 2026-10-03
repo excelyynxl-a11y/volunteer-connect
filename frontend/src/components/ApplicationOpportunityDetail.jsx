@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatDate } from "../lib/utils";
+import { formatOpportunityDate } from "../lib/opportunity";
 import { ArrowLeft, Check, ClipboardList, Eye, X, Calendar } from "lucide-react";
 import { APPLICATION_TABS } from "../lib/application";
 
@@ -106,8 +107,8 @@ const ApplicationOpportunityDetail = ({
           <p className="app-detail-eyebrow">Opportunity applications</p>
           <h1>{opportunity?.title}</h1>
           <span className="app-detail-subtitle">
-            {formatDate(opportunity?.eventDate)} · Application deadline{" "}
-            {formatDate(opportunity?.deadline)}
+            {formatOpportunityDate(opportunity?.eventDate, "Date unavailable")} · Application deadline{" "}
+            {formatOpportunityDate(opportunity?.deadline, "Date unavailable")}
           </span>
         </div>
         <button type="button" className="app-back-btn" onClick={onBack}>

@@ -57,7 +57,7 @@ describe('frontend opportunity rules', () => {
   })
 
   it('formats valid dates and time ranges with safe fallbacks', () => {
-    expect(formatOpportunityDate('2027-01-07T00:00:00.000Z')).toBe('7 Jan 2027')
+    expect(formatOpportunityDate('2027-01-07T09:00')).toBe('Thursday, 7 Jan 2027')
     expect(formatOpportunityDate(null, 'TBC')).toBe('TBC')
     expect(formatOpportunityDate('not-a-date', 'TBC')).toBe('TBC')
 
@@ -66,6 +66,14 @@ describe('frontend opportunity rules', () => {
 
     expect(formatOpportunityDateTime(null, 'No date')).toBe('No date')
     expect(formatOpportunityDateTime('not-a-date', 'No date')).toBe('No date')
+    expect(formatOpportunityDateTime('2027-01-07T09:00')).toContain('Thursday')
+  })
+
+  it.each([
+    ['2026-10-03T00:00', 'Saturday, 3 Oct 2026'],
+    ['2030-01-07T23:59', 'Monday, 7 Jan 2030'],
+  ])('shows the weekday for the local opportunity date %s', (date, expected) => {
+    expect(formatOpportunityDate(date)).toBe(expected)
   })
 
   it('returns safe organisation name, status class, and requirement values', () => {
