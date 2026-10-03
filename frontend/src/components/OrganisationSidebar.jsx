@@ -1,5 +1,6 @@
 import React from "react";
 import Badge from "./Badge";
+import SidebarShell from "./SidebarShell";
 import {
   AlertCircle,
   File,
@@ -44,11 +45,13 @@ const OrganisationSidebar = () => {
       )?.key || currentTab;
 
   return (
-    <aside className={`organisation-sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
+    <SidebarShell className="organisation-sidebar" sidebarCollapsed={sidebarCollapsed} label="Organisation">
+      {({ collapsed, isMobile, closeMobileMenu }) => <>
       <button
         className="organisation-sidebar-brand"
-        onClick={toggleSidebar}
-        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        onClick={isMobile ? closeMobileMenu : toggleSidebar}
+        aria-label={isMobile ? "Close navigation" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={isMobile ? "Close navigation" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <Badge
           icon="V"
@@ -65,11 +68,13 @@ const OrganisationSidebar = () => {
             onClick={() => {
               setCurrentTab(key);
               navigate(path);
+              closeMobileMenu();
             }}
-            title={sidebarCollapsed ? label : undefined}
+            aria-label={label}
+            title={collapsed ? label : undefined}
           >
             {React.createElement(Icon, { size: 20 })}
-            {!sidebarCollapsed && <span>{label}</span>}
+            {!collapsed && <span>{label}</span>}
           </button>
         ))}
       </nav>
@@ -77,14 +82,16 @@ const OrganisationSidebar = () => {
       <div className="organisation-sidebar-footer">
         <button
           className="organisation-sidebar-btn organisation-sidebar-logout"
-          onClick={handleLogout}
-          title={sidebarCollapsed ? "Logout" : undefined}
+          onClick={() => { closeMobileMenu(); handleLogout(); }}
+          aria-label="Logout"
+          title={collapsed ? "Logout" : undefined}
         >
           <LogOut size={20} />
-          {!sidebarCollapsed && <span>Logout</span>}
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
-    </aside>
+      </>}
+    </SidebarShell>
   );
 };
 

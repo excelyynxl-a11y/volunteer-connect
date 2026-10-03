@@ -25,7 +25,8 @@
   padding: 28px 20px;
   background: #2c614f;
   color: #ffffff;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   z-index: 100;
   transition:
     width 0.3s ease,
@@ -1753,12 +1754,14 @@
 
   .admin-sidebar.mobile-open {
     transform: translateX(0);
-    width: 280px;
-    padding: 28px 20px;
+    box-sizing: border-box;
+    width: min(280px, 100vw);
+    padding: 16px 20px;
   }
 
   .admin-content {
     margin-left: 0;
+    min-height: calc(100dvh - 56px);
   }
 
   .admin-content.sidebar-collapsed {

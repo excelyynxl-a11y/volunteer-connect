@@ -891,12 +891,14 @@
 
   .organisation-sidebar.mobile-open {
     transform: translateX(0);
-    width: 280px;
-    padding: 28px 20px;
+    box-sizing: border-box;
+    width: min(280px, 100vw);
+    padding: 16px 20px;
   }
 
   .organisation-content {
     margin-left: 0;
+    min-height: calc(100dvh - 56px);
   }
 
   .organisation-content.sidebar-collapsed {
@@ -3247,6 +3249,12 @@
     height: auto;
     min-height: 100vh;
     overflow-y: auto;
+  }
+}
+
+@media (max-width: 1050px) {
+  .organisation-content.organisation-content-messages {
+    min-height: calc(100dvh - 56px);
   }
 }
 
