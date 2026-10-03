@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import CreateOpportunityPage from '../../src/pages/Organisation/CreateOpportunityPage.jsx'
 import EditOpportunity from '../../src/pages/Organisation/EditOpportunity.jsx'
 import OrganisationOpportunity from '../../src/pages/Organisation/OrganisationOpportunity.jsx'
+import OrganisationHomepage from '../../src/pages/Organisation/OrganisationHomepage.jsx'
 import { useOrganisationStore } from '../../src/store/useOrganisationStore.js'
 
 vi.mock('react-hot-toast', () => ({
@@ -30,6 +31,10 @@ const opportunity = {
 const resetStore = () => {
   useOrganisationStore.setState({
     allMyOpportunities: [],
+    activeOpportunities: [],
+    closedOpportunities: [],
+    cancelledOpportunities: [],
+    getMyOpportunities: vi.fn(),
     isOpportunitiesLoading: false,
     opportunitiesError: '',
     isCreatingOpportunity: false,
@@ -96,6 +101,70 @@ afterEach(() => {
 })
 
 describe('Organisation opportunity management UI', () => {
+  it('shows weekdays in the homepage next event and opportunity rows', () => {
+    useOrganisationStore.setState({ allMyOpportunities: [opportunity], activeOpportunities: [opportunity] })
+    renderManagementRoute(<OrganisationHomepage />)
+    expect(screen.getAllByText('Friday, 1 Feb 2030')).toHaveLength(2)
+  })
+
+  it.each([
+    ['a deadline after the start', 'applicationDeadline', '2030-02-02', /Application deadline must be before/],
+    ['an end before the start', 'endDate', '2030-01-31', /End date\/time must be after/],
+    ['a past start date', 'startDate', '2000-01-01', /Start date cannot be before today/],
+  ])('blocks creation with %s before calling the API', async (_description, field, value, message) => {
+    const user = userEvent.setup()
+    const createOpportunity = vi.fn()
+    useOrganisationStore.setState({ createOpportunity })
+    const view = renderManagementRoute(<CreateOpportunityPage />)
+    await fillValidCreateForm(user, view.container)
+    fireEvent.change(view.container.querySelector(`[name="${field}"]`), { target: { value } })
+    fireEvent.submit(view.container.querySelector('#create-opportunity-form'))
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(createOpportunity).not.toHaveBeenCalled()
+  }, 10_000)
+
+  it('rejects a midnight start equal to the date-only deadline', async () => {
+    const user = userEvent.setup()
+    const createOpportunity = vi.fn()
+    useOrganisationStore.setState({ createOpportunity })
+    const view = renderManagementRoute(<CreateOpportunityPage />)
+    await fillValidCreateForm(user, view.container)
+    await chooseCustomOption(user, '09:00', '00:00')
+    fireEvent.change(view.container.querySelector('[name="applicationDeadline"]'), { target: { value: '2030-02-01' } })
+    fireEvent.submit(view.container.querySelector('#create-opportunity-form'))
+    expect(screen.getByText(/Application deadline must be before/)).toBeInTheDocument()
+    expect(createOpportunity).not.toHaveBeenCalled()
+  }, 10_000)
+
+  it('submits an overnight event with a same-day deadline at local midnight', async () => {
+    const user = userEvent.setup()
+    const createOpportunity = vi.fn().mockResolvedValue({ success: true })
+    useOrganisationStore.setState({ createOpportunity })
+    const view = renderManagementRoute(<CreateOpportunityPage />)
+    await fillValidCreateForm(user, view.container)
+    fireEvent.change(view.container.querySelector('[name="applicationDeadline"]'), { target: { value: '2030-02-01' } })
+    fireEvent.change(view.container.querySelector('[name="endDate"]'), { target: { value: '2030-02-02' } })
+    fireEvent.submit(view.container.querySelector('#create-opportunity-form'))
+    expect(createOpportunity).toHaveBeenCalledWith(expect.objectContaining({
+      startAt: new Date('2030-02-01T09:00').toISOString(),
+      endAt: new Date('2030-02-02T12:00').toISOString(),
+      applicationDeadline: new Date('2030-02-01T00:00').toISOString(),
+    }))
+  }, 10_000)
+
+  it.each([
+    ['endAt', '2030-02-01T00:00', /End date\/time must be after/],
+    ['applicationDeadline', '2030-02-02T00:00', /Application deadline must be before/],
+  ])('blocks editing an invalid %s before calling the API', (field, value, message) => {
+    const updateOpportunity = vi.fn()
+    useOrganisationStore.setState({ allMyOpportunities: [opportunity], updateOpportunity })
+    const view = renderManagementRoute(<EditOpportunity />, '/organisation-dashboard/edit-opportunity/opportunity-1')
+    fireEvent.change(view.container.querySelector(`[name="${field}"]`), { target: { value } })
+    fireEvent.submit(view.container.querySelector('form'))
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(updateOpportunity).not.toHaveBeenCalled()
+  })
+
   it('validates required text, capacity, category, and chronological dates', async () => {
     const createOpportunity = vi.fn()
     useOrganisationStore.setState({ createOpportunity })

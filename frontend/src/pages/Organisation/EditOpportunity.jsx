@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useOrganisationStore } from '../../store/useOrganisationStore';
 import { malaysiaStateCities, malaysiaStates, EVENT_CATEGORIES } from '../../lib/data';
 import { ArrowLeft, Save, X, Calendar, MapPin, Tag, AlignLeft } from 'lucide-react';
+import { validateOpportunityDates } from '../../lib/opportunityDates';
 
 const formatDBDateForInput = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
+    if (!Number.isFinite(date.getTime())) return "";
     const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
     return localDate.toISOString().slice(0, 16);
 };
@@ -156,17 +158,8 @@ const EditOpportunity = () => {
             newErrors.maxVolunteers = "Volunteer capacity must be a positive integer.";
         }
 
-        if (formData.startAt && formData.endAt) {
-            const startDate = new Date(formData.startAt);
-            const endDate = new Date(formData.endAt);
-            if (endDate <= startDate) {
-                newErrors.endAt = "End date/time must be after the start date/time.";
-            }
-
-            if (formData.applicationDeadline && new Date(formData.applicationDeadline) >= startDate) {
-                newErrors.applicationDeadline = "Application deadline must be before the start date/time.";
-            }
-        }
+        const { errors: dateErrors, start, end, deadline } = validateOpportunityDates(formData);
+        Object.assign(newErrors, dateErrors);
 
         if (Object.keys(newErrors).length > 0) {
             setFieldErrors(newErrors);
@@ -180,12 +173,10 @@ const EditOpportunity = () => {
             requirements: formData.requirements.trim(),
             category: selectedCategory,
             location: `${selectedState}, ${selectedCity}`,
-            startAt: new Date(formData.startAt).toISOString(),
-            endAt: new Date(formData.endAt).toISOString(),
+            startAt: start.toISOString(),
+            endAt: end.toISOString(),
             maxVolunteers: Number(formData.maxVolunteers),
-            applicationDeadline: formData.applicationDeadline
-                ? new Date(formData.applicationDeadline).toISOString()
-                : undefined,
+            applicationDeadline: deadline.toISOString(),
             status: formData.status
         };
 
@@ -343,7 +334,8 @@ const EditOpportunity = () => {
 
                             <div className="org-profile-edit-input-group">
                                 <label>Application Deadline</label>
-                                <input type="datetime-local" name="applicationDeadline" value={formData.applicationDeadline} onChange={handleChange} className={fieldErrors.applicationDeadline ? "input-error" : ""} />
+                                <input type="datetime-local" name="applicationDeadline" max={formData.startAt || undefined} value={formData.applicationDeadline} onChange={handleChange} className={fieldErrors.applicationDeadline ? "input-error" : ""} />
+                                <p className="organisation-form-hint">The application deadline must be earlier than the start date and time.</p>
                                 {renderError("applicationDeadline")}
                             </div>
 
@@ -364,6 +356,7 @@ const EditOpportunity = () => {
                                     <input
                                         type="datetime-local"
                                         name="endAt"
+                                        min={formData.startAt || undefined}
                                         value={formData.endAt}
                                         onChange={handleChange}
                                         className={fieldErrors.endAt ? "input-error" : ""}

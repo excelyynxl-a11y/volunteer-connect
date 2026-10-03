@@ -94,6 +94,8 @@ describe('Volunteer opportunity discovery UI', () => {
     expect(screen.getByText('Community Garden Day')).toBeInTheDocument()
     expect(screen.queryByText('Closed Event')).not.toBeInTheDocument()
     expect(screen.getByText('1 results')).toBeInTheDocument()
+    expect(screen.getByText('Monday, 7 Jan 2030')).toBeInTheDocument()
+    expect(screen.getByText('Apply before Monday, 31 Dec 2029')).toBeInTheDocument()
   })
 
   it('searches and filters by the supported visible fields', async () => {
@@ -142,6 +144,7 @@ describe('Volunteer opportunity discovery UI', () => {
     expect(within(dialog).getByText('Green Neighbours')).toBeInTheDocument()
     expect(within(dialog).getByText('Closed shoes')).toBeInTheDocument()
     expect(within(dialog).getByText('7 spots left')).toBeInTheDocument()
+    expect(within(dialog).getByText('Monday, 7 Jan 2030')).toBeInTheDocument()
   })
 
   it('explains why Apply is blocked when availability does not cover the event', async () => {

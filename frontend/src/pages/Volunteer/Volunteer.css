@@ -1749,12 +1749,20 @@
     transform: translateX(-100%);
   }
 
+  .volunteer-sidebar.mobile-open {
+    transform: translateX(0);
+    box-sizing: border-box;
+    width: min(280px, 100vw);
+    padding: 16px 20px;
+  }
+
   .volunteer-content,
   .volunteer-content.sidebar-collapsed {
     margin-left: 0;
   }
 
   .volunteer-content {
+    height: calc(100dvh - 56px);
     padding: 28px 24px;
   }
 

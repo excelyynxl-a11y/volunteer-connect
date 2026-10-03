@@ -100,6 +100,7 @@ describe('Application feature UI', () => {
     )
 
     expect(screen.getByText('Community Garden Day')).toBeInTheDocument()
+    expect(screen.getByText(/Monday, 7 Jan 2030/)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Confirm & Apply' }))
     expect(onConfirm).toHaveBeenCalledOnce()
   })
@@ -182,6 +183,8 @@ describe('Application feature UI', () => {
 
     expect(await screen.findByText('Community Garden Day')).toBeInTheDocument()
     expect(screen.getByText('1 pending')).toBeInTheDocument()
+    expect(screen.getByText('Monday, 7 Jan 2030')).toBeInTheDocument()
+    expect(screen.getByText('Monday, 31 Dec 2029')).toBeInTheDocument()
     expect(screen.queryByText('Another organisation')).not.toBeInTheDocument()
   })
 
@@ -198,6 +201,8 @@ describe('Application feature UI', () => {
       approveApplication,
     })
     renderOrganisationApplications('/organisation-dashboard/applications/opportunity-1')
+
+    expect(await screen.findByText(/Monday, 7 Jan 2030.*Application deadline.*Monday, 31 Dec 2029/)).toBeInTheDocument()
 
     await user.click(await screen.findByRole('button', { name: 'View Details' }))
     expect(screen.getByRole('heading', { name: 'Volunteer profile' })).toBeInTheDocument()

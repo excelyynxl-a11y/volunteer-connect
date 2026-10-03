@@ -40,6 +40,7 @@ export const formatOpportunityDate = (dateValue, fallback = '') => {
   if (!date) return fallback
 
   return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -64,6 +65,7 @@ export const formatOpportunityDateTime = (dateValue, fallback = '') => {
   if (!date) return fallback
 
   return date.toLocaleString('en-MY', {
+    weekday: 'long',
     day: 'numeric',
     month: 'short',
     year: 'numeric',

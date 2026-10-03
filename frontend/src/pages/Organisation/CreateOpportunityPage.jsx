@@ -21,6 +21,7 @@ import {
 import CustomSelect from "../../components/CustomSelect";
 import { useOrganisationStore } from "../../store/useOrganisationStore";
 import toast from "react-hot-toast";
+import { formatLocalDate, validateOpportunityDates } from "../../lib/opportunityDates";
 
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
   const hours = Math.floor(index / 2).toString().padStart(2, "0");
@@ -32,11 +33,6 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
     value,
   };
 });
-
-const buildLocalDateTime = (date, time) => {
-  if (!date || !time) return null;
-  return new Date(`${date}T${time}`);
-};
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
@@ -112,22 +108,12 @@ const CreateOpportunityPage = () => {
 
     const newErrors = {};
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const startDateTime = buildLocalDateTime(
-      formData.startDate,
-      formData.startTime,
-    );
-
-    const endDateTime = buildLocalDateTime(
-      formData.endDate,
-      formData.endTime,
-    );
-
-    const deadlineDate = formData.applicationDeadline
-      ? new Date(`${formData.applicationDeadline}T00:00`)
-      : null;
+    const { errors: dateErrors, start: startDateTime, end: endDateTime, deadline: deadlineDate } =
+      validateOpportunityDates({
+        startAt: formData.startDate && formData.startTime ? `${formData.startDate}T${formData.startTime}` : "",
+        endAt: formData.endDate && formData.endTime ? `${formData.endDate}T${formData.endTime}` : "",
+        applicationDeadline: formData.applicationDeadline ? `${formData.applicationDeadline}T00:00` : "",
+      }, { creating: true });
 
     // title validation
     if (!formData.title.trim()) {
@@ -177,13 +163,6 @@ const CreateOpportunityPage = () => {
 
     if (!formData.endTime) {
       newErrors.endTime = "End time is required";
-    } else if (
-      startDateTime &&
-      endDateTime &&
-      endDateTime <= startDateTime
-    ) {
-      newErrors.endTime =
-        "End date and time must be after start date and time";
     }
 
     // volunteer capacity validation
@@ -199,10 +178,11 @@ const CreateOpportunityPage = () => {
     if (!formData.applicationDeadline) {
       newErrors.applicationDeadline =
         "Application deadline is required";
-    } else if (deadlineDate < today) {
-      newErrors.applicationDeadline =
-        "Application deadline cannot be before today's date";
     }
+
+    if (dateErrors.startAt) newErrors.startDate = dateErrors.startAt;
+    if (dateErrors.endAt) newErrors.endDate = dateErrors.endAt;
+    if (dateErrors.applicationDeadline) newErrors.applicationDeadline = dateErrors.applicationDeadline;
 
     setErrors(newErrors);
 
@@ -564,6 +544,7 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="startDate"
+                      min={formatLocalDate()}
                       value={formData.startDate}
                       onChange={handleChange}
                       className={
@@ -616,6 +597,7 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="endDate"
+                      min={formData.startDate || formatLocalDate()}
                       value={formData.endDate}
                       onChange={handleChange}
                       className={
@@ -695,6 +677,8 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="applicationDeadline"
+                      min={formatLocalDate()}
+                      max={formData.startDate || undefined}
                       value={
                         formData.applicationDeadline
                       }
@@ -706,6 +690,7 @@ const CreateOpportunityPage = () => {
                       }
                     />
 
+                    <p className="organisation-form-hint">Applications close at 00:00 on this date, before the opportunity starts.</p>
                     {errors.applicationDeadline && (
                       <p className="organisation-error-text">
                         {
