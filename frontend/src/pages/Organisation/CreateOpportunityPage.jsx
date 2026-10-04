@@ -41,6 +41,13 @@ const FIELD_LIMITS = {
   requirements: { min: 0, max: 2000 },
 };
 
+const getCurrentTimeValue = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 const LengthMeter = ({ id, value, min = 0, max, showHint = true }) => {
   const length = value.length;
   const trimmedLength = value.trim().length;
@@ -128,6 +135,19 @@ const CreateOpportunityPage = () => {
   const availableCategories = EVENT_CATEGORIES.filter(
     (category) => !selectedCategory.includes(category),
   );
+
+  // Time slot filtering: hide slots that are already in the past
+  const todayInputValue = formatLocalDate();
+  const isStartToday = formData.startDate === todayInputValue;
+
+  const startTimeOptions = isStartToday
+    ? TIME_OPTIONS.filter((option) => option.value > getCurrentTimeValue())
+    : TIME_OPTIONS;
+
+  const endTimeOptions =
+    formData.endDate && formData.endDate === formData.startDate && formData.startTime
+      ? TIME_OPTIONS.filter((option) => option.value > formData.startTime)
+      : TIME_OPTIONS;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -245,6 +265,17 @@ const CreateOpportunityPage = () => {
     if (dateErrors.startAt) newErrors.startDate = dateErrors.startAt;
     if (dateErrors.endAt) newErrors.endDate = dateErrors.endAt;
     if (dateErrors.applicationDeadline) newErrors.applicationDeadline = dateErrors.applicationDeadline;
+
+    // start datetime must be in the future (date alone can be today)
+    if (
+      !newErrors.startDate &&
+      !newErrors.startTime &&
+      startDateTime instanceof Date &&
+      !Number.isNaN(startDateTime.getTime()) &&
+      startDateTime <= new Date()
+    ) {
+      newErrors.startTime = "This time has already passed. Pick a later start time.";
+    }
 
     setErrors(newErrors);
 
@@ -595,7 +626,7 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="startDate"
-                      min={formatLocalDate()}
+                      min={todayInputValue}
                       value={formData.startDate}
                       onChange={handleChange}
                       className={
@@ -621,20 +652,31 @@ const CreateOpportunityPage = () => {
 
                     <CustomSelect
                       value={formData.startTime}
-                      placeholder="Select start time"
-                      options={TIME_OPTIONS}
+                      placeholder={
+                        startTimeOptions.length > 0
+                          ? "Select start time"
+                          : "No times left today, pick a later date"
+                      }
+                      options={startTimeOptions}
                       onChange={(value) =>
                         handleChange({
                           target: { name: "startTime", value },
                         })
                       }
                       className={errors.startTime ? "error" : ""}
+                      disabled={startTimeOptions.length === 0}
                     />
 
-                    {errors.startTime && (
+                    {errors.startTime ? (
                       <p className="organisation-error-text">
                         {errors.startTime}
                       </p>
+                    ) : (
+                      isStartToday && (
+                        <p className="organisation-form-hint">
+                          Must be later than the current time.
+                        </p>
+                      )
                     )}
                   </div>
 
@@ -648,7 +690,7 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="endDate"
-                      min={formData.startDate || formatLocalDate()}
+                      min={formData.startDate || todayInputValue}
                       value={formData.endDate}
                       onChange={handleChange}
                       className={
@@ -675,7 +717,7 @@ const CreateOpportunityPage = () => {
                     <CustomSelect
                       value={formData.endTime}
                       placeholder="Select end time"
-                      options={TIME_OPTIONS}
+                      options={endTimeOptions}
                       onChange={(value) =>
                         handleChange({
                           target: { name: "endTime", value },
@@ -724,7 +766,7 @@ const CreateOpportunityPage = () => {
                     <input
                       type="date"
                       name="applicationDeadline"
-                      min={formatLocalDate()}
+                      min={todayInputValue}
                       max={formData.startDate || undefined}
                       value={formData.applicationDeadline}
                       onChange={handleChange}
