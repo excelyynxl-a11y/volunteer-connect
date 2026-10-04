@@ -170,6 +170,7 @@ const SignUp = () => {
       payload.append("email", formData.email);
       payload.append("password", formData.password);
       payload.append("role", formData.role);
+
       if (formData.role === "volunteer") {
         payload.append("ageGroup", volunteerFormData.ageGroup);
         if (volunteerFormData.resume) {

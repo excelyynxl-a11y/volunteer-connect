@@ -921,29 +921,41 @@
   }
 }
 
-
 .signup-password-checklist {
   list-style: none;
   padding: 0;
-  margin: 0.5rem 0 0 0;
+  margin: 8px 0 4px;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 6px;
 }
 
-.signup-password-requirement {
+.checklist-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  color: #94a3b8; /* muted gray */
-  transition: color 0.15s ease-in-out;
+  gap: 8px;
+  font-size: 0.82rem;
+  transition: color 0.15s ease;
 }
 
-.signup-password-requirement.met {
-  color: #16a34a; /* success green */
+/* Green state when condition is met */
+.checklist-item.valid {
+  color: #16a34a;
 }
 
-.requirement-icon {
+.checklist-item.valid .checklist-icon {
+  color: #16a34a;
+}
+
+/* Red state when condition is not met */
+.checklist-item.invalid {
+  color: #dc2626;
+}
+
+.checklist-item.invalid .checklist-icon {
+  color: #dc2626;
+}
+
+.checklist-icon {
   flex-shrink: 0;
 }
