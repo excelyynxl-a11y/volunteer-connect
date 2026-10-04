@@ -10,7 +10,8 @@ import {
   Users,
   X,
   Target,
-  Loader2
+  Loader2,
+  Info,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -33,6 +34,69 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
     value,
   };
 });
+
+const FIELD_LIMITS = {
+  title: { min: 15, max: 120 },
+  details: { min: 50, max: 5000 },
+  requirements: { min: 0, max: 2000 },
+};
+
+const LengthMeter = ({ id, value, min = 0, max, showHint = true }) => {
+  const length = value.length;
+  const trimmedLength = value.trim().length;
+  const remaining = Math.max(min - trimmedLength, 0);
+  const minMet = remaining === 0;
+  const fillPercent = Math.min((length / max) * 100, 100);
+  const minPercent = (min / max) * 100;
+
+  let hintText = "";
+  if (min > 0) {
+    if (trimmedLength === 0) {
+      hintText = `Minimum ${min} characters`;
+    } else if (!minMet) {
+      hintText = `${remaining} more character${remaining === 1 ? "" : "s"} needed (minimum ${min})`;
+    } else {
+      hintText = `Minimum of ${min} characters met`;
+    }
+  }
+
+  return (
+    <div className="organisation-length-meter">
+      <div className="organisation-progress-row">
+        <div
+          className={`organisation-progress-bar ${
+            min > 0 && !minMet ? "below-min" : ""
+          }`}
+        >
+          <span style={{ width: `${fillPercent}%` }} />
+          {min > 0 && (
+            <i
+              className="organisation-progress-min-marker"
+              style={{ left: `${minPercent}%` }}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+
+        <div className="organisation-character-count">
+          {length}/{max}
+        </div>
+      </div>
+
+      {min > 0 && showHint && (
+        <p
+          id={id}
+          className={`organisation-form-hint organisation-length-hint ${
+            minMet ? "is-met" : ""
+          }`}
+        >
+          {minMet ? <CheckCircle2 size={14} /> : <Info size={14} />}
+          {hintText}
+        </p>
+      )}
+    </div>
+  );
+};
 
 const CreateOpportunityPage = () => {
   const navigate = useNavigate();
@@ -118,21 +182,19 @@ const CreateOpportunityPage = () => {
     // title validation
     if (!formData.title.trim()) {
       newErrors.title = "Event title is required";
-    } else if (formData.title.trim().length < 15) {
-      newErrors.title =
-        "Title must be at least 15 characters";
+    } else if (formData.title.trim().length < FIELD_LIMITS.title.min) {
+      newErrors.title = `Title must be at least ${FIELD_LIMITS.title.min} characters`;
     }
 
     // description validation
     if (!formData.details.trim()) {
       newErrors.details = "Description is required";
-    } else if (formData.details.trim().length < 50) {
-      newErrors.details =
-        "Description must be at least 50 characters";
+    } else if (formData.details.trim().length < FIELD_LIMITS.details.min) {
+      newErrors.details = `Description must be at least ${FIELD_LIMITS.details.min} characters`;
     }
 
-    if (formData.requirements.trim().length > 2000) {
-      newErrors.requirements = "Requirements must be 2,000 characters or fewer";
+    if (formData.requirements.trim().length > FIELD_LIMITS.requirements.max) {
+      newErrors.requirements = `Requirements must be ${FIELD_LIMITS.requirements.max.toLocaleString()} characters or fewer`;
     }
 
     // location validation
@@ -306,8 +368,7 @@ const CreateOpportunityPage = () => {
                 <h2>Opportunity Details</h2>
 
                 <p className="organisation-card-subtitle">
-                  Fill in the essentials below, all
-                  fields are required.
+                  Fill in the essentials below. All fields are required except Requirements.
                 </p>
               </div>
             </div>
@@ -316,6 +377,7 @@ const CreateOpportunityPage = () => {
               id="create-opportunity-form"
               className="organisation-create-form"
               onSubmit={handleSubmit}
+              noValidate
             >
               <div className="organisation-form-left">
 
@@ -329,33 +391,25 @@ const CreateOpportunityPage = () => {
                   <input
                     type="text"
                     name="title"
-                     value={formData.title}
-                     maxLength={120}
+                    value={formData.title}
+                    maxLength={FIELD_LIMITS.title.max}
                     onChange={handleChange}
                     placeholder="A clear, inviting title for your event"
-                    className={
-                      errors.title ? "error" : ""
-                    }
+                    aria-describedby="title-hint"
+                    aria-invalid={!!errors.title}
+                    className={errors.title ? "error" : ""}
                   />
 
-                  <div className="organisation-progress-row">
-                    <div className="organisation-progress-bar">
-                      <span
-                        style={{
-                         width: `${Math.min((formData.title.length / 120) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="organisation-character-count">
-                      {formData.title.length}/120
-                    </div>
-                  </div>
+                  <LengthMeter
+                    id="title-hint"
+                    value={formData.title}
+                    min={FIELD_LIMITS.title.min}
+                    max={FIELD_LIMITS.title.max}
+                    showHint={!errors.title}
+                  />
 
                   {errors.title && (
-                    <p className="organisation-error-text">
-                      {errors.title}
-                    </p>
+                    <p className="organisation-error-text">{errors.title}</p>
                   )}
                 </div>
 
@@ -368,53 +422,50 @@ const CreateOpportunityPage = () => {
 
                   <textarea
                     name="details"
-                     value={formData.details}
-                     maxLength={5000}
+                    value={formData.details}
+                    maxLength={FIELD_LIMITS.details.max}
                     onChange={handleChange}
                     placeholder="Describe what volunteers will do, who they will help, and why it matters"
-                    className={
-                      errors.details ? "error" : ""
-                    }
+                    aria-describedby="details-hint"
+                    aria-invalid={!!errors.details}
+                    className={errors.details ? "error" : ""}
                   />
 
-                  <div className="organisation-progress-row">
-                    <div className="organisation-progress-bar">
-                      <span
-                        style={{
-                           width: `${Math.min((formData.details.length / 5000) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="organisation-character-count">
-                      {formData.details.length}/5000
-                    </div>
-                  </div>
+                  <LengthMeter
+                    id="details-hint"
+                    value={formData.details}
+                    min={FIELD_LIMITS.details.min}
+                    max={FIELD_LIMITS.details.max}
+                    showHint={!errors.details}
+                  />
 
                   {errors.details && (
-                    <p className="organisation-error-text">
-                      {errors.details}
-                    </p>
+                    <p className="organisation-error-text">{errors.details}</p>
                   )}
                 </div>
 
+                {/* REQUIREMENTS */}
                 <div className="organisation-form-group">
                   <label>
                     <FileText size={16} />
                     Requirements (optional)
                   </label>
+
                   <textarea
                     name="requirements"
                     value={formData.requirements}
                     onChange={handleChange}
-                    maxLength={2000}
+                    maxLength={FIELD_LIMITS.requirements.max}
                     rows={4}
                     placeholder="List useful skills, equipment, or preparation volunteers should have"
                     className={errors.requirements ? "error" : ""}
                   />
-                  <div className="organisation-character-count">
-                    {formData.requirements.length}/2000
-                  </div>
+
+                  <LengthMeter
+                    value={formData.requirements}
+                    max={FIELD_LIMITS.requirements.max}
+                  />
+
                   {errors.requirements && (
                     <p className="organisation-error-text">{errors.requirements}</p>
                   )}
@@ -653,17 +704,13 @@ const CreateOpportunityPage = () => {
                       value={formData.maxVolunteers}
                       onChange={handleChange}
                       min="1"
-                      className={
-                        errors.maxVolunteers
-                          ? "error"
-                          : ""
-                      }
+                      className={errors.maxVolunteers ? "error" : ""}
                     />
 
-                    {errors.maxVolunteers && (
-                      <p className="organisation-error-text">
-                        {errors.maxVolunteers}
-                      </p>
+                    {errors.maxVolunteers ? (
+                      <p className="organisation-error-text">{errors.maxVolunteers}</p>
+                    ) : (
+                      <p className="organisation-form-hint">At least 1 volunteer.</p>
                     )}
                   </div>
 
@@ -679,9 +726,7 @@ const CreateOpportunityPage = () => {
                       name="applicationDeadline"
                       min={formatLocalDate()}
                       max={formData.startDate || undefined}
-                      value={
-                        formData.applicationDeadline
-                      }
+                      value={formData.applicationDeadline}
                       onChange={handleChange}
                       className={
                         errors.applicationDeadline
@@ -693,9 +738,7 @@ const CreateOpportunityPage = () => {
                     <p className="organisation-form-hint">Applications close at 00:00 on this date, before the opportunity starts.</p>
                     {errors.applicationDeadline && (
                       <p className="organisation-error-text">
-                        {
-                          errors.applicationDeadline
-                        }
+                        {errors.applicationDeadline}
                       </p>
                     )}
                   </div>
