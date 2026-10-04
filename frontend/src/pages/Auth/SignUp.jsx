@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ArrowBigLeft,
   Building2,
+  Check,
   Eye,
   EyeOff,
   Loader2,
@@ -12,6 +13,7 @@ import {
   Mail,
   Upload,
   UserCheck,
+  X,
 } from "lucide-react";
 import Badge from "../../components/Badge";
 import { validateEmail, validatePassword } from "../../lib/utils";
@@ -29,7 +31,18 @@ const SignUp = () => {
     role: "",
   });
 
-  // current form state and errors
+  // Track password focus for interactive requirements
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  // Requirements defined after formData so formData.password is reachable
+  const passwordRequirements = [
+    { label: "At least 8 characters", met: formData.password.length >= 8 },
+    { label: "At least one uppercase letter", met: /[A-Z]/.test(formData.password) },
+    { label: "At least one lowercase letter", met: /[a-z]/.test(formData.password) },
+    { label: "At least one number", met: /[0-9]/.test(formData.password) },
+  ];
+
+  // Current form state and errors
   const [formState, setFormState] = useState({
     loading: false,
     errors: {},
@@ -346,6 +359,8 @@ const SignUp = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                   className={
                     formState.errors.password
                       ? "signup-input has-icon has-toggle error"
@@ -366,6 +381,25 @@ const SignUp = () => {
                   {formState.showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
+
+              {/* Password Requirements Checklist */}
+              {(passwordFocused || formData.password.length > 0) && (
+                <ul className="signup-password-checklist">
+                  {passwordRequirements.map((req, index) => (
+                    <li
+                      key={index}
+                      className={`checklist-item ${req.met ? "valid" : "invalid"}`}
+                    >
+                      {req.met ? (
+                        <Check className="checklist-icon check" size={14} />
+                      ) : (
+                        <X className="checklist-icon cross" size={14} />
+                      )}
+                      <span>{req.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
 
               {formState.errors.password && (
                 <p className="signup-field-error">

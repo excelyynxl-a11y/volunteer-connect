@@ -920,3 +920,30 @@
     font-size: 26px;
   }
 }
+
+
+.signup-password-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.signup-password-requirement {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #94a3b8; /* muted gray */
+  transition: color 0.15s ease-in-out;
+}
+
+.signup-password-requirement.met {
+  color: #16a34a; /* success green */
+}
+
+.requirement-icon {
+  flex-shrink: 0;
+}
