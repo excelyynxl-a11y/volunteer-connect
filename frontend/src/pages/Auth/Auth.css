@@ -920,3 +920,42 @@
     font-size: 26px;
   }
 }
+
+.signup-password-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  transition: color 0.15s ease;
+}
+
+/* Green state when condition is met */
+.checklist-item.valid {
+  color: #16a34a;
+}
+
+.checklist-item.valid .checklist-icon {
+  color: #16a34a;
+}
+
+/* Red state when condition is not met */
+.checklist-item.invalid {
+  color: #dc2626;
+}
+
+.checklist-item.invalid .checklist-icon {
+  color: #dc2626;
+}
+
+.checklist-icon {
+  flex-shrink: 0;
+}
