@@ -2,6 +2,7 @@ import { User, Volunteer, Organisation } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
+import { triggerVolunteerAnalysis } from "../lib/analysisTrigger.js";
 
 const PUBLIC_SIGNUP_ROLES = ["volunteer", "organisation"];
 
@@ -115,6 +116,10 @@ export const signup = async (req, res) => {
 
     if (newUser) {
       await newUser.save();
+
+      if (role === "volunteer") {
+        triggerVolunteerAnalysis(newUser._id);
+      }
 
       if (newUser.approvalStatus === "approved") {
         generateToken(newUser._id, res);
