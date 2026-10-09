@@ -1,4 +1,5 @@
 import { getVolunteerAnalysis } from "../services/volunteerAnalysis.service.js";
+import { getOpportunityRecommendations } from "../services/opportunityRecommendation.service.js";
 
 const toClientAnalysis = (analysis) => ({
   skills: analysis.skills,
@@ -29,5 +30,16 @@ export const getMyAnalysis = async (req, res) => {
   }
 };
 
-export const recommendOpportunities = async (_req, res) =>
-  res.status(501).json({ success: false, message: "Not implemented" });
+export const recommendOpportunities = async (req, res) => {
+  try {
+    const result = await getOpportunityRecommendations(req.user);
+
+    return res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    console.log("Error in recommendOpportunities controller: ", error.message);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
