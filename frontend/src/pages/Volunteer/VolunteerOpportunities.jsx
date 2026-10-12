@@ -20,6 +20,7 @@ import {
 import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import { useApplicationStore } from "../../store/useApplicationStore";
+import RecommendedOpportunities from "../ai-recommendations/RecommendedOpportunities";
 
 const initialCustomAvailability = {
   dayOfWeek: "",
@@ -204,6 +205,9 @@ const VolunteerOpportunities = () => {
           </div>
         </div>
       </section>
+      
+      <RecommendedOpportunities />
+
 
       <section className="volunteer-opportunities-panel">
         <div className="volunteer-opportunities-header">
