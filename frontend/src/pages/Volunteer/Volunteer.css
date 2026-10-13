@@ -4168,3 +4168,27 @@
     font-size: 26px;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--profile-cream); 
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(44, 97, 79, 0.4); /* Faded var(--profile-green) */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--profile-green);
+}
