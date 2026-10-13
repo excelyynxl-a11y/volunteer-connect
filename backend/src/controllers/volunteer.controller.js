@@ -3,6 +3,7 @@ import Application from "../models/application.model.js";
 import Opportunity from "../models/opportunity.model.js";
 import mongoose from "mongoose";
 import { uploadAvatarToCloudinary } from "../services/cloudinary.service.js";
+import { triggerVolunteerAnalysis } from "../lib/analysisTrigger.js";
 import {
   getAvailabilityValidationError,
   normalizeAvailability,
@@ -241,6 +242,7 @@ export const updateVolunteerProfile = async (req, res) => {
       message: "Volunteer profile updated successfully",
       data: updatedVolunteer,
     });
+    triggerVolunteerAnalysis(volunteer._id);
   } catch (err) {
     console.log("Error in updateVolunteerProfile controller: ", err.message);
     res.status(500).json({ message: err.message });

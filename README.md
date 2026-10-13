@@ -51,6 +51,11 @@ CLOUDINARY_API_SECRET=<ask team>
 
 NODE_ENV=development
 
+# Gemini (AI opportunity recommendations) - get a free key from Google AI Studio
+# The app still runs without these; analysis and recommendations are skipped.
+GEMINI_API_KEY=<ask team or create in Google AI Studio>
+GEMINI_MODEL=<ask team - Gemini model code, e.g. a Flash model>
+
 # EmailJS services
 EMAILJS_SERVICE_ID=service_f3k5d4w
 EMAILJS_TEMPLATE_ID=template_yypuy49
