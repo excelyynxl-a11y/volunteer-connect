@@ -132,3 +132,93 @@ describe('AI recommendation priority backend tests', () => {
     expect(result.opportunities).toEqual([]);
   });
 });
+
+
+// Helpers for the additional recommendation scenarios.
+const setCandidates = (items) => mocks.findOpportunities.mockImplementation(() => query(items));
+const setSelection = (ids) => mocks.gemini.mockResolvedValue({ opportunityIds: ids });
+
+describe('Remaining AI recommendation backend scenarios', () => {
+  it('AI-003 uses a PDF resume even when profile information is limited', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, arrayBuffer: async () => Uint8Array.from(Buffer.from('%PDF-1.7 sample')).buffer });
+    try {
+      mocks.findVolunteer.mockReturnValue(query({ biodata: '', skills: [], resume: 'https://example.com/resume.pdf', updatedAt: new Date() }));
+      mocks.gemini.mockResolvedValue({ skills: ['Teamwork'], experience: [], interests: ['Community work'], categories: ['Community'], explanation: analysis.explanation });
+      const result = await analyseVolunteer('volunteer-1');
+      expect(result.resumeUsed).toBe(true);
+      expect(result.categories).toContain('Community');
+      expect(mocks.gemini).toHaveBeenCalledWith(expect.objectContaining({ files: [expect.objectContaining({ mimeType: 'application/pdf' })] }));
+    } finally { globalThis.fetch = originalFetch; }
+  });
+
+  it('AI-004 does not invoke Gemini or invent categories when there is no meaningful input', async () => {
+    mocks.findVolunteer.mockReturnValue(query({ biodata: '', skills: [], resume: null, updatedAt: new Date() }));
+    const result = await analyseVolunteer('volunteer-1');
+    expect(mocks.gemini).not.toHaveBeenCalled();
+    expect(result.categories).toEqual([]);
+    expect(result.skills).toEqual([]);
+    expect(result.resumeUsed).toBe(false);
+  });
+
+  it('AI-005 falls back to profile analysis when the resume fetch fails', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network unavailable'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => { });
+    try {
+      mocks.findVolunteer.mockReturnValue(query({ biodata: 'I organise community events', skills: ['Planning'], resume: 'https://example.com/missing.pdf', updatedAt: new Date() }));
+      mocks.gemini.mockResolvedValue({ skills: ['Planning'], experience: [], interests: [], categories: ['Community'], explanation: analysis.explanation });
+      const result = await analyseVolunteer('volunteer-1');
+      expect(result.resumeUsed).toBe(false);
+      expect(mocks.gemini).toHaveBeenCalledWith(expect.objectContaining({ files: [], prompt: expect.stringContaining('Use the profile only') }));
+    } finally { warn.mockRestore(); globalThis.fetch = originalFetch; }
+  });
+
+  it('AI-009 excludes opportunities on a different weekday from volunteer availability', async () => {
+    setCandidates([event('a')]);
+    const result = await findCandidateOpportunities(volunteer([{ dayOfWeek: 'Monday', startTime: '09:00', endTime: '17:00', preference: 'available' }]), ['Community']);
+    expect(result).toEqual([]);
+  });
+
+  it('AI-011 filters out opportunities with expired application deadlines in the database query', async () => {
+    await findCandidateOpportunities(volunteer(), ['Community']);
+    const filter = mocks.findOpportunities.mock.calls[0][0];
+    expect(filter.applicationDeadline).toEqual({ $gt: expect.any(Date) });
+    expect(filter.applicationDeadline.$gt.getTime()).toBeGreaterThan(Date.now() - 5000);
+  });
+
+  it('AI-014 only queries categories present in the saved volunteer analysis', async () => {
+    await getOpportunityRecommendations(volunteer());
+    expect(mocks.findOpportunities).toHaveBeenCalledWith(expect.objectContaining({ category: { $in: ['Community'] } }));
+  });
+
+  it('AI-016 never returns more than four selected recommendations', async () => {
+    const items = Array.from({ length: 6 }, (_, i) => event(`id-${i}`));
+    setCandidates(items);
+    setSelection(items.map((item) => item._id));
+    const result = await getOpportunityRecommendations(volunteer());
+    expect(result.opportunities).toHaveLength(4);
+    expect(result.opportunities.map((x) => x._id)).toEqual(['id-0', 'id-1', 'id-2', 'id-3']);
+  });
+
+  it('AI-017 deduplicates repeated Gemini opportunity IDs', async () => {
+    setCandidates([event('a'), event('b')]);
+    setSelection(['a', 'a', 'b', 'b']);
+    const result = await getOpportunityRecommendations(volunteer());
+    expect(result.opportunities.map((x) => x._id)).toEqual(['a', 'b']);
+  });
+
+  it('AI-018 discards hallucinated Gemini IDs outside the candidate list', async () => {
+    setCandidates([event('a')]);
+    setSelection(['not-a-candidate', 'a']);
+    const result = await getOpportunityRecommendations(volunteer());
+    expect(result.opportunities.map((x) => x._id)).toEqual(['a']);
+  });
+
+  it('AI-019 returns no_matches when Gemini selects no opportunities', async () => {
+    setCandidates([event('a')]);
+    setSelection([]);
+    const result = await getOpportunityRecommendations(volunteer());
+    expect(result).toEqual({ status: 'no_matches', explanation: analysis.explanation, opportunities: [] });
+  });
+});
