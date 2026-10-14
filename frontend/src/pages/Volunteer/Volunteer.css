@@ -4053,17 +4053,6 @@
   transform: translateY(-2px);
 }
 
-.ai-reco-category {
-  align-self: flex-start;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: #ece6dc;
-  color: var(--profile-muted);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
 
 .ai-reco-card h3 {
   margin: 12px 0 6px;

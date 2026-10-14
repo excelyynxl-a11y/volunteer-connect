@@ -1,9 +1,9 @@
 import { Sparkles, Lightbulb, MapPin, Calendar, Clock, Users, CalendarClock } from "lucide-react";
 
 import {
-  formatDate,
-  formatTime,
-} from "../../lib/utils";
+  formatOpportunityDate,
+  formatOpportunityTimeRange,
+} from "../../lib/opportunity";
 
 const mapRecommendation = (opportunity) => {
   const spotsLeft = Math.max(
@@ -15,15 +15,31 @@ const mapRecommendation = (opportunity) => {
   return {
     ...opportunity,
     id: opportunity._id,
-    category: opportunity.category?.join(", ") || "Other",
+
+    // Keep categories as an array
+    category:
+      opportunity.category?.length > 0
+        ? opportunity.category
+        : ["Other"],
+
     description: opportunity.details,
+
     organisation:
       opportunity.organisationId?.name ||
       "Organisation unavailable",
-    date: formatDate(opportunity.startAt),
-    time: `${formatTime(opportunity.startAt)} - ${formatTime(opportunity.endAt)}`,
+
+    // Match OpportunityCard date formatting
+    date: formatOpportunityDate(opportunity.startAt),
+
+    // Match OpportunityCard time formatting
+    time: formatOpportunityTimeRange(
+      opportunity.startAt,
+      opportunity.endAt
+    ),
+
     spotsLeft,
-    applyBefore: formatDate(
+
+    applyBefore: formatOpportunityDate(
       opportunity.applicationDeadline
     ),
   };
@@ -63,7 +79,18 @@ const RecommendedOpportunities = ({
       <div className="ai-reco-grid">
         {displayRecommendations.map((item) => (
           <article key={item.id} className="ai-reco-card">
-            <span className="ai-reco-category">{item.category}</span>
+
+            <div className="categories-container">
+              {item.category.map((category) => (
+                <span
+                  key={category}
+                  className="event-category-tag"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+
             <h3>{item.title}</h3>
             <p className="ai-reco-desc">{item.description}</p>
             <strong className="ai-reco-org">{item.organisation}</strong>
