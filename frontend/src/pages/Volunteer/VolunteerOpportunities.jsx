@@ -21,6 +21,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useVolunteerStore } from "../../store/useVolunteerStore";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import RecommendedOpportunities from "../ai-recommendations/RecommendedOpportunities";
+import { useRecommendationStore } from "../../store/useRecommendationStore";
 
 const initialCustomAvailability = {
   dayOfWeek: "",
@@ -43,6 +44,14 @@ const VolunteerOpportunities = () => {
     createApplication,
     isSubmittingApplication,
   } = useApplicationStore();
+  const {
+    recommendations,
+    insight,
+    recommendationStatus,
+    isLoading: isRecommendationsLoading,
+    error: recommendationsError,
+    getRecommendations,
+  } = useRecommendationStore();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [applyingOpportunity, setApplyingOpportunity] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,6 +93,15 @@ const VolunteerOpportunities = () => {
   useEffect(() => {
     getMyApplications();
   }, [getMyApplications]);
+
+  useEffect(() => {
+    getRecommendations().catch((error) => {
+      console.error(
+        "Failed to fetch AI recommendations:",
+        error
+      );
+    });
+  }, [getRecommendations]);
 
   const shouldFilterByAvailability =
     hasVolunteerAvailability && matchesAvailabilityOnly;
@@ -174,7 +192,7 @@ const VolunteerOpportunities = () => {
     if (!applyingOpportunity) return;
     try {
       await createApplication(applyingOpportunity._id);
-      await getMyApplications(); 
+      await getMyApplications();
       setApplyingOpportunity(null);
     } catch (error) {
       console.error("Failed to submit application:", error);
@@ -205,8 +223,38 @@ const VolunteerOpportunities = () => {
           </div>
         </div>
       </section>
-      
-      <RecommendedOpportunities />
+
+
+      {isRecommendationsLoading ? (
+        <p>Finding opportunities for you...</p>
+      ) : recommendationsError ? (
+        <p>{recommendationsError}</p>
+      ) : recommendationStatus === "analysis_unavailable" ? (
+        <p>
+          Your profile analysis is not ready yet.
+          Please revisit this page shortly.
+        </p>
+      ) : recommendationStatus === "ai_unavailable" ? (
+        <p>
+          AI recommendations are temporarily unavailable.
+        </p>
+      ) : recommendationStatus === "no_matches" ? (
+        <p>
+          No suitable recommendations are available right now.
+        </p>
+      ) : (
+        <RecommendedOpportunities
+          recommendations={recommendations}
+          insight={insight}
+          onView={(opportunity) =>
+            setSelectedOpportunity(opportunity)
+          }
+          onApply={(opportunity) =>
+            setApplyingOpportunity(opportunity)
+          }
+        />
+      )}
+
 
 
       <section className="volunteer-opportunities-panel">
@@ -230,13 +278,13 @@ const VolunteerOpportunities = () => {
               {(selectedCategories.length > 0 ||
                 shouldFilterByAvailability ||
                 hasCustomAvailabilityInput) && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                >
-                  Clear
-                </button>
-              )}
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                  >
+                    Clear
+                  </button>
+                )}
             </div>
 
             <fieldset
@@ -426,9 +474,9 @@ const VolunteerOpportunities = () => {
             ) : (
               <p>
                 {searchQuery.trim() ||
-                selectedCategories.length > 0 ||
-                shouldFilterByAvailability ||
-                hasCustomAvailabilityInput
+                  selectedCategories.length > 0 ||
+                  shouldFilterByAvailability ||
+                  hasCustomAvailabilityInput
                   ? "No opportunities match your search or filters."
                   : "No active opportunities found."}
               </p>
