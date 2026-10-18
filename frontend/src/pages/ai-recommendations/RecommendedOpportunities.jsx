@@ -1,66 +1,59 @@
 import { Sparkles, Lightbulb, MapPin, Calendar, Clock, Users, CalendarClock } from "lucide-react";
 
-// Mock data for now. Replace with real data later.
-const mockRecommendations = [
-  {
-    id: "rec-1",
-    category: "Education",
-    title: "Weekend Reading Buddies",
-    description: "Help children build reading confidence through stories and conversation.",
-    organisation: "Bright Futures Learning",
-    location: "Selangor, Subang Jaya",
-    date: "Sunday, 18 Oct 2026",
-    time: "9:00 am - 11:00 am",
-    spotsLeft: 8,
-    applyBefore: "15 Oct 2026",
-  },
-  {
-    id: "rec-2",
-    category: "Community",
-    title: "Community Food Packing",
-    description: "Pack essential food supplies for local families.",
-    organisation: "Neighbourhood Care",
-    location: "Kuala Lumpur",
-    date: "Sunday, 18 Oct 2026",
-    time: "2:00 pm - 4:00 pm",
-    spotsLeft: 12,
-    applyBefore: "15 Oct 2026",
-  },
-  {
-    id: "rec-3",
-    category: "Education",
-    title: "Digital Skills for Seniors",
-    description: "Support seniors with basic smartphone and computer skills.",
-    organisation: "Community Learning Hub",
-    location: "Selangor, Petaling Jaya",
-    date: "Sunday, 25 Oct 2026",
-    time: "9:00 am - 12:00 pm",
-    spotsLeft: 6,
-    applyBefore: "22 Oct 2026",
-  },
-  {
-    id: "rec-4",
-    category: "Community",
-    title: "Neighbourhood Welcome Day",
-    description: "Welcome visitors and help coordinate a community gathering.",
-    organisation: "Local Connections",
-    location: "Selangor, Shah Alam",
-    date: "Sunday, 25 Oct 2026",
-    time: "2:00 pm - 5:00 pm",
-    spotsLeft: 10,
-    applyBefore: "22 Oct 2026",
-  },
-];
+import {
+  formatOpportunityDate,
+  formatOpportunityTimeRange,
+} from "../../lib/opportunity";
 
-const mockInsight =
-  "Your tutoring experience and communication skills suggest Education and Community opportunities.";
+const mapRecommendation = (opportunity) => {
+  const spotsLeft = Math.max(
+    0,
+    opportunity.maxVolunteers -
+    opportunity.approvedVolunteersCount
+  );
+
+  return {
+    ...opportunity,
+    id: opportunity._id,
+
+    // Keep categories as an array
+    category:
+      opportunity.category?.length > 0
+        ? opportunity.category
+        : ["Other"],
+
+    description: opportunity.details,
+
+    organisation:
+      opportunity.organisationId?.name ||
+      "Organisation unavailable",
+
+    // Match OpportunityCard date formatting
+    date: formatOpportunityDate(opportunity.startAt),
+
+    // Match OpportunityCard time formatting
+    time: formatOpportunityTimeRange(
+      opportunity.startAt,
+      opportunity.endAt
+    ),
+
+    spotsLeft,
+
+    applyBefore: formatOpportunityDate(
+      opportunity.applicationDeadline
+    ),
+  };
+};
+
 
 const RecommendedOpportunities = ({
-  recommendations = mockRecommendations,
-  insight = mockInsight,
-  onView = () => {},
-  onApply = () => {},
+  recommendations = [],
+  insight = "",
+  onView = () => { },
+  onApply = () => { },
 }) => {
+  const displayRecommendations =
+    recommendations.map(mapRecommendation);
   return (
     <section className="ai-reco-panel">
       <div className="ai-reco-header">
@@ -72,7 +65,7 @@ const RecommendedOpportunities = ({
           </div>
         </div>
         <span className="ai-reco-count">
-          {recommendations.length} recommendations
+          {displayRecommendations.length} recommendations
         </span>
       </div>
 
@@ -84,9 +77,20 @@ const RecommendedOpportunities = ({
       )}
 
       <div className="ai-reco-grid">
-        {recommendations.map((item) => (
+        {displayRecommendations.map((item) => (
           <article key={item.id} className="ai-reco-card">
-            <span className="ai-reco-category">{item.category}</span>
+
+            <div className="categories-container">
+              {item.category.map((category) => (
+                <span
+                  key={category}
+                  className="event-category-tag"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
+
             <h3>{item.title}</h3>
             <p className="ai-reco-desc">{item.description}</p>
             <strong className="ai-reco-org">{item.organisation}</strong>
